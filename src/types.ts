@@ -47,7 +47,24 @@ export type NumberUnionSchema<T extends number = number> = BaseSchema<T> & {
   of: Array<T>
 }
 
+export type RequiredPrimitiveSchemaShorthand =
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'buffer'
+
+export type OptionalPrimitiveSchemaShorthand =
+  | 'string?'
+  | 'number?'
+  | 'boolean?'
+  | 'buffer?'
+
+export type PrimitiveSchemaShorthand =
+  | RequiredPrimitiveSchemaShorthand
+  | OptionalPrimitiveSchemaShorthand
+
 export type PrimitiveSchema =
+  | PrimitiveSchemaShorthand
   | StringSchema
   | NumberSchema
   | BooleanSchema
@@ -57,31 +74,51 @@ export type PrimitiveSchema =
   | StringUnionSchema
   | NumberUnionSchema
 
+type InferPrimitiveSchemaShorthandType<T extends PrimitiveSchemaShorthand> =
+  T extends 'string'
+    ? string
+    : T extends 'string?'
+      ? string | undefined
+      : T extends 'number'
+        ? number
+        : T extends 'number?'
+          ? number | undefined
+          : T extends 'boolean'
+            ? boolean
+            : T extends 'boolean?'
+              ? boolean | undefined
+              : T extends 'buffer'
+                ? Buffer
+                : T extends 'buffer?'
+                  ? Buffer | undefined
+                  : never
+
 export type InferOptionality<T extends { optional?: boolean }, U> = T extends {
   optional: true
 }
   ? U | undefined
   : U
 
-export type InferPrimitiveSchemaType<T extends PrimitiveSchema> = T extends {
-  type: 'string'
-}
-  ? InferOptionality<T, string>
-  : T extends { type: 'number' }
-    ? InferOptionality<T, number>
-    : T extends { type: 'boolean' }
-      ? InferOptionality<T, boolean>
-      : T extends { type: 'buffer' }
-        ? InferOptionality<T, Buffer>
-        : T extends StringLiteralSchema<infer U>
-          ? InferOptionality<T, U>
-          : T extends NumberLiteralSchema<infer V>
-            ? InferOptionality<T, V>
-            : T extends StringUnionSchema<infer W>
-              ? InferOptionality<T, W>
-              : T extends NumberUnionSchema<infer X>
-                ? InferOptionality<T, X>
-                : never
+export type InferPrimitiveSchemaType<T extends PrimitiveSchema> =
+  T extends PrimitiveSchemaShorthand
+    ? InferPrimitiveSchemaShorthandType<T>
+    : T extends StringSchema
+      ? InferOptionality<T, string>
+      : T extends NumberSchema
+        ? InferOptionality<T, number>
+        : T extends BooleanSchema
+          ? InferOptionality<T, boolean>
+          : T extends BufferSchema
+            ? InferOptionality<T, Buffer>
+            : T extends StringLiteralSchema<infer U>
+              ? InferOptionality<T, U>
+              : T extends NumberLiteralSchema<infer V>
+                ? InferOptionality<T, V>
+                : T extends StringUnionSchema<infer W>
+                  ? InferOptionality<T, W>
+                  : T extends NumberUnionSchema<infer X>
+                    ? InferOptionality<T, X>
+                    : never
 
 export type ArraySchema<T extends PrimitiveSchema = PrimitiveSchema> = {
   type: 'array'
