@@ -1,3 +1,6 @@
+import type { InferOptionality } from './shared'
+import type * as PrimitiveDetailed from './primitive-detailed-types'
+
 export type SharedSchema = {
   description?: string
   maxSizeBytes?: number /* <= */
@@ -46,6 +49,38 @@ export type NumberUnionSchema<T extends number = number> = BaseSchema<T> & {
   type: 'numberUnion'
   of: Array<T>
 }
+export type PrimitiveSchemaObject =
+  | PrimitiveDetailed.StringSchema
+  | PrimitiveDetailed.NumberSchema
+  | PrimitiveDetailed.BooleanSchema
+  | PrimitiveDetailed.BufferSchema
+  | StringLiteralSchema
+  | NumberLiteralSchema
+  | PrimitiveDetailed.StringUnionSchema
+  | PrimitiveDetailed.NumberUnionSchema
+
+export type InferPrimitiveSchemaObjectType<T extends PrimitiveSchema> =
+  T extends PrimitiveSchemaShorthand
+    ? InferPrimitiveSchemaShorthandType<T>
+    : T extends StringSchema
+      ? InferOptionality<T, string>
+      : T extends NumberSchema
+        ? InferOptionality<T, number>
+        : T extends BooleanSchema
+          ? InferOptionality<T, boolean>
+          : T extends BufferSchema
+            ? InferOptionality<T, Buffer>
+            : T extends StringLiteralSchema<infer U>
+              ? InferOptionality<T, U>
+              : T extends NumberLiteralSchema<infer V>
+                ? InferOptionality<T, V>
+                : T extends StringUnionSchema<infer W>
+                  ? InferOptionality<T, W>
+                  : T extends NumberUnionSchema<infer X>
+                    ? InferOptionality<T, X>
+                    : never
+
+/* PrimitiveSchemaShorthand */
 
 export type RequiredPrimitiveSchemaShorthand =
   | 'string'
@@ -63,16 +98,7 @@ export type PrimitiveSchemaShorthand =
   | RequiredPrimitiveSchemaShorthand
   | OptionalPrimitiveSchemaShorthand
 
-export type PrimitiveSchema =
-  | PrimitiveSchemaShorthand
-  | StringSchema
-  | NumberSchema
-  | BooleanSchema
-  | BufferSchema
-  | StringLiteralSchema
-  | NumberLiteralSchema
-  | StringUnionSchema
-  | NumberUnionSchema
+export type PrimitiveSchema = PrimitiveSchemaShorthand | PrimitiveSchemaObject
 
 type InferPrimitiveSchemaShorthandType<T extends PrimitiveSchemaShorthand> =
   T extends 'string'
@@ -92,12 +118,6 @@ type InferPrimitiveSchemaShorthandType<T extends PrimitiveSchemaShorthand> =
                 : T extends 'buffer?'
                   ? Buffer | undefined
                   : never
-
-export type InferOptionality<T extends { optional?: boolean }, U> = T extends {
-  optional: true
-}
-  ? U | undefined
-  : U
 
 export type InferPrimitiveSchemaType<T extends PrimitiveSchema> =
   T extends PrimitiveSchemaShorthand
@@ -120,7 +140,7 @@ export type InferPrimitiveSchemaType<T extends PrimitiveSchema> =
                     ? InferOptionality<T, X>
                     : never
 
-export type ArraySchema<T extends PrimitiveSchema = PrimitiveSchema> = {
+export type ArraySchemaObject<T extends PrimitiveSchema = PrimitiveSchema> = {
   type: 'array'
   of: T
   minLength?: number /* >= */
@@ -128,17 +148,33 @@ export type ArraySchema<T extends PrimitiveSchema = PrimitiveSchema> = {
   optional?: boolean
 } & SharedSchema
 
-export type InferArraySchemaType<T extends ArraySchema = ArraySchema> =
-  T extends { of: infer U; optional?: boolean }
-    ? U extends PrimitiveSchema
-      ? InferOptionality<T, Array<NonNullable<InferPrimitiveSchemaType<U>>>>
-      : never
+export type ArraySchemaShorthand<T extends PrimitiveSchema = PrimitiveSchema> =
+  [T]
+
+export type ArraySchema<T extends PrimitiveSchema = PrimitiveSchema> =
+  | ArraySchemaObject<T>
+  | ArraySchemaShorthand<T>
+
+export type InferArraySchemaShorthand<
+  T extends ArraySchemaShorthand = ArraySchemaShorthand,
+> = T extends [infer U]
+  ? U extends PrimitiveSchema
+    ? Array<NonNullable<InferPrimitiveSchemaType<U>>>
     : never
+  : never
+
+export type InferArraySchemaObjectType<
+  T extends ArraySchemaObject = ArraySchemaObject,
+> = T extends ArraySchemaObject<infer U>
+  ? U extends PrimitiveSchema
+    ? InferOptionality<T, Array<NonNullable<InferPrimitiveSchemaType<U>>>>
+    : never
+  : never
 
 export type ObjectSchema<
-  T extends Record<string, PrimitiveSchema | ArraySchema> = Record<
+  T extends Record<string, PrimitiveSchema | ArraySchemaObject> = Record<
     string,
-    PrimitiveSchema | ArraySchema
+    PrimitiveSchema | ArraySchemaObject
   >,
 > = {
   type: 'object'
@@ -154,8 +190,8 @@ export type InferObjectSchemaType<T extends ObjectSchema> = T extends {
       {
         [k in keyof U]: U[k] extends PrimitiveSchema
           ? InferPrimitiveSchemaType<U[k]>
-          : U[k] extends ArraySchema
-            ? InferArraySchemaType<U[k]>
+          : U[k] extends ArraySchemaObject
+            ? InferArraySchemaObjectType<U[k]>
             : never
       }
     >
@@ -178,20 +214,26 @@ export type InferObjectArraySchemaType<T extends ObjectArraySchema> =
       : never
     : never
 
-export type CompoundSchema = ArraySchema | ObjectSchema | ObjectArraySchema
+export type CompoundSchema =
+  | ArraySchemaObject
+  | ObjectSchema
+  | ObjectArraySchema
 
 export type Schema = PrimitiveSchema | CompoundSchema
 
-type InferCompoundSchemaType<T extends CompoundSchema> = T extends ArraySchema
-  ? InferArraySchemaType<T>
-  : T extends ObjectSchema
-    ? InferObjectSchemaType<T>
-    : T extends ObjectArraySchema
-      ? InferObjectArraySchemaType<T>
-      : never
+type InferCompoundSchemaType<T extends CompoundSchema> =
+  T extends ArraySchemaObject
+    ? InferArraySchemaObjectType<T>
+    : T extends ObjectSchema
+      ? InferObjectSchemaType<T>
+      : T extends ObjectArraySchema
+        ? InferObjectArraySchemaType<T>
+        : never
 
 export type InferSchemaType<T extends Schema> = T extends PrimitiveSchema
   ? InferPrimitiveSchemaType<T>
   : T extends CompoundSchema
     ? InferCompoundSchemaType<T>
     : never
+
+export { InferOptionality } from './shared'

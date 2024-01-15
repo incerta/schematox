@@ -2,7 +2,8 @@ import { check, unknownX } from './test-utils'
 
 import type {
   BaseSchema,
-  InferArraySchemaType,
+  InferArraySchemaShorthand,
+  InferArraySchemaObjectType,
   InferObjectArraySchemaType,
   InferObjectSchemaType,
   InferOptionality,
@@ -433,11 +434,47 @@ it('InferPrimitiveSchemaType<T>: NumberUnionSchema default caveat', () => {
   )
 })
 
-it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', () => {
+it('InferArraySchemaShorthand<T>: RequiredPrimitiveSchemaShorthand all cases', () => {
+  check<string[]>(unknownX as InferArraySchemaShorthand<['string']>)
+  // @ts-expect-error `number[]` is not assignable to `string[]`
+  check<string[]>(unknownX as InferArraySchemaShorthand<['number']>)
+
+  check<number[]>(unknownX as InferArraySchemaShorthand<['number']>)
+  // @ts-expect-error `boolean[]` is not assignable to `number[]`
+  check<number[]>(unknownX as InferArraySchemaShorthand<['boolean']>)
+
+  check<boolean[]>(unknownX as InferArraySchemaShorthand<['boolean']>)
+  // @ts-expect-error `buffer[]` is not assignable to `boolean[]`
+  check<boolean[]>(unknownX as InferArraySchemaShorthand<['buffer']>)
+
+  check<Buffer[]>(unknownX as InferArraySchemaShorthand<['buffer']>)
+  // @ts-expect-error `string[]` is not assignable to `Buffer[]`
+  check<Buffer[]>(unknownX as InferArraySchemaShorthand<['string']>)
+})
+
+it('InferArraySchemaShorthand<T>: OptionalPrimitiveSchemaShorthand all cases', () => {
+  check<string[]>(unknownX as InferArraySchemaShorthand<['string?']>)
+  // @ts-expect-error `number[]` is not assignable to `string[]`
+  check<string[]>(unknownX as InferArraySchemaShorthand<['number?']>)
+
+  check<number[]>(unknownX as InferArraySchemaShorthand<['number?']>)
+  // @ts-expect-error `boolean[]` is not assignable to `number[]`
+  check<number[]>(unknownX as InferArraySchemaShorthand<['boolean?']>)
+
+  check<boolean[]>(unknownX as InferArraySchemaShorthand<['boolean?']>)
+  // @ts-expect-error `buffer[]` is not assignable to `boolean[]`
+  check<boolean[]>(unknownX as InferArraySchemaShorthand<['buffer?']>)
+
+  check<Buffer[]>(unknownX as InferArraySchemaShorthand<['buffer?']>)
+  // @ts-expect-error `string[]` is not assignable to `Buffer[]`
+  check<Buffer[]>(unknownX as InferArraySchemaShorthand<['string?']>)
+})
+
+it('InferArraySchemaObjectType<T>: PrimitiveSchemaObject all cases, `array` is required', () => {
   /* string */
 
   check<string[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'string' }
     }>
@@ -445,25 +482,25 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
 
   check<string[]>(
     // @ts-expect-error `number[]` is not assignable to `string[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'number' }
     }>
   )
 
   check<string[]>(
-    unknownX as InferArraySchemaType<{ type: 'array'; of: 'string' }>
+    unknownX as InferArraySchemaObjectType<{ type: 'array'; of: 'string' }>
   )
 
   check<string[]>(
     // @ts-expect-error `number[]` is not assignable to `string[]`
-    unknownX as InferArraySchemaType<{ type: 'array'; of: 'number' }>
+    unknownX as InferArraySchemaObjectType<{ type: 'array'; of: 'number' }>
   )
 
   /* number */
 
   check<number[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'number' }
     }>
@@ -471,25 +508,25 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
 
   check<number[]>(
     // @ts-expect-error `boolean[]` is not assignable to `number[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'boolean' }
     }>
   )
 
   check<number[]>(
-    unknownX as InferArraySchemaType<{ type: 'array'; of: 'number' }>
+    unknownX as InferArraySchemaObjectType<{ type: 'array'; of: 'number' }>
   )
 
   check<number[]>(
     // @ts-expect-error `boolean[]` is not assignable to `number[]`
-    unknownX as InferArraySchemaType<{ type: 'array'; of: 'boolean' }>
+    unknownX as InferArraySchemaObjectType<{ type: 'array'; of: 'boolean' }>
   )
 
   /* boolean */
 
   check<boolean[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'boolean' }
     }>
@@ -497,25 +534,25 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
 
   check<boolean[]>(
     // @ts-expect-error `Buffer[]` is not assignable to `boolean[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'buffer' }
     }>
   )
 
   check<boolean[]>(
-    unknownX as InferArraySchemaType<{ type: 'array'; of: 'boolean' }>
+    unknownX as InferArraySchemaObjectType<{ type: 'array'; of: 'boolean' }>
   )
 
   check<boolean[]>(
     // @ts-expect-error `Buffer[]` is not assignable to `boolean[]`
-    unknownX as InferArraySchemaType<{ type: 'array'; of: 'buffer' }>
+    unknownX as InferArraySchemaObjectType<{ type: 'array'; of: 'buffer' }>
   )
 
   /* buffer */
 
   check<Buffer[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'buffer' }
     }>
@@ -523,25 +560,25 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
 
   check<Buffer[]>(
     // @ts-expect-error `'x'[]` is not assignable to `Buffer[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'stringLiteral'; of: 'x' }
     }>
   )
 
   check<Buffer[]>(
-    unknownX as InferArraySchemaType<{ type: 'array'; of: 'buffer' }>
+    unknownX as InferArraySchemaObjectType<{ type: 'array'; of: 'buffer' }>
   )
 
   check<Buffer[]>(
     // @ts-expect-error `string[]` is not assignable to `Buffer[]`
-    unknownX as InferArraySchemaType<{ type: 'array'; of: 'string' }>
+    unknownX as InferArraySchemaObjectType<{ type: 'array'; of: 'string' }>
   )
 
   /* stringLiteral */
 
   check<'x'[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'stringLiteral'; of: 'x' }
     }>
@@ -549,7 +586,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
 
   check<'x'[]>(
     // @ts-expect-error `1` is not assignable to `'x'[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'numberLiteral'; of: 1 }
     }>
@@ -558,7 +595,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
   /* numberLiteral */
 
   check<1[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'numberLiteral'; of: 1 }
     }>
@@ -566,7 +603,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
 
   check<1[]>(
     // @ts-expect-error `('x' | 'y')[]` is not assignable to `1[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'stringUnion'; of: ['x', 'y'] }
     }>
@@ -575,7 +612,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
   /* stringUnion */
 
   check<('x' | 'y')[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'stringUnion'; of: ['x', 'y'] }
     }>
@@ -583,7 +620,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
 
   check<('x' | 'y')[]>(
     // @ts-expect-error `(1 | 2)[]` is not assignable to `('x' | 'y')[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'numberUnion'; of: [1, 2] }
     }>
@@ -592,7 +629,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
   /* numberUnion */
 
   check<(1 | 2)[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'numberUnion'; of: [1, 2] }
     }>
@@ -600,18 +637,18 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is required', ()
 
   check<(1 | 2)[]>(
     // @ts-expect-error `string[]` is not assignable to `(1 | 2)[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'string' }
     }>
   )
 })
 
-it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', () => {
+it('InferArraySchemaObjectType<T>: PrimitiveSchemaObject all cases, `array` is optional', () => {
   /* string */
 
   check<string[] | undefined>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'string' }
       optional: true
@@ -620,7 +657,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<string[]>(
     unknownX as NonNullable<
-      InferArraySchemaType<{
+      InferArraySchemaObjectType<{
         type: 'array'
         of: 'string'
         optional: true
@@ -630,7 +667,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<string[]>(
     // @ts-expect-error `string[] | undefined` is not assignable to `string[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'string' }
       optional: true
@@ -640,7 +677,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
   /* number */
 
   check<number[] | undefined>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'number' }
       optional: true
@@ -649,7 +686,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<number[]>(
     unknownX as NonNullable<
-      InferArraySchemaType<{
+      InferArraySchemaObjectType<{
         type: 'array'
         of: 'number'
         optional: true
@@ -659,7 +696,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<number[]>(
     // @ts-expect-error `number[] | undefined` is not assignable to `number[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'number' }
       optional: true
@@ -669,7 +706,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
   /* boolean */
 
   check<boolean[] | undefined>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'boolean' }
       optional: true
@@ -678,7 +715,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<boolean[]>(
     unknownX as NonNullable<
-      InferArraySchemaType<{
+      InferArraySchemaObjectType<{
         type: 'array'
         of: 'boolean'
         optional: true
@@ -688,7 +725,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<boolean[]>(
     // @ts-expect-error `boolean[] | undefined` is not assignable to `boolean[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'boolean' }
       optional: true
@@ -698,7 +735,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
   /* buffer */
 
   check<Buffer[] | undefined>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'buffer' }
       optional: true
@@ -707,7 +744,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<Buffer[]>(
     unknownX as NonNullable<
-      InferArraySchemaType<{
+      InferArraySchemaObjectType<{
         type: 'array'
         of: 'buffer'
         optional: true
@@ -717,7 +754,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<Buffer[]>(
     // @ts-expect-error `Buffer[] | undefined` is not assignable to `Buffer[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'buffer' }
       optional: true
@@ -728,7 +765,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<'x'[]>(
     // @ts-expect-error `'x'[] | undefined` is not assignable to `'x'[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'stringLiteral'; of: 'x' }
       optional: true
@@ -736,7 +773,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
   )
 
   check<'x'[] | undefined>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'stringLiteral'; of: 'x' }
       optional: true
@@ -747,7 +784,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<1[]>(
     // @ts-expect-error `1[] | undefined` is not assignable to `1[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'numberLiteral'; of: 1 }
       optional: true
@@ -755,7 +792,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
   )
 
   check<1[] | undefined>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'numberLiteral'; of: 1 }
       optional: true
@@ -766,7 +803,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<('x' | 'y')[]>(
     // @ts-expect-error `('x' | 'y')[] | undefined` is not assignable to `('x' | 'y')[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'stringUnion'; of: ['x', 'y'] }
       optional: true
@@ -774,7 +811,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
   )
 
   check<('x' | 'y')[] | undefined>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'stringUnion'; of: ['x', 'y'] }
       optional: true
@@ -785,7 +822,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
 
   check<(1 | 2)[]>(
     // @ts-expect-error `(1 | 2)[] | undefined` is not assignable to `(1 | 2)[]`
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'numberUnion'; of: [1, 2] }
       optional: true
@@ -793,7 +830,7 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
   )
 
   check<(1 | 2)[] | undefined>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'numberUnion'; of: [1, 2] }
       optional: true
@@ -801,93 +838,93 @@ it('InferArraySchemaType<T>: all PrimitiveSchema cases, `array` is optional', ()
   )
 })
 
-it('InferArraySchemaType<T>: should omit nullable values', () => {
+it('InferArraySchemaObjectType<T>: should omit nullable values', () => {
   check<string[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'string'; optional: true }
     }>
   )
 
   check<string[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: 'string?'
     }>
   )
 
   check<number[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'number'; optional: true }
     }>
   )
 
   check<number[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: 'number?'
     }>
   )
 
   check<boolean[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'boolean'; optional: true }
     }>
   )
 
   check<boolean[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: 'boolean?'
     }>
   )
 
   check<Buffer[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'buffer'; optional: true }
     }>
   )
 
   check<Buffer[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: 'buffer?'
     }>
   )
 
   check<'x'[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'stringLiteral'; of: 'x'; optional: true }
     }>
   )
 
   check<0[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'numberLiteral'; of: 0; optional: true }
     }>
   )
 
   check<('x' | 'y')[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'stringUnion'; of: ['x', 'y']; optional: true }
     }>
   )
 
   check<(0 | 1)[]>(
-    unknownX as InferArraySchemaType<{
+    unknownX as InferArraySchemaObjectType<{
       type: 'array'
       of: { type: 'numberUnion'; of: [0, 1]; optional: true }
     }>
   )
 })
 
-it('InferObjectSchemaType<T>: should infer all types in one object', () => {
+it('InferObjectSchemaType<T>: ObjectSchema all cases', () => {
   check<{
     a: string
     b: number
@@ -955,7 +992,7 @@ it('InferObjectSchemaType<T>: should infer all types in one object', () => {
   )
 })
 
-it('InferObjectSchemaType<T>: optionality check', () => {
+it('InferObjectSchemaType<T>: ObjectSchema optionality check', () => {
   check<{ x: string }>(
     // @ts-expect-error `{ x: string } | undefined` is not assignable to `{ x: string }`
     unknownX as InferObjectSchemaType<{
@@ -1058,7 +1095,7 @@ it('InferObjectSchemaType<T>: optionality check', () => {
   )
 })
 
-it('InferObjectSchemaType<T>: expect structural error', () => {
+it('InferObjectSchemaType<T>: ObjectSchema expect structural error', () => {
   check<{ x: string; y: number }>(
     // @ts-expect-error `{ x: string }` is not assignable to `{ x: string; y: number }`
     unknownX as InferObjectSchemaType<{
