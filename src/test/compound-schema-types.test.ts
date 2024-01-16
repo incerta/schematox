@@ -2,17 +2,17 @@ import { check, unknownX } from './test-utils'
 import {
   Con_BaseSchema_SubjT_P,
   Con_BaseSchema_SubjT_V,
-  ConstructArraySchemaShortSubjectType,
-  ConstructArraySchemaDetailedSubjectType,
-  ConstructArraySchemaSubjectType,
-  ConstructObjectSchemaSubjectTypeParsed,
+  Con_CS_Array_SubjT,
+  Con_CD_Array_SubjT,
+  Con_ArraySchema_SubjT,
+  Con_ObjectSchema_SubjT_P,
   ObjectSchema,
-  ArraySchemaShort,
+  CS_Array,
   Schema,
-} from '../compound-types'
+} from '../compound-schema-types'
 
-it('Con_BaseSchema_SubjT_P<T>: check "string" PrimitiveShort & PrimitiveDetailed required/optional/default cases', () => {
-  /* PrimitiveDetailed */
+it('Con_BaseSchema_SubjT_P<T>: check "string" BS & BD required/optional/default cases', () => {
+  /* Base detailed schema */
 
   check<string>(unknownX as Con_BaseSchema_SubjT_P<{ type: 'string' }>)
 
@@ -44,7 +44,7 @@ it('Con_BaseSchema_SubjT_P<T>: check "string" PrimitiveShort & PrimitiveDetailed
     }>
   )
 
-  /* PrimitiveShort */
+  /* Base short schema */
 
   check<string>(unknownX as Con_BaseSchema_SubjT_P<'string'>)
 
@@ -54,8 +54,8 @@ it('Con_BaseSchema_SubjT_P<T>: check "string" PrimitiveShort & PrimitiveDetailed
   )
 })
 
-it('Con_BaseSchema_SubjT_V<T>: check "string" PrimitiveShort & PrimitiveDetailed required/optional/default cases', () => {
-  /* PrimitiveDetailedSchema */
+it('Con_BaseSchema_SubjT_V<T>: check "string" BS & BD required/optional/default cases', () => {
+  /* Base detailed schema */
 
   check<string>(unknownX as Con_BaseSchema_SubjT_V<{ type: 'string' }>)
 
@@ -88,7 +88,7 @@ it('Con_BaseSchema_SubjT_V<T>: check "string" PrimitiveShort & PrimitiveDetailed
     }>
   )
 
-  /* PrimitiveShortSchema */
+  /* Base short schema */
 
   check<string>(unknownX as Con_BaseSchema_SubjT_V<'string'>)
 
@@ -98,14 +98,12 @@ it('Con_BaseSchema_SubjT_V<T>: check "string" PrimitiveShort & PrimitiveDetailed
   )
 })
 
-it('ConstructArraySchemaShortSubjectType<T>: check ArrSchema subject type', () => {
-  check<Array<Array<string>>>(
-    unknownX as ConstructArraySchemaShortSubjectType<[['string']]>
-  )
+it('Con_CS_Array_SubjT<T>: check ArrSchema subject type', () => {
+  check<Array<Array<string>>>(unknownX as Con_CS_Array_SubjT<[['string']]>)
 
   check<Array<Array<string>>>(
     // @ts-expect-error 'number[]' is not assignable to type 'string[]'
-    unknownX as ConstructArraySchemaShortSubjectType<[['number']]>
+    unknownX as Con_CS_Array_SubjT<[['number']]>
   )
 
   const arrSchemaShortSample = [
@@ -129,63 +127,55 @@ it('ConstructArraySchemaShortSubjectType<T>: check ArrSchema subject type', () =
         ],
       ],
     ],
-  ] as const satisfies ArraySchemaShort
+  ] as const satisfies CS_Array
 
-  type ResultType = ConstructArraySchemaShortSubjectType<
-    typeof arrSchemaShortSample
-  >
+  type ResultType = Con_CS_Array_SubjT<typeof arrSchemaShortSample>
 
   check<Array<Array<Array<Array<Array<Array<Array<string>>>>>>>>(
     unknownX as ResultType
   )
 })
 
-it('ConstructArraySchemaShortSubjectType<T>: check ObjectSchema subject type', () => {
-  check<Array<{ x: string }>>(
-    unknownX as ConstructArraySchemaShortSubjectType<[{ x: 'string' }]>
-  )
+it('Con_CS_Array_SubjT<T>: check CS_Object subject type', () => {
+  check<Array<{ x: string }>>(unknownX as Con_CS_Array_SubjT<[{ x: 'string' }]>)
 
   check<Array<{ x: string }>>(
     // @ts-expect-error '{ x: number; }[]' is not assignable to '{ x: string; }[]'
-    unknownX as ConstructArraySchemaShortSubjectType<[{ x: 'number' }]>
+    unknownX as Con_CS_Array_SubjT<[{ x: 'number' }]>
   )
 })
 
-it('ConstructArraySchemaShortSubjectType<T>: should ignore optional/default values', () => {
-  check<string[]>(unknownX as ConstructArraySchemaShortSubjectType<['string']>)
+it('Con_CS_Array_SubjT<T>: should ignore optional/default values', () => {
+  check<string[]>(unknownX as Con_CS_Array_SubjT<['string']>)
 
   check<string[]>(
     // @ts-expect-error 'number[]' is not assignable to 'string[]'
-    unknownX as ConstructArraySchemaShortSubjectType<['number']>
+    unknownX as Con_CS_Array_SubjT<['number']>
   )
 
-  check<string[]>(unknownX as ConstructArraySchemaShortSubjectType<['string?']>)
+  check<string[]>(unknownX as Con_CS_Array_SubjT<['string?']>)
 
-  check<string[]>(
-    unknownX as ConstructArraySchemaShortSubjectType<[{ type: 'string' }]>
-  )
+  check<string[]>(unknownX as Con_CS_Array_SubjT<[{ type: 'string' }]>)
 
   check<string[]>(
     // @ts-expect-error 'number[]' is not assignable to 'string[]'
-    unknownX as ConstructArraySchemaShortSubjectType<[{ type: 'number' }]>
+    unknownX as Con_CS_Array_SubjT<[{ type: 'number' }]>
   )
 
   check<string[]>(
-    unknownX as ConstructArraySchemaShortSubjectType<
-      [{ type: 'string'; optional: true }]
-    >
+    unknownX as Con_CS_Array_SubjT<[{ type: 'string'; optional: true }]>
   )
 
   check<string[]>(
-    unknownX as ConstructArraySchemaShortSubjectType<
+    unknownX as Con_CS_Array_SubjT<
       [{ type: 'string'; optional: true; default: 'x' }]
     >
   )
 })
 
-it('ConstructArraySchemaDetailedSubjectType<T>: should ignore optional/default `of` schema props', () => {
+it('Con_CD_Array_SubjT<T>: should ignore optional/default `of` schema props', () => {
   check<string[]>(
-    unknownX as ConstructArraySchemaDetailedSubjectType<{
+    unknownX as Con_CD_Array_SubjT<{
       type: 'array'
       of: 'string'
     }>
@@ -193,21 +183,21 @@ it('ConstructArraySchemaDetailedSubjectType<T>: should ignore optional/default `
 
   check<string[]>(
     // @ts-expect-error 'number[]' is not assignable to 'string[]'
-    unknownX as ConstructArraySchemaDetailedSubjectType<{
+    unknownX as Con_CD_Array_SubjT<{
       type: 'array'
       of: 'number'
     }>
   )
 
   check<string[]>(
-    unknownX as ConstructArraySchemaDetailedSubjectType<{
+    unknownX as Con_CD_Array_SubjT<{
       type: 'array'
       of: 'string?'
     }>
   )
 
   check<string[]>(
-    unknownX as ConstructArraySchemaDetailedSubjectType<{
+    unknownX as Con_CD_Array_SubjT<{
       type: 'array'
       of: { type: 'string' }
     }>
@@ -215,30 +205,30 @@ it('ConstructArraySchemaDetailedSubjectType<T>: should ignore optional/default `
 
   check<string[]>(
     // @ts-expect-error 'number[]' is not assignable to 'string[]'
-    unknownX as ConstructArraySchemaDetailedSubjectType<{
+    unknownX as Con_CD_Array_SubjT<{
       type: 'array'
       of: { type: 'number' }
     }>
   )
 
   check<string[]>(
-    unknownX as ConstructArraySchemaDetailedSubjectType<{
+    unknownX as Con_CD_Array_SubjT<{
       type: 'array'
       of: { type: 'string'; optional: true }
     }>
   )
 
   check<string[]>(
-    unknownX as ConstructArraySchemaDetailedSubjectType<{
+    unknownX as Con_CD_Array_SubjT<{
       type: 'array'
       of: { type: 'string'; optional: true; default: 'x' }
     }>
   )
 })
 
-it('ConstructArraySchemaDetailedSubjectType<T>: ArraySchemaDetailed can be optional by itself', () => {
+it('Con_CD_Array_SubjT<T>: CD_Array can be optional by itself', () => {
   check<string[] | undefined>(
-    unknownX as ConstructArraySchemaDetailedSubjectType<{
+    unknownX as Con_CD_Array_SubjT<{
       type: 'array'
       of: 'string'
       optional: true
@@ -247,7 +237,7 @@ it('ConstructArraySchemaDetailedSubjectType<T>: ArraySchemaDetailed can be optio
 
   check<string[]>(
     // @ts-expect-error 'string[] | undefined' is not assignable to 'string[]'
-    unknownX as ConstructArraySchemaDetailedSubjectType<{
+    unknownX as Con_CD_Array_SubjT<{
       type: 'array'
       of: 'string'
       optional: true
@@ -255,46 +245,42 @@ it('ConstructArraySchemaDetailedSubjectType<T>: ArraySchemaDetailed can be optio
   )
 })
 
-it('ConstructArraySchemaSubjectType<T>: required "string[]" Detailed & Short cases', () => {
+it('Con_ArraySchema_SubjT<T>: required "string[]" Detailed & Short cases', () => {
   const requiredStringArrDetailed = {
     type: 'array',
     of: 'string',
   } as const satisfies Schema
 
   check<string[]>(
-    unknownX as ConstructArraySchemaSubjectType<
-      typeof requiredStringArrDetailed
-    >
+    unknownX as Con_ArraySchema_SubjT<typeof requiredStringArrDetailed>
   )
 
   check<number[]>(
     // @ts-expect-error 'string[]' is not assignable to 'number[]'
-    unknownX as ConstructArraySchemaSubjectType<
-      typeof requiredStringArrDetailed
-    >
+    unknownX as Con_ArraySchema_SubjT<typeof requiredStringArrDetailed>
   )
 
   const requiredStringArrShort = ['string'] as const satisfies Schema
 
   check<string[]>(
-    unknownX as ConstructArraySchemaSubjectType<typeof requiredStringArrShort>
+    unknownX as Con_ArraySchema_SubjT<typeof requiredStringArrShort>
   )
 
   check<number[]>(
     // @ts-expect-error 'string[]' is not assignable to 'number[]'
-    unknownX as ConstructArraySchemaSubjectType<typeof requiredStringArrShort>
+    unknownX as Con_ArraySchema_SubjT<typeof requiredStringArrShort>
   )
 })
 
-it('ConstructObjectSchemaSubjectTypeParsed<T>: ...', () => {
+it('Con_ObjectSchema_SubjT_P<T>: check object schema nesting', () => {
   check<{ x: string }>(
-    unknownX as ConstructObjectSchemaSubjectTypeParsed<{
+    unknownX as Con_ObjectSchema_SubjT_P<{
       x: 'string'
     }>
   )
 
   check<{ x: string; y: { x: string } }>(
-    unknownX as ConstructObjectSchemaSubjectTypeParsed<{
+    unknownX as Con_ObjectSchema_SubjT_P<{
       x: 'string'
       y: {
         x: 'string'
@@ -348,9 +334,5 @@ it('ConstructObjectSchemaSubjectTypeParsed<T>: ...', () => {
         }
       }
     }
-  }>(
-    unknownX as ConstructObjectSchemaSubjectTypeParsed<
-      typeof objectSchemaSample
-    >
-  )
+  }>(unknownX as Con_ObjectSchema_SubjT_P<typeof objectSchemaSample>)
 })
