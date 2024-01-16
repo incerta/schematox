@@ -1,20 +1,20 @@
+import type { BS_Schema, Con_BS_Schema_SubjT } from './base-short-schema-types'
 import type * as PrimitiveDetailed from './primitive-detailed-types'
-import type * as PrimitiveShort from './primitive-short-types'
 
-export type PrimitiveSchema = PrimitiveDetailed.Schema | PrimitiveShort.Schema
+export type PrimitiveSchema = PrimitiveDetailed.Schema | BS_Schema
 
 export type ConstructPrimitiveSchemaSubjectTypeParsed<
   T extends PrimitiveSchema,
-> = T extends PrimitiveShort.Schema
-  ? PrimitiveShort.ConstructSchemaSubjectType<T>
+> = T extends BS_Schema
+  ? Con_BS_Schema_SubjT<T>
   : T extends PrimitiveDetailed.Schema
     ? PrimitiveDetailed.ConstructSchemaSubjectTypeParsed<T>
     : never
 
 export type ConstructPrimitiveSchemaSubjectTypeValidated<
   T extends PrimitiveSchema,
-> = T extends PrimitiveShort.Schema
-  ? PrimitiveShort.ConstructSchemaSubjectType<T>
+> = T extends BS_Schema
+  ? Con_BS_Schema_SubjT<T>
   : T extends PrimitiveDetailed.Schema
     ? PrimitiveDetailed.ConstructSchemaSubjectTypeValidated<T>
     : never
