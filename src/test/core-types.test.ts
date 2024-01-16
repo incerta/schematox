@@ -1,3 +1,4 @@
+// DEPRECATED: the file will be removed soon
 import { check, unknownX } from './test-utils'
 
 import type {
@@ -73,7 +74,7 @@ it('InferPrimitiveSchemaType<T>: RequiredPrimitiveSchemaShorthand all cases', ()
   check<Buffer>(unknownX as InferPrimitiveSchemaType<'buffer?'>)
 })
 
-it('InferPrimitiveSchemaType<T>: StringSchema required', () => {
+it('InferPrimitiveSchemaType<T>: BD_String required', () => {
   check<string>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'string'
@@ -81,7 +82,7 @@ it('InferPrimitiveSchemaType<T>: StringSchema required', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: StringSchema optional', () => {
+it('InferPrimitiveSchemaType<T>: BD_String optional', () => {
   check<string | undefined>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'string'
@@ -97,7 +98,7 @@ it('InferPrimitiveSchemaType<T>: StringSchema optional', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: StringSchema default', () => {
+it('InferPrimitiveSchemaType<T>: BD_String default', () => {
   check<string>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'string'
@@ -114,7 +115,7 @@ it('InferPrimitiveSchemaType<T>: StringSchema default', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: NumberSchema required', () => {
+it('InferPrimitiveSchemaType<T>: BD_Number required', () => {
   check<number>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'number'
@@ -122,7 +123,7 @@ it('InferPrimitiveSchemaType<T>: NumberSchema required', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: NumberSchema optional', () => {
+it('InferPrimitiveSchemaType<T>: BD_Number optional', () => {
   check<number | undefined>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'number'
@@ -139,7 +140,7 @@ it('InferPrimitiveSchemaType<T>: NumberSchema optional', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: NumberSchema default', () => {
+it('InferPrimitiveSchemaType<T>: BD_Number default', () => {
   check<number>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'number'
@@ -156,7 +157,7 @@ it('InferPrimitiveSchemaType<T>: NumberSchema default', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: BooleanSchema required', () => {
+it('InferPrimitiveSchemaType<T>: BD_Boolean required', () => {
   check<boolean>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'boolean'
@@ -164,7 +165,7 @@ it('InferPrimitiveSchemaType<T>: BooleanSchema required', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: BooleanSchema optional', () => {
+it('InferPrimitiveSchemaType<T>: BD_Boolean optional', () => {
   check<boolean | undefined>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'boolean'
@@ -181,7 +182,7 @@ it('InferPrimitiveSchemaType<T>: BooleanSchema optional', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: BooleanSchema default', () => {
+it('InferPrimitiveSchemaType<T>: BD_Boolean default', () => {
   check<boolean>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'boolean'
@@ -324,7 +325,7 @@ it('InferPrimitiveSchemaType<T>: NumberLiteralSchema default caveat', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: StringUnionSchema required', () => {
+it('InferPrimitiveSchemaType<T>: BD_StringUnion required', () => {
   check<'x' | 'y'>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'stringUnion'
@@ -341,7 +342,7 @@ it('InferPrimitiveSchemaType<T>: StringUnionSchema required', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: StringUnionSchema optional', () => {
+it('InferPrimitiveSchemaType<T>: BD_StringUnion optional', () => {
   check<'x' | 'y' | undefined>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'stringUnion'
@@ -360,7 +361,7 @@ it('InferPrimitiveSchemaType<T>: StringUnionSchema optional', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: StringUnionSchema default caveat', () => {
+it('InferPrimitiveSchemaType<T>: BD_StringUnion default caveat', () => {
   check<'x' | 'y' | 'z'>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'stringUnion'
@@ -379,7 +380,7 @@ it('InferPrimitiveSchemaType<T>: StringUnionSchema default caveat', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: NumberUnionSchema required', () => {
+it('InferPrimitiveSchemaType<T>: BD_NumberUnion required', () => {
   check<1 | 2>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'numberUnion'
@@ -396,7 +397,7 @@ it('InferPrimitiveSchemaType<T>: NumberUnionSchema required', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: NumberUnionSchema optional', () => {
+it('InferPrimitiveSchemaType<T>: BD_NumberUnion optional', () => {
   check<1 | 2 | undefined>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'numberUnion'
@@ -415,7 +416,7 @@ it('InferPrimitiveSchemaType<T>: NumberUnionSchema optional', () => {
   )
 })
 
-it('InferPrimitiveSchemaType<T>: NumberUnionSchema default caveat', () => {
+it('InferPrimitiveSchemaType<T>: BD_NumberUnion default caveat', () => {
   check<1 | 2 | 3>(
     unknownX as InferPrimitiveSchemaType<{
       type: 'numberUnion'

@@ -1,3 +1,4 @@
+// DEPRECATED: the file will be removed soon
 export type SharedSchema = {
   description?: string
   size?: number /* <= bytes */

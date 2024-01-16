@@ -1,23 +1,25 @@
 import type { BS_Schema, Con_BS_Schema_SubjT } from './base-short-schema-types'
-import type * as PrimitiveDetailed from './primitive-detailed-types'
+import type {
+  BD_Schema,
+  Con_BD_Schema_SubjT_P,
+  Con_BD_Schema_SubjT_V,
+} from './base-detailed-schema-types'
 
-export type PrimitiveSchema = PrimitiveDetailed.Schema | BS_Schema
+export type PrimitiveSchema = BS_Schema | BD_Schema
 
-export type ConstructPrimitiveSchemaSubjectTypeParsed<
-  T extends PrimitiveSchema,
-> = T extends BS_Schema
-  ? Con_BS_Schema_SubjT<T>
-  : T extends PrimitiveDetailed.Schema
-    ? PrimitiveDetailed.ConstructSchemaSubjectTypeParsed<T>
-    : never
+export type Con_BaseSchema_SubjT_P<T extends PrimitiveSchema> =
+  T extends BS_Schema
+    ? Con_BS_Schema_SubjT<T>
+    : T extends BD_Schema
+      ? Con_BD_Schema_SubjT_P<T>
+      : never
 
-export type ConstructPrimitiveSchemaSubjectTypeValidated<
-  T extends PrimitiveSchema,
-> = T extends BS_Schema
-  ? Con_BS_Schema_SubjT<T>
-  : T extends PrimitiveDetailed.Schema
-    ? PrimitiveDetailed.ConstructSchemaSubjectTypeValidated<T>
-    : never
+export type Con_BaseSchema_SubjT_V<T extends PrimitiveSchema> =
+  T extends BS_Schema
+    ? Con_BS_Schema_SubjT<T>
+    : T extends BD_Schema
+      ? Con_BD_Schema_SubjT_V<T>
+      : never
 
 /* ArraySchema */
 
@@ -42,7 +44,7 @@ export type ArraySchemaShort<
 export type ConstructArraySchemaShortSubjectType<T extends ArraySchemaShort> =
   T extends [infer U]
     ? U extends PrimitiveSchema
-      ? Array<NonNullable<ConstructPrimitiveSchemaSubjectTypeValidated<U>>>
+      ? Array<NonNullable<Con_BaseSchema_SubjT_V<U>>>
       : U extends ObjectSchema
         ? Array<ConstructObjectSchemaSubjectTypeParsed<U>>
         : U extends ArraySchemaShort
@@ -90,7 +92,7 @@ export type Prettify<T> = {
 export type ConstructObjectSchemaSubjectTypeParsed<T extends ObjectSchema> =
   Prettify<{
     [k in keyof T]: T[k] extends PrimitiveSchema
-      ? ConstructPrimitiveSchemaSubjectTypeParsed<T[k]>
+      ? Con_BaseSchema_SubjT_P<T[k]>
       : T[k] extends ArraySchema
         ? ConstructArraySchemaSubjectType<T[k]>
         : T[k] extends ObjectSchema

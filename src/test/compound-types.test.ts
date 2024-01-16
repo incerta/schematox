@@ -1,7 +1,7 @@
 import { check, unknownX } from './test-utils'
 import {
-  ConstructPrimitiveSchemaSubjectTypeParsed,
-  ConstructPrimitiveSchemaSubjectTypeValidated,
+  Con_BaseSchema_SubjT_P,
+  Con_BaseSchema_SubjT_V,
   ConstructArraySchemaShortSubjectType,
   ConstructArraySchemaDetailedSubjectType,
   ConstructArraySchemaSubjectType,
@@ -11,20 +11,18 @@ import {
   Schema,
 } from '../compound-types'
 
-it('ConstructPrimitiveSchemaSubjectTypeParsed<T>: check "string" PrimitiveShort & PrimitiveDetailed required/optional/default cases', () => {
+it('Con_BaseSchema_SubjT_P<T>: check "string" PrimitiveShort & PrimitiveDetailed required/optional/default cases', () => {
   /* PrimitiveDetailed */
 
-  check<string>(
-    unknownX as ConstructPrimitiveSchemaSubjectTypeParsed<{ type: 'string' }>
-  )
+  check<string>(unknownX as Con_BaseSchema_SubjT_P<{ type: 'string' }>)
 
   check<string>(
     // @ts-expect-error 'number' is not assignable to 'string'
-    unknownX as ConstructPrimitiveSchemaSubjectTypeParsed<{ type: 'number' }>
+    unknownX as Con_BaseSchema_SubjT_P<{ type: 'number' }>
   )
 
   check<string | undefined>(
-    unknownX as ConstructPrimitiveSchemaSubjectTypeParsed<{
+    unknownX as Con_BaseSchema_SubjT_P<{
       type: 'string'
       optional: true
     }>
@@ -32,14 +30,14 @@ it('ConstructPrimitiveSchemaSubjectTypeParsed<T>: check "string" PrimitiveShort 
 
   check<string>(
     // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as ConstructPrimitiveSchemaSubjectTypeParsed<{
+    unknownX as Con_BaseSchema_SubjT_P<{
       type: 'string'
       optional: true
     }>
   )
 
   check<string>(
-    unknownX as ConstructPrimitiveSchemaSubjectTypeParsed<{
+    unknownX as Con_BaseSchema_SubjT_P<{
       type: 'string'
       optional: true
       default: 'x'
@@ -48,28 +46,26 @@ it('ConstructPrimitiveSchemaSubjectTypeParsed<T>: check "string" PrimitiveShort 
 
   /* PrimitiveShort */
 
-  check<string>(unknownX as ConstructPrimitiveSchemaSubjectTypeParsed<'string'>)
+  check<string>(unknownX as Con_BaseSchema_SubjT_P<'string'>)
 
   check<string>(
     // @ts-expect-error 'number' is not assignable to 'string'
-    unknownX as ConstructPrimitiveSchemaSubjectTypeParsed<'number'>
+    unknownX as Con_BaseSchema_SubjT_P<'number'>
   )
 })
 
-it('ConstructPrimitiveSchemaSubjectTypeValidated<T>: check "string" PrimitiveShort & PrimitiveDetailed required/optional/default cases', () => {
+it('Con_BaseSchema_SubjT_V<T>: check "string" PrimitiveShort & PrimitiveDetailed required/optional/default cases', () => {
   /* PrimitiveDetailedSchema */
 
-  check<string>(
-    unknownX as ConstructPrimitiveSchemaSubjectTypeValidated<{ type: 'string' }>
-  )
+  check<string>(unknownX as Con_BaseSchema_SubjT_V<{ type: 'string' }>)
 
   check<string>(
     // @ts-expect-error 'number' is not assignable to 'string'
-    unknownX as ConstructPrimitiveSchemaSubjectTypeValidated<{ type: 'number' }>
+    unknownX as Con_BaseSchema_SubjT_V<{ type: 'number' }>
   )
 
   check<string | undefined>(
-    unknownX as ConstructPrimitiveSchemaSubjectTypeValidated<{
+    unknownX as Con_BaseSchema_SubjT_V<{
       type: 'string'
       optional: true
     }>
@@ -77,7 +73,7 @@ it('ConstructPrimitiveSchemaSubjectTypeValidated<T>: check "string" PrimitiveSho
 
   check<string>(
     // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as ConstructPrimitiveSchemaSubjectTypeValidated<{
+    unknownX as Con_BaseSchema_SubjT_V<{
       type: 'string'
       optional: true
     }>
@@ -85,7 +81,7 @@ it('ConstructPrimitiveSchemaSubjectTypeValidated<T>: check "string" PrimitiveSho
 
   check<string>(
     // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as ConstructPrimitiveSchemaSubjectTypeValidated<{
+    unknownX as Con_BaseSchema_SubjT_V<{
       type: 'string'
       optional: true
       default: 'x'
@@ -94,13 +90,11 @@ it('ConstructPrimitiveSchemaSubjectTypeValidated<T>: check "string" PrimitiveSho
 
   /* PrimitiveShortSchema */
 
-  check<string>(
-    unknownX as ConstructPrimitiveSchemaSubjectTypeValidated<'string'>
-  )
+  check<string>(unknownX as Con_BaseSchema_SubjT_V<'string'>)
 
   check<string>(
     // @ts-expect-error 'number' is not assignable to 'string'
-    unknownX as ConstructPrimitiveSchemaSubjectTypeValidated<'number'>
+    unknownX as Con_BaseSchema_SubjT_V<'number'>
   )
 })
 
@@ -115,7 +109,7 @@ it('ConstructArraySchemaShortSubjectType<T>: check ArrSchema subject type', () =
   )
 
   const arrSchemaShortSample = [
-    // depth 1 Array<Array<T>>
+    // depth 1 Array<T>
     [
       // depth 2 Array<Array<T>>
       [
