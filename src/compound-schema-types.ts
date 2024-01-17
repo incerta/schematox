@@ -6,18 +6,22 @@ import type {
 } from './base-detailed-schema-types'
 
 export type BaseSchema = BS_Schema | BD_Schema
+export type CompoundSchema = CS_Object | CD_Object | CS_Array | CD_Array
+export type Schema = BaseSchema | CompoundSchema
 
 type R<T> =
   | T
   | [T]
   | { type: 'array'; of: T }
-  | Record<string, T | [T] | { type: 'array'; of: T }>
+  | { type: 'object'; of: T }
+  | Record<
+      string,
+      T | [T] | { type: 'array'; of: T } | { type: 'object'; of: T }
+    >
 
 /* ArraySchema */
 
-export type CD_Array<
-  T extends BaseSchema | CS_Object | CD_Array | CS_Array = R<R<R<BaseSchema>>>,
-> = {
+export type CD_Array<T extends Schema = R<R<R<R<BaseSchema>>>>> = {
   type: 'array'
   of: T
 
@@ -27,16 +31,25 @@ export type CD_Array<
   maxLength?: number /* <= */
 }
 
-export type CS_Array<
-  T extends BaseSchema | CS_Object | CD_Array | CS_Array = R<R<R<BaseSchema>>>,
-> = [T]
+export type CS_Array<T extends Schema = R<R<R<R<BaseSchema>>>>> = [T]
 
 /* ObjectSchema */
 
 export type CS_Object<
   T extends string = string,
-  U extends BaseSchema | CS_Object | CD_Array | CS_Array = R<R<R<BaseSchema>>>,
+  U extends Schema = R<R<R<R<BaseSchema>>>>,
 > = Record<T, U>
+
+export type CD_Object<
+  T extends string = string,
+  U extends Schema = R<R<R<R<BaseSchema>>>>,
+> = {
+  type: 'object'
+  of: Record<T, U> | U
+
+  optional?: boolean
+  description?: string
+}
 
 /* Construct BaseSchema subject type */
 
@@ -109,17 +122,32 @@ export type Prettify_ObjectSchema_SubjT<T> = {
   [k in keyof T]: T[k]
 }
 
-export type Con_CS_Object_SubjT_V<T extends CS_Object> =
-  Prettify_ObjectSchema_SubjT<{
-    [k in keyof T]: T[k] extends BaseSchema
-      ? Con_BaseSchema_SubjT_V<T[k]>
-      : T[k] extends CS_Object
-        ? Con_CS_Object_SubjT_V<T[k]>
-        : T[k] extends CS_Array
-          ? Con_CS_Array_SubjT_V<T[k]>
-          : T[k] extends CD_Array
-            ? Con_CD_Array_SubjT_V<T[k]>
+export type Con_CS_Object_SubjT_V<T extends CS_Object> = {
+  [k in keyof T]: T[k] extends BaseSchema
+    ? Con_BaseSchema_SubjT_V<T[k]>
+    : T[k] extends CS_Object
+      ? Con_CS_Object_SubjT_V<T[k]>
+      : T[k] extends CS_Array
+        ? Con_CS_Array_SubjT_V<T[k]>
+        : T[k] extends CD_Array
+          ? Con_CD_Array_SubjT_V<T[k]>
+          : never
+}
+
+// export type CompoundSchema = CS_Object | CD_Object | CS_Array | CD_Array
+
+export type Con_CD_Object_SubjT_V<T extends CD_Object> = T extends {
+  of: infer U
+}
+  ? {
+      [k in keyof U]: U[k] extends BaseSchema
+        ? Con_BaseSchema_SubjT_V<U[k]>
+        : U[k] extends CD_Object
+          ? Con_CD_Object_SubjT_V<U[k]>
+          : U[k] extends CS_Object
+            ? Con_CS_Object_SubjT_V<U[k]>
             : never
-  }>
+    }
+  : never
 
 /* Construct Schema subject type (TBD) */

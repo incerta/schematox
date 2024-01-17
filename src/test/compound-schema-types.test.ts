@@ -7,7 +7,9 @@ import {
   Con_CS_Array_SubjT_P,
   Con_CS_Array_SubjT_V,
   Con_CS_Object_SubjT_V,
+  Con_CD_Object_SubjT_V,
   CS_Object,
+  CD_Object,
 } from '../compound-schema-types'
 
 /* Construct BASE schema subject type PARSED */
@@ -410,4 +412,65 @@ it('Con_CD_Array_SubjT_V<T>: mixed CD_Array/CS_Array/CS_Object schemas', () => {
       of: [{ x: 'string'; y: 'number' }]
     }>
   )
+})
+
+it('Reasons why we are not going to proceed with compound SHORT schema format', () => {
+  const schema0 = {
+    type: 'object',
+    of: {
+      // REASON 1: What if library user wants to define its own `type: 'object'` value?
+      x: 'string',
+    },
+  } as const satisfies CD_Object
+
+  check<{ x: string }>(unknownX as Con_CD_Object_SubjT_V<typeof schema0>)
+
+  const schema1 = {
+    type: 'object',
+    // REASON 2: The internal types could be coherent only if we allow `of` to be `Schema`
+    //           therefore we will not have a type error here which is really bad :(
+    of: 'string',
+  } as const satisfies CD_Object
+
+  check<'string'>(unknownX as Con_CD_Object_SubjT_V<typeof schema1>)
+
+  // REASON 3: CS/CD my ass! This library supposed to be simple not the Christmas tree of
+  //           insane `extend` logic. There is much more we can spent our time on.
+  //           For example ACTUAL IMPLEMENTATION of the parser/validator!
+
+  // REASON 4: Creating nested structures in data schema MUST cause pain. For those
+  //           who disagree we will provide Zod like API `x.object({ a: x.object({ b: 'string' }) })
+
+  // It is working thou:
+
+  const schema2 = {
+    type: 'object',
+    of: {
+      x: {
+        type: 'object',
+        of: {
+          y: {
+            z: 'string',
+          },
+        },
+      },
+    },
+  } as const satisfies CD_Object
+
+  check<{
+    x: {
+      y: {
+        z: string
+      }
+    }
+  }>(unknownX as Con_CD_Object_SubjT_V<typeof schema2>)
+
+  check<{
+    x: {
+      y: {
+        z: number
+      }
+    }
+    // @ts-expect-error Type 'string' is not assignable to type 'number'
+  }>(unknownX as Con_CD_Object_SubjT_V<typeof schema2>)
 })
