@@ -2,475 +2,879 @@ import { check, unknownX } from './test-utils'
 import {
   Con_BaseSchema_SubjT_P,
   Con_BaseSchema_SubjT_V,
-  Con_CD_Array_SubjT_P,
-  Con_CD_Array_SubjT_V,
-  Con_CS_Array_SubjT_P,
-  Con_CS_Array_SubjT_V,
-  Con_CS_Object_SubjT_V,
-  Con_CD_Object_SubjT_V,
-  CS_Object,
-  CD_Object,
+  Con_ArraySchema_SubjT_P,
+  Con_ArraySchema_SubjT_V,
+  Con_ObjectSchema_SubjT_P,
+  Con_ObjectSchema_SubjT_V,
 } from '../compound-schema-types'
 
-/* Construct BASE schema subject type PARSED */
+describe('Construct BaseSchema subject type PARSED', () => {
+  it('Con_BaseSchema_SubjT_P<T>: check base short schema required/optional cases', () => {
+    check<string>(unknownX as Con_BaseSchema_SubjT_P<'string'>)
+    check<string>(
+      // @ts-expect-error 'number' is not assignable to 'string'
+      unknownX as Con_BaseSchema_SubjT_P<'number'>
+    )
 
-it('Con_BaseSchema_SubjT_P<T>: check "string" BS & BD required/optional/default cases', () => {
-  /* Base detailed schema */
+    check<string | undefined>(unknownX as Con_BaseSchema_SubjT_P<'string?'>)
+    // @ts-expect-error 'number | undefined' is not assignable to parameter of type 'string | undefined'
+    check<string | undefined>(unknownX as Con_BaseSchema_SubjT_P<'number?'>)
+  })
 
-  check<string>(unknownX as Con_BaseSchema_SubjT_P<{ type: 'string' }>)
+  it('Con_BaseSchema_SubjT_P<T>: check base detailed schema required/optional cases', () => {
+    check<string>(unknownX as Con_BaseSchema_SubjT_P<{ type: 'string' }>)
+    check<string>(
+      // @ts-expect-error 'number' is not assignable to 'string'
+      unknownX as Con_BaseSchema_SubjT_P<{ type: 'number' }>
+    )
 
-  check<string>(
-    // @ts-expect-error 'number' is not assignable to 'string'
-    unknownX as Con_BaseSchema_SubjT_P<{ type: 'number' }>
-  )
+    check<string | undefined>(
+      unknownX as Con_BaseSchema_SubjT_P<{
+        type: 'string'
+        optional: true
+      }>
+    )
+    check<string>(
+      // @ts-expect-error 'string | undefined' is not assignable to 'string'
+      unknownX as Con_BaseSchema_SubjT_P<{
+        type: 'string'
+        optional: true
+      }>
+    )
+  })
 
-  check<string | undefined>(
-    unknownX as Con_BaseSchema_SubjT_P<{
-      type: 'string'
-      optional: true
-    }>
-  )
+  it('Con_BaseSchema_SubjT_P<T>: should ignore schema optional property if default is set', () => {
+    check<string>(
+      unknownX as Con_BaseSchema_SubjT_P<{
+        type: 'string'
+        optional: true
+        default: 'x'
+      }>
+    )
 
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as Con_BaseSchema_SubjT_P<{
-      type: 'string'
-      optional: true
-    }>
-  )
-
-  check<string>(
-    unknownX as Con_BaseSchema_SubjT_P<{
-      type: 'string'
-      optional: true
-      default: 'x'
-    }>
-  )
-
-  /* Base short schema */
-
-  check<string>(unknownX as Con_BaseSchema_SubjT_P<'string'>)
-
-  check<string>(
-    // @ts-expect-error 'number' is not assignable to 'string'
-    unknownX as Con_BaseSchema_SubjT_P<'number'>
-  )
+    check<string>(
+      // @ts-expect-error 'number' is not assignable to parameter of type 'string'
+      unknownX as Con_BaseSchema_SubjT_P<{
+        type: 'number'
+        optional: true
+        default: 0
+      }>
+    )
+  })
 })
 
-/* Construct BASE schema subject type VALIDATED */
+describe('Construct BaseSchema subject type VALIDATED', () => {
+  it('Con_BaseSchema_SubjT_V<T>: check base short schema required/optional cases', () => {
+    check<string>(unknownX as Con_BaseSchema_SubjT_P<'string'>)
+    check<string>(
+      // @ts-expect-error 'number' is not assignable to 'string'
+      unknownX as Con_BaseSchema_SubjT_P<'number'>
+    )
 
-it('Con_BaseSchema_SubjT_V<T>: check "string" BS & BD required/optional/default cases', () => {
-  /* Base detailed schema */
+    check<string | undefined>(unknownX as Con_BaseSchema_SubjT_P<'string?'>)
+    // @ts-expect-error 'number | undefined' is not assignable to parameter of type 'string | undefined'
+    check<string | undefined>(unknownX as Con_BaseSchema_SubjT_P<'number?'>)
+  })
 
-  check<string>(unknownX as Con_BaseSchema_SubjT_V<{ type: 'string' }>)
+  it('Con_BaseSchema_SubjT_V<T>: check base detailed schema required/optional cases', () => {
+    check<string>(unknownX as Con_BaseSchema_SubjT_V<{ type: 'string' }>)
+    check<string>(
+      // @ts-expect-error 'number' is not assignable to 'string'
+      unknownX as Con_BaseSchema_SubjT_V<{ type: 'number' }>
+    )
 
-  check<string>(
-    // @ts-expect-error 'number' is not assignable to 'string'
-    unknownX as Con_BaseSchema_SubjT_V<{ type: 'number' }>
-  )
+    check<string | undefined>(
+      unknownX as Con_BaseSchema_SubjT_V<{
+        type: 'string'
+        optional: true
+      }>
+    )
+    check<string>(
+      // @ts-expect-error 'string | undefined' is not assignable to 'string'
+      unknownX as Con_BaseSchema_SubjT_V<{
+        type: 'string'
+        optional: true
+      }>
+    )
+  })
 
-  check<string | undefined>(
-    unknownX as Con_BaseSchema_SubjT_V<{
-      type: 'string'
-      optional: true
-    }>
-  )
-
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as Con_BaseSchema_SubjT_V<{
-      type: 'string'
-      optional: true
-    }>
-  )
-
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as Con_BaseSchema_SubjT_V<{
-      type: 'string'
-      optional: true
-      default: 'x'
-    }>
-  )
-
-  /* Base short schema */
-
-  check<string>(unknownX as Con_BaseSchema_SubjT_V<'string'>)
-
-  check<string>(
-    // @ts-expect-error 'number' is not assignable to 'string'
-    unknownX as Con_BaseSchema_SubjT_V<'number'>
-  )
+  it('Con_BaseSchema_SubjT_V<T>: should ignore nestend schema default property', () => {
+    check<string | undefined>(
+      unknownX as Con_BaseSchema_SubjT_V<{
+        type: 'string'
+        optional: true
+        default: 'x'
+      }>
+    )
+    check<string>(
+      // @ts-expect-error 'string | undefined' is not assignable to parameter of type 'string'
+      unknownX as Con_BaseSchema_SubjT_V<{
+        type: 'string'
+        optional: true
+        default: 'x'
+      }>
+    )
+    check<string | undefined>(
+      // @ts-expect-error 'number | undefined' is not assignable to parameter of type 'string | undefined'
+      unknownX as Con_BaseSchema_SubjT_V<{
+        type: 'number'
+        optional: true
+        default: 0
+      }>
+    )
+  })
 })
 
-/* Construct compound array short schema subject type PARSED */
+describe('Construct ArraySchema subject type PARSED', () => {
+  it('Con_ArraySchema_SubjT_P<T>: check BaseSchema subject type construction', () => {
+    check<string[]>(
+      unknownX as Con_ArraySchema_SubjT_P<{ type: 'array'; of: 'string' }>
+    )
+    check<string[]>(
+      // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
+      unknownX as Con_ArraySchema_SubjT_P<{ type: 'array'; of: 'number' }>
+    )
 
-it('Con_CS_Array_SubjT_P<T>: check BaseSchema subject type construction', () => {
-  check<string[]>(unknownX as Con_CS_Array_SubjT_P<['string']>)
-  // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
-  check<string[]>(unknownX as Con_CS_Array_SubjT_P<['number']>)
-})
+    check<string[]>(
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'string' }
+      }>
+    )
+    check<string[]>(
+      // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'number' }
+      }>
+    )
+  })
 
-it('Con_CS_Array_SubjT_P<T>: should ignore "undefined" in optional BaseSchema', () => {
-  check<string[]>(unknownX as Con_CS_Array_SubjT_P<['string?']>)
-  check<number[]>(unknownX as Con_CS_Array_SubjT_P<['number?']>)
-  // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
-  check<string[]>(unknownX as Con_CS_Array_SubjT_P<['number?']>)
-})
+  it('Con_ArraySchema_SubjT_P<T>: check nested ArraySchema subject type construction', () => {
+    check<string[][]>(
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'array'; of: 'string' }
+      }>
+    )
+    check<string[][]>(
+      // @ts-expect-error 'number[][]' is not assignable to parameter of type 'string[][]'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'array'; of: 'number' }
+      }>
+    )
 
-it('Con_CS_Array_SubjT_P<T>: default value of BD_Schema is not matter in the context of parsed array', () => {
-  check<string[]>(
-    unknownX as Con_CS_Array_SubjT_P<
-      [{ type: 'string'; optional: true; default: 'x' }]
-    >
-  )
-  check<string[]>(
-    // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
-    unknownX as Con_CS_Array_SubjT_P<
-      [{ type: 'number'; optional: true; default: 0 }]
-    >
-  )
-})
+    check<string[][]>(
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'array'; of: { type: 'string' } }
+      }>
+    )
+    check<string[][]>(
+      // @ts-expect-error 'number[][]' is not assignable to parameter of type 'string[][]'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'array'; of: { type: 'number' } }
+      }>
+    )
+  })
 
-/* Construct compound array short schema subject type VALIDATED */
+  it('Con_ArraySchema_SubjT_P<T>: check nested ObjectSchema subject type construction', () => {
+    check<Array<{ x: string }>>(
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'object'; of: { x: 'string' } }
+      }>
+    )
+    check<Array<{ x: string }>>(
+      // @ts-expect-error 'number' is not assignable to type 'string'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'object'; of: { x: 'number' } }
+      }>
+    )
+  })
 
-it('Con_CS_Array_SubjT_V<T>: check BaseSchema subject type construction', () => {
-  check<string[]>(unknownX as Con_CS_Array_SubjT_V<['string']>)
-  // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
-  check<string[]>(unknownX as Con_CS_Array_SubjT_V<['number']>)
-})
+  it('Con_ArraySchema_SubjT_P<T>: nested ObjectSchema nested BaseSchema should ignore optional property if default is set', () => {
+    check<Array<{ x: string | undefined }>>(
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'object'; of: { x: { type: 'string'; optional: true } } }
+      }>
+    )
+    check<Array<{ x: string | undefined }>>(
+      // @ts-expect-error 'number | undefined' is not assignable to type 'string | undefined'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'object'; of: { x: { type: 'number'; optional: true } } }
+      }>
+    )
 
-it('Con_CS_Array_SubjT_V<T>: check nested BD_Array', () => {
-  check<string[][]>(
-    unknownX as Con_CS_Array_SubjT_V<[{ type: 'array'; of: 'string' }]>
-  )
+    check<Array<{ x: string }>>(
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: {
+          type: 'object'
+          of: { x: { type: 'string'; optional: true; default: 'x' } }
+        }
+      }>
+    )
+    check<Array<{ x: string }>>(
+      // @ts-expect-error 'number' is not assignable to type 'string'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: {
+          type: 'object'
+          of: { x: { type: 'number'; optional: true; default: 0 } }
+        }
+      }>
+    )
+  })
 
-  check<string[][]>(
-    // @ts-expect-error type 'number[][]' is not assignable to parameter of type 'string[
-    unknownX as Con_CS_Array_SubjT_V<[{ type: 'array'; of: 'number' }]>
-  )
-})
+  it('Con_ArraySchema_SubjT_P<T>: should ignore nested BaseSchema optionality', () => {
+    check<string[]>(
+      unknownX as Con_ArraySchema_SubjT_P<{ type: 'array'; of: 'string?' }>
+    )
+    check<string[]>(
+      // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
+      unknownX as Con_ArraySchema_SubjT_P<{ type: 'array'; of: 'number?' }>
+    )
+    check<string[]>(
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'string'; optional: true }
+      }>
+    )
+    check<string[]>(
+      // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'number'; optional: true }
+      }>
+    )
+  })
 
-it('Con_CS_Array_SubjT_V<T>: should NOT ignore "undefined" in optional BaseSchema', () => {
-  check<Array<string | undefined>>(
-    unknownX as Con_CS_Array_SubjT_V<['string?']>
-  )
-  check<Array<string | undefined>>(
-    // @ts-expect-error '(number | undefined)[]' is not '(string | undefined)[]'
-    unknownX as Con_CS_Array_SubjT_V<['number?']>
-  )
+  it('Con_ArraySchema_SubjT_P<T>: should ignore nested ArraySchema optionality', () => {
+    check<string[][]>(
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'array'; of: 'string'; optional: true }
+      }>
+    )
+    check<string[][]>(
+      // @ts-expect-error 'number[][]' is not assignable to parameter of type 'string[][]'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'array'; of: 'number'; optional: true }
+      }>
+    )
+  })
 
-  // @ts-expect-error '(string | undefined)[]' is not 'string[]'
-  check<string[]>(unknownX as Con_CS_Array_SubjT_V<['string?']>)
-})
+  it('Con_ArraySchema_SubjT_P<T>: should ignore nested ObjectSchema optionality', () => {
+    check<Array<{ x: string }>>(
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'object'; of: { x: 'string' }; optional: true }
+      }>
+    )
+    check<Array<{ x: string }>>(
+      // @ts-expect-error 'number' is not assignable to type 'string'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'object'; of: { x: 'number' }; optional: true }
+      }>
+    )
+  })
 
-it('Con_CS_Array_SubjT_V<T>: should ignore default value in optional BD_Schema', () => {
-  check<Array<string | undefined>>(
-    unknownX as Con_CS_Array_SubjT_V<
-      [{ type: 'string'; optional: true; default: 'x' }]
-    >
-  )
-  check<string[]>(
-    // @ts-expect-error `'(string | undefined)[]' is not 'string[]'
-    unknownX as Con_CS_Array_SubjT_V<
-      [{ type: 'string'; optional: true; default: 'x' }]
-    >
-  )
-})
-
-/* Construct compound array detailed schema subject type PARSED */
-
-it('Con_CD_Array_SubjT_P<T>: check BaseSchema subject type construction', () => {
-  check<string[]>(
-    unknownX as Con_CD_Array_SubjT_P<{ type: 'array'; of: 'string' }>
-  )
-  check<number[]>(
-    unknownX as Con_CD_Array_SubjT_P<{ type: 'array'; of: 'number' }>
-  )
-  check<string[]>(
-    // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
-    unknownX as Con_CD_Array_SubjT_P<{ type: 'array'; of: 'number' }>
-  )
-})
-
-it('Con_CD_Array_SubjT_P<T>: should ignore "undefined" in optional BaseSchema', () => {
-  check<string[]>(
-    unknownX as Con_CD_Array_SubjT_P<{ type: 'array'; of: 'string?' }>
-  )
-  check<number[]>(
-    unknownX as Con_CD_Array_SubjT_P<{ type: 'array'; of: 'number?' }>
-  )
-  check<string[]>(
-    // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
-    unknownX as Con_CD_Array_SubjT_P<{ type: 'array'; of: 'number?' }>
-  )
-})
-
-it('Con_CD_Array_SubjT_P<T>: default value of BD_Schema is not matter in the context of parsed array', () => {
-  check<Array<string>>(
-    unknownX as Con_CD_Array_SubjT_P<{
-      type: 'array'
-      of: { type: 'string'; optional: true; default: 'x' }
-    }>
-  )
-  check<string[]>(
-    unknownX as Con_CD_Array_SubjT_P<{
-      type: 'array'
-      of: { type: 'string'; optional: true; default: 'x' }
-    }>
-  )
-})
-
-it('Con_CD_Array_SubjT_P<T>: CD_Array can be optional by itself', () => {
-  check<string[] | undefined>(
-    unknownX as Con_CD_Array_SubjT_P<{
-      type: 'array'
-      of: 'string'
-      optional: true
-    }>
-  )
-  check<string[]>(
-    // @ts-expect-error 'string[] | undefined' is not assignable to parameter of type 'string[]'
-    unknownX as Con_CD_Array_SubjT_P<{
-      type: 'array'
-      of: 'string'
-      optional: true
-    }>
-  )
-})
-
-/* Construct compound ARRAY detailed schema subject type VALIDATED */
-
-it('Con_CD_Array_SubjT_V<T>: check BaseSchema subject type construction', () => {
-  check<string[]>(
-    unknownX as Con_CD_Array_SubjT_V<{ type: 'array'; of: 'string' }>
-  )
-  check<number[]>(
-    unknownX as Con_CD_Array_SubjT_V<{ type: 'array'; of: 'number' }>
-  )
-  check<string[]>(
-    // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
-    unknownX as Con_CD_Array_SubjT_V<{ type: 'array'; of: 'number' }>
-  )
-})
-
-it('Con_CD_Array_SubjT_V<T>: should NOT ignore "undefined" in optional BaseSchema', () => {
-  check<Array<string | undefined>>(
-    unknownX as Con_CD_Array_SubjT_V<{ type: 'array'; of: 'string?' }>
-  )
-  check<Array<number | undefined>>(
-    unknownX as Con_CD_Array_SubjT_V<{ type: 'array'; of: 'number?' }>
-  )
-  check<string[]>(
-    // @ts-expect-error '(number | undefined)[]' is not assignable to parameter of type 'string[]'
-    unknownX as Con_CD_Array_SubjT_V<{ type: 'array'; of: 'number?' }>
-  )
-})
-
-it('Con_CD_Array_SubjT_V<T>: CD_Array can be optional by itself', () => {
-  check<string[] | undefined>(
-    unknownX as Con_CD_Array_SubjT_V<{
-      type: 'array'
-      of: 'string'
-      optional: true
-    }>
-  )
-  check<string[]>(
-    // @ts-expect-error 'string[] | undefined' is not assignable to parameter of type 'string[]'
-    unknownX as Con_CD_Array_SubjT_V<{
-      type: 'array'
-      of: 'string'
-      optional: true
-    }>
-  )
-})
-
-it('Con_CD_Array_SubjT_V<T>: should ignore default value in optional BD_Schema', () => {
-  check<Array<string | undefined>>(
-    unknownX as Con_CD_Array_SubjT_V<{
-      type: 'array'
-      of: { type: 'string'; optional: true; default: 'x' }
-    }>
-  )
-  check<string[]>(
-    // @ts-expect-error '(string | undefined)[]' is not assignable to parameter of type 'string[]'
-    unknownX as Con_CD_Array_SubjT_V<{
-      type: 'array'
-      of: { type: 'string'; optional: true; default: 'x' }
-    }>
-  )
-})
-
-/* Construct compound OBJECT short schema subject type VALIDATED */
-
-it('Con_CS_Object_SubjT_V<T>: check BaseSchema subject type construction', () => {
-  check<{ x: string }>(unknownX as Con_CS_Object_SubjT_V<{ x: 'string' }>)
-  // @ts-expect-error 'number' is not assignable to type 'string'
-  check<{ x: string }>(unknownX as Con_CS_Object_SubjT_V<{ x: 'number' }>)
-})
-
-it('Con_CS_Object_SubjT_V<T>: check CS_Array/CD_Array subject type construction', () => {
-  check<{ x: string[] }>(unknownX as Con_CS_Object_SubjT_V<{ x: ['string'] }>)
-  // @ts-expect-error type 'number[]' is not assignable to type 'string[]'
-  check<{ x: string[] }>(unknownX as Con_CS_Object_SubjT_V<{ x: ['number'] }>)
-})
-
-it('Con_CS_Object_SubjT_V<T>: should allow recursion', () => {
-  check<{ x: { x: string } }>(
-    unknownX as Con_CS_Object_SubjT_V<{
-      x: {
-        x: 'string'
-      }
-    }>
-  )
-
-  check<{ x: { x: string } }>(
-    // @ts-expect-error type 'number' is not assignable to type 'string'
-    unknownX as Con_CS_Object_SubjT_V<{
-      x: {
-        x: 'number'
-      }
-    }>
-  )
-})
-
-it('Con_CS_Object_SubjT_V<T>: check BaseSchema subject type construction', () => {
-  const schema = {
-    x: ['string'],
-    y: 'string',
-    z: {
-      x: 'number',
-      y: {
-        type: 'array',
-        of: 'string',
-      },
-    },
-  } as const satisfies CS_Object
-
-  check<{ x: string[]; y: string; z: { x: number; y: string[] } }>(
-    unknownX as Con_CS_Object_SubjT_V<typeof schema>
-  )
-
-  check<{ x: string[]; y: string; z: { x: string; y: string[] } }>(
-    // @ts-expect-error The types of 'z.x' are incompatible between these types
-    unknownX as Con_CS_Object_SubjT_V<typeof schema>
-  )
-})
-
-/* Recursive definitions */
-
-it('Con_CD_Array_SubjT_V<T>: CD_Array recursive definition should allow 2 layers of depth', () => {
-  check<Array<Array<string>>>(
-    unknownX as Con_CD_Array_SubjT_V<{
-      type: 'array'
-      of: {
+  it('Con_ArraySchema_SubjT_P<T>: check ArraySchema can be optional by itself', () => {
+    check<string[] | undefined>(
+      unknownX as Con_ArraySchema_SubjT_P<{
         type: 'array'
         of: 'string'
-      }
-    }>
-  )
+        optional: true
+      }>
+    )
+    check<string[]>(
+      // @ts-expect-error 'string[] | undefined' is not assignable to parameter of type 'string[]'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: 'string'
+        optional: true
+      }>
+    )
+  })
+})
 
-  check<Array<Array<string>>>(
-    // @ts-expect-error 'number[]' is not assignable to type 'string[]'
-    unknownX as Con_CD_Array_SubjT_V<{
-      type: 'array'
-      of: {
+describe('Construct ArraySchema subject type VALIDATED', () => {
+  it('Con_ArraySchema_SubjT_V<T>: check BaseSchema subject type construction', () => {
+    check<string[]>(
+      unknownX as Con_ArraySchema_SubjT_V<{ type: 'array'; of: 'string' }>
+    )
+    check<string[]>(
+      // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
+      unknownX as Con_ArraySchema_SubjT_V<{ type: 'array'; of: 'number' }>
+    )
+
+    check<string[]>(
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'string' }
+      }>
+    )
+    check<string[]>(
+      // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'number' }
+      }>
+    )
+
+    check<Array<string | undefined>>(
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'string'; optional: true }
+      }>
+    )
+    check<Array<string | undefined>>(
+      // @ts-expect-error 'number | undefined' is not assignable to type 'string | undefined'
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'number'; optional: true }
+      }>
+    )
+    check<Array<string>>(
+      // @ts-expect-error 'string | undefined' is not assignable to type 'string'
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'string'; optional: true; default: 'x' }
+      }>
+    )
+  })
+
+  it('Con_ArraySchema_SubjT_V<T>: check nested ArraySchema subject type construction', () => {
+    check<string[][]>(
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'array'; of: 'string' }
+      }>
+    )
+    check<string[][]>(
+      // @ts-expect-error 'number[][]' is not assignable to parameter of type 'string[][]'
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'array'; of: 'number' }
+      }>
+    )
+
+    check<string[][]>(
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'array'; of: { type: 'string' } }
+      }>
+    )
+    check<string[][]>(
+      // @ts-expect-error 'number[][]' is not assignable to parameter of type 'string[][]'
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'array'; of: { type: 'number' } }
+      }>
+    )
+  })
+
+  it('Con_ArraySchema_SubjT_V<T>: check nested ObjectSchema subject type construction', () => {
+    check<Array<{ x: string }>>(
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'object'; of: { x: 'string' } }
+      }>
+    )
+    check<Array<{ x: string }>>(
+      // @ts-expect-error 'number' is not assignable to type 'string'
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'object'; of: { x: 'number' } }
+      }>
+    )
+  })
+
+  it('Con_ArraySchema_SubjT_V<T>: nested ObjectSchema nested BaseSchema should ignore default property', () => {
+    check<Array<{ x: string | undefined }>>(
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: {
+          type: 'object'
+          of: { x: { type: 'string'; optional: true; default: 'x' } }
+        }
+      }>
+    )
+    check<Array<{ x: string | undefined }>>(
+      // @ts-expect-error 'number | undefined' is not assignable to type 'string | undefined'
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: {
+          type: 'object'
+          of: { x: { type: 'number'; optional: true; default: 0 } }
+        }
+      }>
+    )
+
+    check<Array<{ x: string }>>(
+      // @ts-expect-error 'string | undefined' is not assignable to type 'string'
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: {
+          type: 'object'
+          of: { x: { type: 'string'; optional: true; default: 'x' } }
+        }
+      }>
+    )
+    check<Array<{ x: string }>>(
+      // @ts-expect-error 'number | undefined' is not assignable to type 'string'
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: {
+          type: 'object'
+          of: { x: { type: 'number'; optional: true; default: 0 } }
+        }
+      }>
+    )
+  })
+
+  it('Con_ArraySchema_SubjT_V<T>: should ignore nested schema default property', () => {
+    check<Array<string | undefined>>(
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'string'; optional: true; default: 'x' }
+      }>
+    )
+    check<string[]>(
+      // @ts-expect-error '(string | undefined)[]' is not assignable to parameter of type 'string[]'
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: { type: 'string'; optional: true; default: 'x' }
+      }>
+    )
+  })
+
+  it('Con_ArraySchema_SubjT_V<T>: check ArraySchema can be optional by itself', () => {
+    check<Array<string> | undefined>(
+      unknownX as Con_ArraySchema_SubjT_V<{
+        type: 'array'
+        of: 'string'
+        optional: true
+      }>
+    )
+    check<Array<string> | undefined>(
+      // @ts-expect-error 'number[] | undefined' is not 'string[] | undefined'
+      unknownX as Con_ArraySchema_SubjT_V<{
         type: 'array'
         of: 'number'
-      }
-    }>
-  )
+        optional: true
+      }>
+    )
+  })
 })
 
-it('Con_CD_Array_SubjT_V<T>: mixed CD_Array/CS_Array/CS_Object schemas', () => {
-  check<Array<Array<string>>>(
-    unknownX as Con_CD_Array_SubjT_V<{
-      type: 'array'
-      of: ['string']
-    }>
-  )
+describe('Construct ObjectSchema subject type PARSED', () => {
+  it('Con_ObjectSchema_SubjT_P<T>: check BaseSchema subject type construction', () => {
+    check<{ x: string; y: number }>(
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: { x: 'string'; y: 'number' }
+      }>
+    )
+    check<{ x: string; y: number }>(
+      // @ts-expect-error 'number' is not assignable to type 'string'
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: { x: 'number'; y: 'number' }
+      }>
+    )
 
-  check<Array<Array<number>>>(
-    // @ts-expect-error Type 'string[][]' is not assignable to type 'number[][]'
-    unknownX as Con_CD_Array_SubjT_V<{
-      type: 'array'
-      of: ['string']
-    }>
-  )
+    check<{ x: string; y: number }>(
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: { x: { type: 'string' }; y: { type: 'number' } }
+      }>
+    )
+    check<{ x: string; y: number }>(
+      // @ts-expect-error 'number' is not assignable to type 'string'
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: { x: { type: 'number' }; y: { type: 'number' } }
+      }>
+    )
 
-  check<Array<Array<{ x: string; y: number }>>>(
-    unknownX as Con_CD_Array_SubjT_V<{
-      type: 'array'
-      of: [{ x: 'string'; y: 'number' }]
-    }>
-  )
+    check<{ x: string; y: number | undefined }>(
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: { x: { type: 'string' }; y: { type: 'number'; optional: true } }
+      }>
+    )
+    check<{ x: string; y: number | undefined }>(
+      // @ts-expect-error 'string' is not assignable to type 'number'
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: { x: { type: 'string' }; y: { type: 'string'; optional: true } }
+      }>
+    )
+  })
 
-  // FIXME: should be an error here
-  check<Array<Array<{ x: number; y: number }>>>(
-    unknownX as Con_CD_Array_SubjT_V<{
-      type: 'array'
-      of: [{ x: 'string'; y: 'number' }]
-    }>
-  )
-})
-
-it('Reasons why we are not going to proceed with compound SHORT schema format', () => {
-  const schema0 = {
-    type: 'object',
-    of: {
-      // REASON 1: What if library user wants to define its own `type: 'object'` value?
-      x: 'string',
-    },
-  } as const satisfies CD_Object
-
-  check<{ x: string }>(unknownX as Con_CD_Object_SubjT_V<typeof schema0>)
-
-  const schema1 = {
-    type: 'object',
-    // REASON 2: The internal types could be coherent only if we allow `of` to be `Schema`
-    //           therefore we will not have a type error here which is really bad :(
-    of: 'string',
-  } as const satisfies CD_Object
-
-  check<'string'>(unknownX as Con_CD_Object_SubjT_V<typeof schema1>)
-
-  // REASON 3: CS/CD my ass! This library supposed to be simple not the Christmas tree of
-  //           insane `extend` logic. There is much more we can spent our time on.
-  //           For example ACTUAL IMPLEMENTATION of the parser/validator!
-
-  // REASON 4: Creating nested structures in data schema MUST cause pain. For those
-  //           who disagree we will provide Zod like API `x.object({ a: x.object({ b: 'string' }) })
-
-  // It is working thou:
-
-  const schema2 = {
-    type: 'object',
-    of: {
-      x: {
-        type: 'object',
+  it('Con_ObjectSchema_SubjT_P<T>: nested BaseSchema should ignore optional proprety if default is set', () => {
+    check<{ x: string; y: number }>(
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
         of: {
-          y: {
-            z: 'string',
-          },
-        },
-      },
-    },
-  } as const satisfies CD_Object
+          x: { type: 'string' }
+          y: { type: 'number'; optional: true; default: 0 }
+        }
+      }>
+    )
+    check<{ x: string; y: number }>(
+      // @ts-expect-error 'string' is not assignable to type 'number'
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: { type: 'string' }
+          y: { type: 'string'; optional: true; default: 'x' }
+        }
+      }>
+    )
+  })
 
-  check<{
-    x: {
-      y: {
-        z: string
-      }
-    }
-  }>(unknownX as Con_CD_Object_SubjT_V<typeof schema2>)
+  it('Con_ObjectSchema_SubjT_P<T>: check nested ArraySchema subject type construction', () => {
+    check<{ x: string[]; y: number[] }>(
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: { type: 'array'; of: 'string' }
+          y: { type: 'array'; of: 'number' }
+        }
+      }>
+    )
 
-  check<{
-    x: {
-      y: {
-        z: number
-      }
-    }
-    // @ts-expect-error Type 'string' is not assignable to type 'number'
-  }>(unknownX as Con_CD_Object_SubjT_V<typeof schema2>)
+    check<{ x: string[]; y: number[] }>(
+      // @ts-expect-error 'string' is not assignable to type 'number'
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: { type: 'array'; of: 'string' }
+          y: { type: 'array'; of: 'string' }
+        }
+      }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_P<T>: nested ArraySchema should ignore its nested schema optionality', () => {
+    check<{ x: string[]; y: number[] }>(
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: { type: 'array'; of: 'string?' }
+          y: { type: 'array'; of: 'number?' }
+        }
+      }>
+    )
+
+    check<{ x: string[]; y: number[] }>(
+      // @ts-expect-error 'string' is not assignable to type 'number'
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: { type: 'array'; of: 'string?' }
+          y: { type: 'array'; of: 'string?' }
+        }
+      }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_P<T>: check nested ObjectSchema subject type construction', () => {
+    check<{ x: { a: string; b: number }; y: { c: boolean; d: Buffer } }>(
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: { type: 'object'; of: { a: 'string'; b: 'number' } }
+          y: { type: 'object'; of: { c: 'boolean'; d: 'buffer' } }
+        }
+      }>
+    )
+
+    check<{ x: { a: string; b: number }; y: { c: boolean; d: Buffer } }>(
+      // @ts-expect-error 'y.d' are incompatible; 'string' is not  'Buffer'
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: { type: 'object'; of: { a: 'string'; b: 'number' } }
+          y: { type: 'object'; of: { c: 'boolean'; d: 'string' } }
+        }
+      }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_P<T>: nested ObjectSchema nested BaseSchema should ignore optional property if default is set', () => {
+    check<{ x: { y: string | undefined } }>(
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: { type: 'object'; of: { y: { type: 'string'; optional: true } } }
+        }
+      }>
+    )
+    check<{ x: { y: string | undefined } }>(
+      // @ts-expect-error 'number | undefined' is not assignable to type 'string | undefined'
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: { type: 'object'; of: { y: { type: 'number'; optional: true } } }
+        }
+      }>
+    )
+
+    check<{ x: { y: string } }>(
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: {
+            type: 'object'
+            of: { y: { type: 'string'; optional: true; default: 'x' } }
+          }
+        }
+      }>
+    )
+    check<{ x: { y: string } }>(
+      // @ts-expect-error 'number' is not assignable to type 'string'
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: {
+          x: {
+            type: 'object'
+            of: { y: { type: 'number'; optional: true; default: 0 } }
+          }
+        }
+      }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_P<T>: check ObjectSchema can be optional by itself', () => {
+    check<{ x: string } | undefined>(
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: { x: 'string' }
+        optional: true
+      }>
+    )
+    check<{ x: string }>(
+      // @ts-expect-error '{ x: string; } | undefined' is not assignable to parameter of type '{ x: string; }'
+      unknownX as Con_ObjectSchema_SubjT_P<{
+        type: 'object'
+        of: { x: 'string' }
+        optional: true
+      }>
+    )
+  })
+})
+
+describe('Construct ObjectSchema subject type VALIDATED', () => {
+  it('Con_ObjectSchema_SubjT_V<T>: check BaseSchema subject type construction', () => {
+    check<{ x: string; y: number }>(
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: { x: 'string'; y: 'number' }
+      }>
+    )
+    check<{ x: string; y: number }>(
+      // @ts-expect-error 'number' is not assignable to type 'string'
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: { x: 'number'; y: 'number' }
+      }>
+    )
+
+    check<{ x: string; y: number }>(
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: { x: { type: 'string' }; y: { type: 'number' } }
+      }>
+    )
+    check<{ x: string; y: number }>(
+      // @ts-expect-error 'number' is not assignable to type 'string'
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: { x: { type: 'number' }; y: { type: 'number' } }
+      }>
+    )
+
+    check<{ x: string; y: number | undefined }>(
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: { x: { type: 'string' }; y: { type: 'number'; optional: true } }
+      }>
+    )
+    check<{ x: string; y: number | undefined }>(
+      // @ts-expect-error 'string' is not assignable to type 'number'
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: { x: { type: 'string' }; y: { type: 'string'; optional: true } }
+      }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_V<T>: nested BaseSchema should ignore default property', () => {
+    check<{ x: string; y: number | undefined }>(
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: { type: 'string' }
+          y: { type: 'number'; optional: true; default: 0 }
+        }
+      }>
+    )
+    check<{ x: string; y: number | undefined }>(
+      // @ts-expect-error 'string | undefined' is not assignable to type 'number | undefined'
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: { type: 'string' }
+          y: { type: 'string'; optional: true; default: 'x' }
+        }
+      }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_V<T>: check nested ArraySchema subject type construction', () => {
+    check<{ x: string[]; y: number[] }>(
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: { type: 'array'; of: 'string' }
+          y: { type: 'array'; of: 'number' }
+        }
+      }>
+    )
+
+    check<{ x: string[]; y: number[] }>(
+      // @ts-expect-error 'string[]' is not assignable to type 'number[]'
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: { type: 'array'; of: 'string' }
+          y: { type: 'array'; of: 'string' }
+        }
+      }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_V<T>: nested ArraySchema should NOT ignore its nested schema optionality', () => {
+    check<{ x: Array<string | undefined>; y: Array<number | undefined> }>(
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: { type: 'array'; of: 'string?' }
+          y: { type: 'array'; of: 'number?' }
+        }
+      }>
+    )
+    check<{ x: Array<string | undefined>; y: Array<number | undefined> }>(
+      // @ts-expect-error '(number | undefined)[]' is not assignable to type '(string | undefined)[]'
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: { type: 'array'; of: 'number?' }
+          y: { type: 'array'; of: 'number?' }
+        }
+      }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_V<T>: check nested ObjectSchema subject type construction', () => {
+    check<{ x: { a: string; b: number }; y: { c: boolean; d: Buffer } }>(
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: { type: 'object'; of: { a: 'string'; b: 'number' } }
+          y: { type: 'object'; of: { c: 'boolean'; d: 'buffer' } }
+        }
+      }>
+    )
+
+    check<{ x: { a: string; b: number }; y: { c: boolean; d: Buffer } }>(
+      // @ts-expect-error 'y.d' are incompatible; 'string' is not  'Buffer'
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: { type: 'object'; of: { a: 'string'; b: 'number' } }
+          y: { type: 'object'; of: { c: 'boolean'; d: 'string' } }
+        }
+      }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_V<T>: nested ObjectSchema nested BaseSchema should ignore default property', () => {
+    check<{ x: { y: string | undefined } }>(
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: {
+            type: 'object'
+            of: { y: { type: 'string'; optional: true; default: 'x' } }
+          }
+        }
+      }>
+    )
+    check<{ x: { y: string | undefined } }>(
+      // @ts-expect-error 'number | undefined' is not assignable to type 'string | undefined'
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: {
+            type: 'object'
+            of: { y: { type: 'number'; optional: true; default: 0 } }
+          }
+        }
+      }>
+    )
+
+    check<{ x: { y: string | undefined } }>(
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: {
+            type: 'object'
+            of: { y: { type: 'string'; optional: true; default: 'x' } }
+          }
+        }
+      }>
+    )
+    check<{ x: { y: string | undefined } }>(
+      // @ts-expect-error type 'number | undefined' is not assignable to type 'string | undefined'
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: {
+          x: {
+            type: 'object'
+            of: { y: { type: 'number'; optional: true; default: 0 } }
+          }
+        }
+      }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_V<T>: check ObjectSchema can be optional by itself', () => {
+    check<{ x: string } | undefined>(
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: { x: 'string' }
+        optional: true
+      }>
+    )
+    check<{ x: string }>(
+      // @ts-expect-error '{ x: string; } | undefined' is not assignable to parameter of type '{ x: string; }'
+      unknownX as Con_ObjectSchema_SubjT_V<{
+        type: 'object'
+        of: { x: 'string' }
+        optional: true
+      }>
+    )
+  })
 })
