@@ -1,15 +1,15 @@
 # General glossary
 
 - `schema` – a JSON-compatible representation of JS runtime `primitive/object/array/Buffer` entities
-- `schematoX` – the library closure which is wraps `schema` and used for parsing/validating schema subjects
+- `schematoX` or `x` – the library closure which is wraps `schema` and used for parsing/validating schema subjects
 - `base schema` – the most basic unit of a schema
 - `compound schema` – higher-order structure that connects base or other compound schemas
-- `short schema` – shortened form of the base or compound schema
-- `detailed schema` – detailed version of the base or compound schema
+- `short schema` – shortened form of the base schema
+- `detailed schema` – detailed version of the base schema
 - `schema subject` – the JS runtime primitive or object that is intended to be tested against the schema
 - `schema subject type` – the TypeScript type of the schema subject
-- `schema validated subject type` – the resultant TypeScript type of the entity validated by the Schematox library
-- `schema parsed subject type` – the resultant TypeScript type of the entity parsed by the Schematox library
+- `schema validated subject type` – the resultant TypeScript type of the entity validated by `x`
+- `schema parsed subject type` – the resultant TypeScript type of the entity parsed by `x`
 - `schema brand` – the method used to distinguish two identical JS entities from the runtime type standpoint using type intersection
 - `schema brand definition` – the definition format of the schema brand
 - `schema brand subject type` – the intersection of the brand part of the schema validated/parsed subject type
@@ -90,99 +90,6 @@ type BD_Schema =
   | BD_NumberUnion
 ```
 
-## Base schema "Base_Schema"
-
-Resolution of `BS_` and `BD_` prefixes:
-
-```typescript
-type Base_Schema = BS_Schema | BD_Schema
-```
-
-## Compound short schema. "CS\_" prefix
-
-`CS_` is shortened `CompoundShortSchema`. Compound short schema represented by js object which can contain any other schema including itself in simplified syntax manner. Complete list of the compound short schema types:
-
-- `CS_Array<T = U>` – result in:
-  - `Array<Con_SubjT_V<T>>` schema subject type for validate schematox flow
-  - `Array<NonNullable<Con_SubjT_P<T>>>` schema subject type for parse schematox flow
-
-We want to emphasize that in parse schematox flow all optional values reduced to `undefined` therefor we using `NonNullable` generic to clear them up.
-
-- `CS_Object<T = U>` – result in:
-  - `{ [k in keyof T]: Con_SubjT_V<T[k]> }` schema subject type for validate schematox flow
-  - `{ [k in keyof T]: Con_SubjT_P<T[k]> }` schema subject type for parse schematox flow
-
-In future we might support `CS_Record`, `CS_ArrayUnion`, `CS_ObjectUnion`, `CS_Intersection` and `CS_Union` – but it is up to debate if we do really need them or current constraints will suits our goals better than library general flexibility.
-
-## Compound detailed schema. "CD\_" prefix
-
-`CD_` is shortened `CompoundDetailedSchema`. Compound short schema represented by js object which can contain any other schema including itself. The object has required `of` property from which we infer nested schema types. We need detailed syntax in order to detect if schema is optional in the context of parent schema structure, here is an example:
-
-```typescript
-import { Schema } from 'schematox'
-
-const userSchema = {
-  id: { type: 'string', brand: ['idFor', 'User'] },
-  firstName: 'string',
-  surName: 'string',
-  email: { type: 'string', brand: ['format', 'email'] },
-  contacts: {
-    type: 'object',
-    optional: true,
-    of: {
-      phoneNumber: { type: 'string', brand: ['format', 'E.164'] },
-    },
-  },
-} as const satisfies Schema
-```
-
-The schema subject type of the `userSchema` will be:
-
-```typescript
-type UserSchemaSubjectType = {
-  id: string & { __idFor: 'User' }
-  firstName: string
-  surName: string
-  email: string & { __format: 'email' }
-  contacts: { phoneNumber: string & { __format: 'E.164' } } | undefined
-}
-```
-
-We want ability to specify that `contacts` key value is optional. Because our schema MUST be JSON compatible we don't really have any other choice other than that. Each compound detailed schema can also have `description?` property and extra props depending on its specific type.
-
-Complete list of the compound detailed schema types:
-
-- `CD_Array<T = U> = T extends { of: infer V }` – result in:
-  - `Array<Con_SubjT_V<V>>` schema subject type for validate schematox flow
-  - `Array<NonNullable<Con_SubjT_P<V>>>` schema subject type for parse schematox flow
-- Compound array detailed schema has extra props:
-  - `minLength?: number` – schema subject `.length` should be >= specified value to pass validate/parse successfully
-  - `maxLength?: number` – schema subject `.length` should be <= specified value to pass validate/parse successfully
-
-We want to emphasize that in parse schematox flow all optional values reduced to `undefined` therefor we using `NonNullable` generic to clear them up.
-
-- `CD_Object<T = U> = T extends { of: infer V }` – result in:
-  - `{ [k in keyof T]: Con_SubjT_V<T[k]> }` schema subject type for validate schematox flow
-  - `{ [k in keyof T]: Con_SubjT_P<T[k]> }` schema subject type for parse schematox flow
-
-In future we might support `CD_Record`, `CD_Tuple`, `CD_ArrayUnion`, `CD_ObjectUnion`, `CD_Intersection` and `CD_Union` – but it is up to debate if we do really need them or current constraints will suits our goals better than library general flexibility.
-
-## Compound schema "Compound_Schema"
-
-Resolution of `CS_` and `CD_` prefixes:
-
-```typescript
-type CompoundSchema = CS_Schema | CD_Schema
-```
-
-## Schema
-
-The type representing each schema that can be wrapped by `schematoX` closure for parsing/validating:
-
-```typescript
-type Schema = BaseSchema | CompoundSchema
-```
-
 ## Detailed schema optional properties
 
 - `optional?: boolean` – affects schema validated/parsed subject type and parse/validate `schematoX` logic
@@ -196,9 +103,9 @@ TODO: add `minLength/maxLength/min/max` description
 
 `Con_` is a shortened form of `Construct`, which means something generic that constructs one type from another type. We don't want to use `Extract` because it implies that we are extracting something that is already there. We also don't want to use `Infer`, as it has a specific meaning within the TypeScript language itself.
 
-## Extension type generic. "Extend\_" prefix
+## Extension type generic. "ExWith\_" prefix
 
-TODO: explain what they are
+TODO: ...
 
 ## Parse and validated schematoX flows. "SubjT_V" and "SubjT_P" suffixes
 
@@ -212,42 +119,6 @@ TODO: explain what they are
 The third reason is in future we could support extra flows like `parseStrict/parseWeak` which might have the same implications of the schema subject type. So already existed separation might be very handy.
 
 Because `default` value can be specified on base detailed schema ground level (`BD_Schema`) all type constructors for all base detailed and compound schema subject type will be split accordingly. Check out [type-testing-strategy](type-testing-strategy) to know how those split works within type unit testing context.
-
-## List of all generic construct types:
-
-TODO: explain why each generic type exists specifically
-
-- `Con_BS_Schema_Req_SubjT`
-- `Con_BS_Schema_Opt_SubjT`
-- `Con_Brand_SubjT`
-- `Con_BS_Schema_SubjT`
-
-- `Con_BD_Schema_SubjT_V`
-- `Con_BD_Schema_SubjT_P`
-
-- `Con_BaseSchema_SubjT_V`
-- `Con_BaseSchema_SubjT_P`
-
-- `Con_CS_Array_SubjT_V`
-- `Con_CS_Array_SubjT_P`
-
-- `Con_CD_Array_SubjT_V`
-- `Con_CD_Array_SubjT_P`
-
-- `Con_ArraySchema_SubjT_V`
-- `Con_ArraySchema_SubjT_P`
-
-- `Con_CS_Object_SubjT_V`
-- `Con_CS_Object_SubjT_P`
-
-- `Con_CD_Object_SubjT_V`
-- `Con_CD_Object_SubjT_P`
-
-- `Con_ObjectSchema_SubjT_V`
-- `Con_ObjectSchema_SubjT_P`
-
-- `Con_Schema_SubjT_V`
-- `Con_Schema_SubjT_P`
 
 # Type testing strategy
 
