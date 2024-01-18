@@ -1,11 +1,14 @@
 import { check, unknownX } from './test-utils'
-import {
+import type {
   Con_BaseSchema_SubjT_P,
   Con_BaseSchema_SubjT_V,
   Con_ArraySchema_SubjT_P,
   Con_ArraySchema_SubjT_V,
   Con_ObjectSchema_SubjT_P,
   Con_ObjectSchema_SubjT_V,
+  Con_Schema_SubjT_P,
+  Con_Schema_SubjT_V,
+  Schema,
 } from '../compound-schema-types'
 
 describe('Construct BaseSchema subject type PARSED', () => {
@@ -875,6 +878,575 @@ describe('Construct ObjectSchema subject type VALIDATED', () => {
         of: { x: 'string' }
         optional: true
       }>
+    )
+  })
+})
+
+describe('Construct Schema subject type PARSED/VALIDATED diff', () => {
+  it('BaseSchema default property subject type diff depending on the SubjT_P/Subj_V context', () => {
+    const stringSchemaWithDefaultProperty = {
+      type: 'string',
+      optional: true,
+      default: 'x',
+    } as const satisfies Schema
+
+    check<string>(
+      unknownX as Con_Schema_SubjT_P<typeof stringSchemaWithDefaultProperty>
+    )
+    check<string | undefined>(
+      unknownX as Con_Schema_SubjT_V<typeof stringSchemaWithDefaultProperty>
+    )
+    check<string>(
+      // @ts-expect-error 'string | undefined' is not assignable to parameter of type 'string'
+      unknownX as Con_Schema_SubjT_V<typeof stringSchemaWithDefaultProperty>
+    )
+  })
+
+  it('ArraySchema optional property subject type diff depending on the SubjT_P/Subj_V context', () => {
+    const arraySchemaWithOptionalNestedSchema = {
+      type: 'array',
+      of: { type: 'string', optional: true },
+    } as const satisfies Schema
+
+    check<string[]>(
+      unknownX as Con_Schema_SubjT_P<typeof arraySchemaWithOptionalNestedSchema>
+    )
+    check<(string | undefined)[]>(
+      unknownX as Con_Schema_SubjT_V<typeof arraySchemaWithOptionalNestedSchema>
+    )
+    check<string[]>(
+      // @ts-expect-error '(string | undefined)[]' is not assignable to parameter of type 'string[]'
+      unknownX as Con_Schema_SubjT_V<typeof arraySchemaWithOptionalNestedSchema>
+    )
+  })
+
+  it('ArraySchema default property subject type diff depending on the SubjT_P/Subj_V context', () => {
+    const arraySchemaWithDefaultNestedSchema = {
+      type: 'array',
+      of: { type: 'string', optional: true, default: 'x' },
+    } as const satisfies Schema
+
+    check<string[]>(
+      unknownX as Con_Schema_SubjT_P<typeof arraySchemaWithDefaultNestedSchema>
+    )
+    check<(string | undefined)[]>(
+      unknownX as Con_Schema_SubjT_V<typeof arraySchemaWithDefaultNestedSchema>
+    )
+    check<string[]>(
+      // @ts-expect-error '(string | undefined)[]' is not assignable to parameter of type 'string[]'
+      unknownX as Con_Schema_SubjT_V<typeof arraySchemaWithDefaultNestedSchema>
+    )
+  })
+})
+
+describe('Construct Schema subject type in the context of deeply nested schemas', () => {
+  it('ArraySchema should allow 7 depth levels', () => {
+    const array7DepthLevelSchema = {
+      // Depth 1
+      type: 'array',
+      of: {
+        // Depth 2
+        type: 'array',
+        of: {
+          // Depth 3
+          type: 'array',
+          of: {
+            // Depth 4
+            type: 'array',
+            of: {
+              // Depth 5
+              type: 'array',
+              of: {
+                // Depth 6
+                type: 'array',
+                of: {
+                  // Depth 7
+                  type: 'array',
+                  of: 'string',
+                },
+              },
+            },
+          },
+        },
+      },
+    } as const satisfies Schema
+
+    type ParsedSubjectType = Con_Schema_SubjT_P<typeof array7DepthLevelSchema>
+
+    check<Array<Array<Array<Array<Array<Array<Array<string>>>>>>>>(
+      unknownX as ParsedSubjectType
+    )
+    check<Array<Array<Array<Array<Array<Array<Array<number>>>>>>>>(
+      // @ts-expect-error 'string[]' is not assignable to type 'number[]'
+      unknownX as ParsedSubjectType
+    )
+
+    type ValidatedSubjectType = Con_Schema_SubjT_V<
+      typeof array7DepthLevelSchema
+    >
+
+    check<Array<Array<Array<Array<Array<Array<Array<string>>>>>>>>(
+      unknownX as ValidatedSubjectType
+    )
+    check<Array<Array<Array<Array<Array<Array<Array<number>>>>>>>>(
+      // @ts-expect-error 'string[]' is not assignable to type 'number[]'
+      unknownX as ValidatedSubjectType
+    )
+  })
+
+  it('ObjectSchema should allow 7 depth levels', () => {
+    const object7DepthLevelSchema = {
+      // Depth 1
+      type: 'object',
+      of: {
+        x: {
+          // Depth 2
+          type: 'object',
+          of: {
+            x: {
+              // Depth 3
+              type: 'object',
+              of: {
+                x: {
+                  // Depth 4
+                  type: 'object',
+                  of: {
+                    x: {
+                      // Depth 5
+                      type: 'object',
+                      of: {
+                        x: {
+                          // Depth 6
+                          type: 'object',
+                          of: {
+                            x: {
+                              // Depth 7
+                              type: 'object',
+                              of: {
+                                x: 'string',
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    } as const satisfies Schema
+
+    type ParsedSubjectType = Con_Schema_SubjT_P<typeof object7DepthLevelSchema>
+
+    check<{ x: { x: { x: { x: { x: { x: { x: string } } } } } } }>(
+      unknownX as ParsedSubjectType
+    )
+    check<{ x: { x: { x: { x: { x: { x: { x: number } } } } } } }>(
+      // @ts-expect-error 'string' is not assignable to type 'number'
+      unknownX as ParsedSubjectType
+    )
+
+    type ValidatedSubjectType = Con_Schema_SubjT_V<
+      typeof object7DepthLevelSchema
+    >
+
+    check<{ x: { x: { x: { x: { x: { x: { x: string } } } } } } }>(
+      unknownX as ValidatedSubjectType
+    )
+    check<{ x: { x: { x: { x: { x: { x: { x: number } } } } } } }>(
+      // @ts-expect-error 'string' is not assignable to type 'number'
+      unknownX as ValidatedSubjectType
+    )
+  })
+
+  it('Multilevel Schema with all possible string variations', () => {
+    const schema = {
+      type: 'object',
+      of: {
+        /* Base short required/optional string schema (BS_String_Req/BS_String_Opt) */
+
+        baseSchemaShortString: {
+          type: 'object',
+          of: {
+            objectSchema: {
+              type: 'object',
+              of: {
+                required: {
+                  type: 'object',
+                  of: {
+                    requiredString: 'string',
+                    optionalString: 'string?',
+                  },
+                },
+                optional: {
+                  type: 'object',
+                  optional: true,
+                  of: {
+                    requiredString: 'string',
+                    optionalString: 'string?',
+                  },
+                },
+              },
+            },
+
+            arraySchema: {
+              type: 'object',
+              of: {
+                required: {
+                  type: 'object',
+                  of: {
+                    requiredString: { type: 'array', of: 'string' },
+                    optionalString: { type: 'array', of: 'string?' },
+                  },
+                },
+
+                optional: {
+                  type: 'object',
+                  of: {
+                    requiredString: {
+                      type: 'array',
+                      optional: true,
+                      of: 'string',
+                    },
+                    optionalString: {
+                      type: 'array',
+                      optional: true,
+                      of: 'string?',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        /* Base detailed required/optional/default/branded string schema (BD_String) */
+
+        baseSchemaDetailedString: {
+          type: 'object',
+          of: {
+            objectSchema: {
+              type: 'object',
+              of: {
+                required: {
+                  type: 'object',
+                  of: {
+                    requiredString: { type: 'string' },
+                    requiredStringBranded: {
+                      type: 'string',
+                      brand: ['K', 'V'],
+                    },
+                    optionalString: { type: 'string', optional: true },
+                    optionalStringBranded: {
+                      type: 'string',
+                      optional: true,
+                      brand: ['K', 'V'],
+                    },
+                    optionalStringDefault: {
+                      type: 'string',
+                      optional: true,
+                      default: 'x',
+                    },
+                    optionalStringDefaultBranded: {
+                      type: 'string',
+                      optional: true,
+                      default: 'x',
+                      brand: ['K', 'V'],
+                    },
+                  },
+                },
+                optional: {
+                  type: 'object',
+                  optional: true,
+                  of: {
+                    requiredString: { type: 'string' },
+                    requiredStringBranded: {
+                      type: 'string',
+                      brand: ['K', 'V'],
+                    },
+                    optionalString: { type: 'string', optional: true },
+                    optionalStringBranded: {
+                      type: 'string',
+                      optional: true,
+                      brand: ['K', 'V'],
+                    },
+                    optionalStringDefault: {
+                      type: 'string',
+                      optional: true,
+                      default: 'x',
+                    },
+                    optionalStringDefaultBranded: {
+                      type: 'string',
+                      optional: true,
+                      default: 'x',
+                      brand: ['K', 'V'],
+                    },
+                  },
+                },
+              },
+            },
+
+            arraySchema: {
+              type: 'object',
+              of: {
+                required: {
+                  type: 'object',
+                  of: {
+                    requiredString: { type: 'array', of: { type: 'string' } },
+                    requiredStringBranded: {
+                      type: 'array',
+                      of: {
+                        type: 'string',
+                        brand: ['K', 'V'],
+                      },
+                    },
+                    optionalString: {
+                      type: 'array',
+                      of: { type: 'string', optional: true },
+                    },
+                    optionalStringBranded: {
+                      type: 'array',
+                      of: {
+                        type: 'string',
+                        optional: true,
+                        brand: ['K', 'V'],
+                      },
+                    },
+                    optionalStringDefault: {
+                      type: 'array',
+                      of: {
+                        type: 'string',
+                        optional: true,
+                        default: 'x',
+                      },
+                    },
+                    optionalStringDefaultBranded: {
+                      type: 'array',
+                      of: {
+                        type: 'string',
+                        optional: true,
+                        default: 'x',
+                        brand: ['K', 'V'],
+                      },
+                    },
+                  },
+                },
+                optional: {
+                  type: 'object',
+                  optional: true,
+                  of: {
+                    requiredString: {
+                      type: 'array',
+                      optional: true,
+                      of: { type: 'string' },
+                    },
+                    requiredStringBranded: {
+                      type: 'array',
+                      optional: true,
+                      of: {
+                        type: 'string',
+                        brand: ['K', 'V'],
+                      },
+                    },
+                    optionalString: {
+                      type: 'array',
+                      optional: true,
+                      of: { type: 'string', optional: true },
+                    },
+                    optionalStringBranded: {
+                      type: 'array',
+                      optional: true,
+                      of: {
+                        type: 'string',
+                        optional: true,
+                        brand: ['K', 'V'],
+                      },
+                    },
+                    optionalStringDefault: {
+                      type: 'array',
+                      optional: true,
+                      of: {
+                        type: 'string',
+                        optional: true,
+                        default: 'x',
+                      },
+                    },
+                    optionalStringDefaultBranded: {
+                      type: 'array',
+                      optional: true,
+                      of: {
+                        type: 'string',
+                        optional: true,
+                        default: 'x',
+                        brand: ['K', 'V'],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    } as const satisfies Schema
+
+    type ValidatedSubjectType = Con_Schema_SubjT_V<typeof schema>
+    type ExpectedValidatedSubjectType = {
+      baseSchemaShortString: {
+        objectSchema: {
+          required: {
+            requiredString: string
+            optionalString?: string
+          }
+          optional?: {
+            requiredString: string
+            optionalString?: string
+          }
+        }
+        arraySchema: {
+          required: {
+            requiredString: string[]
+            optionalString: (string | undefined)[]
+          }
+          optional: {
+            requiredString?: string[]
+            optionalString?: (string | undefined)[]
+          }
+        }
+      }
+
+      baseSchemaDetailedString: {
+        objectSchema: {
+          required: {
+            requiredString: string
+            requiredStringBranded: string & { __K: 'V' }
+            optionalString?: string
+            optionalStringBranded?: string & { __K: 'V' }
+            optionalStringDefault?: string
+            optionalStringDefaultBranded?: string & {
+              __K: 'V'
+            }
+          }
+          optional?: {
+            requiredString: string
+            requiredStringBranded: string & { __K: 'V' }
+            optionalString?: string
+            optionalStringBranded?: string & { __K: 'V' }
+            optionalStringDefault?: string
+            optionalStringDefaultBranded?: string & {
+              __K: 'V'
+            }
+          }
+        }
+
+        arraySchema: {
+          required: {
+            requiredString: string[]
+            requiredStringBranded: Array<string & { __K: 'V' }>
+            optionalString: (string | undefined)[]
+            optionalStringBranded: Array<(string & { __K: 'V' }) | undefined>
+            optionalStringDefault: (string | undefined)[]
+            optionalStringDefaultBranded: Array<
+              (string & { __K: 'V' }) | undefined
+            >
+          }
+          optional?: {
+            requiredString?: string[]
+            requiredStringBranded?: Array<string & { __K: 'V' }>
+            optionalString?: (string | undefined)[]
+            optionalStringBranded?: Array<(string & { __K: 'V' }) | undefined>
+            optionalStringDefault?: (string | undefined)[]
+            optionalStringDefaultBranded?: Array<
+              (string & { __K: 'V' }) | undefined
+            >
+          }
+        }
+      }
+    }
+
+    check<ExpectedValidatedSubjectType>(unknownX as ValidatedSubjectType)
+    check<ExpectedValidatedSubjectType & { x: number }>(
+      // @ts-expect-error but required in type '{ x: number; }'
+      unknownX as ValidatedSubjectType
+    )
+
+    type ParsedSubjectType = Con_Schema_SubjT_P<typeof schema>
+    type ExpectedParsedSubjectType = {
+      baseSchemaShortString: {
+        objectSchema: {
+          required: {
+            requiredString: string
+            optionalString?: string
+          }
+          optional?: {
+            requiredString: string
+            optionalString?: string
+          }
+        }
+        arraySchema: {
+          required: {
+            requiredString: string[]
+            optionalString: string[]
+          }
+          optional: {
+            requiredString?: string[]
+            optionalString?: string[]
+          }
+        }
+      }
+
+      baseSchemaDetailedString: {
+        objectSchema: {
+          required: {
+            requiredString: string
+            requiredStringBranded: string & { __K: 'V' }
+            optionalString?: string
+            optionalStringBranded?: string & { __K: 'V' }
+            optionalStringDefault: string
+            optionalStringDefaultBranded: string & {
+              __K: 'V'
+            }
+          }
+          optional?: {
+            requiredString: string
+            requiredStringBranded: string & { __K: 'V' }
+            optionalString?: string
+            optionalStringBranded?: string & { __K: 'V' }
+            optionalStringDefault: string
+            optionalStringDefaultBranded: string & {
+              __K: 'V'
+            }
+          }
+        }
+
+        arraySchema: {
+          required: {
+            requiredString: string[]
+            requiredStringBranded: Array<string & { __K: 'V' }>
+            optionalString: string[]
+            optionalStringBranded: Array<string & { __K: 'V' }>
+            optionalStringDefault: string[]
+            optionalStringDefaultBranded: Array<string & { __K: 'V' }>
+          }
+          optional?: {
+            requiredString?: string[]
+            requiredStringBranded?: Array<string & { __K: 'V' }>
+            optionalString?: string[]
+            optionalStringBranded?: Array<string & { __K: 'V' }>
+            optionalStringDefault?: string[]
+            optionalStringDefaultBranded?: Array<string & { __K: 'V' }>
+          }
+        }
+      }
+    }
+
+    check<ExpectedParsedSubjectType>(unknownX as ParsedSubjectType)
+    check<ExpectedParsedSubjectType & { x: number }>(
+      // @ts-expect-error but required in type '{ x: number; }'
+      unknownX as ParsedSubjectType
     )
   })
 })

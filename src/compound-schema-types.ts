@@ -11,30 +11,36 @@ export type Schema = BaseSchema | CompoundSchema
 
 type R<T> =
   | T
-  | { type: 'array'; of: T }
-  | { type: 'object'; of: Record<string, T> }
+  | ({ type: 'array'; of: T } & ArrSchemaOptProps)
+  | ({ type: 'object'; of: Record<string, T> } & ObjSchemaOptProps)
 
 /* ArraySchema */
 
-export type ArraySchema<T extends Schema = R<R<R<R<BaseSchema>>>>> = {
-  type: 'array'
-  of: T
-
+export type ArrSchemaOptProps = {
   optional?: boolean
   description?: string
   minLength?: number /* >= */
   maxLength?: number /* <= */
 }
 
+export type ArraySchema<T extends Schema = R<R<R<R<R<R<BaseSchema>>>>>>> =
+  ArrSchemaOptProps & {
+    type: 'array'
+    of: T
+  }
+
 /* ObjectSchema */
 
-export type ObjectSchema<T extends Schema = R<R<R<R<BaseSchema>>>>> = {
-  type: 'object'
-  of: Record<string, T>
-
+export type ObjSchemaOptProps = {
   optional?: boolean
   description?: string
 }
+
+export type ObjectSchema<T extends Schema = R<R<R<R<R<R<BaseSchema>>>>>>> =
+  ObjSchemaOptProps & {
+    type: 'object'
+    of: Record<string, T>
+  }
 
 /* Construct BaseSchema subject type */
 
@@ -131,4 +137,20 @@ export type Con_ObjectSchema_SubjT_V<T extends ObjectSchema> =
       : never
   >
 
-/* Construct Schema subject type (TBD) */
+/* Construct Schema subject type */
+
+export type Con_Schema_SubjT_P<T extends Schema> = T extends BaseSchema
+  ? Con_BaseSchema_SubjT_P<T>
+  : T extends ArraySchema
+    ? Con_ArraySchema_SubjT_P<T>
+    : T extends ObjectSchema
+      ? Con_ObjectSchema_SubjT_P<T>
+      : never
+
+export type Con_Schema_SubjT_V<T extends Schema> = T extends BaseSchema
+  ? Con_BaseSchema_SubjT_V<T>
+  : T extends ArraySchema
+    ? Con_ArraySchema_SubjT_V<T>
+    : T extends ObjectSchema
+      ? Con_ObjectSchema_SubjT_V<T>
+      : never
