@@ -1,26 +1,10 @@
 import { error, data } from './utils/fp'
+import { PARSE_ERROR_CODE } from './error'
 
-import type { Either } from './utils/fp'
+import type { EitherError } from './utils/fp'
 import type { BD_String, BD_Number } from './base-detailed-schema-types'
 import type { BaseSchema, Con_Schema_SubjT_P } from './compound-schema-types'
-
-export const PARSING_ERROR_CODE = {
-  invalidType: 'INVALID_TYPE',
-  NaN: 'NOT_A_NUMBER',
-  infinity: 'INFINITY',
-  minRange: 'MIN_RANGE',
-  maxRange: 'MAX_RANGE',
-  notInUnion: 'NOT_IN_UNION',
-  schemaDefaultMinRange: 'SCHEMA_DEFAULT_MIN_RANGE',
-  schemaDefaultMaxRange: 'SCHEMA_DEFAULT_MAX_RANGE',
-  schemaDefaultNotInUnion: 'SCHEMA_DEFAULT_NOT_IN_UNION',
-} as const
-
-export type ParsingError = {
-  code: (typeof PARSING_ERROR_CODE)[keyof typeof PARSING_ERROR_CODE]
-  schema: BaseSchema
-  subject: unknown
-}
+import type { ParsingError } from './error'
 
 export type BaseSchemaSubjectType =
   | string
@@ -32,12 +16,12 @@ export type BaseSchemaSubjectType =
 export function parseBaseSchemaSubject<T extends BaseSchema>(
   schema: T,
   schemaSubject: unknown
-): Either<ParsingError, Con_Schema_SubjT_P<T>>
+): EitherError<ParsingError, Con_Schema_SubjT_P<T>>
 
 export function parseBaseSchemaSubject(
   schema: BaseSchema,
   subject: unknown
-): Either<ParsingError, BaseSchemaSubjectType> {
+): EitherError<ParsingError, BaseSchemaSubjectType> {
   if (typeof schema === 'string') {
     switch (schema) {
       case 'string?':
@@ -50,7 +34,7 @@ export function parseBaseSchemaSubject(
           }
 
           return error({
-            code: PARSING_ERROR_CODE.invalidType,
+            code: PARSE_ERROR_CODE.invalidType,
             schema,
             subject,
           })
@@ -69,7 +53,7 @@ export function parseBaseSchemaSubject(
           }
 
           return error({
-            code: PARSING_ERROR_CODE.invalidType,
+            code: PARSE_ERROR_CODE.invalidType,
             schema,
             subject,
           })
@@ -77,7 +61,7 @@ export function parseBaseSchemaSubject(
 
         if (Number.isNaN(subject)) {
           return error({
-            code: PARSING_ERROR_CODE.NaN,
+            code: PARSE_ERROR_CODE.NaN,
             schema,
             subject,
           })
@@ -85,7 +69,7 @@ export function parseBaseSchemaSubject(
 
         if (Number.isFinite(subject) === false) {
           return error({
-            code: PARSING_ERROR_CODE.infinity,
+            code: PARSE_ERROR_CODE.infinity,
             schema,
             subject,
           })
@@ -104,7 +88,7 @@ export function parseBaseSchemaSubject(
           }
 
           return error({
-            code: PARSING_ERROR_CODE.invalidType,
+            code: PARSE_ERROR_CODE.invalidType,
             schema,
             subject,
           })
@@ -123,7 +107,7 @@ export function parseBaseSchemaSubject(
           }
 
           return error({
-            code: PARSING_ERROR_CODE.invalidType,
+            code: PARSE_ERROR_CODE.invalidType,
             schema,
             subject,
           })
@@ -158,7 +142,7 @@ export function parseBaseSchemaSubject(
         }
 
         return error({
-          code: PARSING_ERROR_CODE.invalidType,
+          code: PARSE_ERROR_CODE.invalidType,
           schema,
           subject,
         })
@@ -196,7 +180,7 @@ export function parseBaseSchemaSubject(
         }
 
         return error({
-          code: PARSING_ERROR_CODE.invalidType,
+          code: PARSE_ERROR_CODE.invalidType,
           schema,
           subject,
         })
@@ -204,7 +188,7 @@ export function parseBaseSchemaSubject(
 
       if (Number.isNaN(subject)) {
         return error({
-          code: PARSING_ERROR_CODE.NaN,
+          code: PARSE_ERROR_CODE.NaN,
           schema,
           subject,
         })
@@ -212,7 +196,7 @@ export function parseBaseSchemaSubject(
 
       if (Number.isFinite(subject) === false) {
         return error({
-          code: PARSING_ERROR_CODE.infinity,
+          code: PARSE_ERROR_CODE.infinity,
           schema,
           subject,
         })
@@ -240,7 +224,7 @@ export function parseBaseSchemaSubject(
         }
 
         return error({
-          code: PARSING_ERROR_CODE.invalidType,
+          code: PARSE_ERROR_CODE.invalidType,
           schema,
           subject,
         })
@@ -258,7 +242,7 @@ export function parseBaseSchemaSubject(
         }
 
         return error({
-          code: PARSING_ERROR_CODE.invalidType,
+          code: PARSE_ERROR_CODE.invalidType,
           schema,
           subject,
         })
@@ -267,7 +251,7 @@ export function parseBaseSchemaSubject(
       if (typeof schema.minLength === 'number') {
         if (subject.length < schema.minLength) {
           return error({
-            code: PARSING_ERROR_CODE.minRange,
+            code: PARSE_ERROR_CODE.minRange,
             schema,
             subject,
           })
@@ -277,7 +261,7 @@ export function parseBaseSchemaSubject(
       if (typeof schema.maxLength === 'number') {
         if (subject.length > schema.maxLength) {
           return error({
-            code: PARSING_ERROR_CODE.maxRange,
+            code: PARSE_ERROR_CODE.maxRange,
             schema,
             subject,
           })
@@ -296,7 +280,7 @@ export function parseBaseSchemaSubject(
 
               if (unionSet.has(schema.default) === false) {
                 return error({
-                  code: PARSING_ERROR_CODE.schemaDefaultNotInUnion,
+                  code: PARSE_ERROR_CODE.schemaDefaultNotInUnion,
                   subject: schema.default,
                   schema,
                 })
@@ -310,7 +294,7 @@ export function parseBaseSchemaSubject(
         }
 
         return error({
-          code: PARSING_ERROR_CODE.invalidType,
+          code: PARSE_ERROR_CODE.invalidType,
           schema,
           subject,
         })
@@ -320,7 +304,7 @@ export function parseBaseSchemaSubject(
 
       if (unionSet.has(subject) === false) {
         return error({
-          code: PARSING_ERROR_CODE.notInUnion,
+          code: PARSE_ERROR_CODE.notInUnion,
           schema,
           subject,
         })
@@ -338,7 +322,7 @@ export function parseBaseSchemaSubject(
 
               if (unionSet.has(schema.default) === false) {
                 return error({
-                  code: PARSING_ERROR_CODE.schemaDefaultNotInUnion,
+                  code: PARSE_ERROR_CODE.schemaDefaultNotInUnion,
                   subject: schema.default,
                   schema,
                 })
@@ -352,7 +336,7 @@ export function parseBaseSchemaSubject(
         }
 
         return error({
-          code: PARSING_ERROR_CODE.invalidType,
+          code: PARSE_ERROR_CODE.invalidType,
           schema,
           subject,
         })
@@ -362,7 +346,7 @@ export function parseBaseSchemaSubject(
 
       if (unionSet.has(subject) === false) {
         return error({
-          code: PARSING_ERROR_CODE.notInUnion,
+          code: PARSE_ERROR_CODE.notInUnion,
           schema,
           subject,
         })
@@ -382,8 +366,8 @@ function getStringRangeError(
     if (subject.length < schema.minLength) {
       return {
         code: isSubjectFromSchemaDefault
-          ? PARSING_ERROR_CODE.schemaDefaultMinRange
-          : PARSING_ERROR_CODE.minRange,
+          ? PARSE_ERROR_CODE.schemaDefaultMinRange
+          : PARSE_ERROR_CODE.minRange,
         schema,
         subject,
       }
@@ -394,8 +378,8 @@ function getStringRangeError(
     if (subject.length > schema.maxLength) {
       return {
         code: isSubjectFromSchemaDefault
-          ? PARSING_ERROR_CODE.schemaDefaultMaxRange
-          : PARSING_ERROR_CODE.maxRange,
+          ? PARSE_ERROR_CODE.schemaDefaultMaxRange
+          : PARSE_ERROR_CODE.maxRange,
         schema,
         subject,
       }
@@ -412,8 +396,8 @@ function getNumberRangeError(
     if (subject < schema.min) {
       return {
         code: isSubjectFromSchemaDefault
-          ? PARSING_ERROR_CODE.schemaDefaultMinRange
-          : PARSING_ERROR_CODE.minRange,
+          ? PARSE_ERROR_CODE.schemaDefaultMinRange
+          : PARSE_ERROR_CODE.minRange,
         schema,
         subject,
       }
@@ -424,8 +408,8 @@ function getNumberRangeError(
     if (subject > schema.max) {
       return {
         code: isSubjectFromSchemaDefault
-          ? PARSING_ERROR_CODE.schemaDefaultMaxRange
-          : PARSING_ERROR_CODE.maxRange,
+          ? PARSE_ERROR_CODE.schemaDefaultMaxRange
+          : PARSE_ERROR_CODE.maxRange,
         schema,
         subject,
       }

@@ -8,13 +8,13 @@ export type Data<U> = {
   data: U
 }
 
-export type Either<T, U> = NonNullable<Error<T> | Data<U>>
+export type EitherError<T, U> = NonNullable<Error<T> | Data<U>>
 
-export const isError = <T, U>(e: Either<T, U>): e is Error<T> => {
+export const isError = <T, U>(e: EitherError<T, U>): e is Error<T> => {
   return e.error !== undefined
 }
 
-export const isData = <T, U>(e: Either<T, U>): e is Data<U> => {
+export const isData = <T, U>(e: EitherError<T, U>): e is Data<U> => {
   return e.data !== undefined
 }
 

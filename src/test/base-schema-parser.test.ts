@@ -1,10 +1,8 @@
-import {
-  parseBaseSchemaSubject,
-  PARSING_ERROR_CODE,
-} from '../base-schema-parser'
+import { PARSE_ERROR_CODE } from '../error'
+import { parseBaseSchemaSubject } from '../base-schema-parser'
 import { check, unknownX } from './test-utils'
 
-import type { ParsingError } from '../base-schema-parser'
+import type { ParsingError } from '../error'
 import type { Schema } from '../compound-schema-types'
 
 describe('Parse base short schema with valid subject', () => {
@@ -72,7 +70,7 @@ describe('Parse base short schema with `null | undefined` subject', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
       subject,
     })
@@ -92,7 +90,7 @@ describe('Parse base short schema with `null | undefined` subject', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
       subject,
     })
@@ -114,7 +112,7 @@ describe('Parse base short schema with `null | undefined` subject', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
       subject,
     })
@@ -134,7 +132,7 @@ describe('Parse base short schema with `null | undefined` subject', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
       subject,
     })
@@ -156,7 +154,7 @@ describe('Parse base short schema with `null | undefined` subject', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
       subject,
     })
@@ -176,7 +174,7 @@ describe('Parse base short schema with `null | undefined` subject', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
       subject,
     })
@@ -198,7 +196,7 @@ describe('Parse base short schema with `null | undefined` subject', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
       subject,
     })
@@ -218,7 +216,7 @@ describe('Parse base short schema with `null | undefined` subject', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
       subject,
     })
@@ -240,7 +238,7 @@ describe('Parse base short schema with `null | undefined` subject', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
       subject,
     })
@@ -260,7 +258,7 @@ describe('Parse base short schema with `null | undefined` subject', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
       subject,
     })
@@ -282,7 +280,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.NaN,
+      code: PARSE_ERROR_CODE.NaN,
       schema,
       subject,
     })
@@ -294,7 +292,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.NaN,
+      code: PARSE_ERROR_CODE.NaN,
       schema,
       subject,
     })
@@ -306,7 +304,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.infinity,
+      code: PARSE_ERROR_CODE.infinity,
       schema,
       subject,
     })
@@ -318,7 +316,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.infinity,
+      code: PARSE_ERROR_CODE.infinity,
       schema,
       subject,
     })
@@ -330,7 +328,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.infinity,
+      code: PARSE_ERROR_CODE.infinity,
       schema,
       subject,
     })
@@ -342,7 +340,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
     const parsed = parseBaseSchemaSubject(schema, subject)
 
     expect(parsed.error).toEqual({
-      code: PARSING_ERROR_CODE.infinity,
+      code: PARSE_ERROR_CODE.infinity,
       schema,
       subject,
     })
@@ -500,7 +498,7 @@ describe('Parse base STRING detailed schema', () => {
     const schema = { type: 'string' } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -540,7 +538,7 @@ describe('Parse base STRING detailed schema', () => {
   it('parseBaseSchemaSubject: default schema property should be skipped in required schema', () => {
     const schema = { type: 'string', default: 'x' } as const satisfies Schema
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -585,7 +583,7 @@ describe('Parse base STRING detailed schema', () => {
   it('parseBaseSchemaSubject: optional schema with invalid subject', () => {
     const schema = { type: 'string', optional: true } as const satisfies Schema
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -639,7 +637,7 @@ describe('Parse base STRING detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -689,7 +687,7 @@ describe('Parse base STRING detailed schema', () => {
     const subject = ''
 
     const error = {
-      code: PARSING_ERROR_CODE.minRange,
+      code: PARSE_ERROR_CODE.minRange,
       schema,
       subject,
     } satisfies ParsingError
@@ -719,7 +717,7 @@ describe('Parse base STRING detailed schema', () => {
     const subject = 'x'
 
     const error = {
-      code: PARSING_ERROR_CODE.maxRange,
+      code: PARSE_ERROR_CODE.maxRange,
       schema,
       subject,
     } satisfies ParsingError
@@ -741,7 +739,7 @@ describe('Parse base STRING detailed schema', () => {
     const subject = undefined
 
     const error = {
-      code: PARSING_ERROR_CODE.schemaDefaultMinRange,
+      code: PARSE_ERROR_CODE.schemaDefaultMinRange,
       subject: defaultValue,
       schema,
     } satisfies ParsingError
@@ -763,7 +761,7 @@ describe('Parse base STRING detailed schema', () => {
     const subject = undefined
 
     const error = {
-      code: PARSING_ERROR_CODE.schemaDefaultMaxRange,
+      code: PARSE_ERROR_CODE.schemaDefaultMaxRange,
       subject: defaultValue,
       schema,
     } satisfies ParsingError
@@ -786,7 +784,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const schema = { type: 'number' } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -826,7 +824,7 @@ describe('Parse base NUMBER detailed schema', () => {
   it('parseBaseSchemaSubject: default schema property should be skipped in required schema', () => {
     const schema = { type: 'number', default: 0 } as const satisfies Schema
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -871,7 +869,7 @@ describe('Parse base NUMBER detailed schema', () => {
   it('parseBaseSchemaSubject: optional schema with invalid subject', () => {
     const schema = { type: 'number', optional: true } as const satisfies Schema
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -925,7 +923,7 @@ describe('Parse base NUMBER detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -975,7 +973,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const subject = 0
 
     const error = {
-      code: PARSING_ERROR_CODE.minRange,
+      code: PARSE_ERROR_CODE.minRange,
       schema,
       subject,
     } satisfies ParsingError
@@ -1005,7 +1003,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const subject = 1
 
     const error = {
-      code: PARSING_ERROR_CODE.maxRange,
+      code: PARSE_ERROR_CODE.maxRange,
       schema,
       subject,
     } satisfies ParsingError
@@ -1027,7 +1025,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const subject = undefined
 
     const error = {
-      code: PARSING_ERROR_CODE.schemaDefaultMinRange,
+      code: PARSE_ERROR_CODE.schemaDefaultMinRange,
       subject: defaultValue,
       schema,
     } satisfies ParsingError
@@ -1049,7 +1047,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const subject = undefined
 
     const error = {
-      code: PARSING_ERROR_CODE.schemaDefaultMaxRange,
+      code: PARSE_ERROR_CODE.schemaDefaultMaxRange,
       subject: defaultValue,
       schema,
     } satisfies ParsingError
@@ -1062,7 +1060,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const schema = { type: 'number' } as const satisfies Schema
     const subject = NaN
     const error = {
-      code: PARSING_ERROR_CODE.NaN,
+      code: PARSE_ERROR_CODE.NaN,
       schema,
       subject,
     } satisfies ParsingError
@@ -1075,7 +1073,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const schema = { type: 'number' } as const satisfies Schema
     const subject = Infinity
     const error = {
-      code: PARSING_ERROR_CODE.infinity,
+      code: PARSE_ERROR_CODE.infinity,
       schema,
       subject,
     } satisfies ParsingError
@@ -1088,7 +1086,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const schema = { type: 'number' } as const satisfies Schema
     const subject = -Infinity
     const error = {
-      code: PARSING_ERROR_CODE.infinity,
+      code: PARSE_ERROR_CODE.infinity,
       schema,
       subject,
     } satisfies ParsingError
@@ -1111,7 +1109,7 @@ describe('Parse base BOOLEAN detailed schema', () => {
     const schema = { type: 'boolean' } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1151,7 +1149,7 @@ describe('Parse base BOOLEAN detailed schema', () => {
   it('parseBaseSchemaSubject: default schema property should be skipped in required schema', () => {
     const schema = { type: 'boolean', default: false } as const satisfies Schema
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1196,7 +1194,7 @@ describe('Parse base BOOLEAN detailed schema', () => {
   it('parseBaseSchemaSubject: optional schema with invalid subject', () => {
     const schema = { type: 'boolean', optional: true } as const satisfies Schema
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1231,7 +1229,7 @@ describe('Parse base BUFFER detailed schema', () => {
     const schema = { type: 'buffer' } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1284,7 +1282,7 @@ describe('Parse base BUFFER detailed schema', () => {
   it('parseBaseSchemaSubject: optional schema with invalid subject', () => {
     const schema = { type: 'buffer', optional: true } as const satisfies Schema
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1326,7 +1324,7 @@ describe('Parse base BUFFER detailed schema', () => {
     const subject = Buffer.from('x')
 
     const error = {
-      code: PARSING_ERROR_CODE.minRange,
+      code: PARSE_ERROR_CODE.minRange,
       schema,
       subject,
     } satisfies ParsingError
@@ -1356,7 +1354,7 @@ describe('Parse base BUFFER detailed schema', () => {
     const subject = Buffer.from('xx')
 
     const error = {
-      code: PARSING_ERROR_CODE.maxRange,
+      code: PARSE_ERROR_CODE.maxRange,
       schema,
       subject,
     } satisfies ParsingError
@@ -1391,7 +1389,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1432,7 +1430,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     expect(parseBaseSchemaSubject(schema, stringZSubj).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, stringZSubj).error).toEqual({
       ...error,
-      code: PARSING_ERROR_CODE.notInUnion,
+      code: PARSE_ERROR_CODE.notInUnion,
       subject: stringZSubj,
     })
   })
@@ -1445,7 +1443,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1509,7 +1507,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1534,7 +1532,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     expect(parseBaseSchemaSubject(schema, stringZSubj).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, stringZSubj).error).toEqual({
       ...error,
-      code: PARSING_ERROR_CODE.notInUnion,
+      code: PARSE_ERROR_CODE.notInUnion,
       subject: stringZSubj,
     })
   })
@@ -1574,7 +1572,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1616,7 +1614,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     const subject = undefined
 
     const error = {
-      code: PARSING_ERROR_CODE.schemaDefaultNotInUnion,
+      code: PARSE_ERROR_CODE.schemaDefaultNotInUnion,
       subject: defaultValue,
       schema,
     } satisfies ParsingError
@@ -1651,7 +1649,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1692,7 +1690,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     expect(parseBaseSchemaSubject(schema, number2Subj).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, number2Subj).error).toEqual({
       ...error,
-      code: PARSING_ERROR_CODE.notInUnion,
+      code: PARSE_ERROR_CODE.notInUnion,
       subject: number2Subj,
     })
   })
@@ -1705,7 +1703,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1770,7 +1768,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1795,7 +1793,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     expect(parseBaseSchemaSubject(schema, number2Subj).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, number2Subj).error).toEqual({
       ...error,
-      code: PARSING_ERROR_CODE.notInUnion,
+      code: PARSE_ERROR_CODE.notInUnion,
       subject: number2Subj,
     })
   })
@@ -1835,7 +1833,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: PARSING_ERROR_CODE.invalidType,
+      code: PARSE_ERROR_CODE.invalidType,
       schema,
     } satisfies Omit<ParsingError, 'subject'>
 
@@ -1877,7 +1875,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     const subject = undefined
 
     const error = {
-      code: PARSING_ERROR_CODE.schemaDefaultNotInUnion,
+      code: PARSE_ERROR_CODE.schemaDefaultNotInUnion,
       subject: defaultValue,
       schema,
     } satisfies ParsingError
