@@ -20,6 +20,10 @@ export type GeneralParsingError = ParsingError & {
   path: ErrorPath
 }
 
+export type GeneralValidatingError = ValidatingError & {
+  path: ErrorPath
+}
+
 export const PARSE_ERROR_CODE = {
   invalidType: 'INVALID_TYPE',
   NaN: 'NOT_A_NUMBER',
