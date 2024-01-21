@@ -1,5 +1,6 @@
 import { parse } from '../general-schema-parser'
 import { PARSE_ERROR_CODE } from '../error'
+import { check, unknownX } from './test-utils'
 
 import type { Schema } from '../compound-schema-types'
 
@@ -1058,5 +1059,24 @@ describe('Parse ARRAY schema with INVALID subject', () => {
         path: [0, 0, 0, 0, 'z', 3, 'x'],
       },
     ])
+  })
+})
+
+describe('Subject type inference check', () => {
+  it('parse: object schema nested branded types', () => {
+    const schema = {
+      type: 'object',
+      of: {
+        x: { type: 'string', brand: ['key', 'value'] },
+      },
+    } as const satisfies Schema
+
+    const parsed = parse(schema, { x: 'y' })
+
+    if (parsed.error) {
+      throw Error('Not expected')
+    }
+
+    check<string & { __key: 'value' }>(unknownX as typeof parsed.data.x)
   })
 })

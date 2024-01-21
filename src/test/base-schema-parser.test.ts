@@ -2,7 +2,7 @@ import { PARSE_ERROR_CODE } from '../error'
 import { parseBaseSchemaSubject } from '../base-schema-parser'
 import { check, unknownX } from './test-utils'
 
-import type { ParsingError } from '../error'
+import type { BaseSchemaParseError } from '../error'
 import type { Schema } from '../compound-schema-types'
 
 describe('Parse base short schema with valid subject', () => {
@@ -355,9 +355,11 @@ describe('Parse base short schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, 'x')
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: number }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: number }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -371,9 +373,11 @@ describe('Parse base short schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, 'x')
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: number }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: number }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -389,9 +393,11 @@ describe('Parse base short schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, 0)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: number }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: number }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -405,9 +411,11 @@ describe('Parse base short schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, 0)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: number }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: number }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -423,9 +431,11 @@ describe('Parse base short schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, true)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -439,9 +449,11 @@ describe('Parse base short schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, true)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -457,9 +469,11 @@ describe('Parse base short schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, Buffer.from('x'))
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: Buffer }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: Buffer }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -473,9 +487,11 @@ describe('Parse base short schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, Buffer.from('x'))
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: Buffer }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: Buffer }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -500,7 +516,7 @@ describe('Parse base STRING detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -540,7 +556,7 @@ describe('Parse base STRING detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -585,7 +601,7 @@ describe('Parse base STRING detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const numberSubj = 0
 
@@ -639,7 +655,7 @@ describe('Parse base STRING detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const numberSubj = 0
 
@@ -690,7 +706,7 @@ describe('Parse base STRING detailed schema', () => {
       code: PARSE_ERROR_CODE.minRange,
       schema,
       subject,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -720,7 +736,7 @@ describe('Parse base STRING detailed schema', () => {
       code: PARSE_ERROR_CODE.maxRange,
       schema,
       subject,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -742,7 +758,7 @@ describe('Parse base STRING detailed schema', () => {
       code: PARSE_ERROR_CODE.schemaDefaultMinRange,
       subject: defaultValue,
       schema,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -764,7 +780,7 @@ describe('Parse base STRING detailed schema', () => {
       code: PARSE_ERROR_CODE.schemaDefaultMaxRange,
       subject: defaultValue,
       schema,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -786,7 +802,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -826,7 +842,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -871,7 +887,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const stringSubj = 'x'
 
@@ -925,7 +941,7 @@ describe('Parse base NUMBER detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const stringSubj = 'x'
 
@@ -976,7 +992,7 @@ describe('Parse base NUMBER detailed schema', () => {
       code: PARSE_ERROR_CODE.minRange,
       schema,
       subject,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1006,7 +1022,7 @@ describe('Parse base NUMBER detailed schema', () => {
       code: PARSE_ERROR_CODE.maxRange,
       schema,
       subject,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1028,7 +1044,7 @@ describe('Parse base NUMBER detailed schema', () => {
       code: PARSE_ERROR_CODE.schemaDefaultMinRange,
       subject: defaultValue,
       schema,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1050,7 +1066,7 @@ describe('Parse base NUMBER detailed schema', () => {
       code: PARSE_ERROR_CODE.schemaDefaultMaxRange,
       subject: defaultValue,
       schema,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1063,7 +1079,7 @@ describe('Parse base NUMBER detailed schema', () => {
       code: PARSE_ERROR_CODE.NaN,
       schema,
       subject,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1076,7 +1092,7 @@ describe('Parse base NUMBER detailed schema', () => {
       code: PARSE_ERROR_CODE.infinity,
       schema,
       subject,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1089,7 +1105,7 @@ describe('Parse base NUMBER detailed schema', () => {
       code: PARSE_ERROR_CODE.infinity,
       schema,
       subject,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1111,7 +1127,7 @@ describe('Parse base BOOLEAN detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -1151,7 +1167,7 @@ describe('Parse base BOOLEAN detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -1196,7 +1212,7 @@ describe('Parse base BOOLEAN detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const stringSubj = 'x'
 
@@ -1231,7 +1247,7 @@ describe('Parse base BUFFER detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -1284,7 +1300,7 @@ describe('Parse base BUFFER detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const numberSubj = 0
 
@@ -1327,7 +1343,7 @@ describe('Parse base BUFFER detailed schema', () => {
       code: PARSE_ERROR_CODE.minRange,
       schema,
       subject,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1357,7 +1373,7 @@ describe('Parse base BUFFER detailed schema', () => {
       code: PARSE_ERROR_CODE.maxRange,
       schema,
       subject,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1391,7 +1407,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -1445,7 +1461,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -1509,7 +1525,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const numberSubj = 0
 
@@ -1574,7 +1590,7 @@ describe('Parse base STRING UNION detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const numberSubj = 0
 
@@ -1617,7 +1633,7 @@ describe('Parse base STRING UNION detailed schema', () => {
       code: PARSE_ERROR_CODE.schemaDefaultNotInUnion,
       subject: defaultValue,
       schema,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1651,7 +1667,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -1705,7 +1721,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -1770,7 +1786,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const stringSubj = 'x'
 
@@ -1835,7 +1851,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
     const error = {
       code: PARSE_ERROR_CODE.invalidType,
       schema,
-    } satisfies Omit<ParsingError, 'subject'>
+    } satisfies Omit<BaseSchemaParseError, 'subject'>
 
     const stringSubj = 'x'
 
@@ -1878,7 +1894,7 @@ describe('Parse base NUMBER UNION detailed schema', () => {
       code: PARSE_ERROR_CODE.schemaDefaultNotInUnion,
       subject: defaultValue,
       schema,
-    } satisfies ParsingError
+    } satisfies BaseSchemaParseError
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -1893,9 +1909,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, 'x')
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: number }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: number }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -1910,9 +1928,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: number }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: number }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -1931,9 +1951,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: number }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: number }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -1949,9 +1971,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, 0)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: number }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: number }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -1966,9 +1990,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: number }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: number }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -1987,9 +2013,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: number }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: number }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2005,9 +2033,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, false)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2022,9 +2052,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2043,9 +2075,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2061,9 +2095,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, Buffer.from('x'))
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: buffer }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: Buffer }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2077,9 +2113,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: buffer }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: Buffer }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2099,9 +2137,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, 'x')
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2120,9 +2160,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2142,9 +2184,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2164,9 +2208,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, 0)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2185,9 +2231,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 
@@ -2207,9 +2255,11 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     const result = parseBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<ParsingError>(unknownX as typeof result.error)
-      // @ts-expect-error Property 'x' is missing in type 'ParsingError'
-      check<ParsingError & { x: boolean }>(unknownX as typeof result.error)
+      check<BaseSchemaParseError>(unknownX as typeof result.error)
+      check<BaseSchemaParseError & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaParseError'
+        unknownX as typeof result.error
+      )
       throw Error('Not expected')
     }
 

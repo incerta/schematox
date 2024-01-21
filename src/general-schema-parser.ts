@@ -4,18 +4,18 @@ import { parseBaseSchemaSubject } from './base-schema-parser'
 
 import type { EitherError } from './utils/fp'
 import type { Schema, Con_Schema_SubjT_P } from './compound-schema-types'
-import type { GeneralParsingError, ErrorPath } from './error'
+import type { ParseError, ErrorPath } from './error'
 
 export function parse<T extends Schema>(
   schema: T,
   subject: unknown
-): EitherError<GeneralParsingError[], Con_Schema_SubjT_P<T>>
+): EitherError<ParseError[], Con_Schema_SubjT_P<T>>
 
 export function parse(
   this: ErrorPath | undefined,
   schema: Schema,
   subject: unknown
-): EitherError<GeneralParsingError[], unknown> {
+): EitherError<ParseError[], unknown> {
   if (
     typeof schema === 'string' ||
     schema.type === 'string' ||
@@ -34,7 +34,7 @@ export function parse(
     return parsed
   }
 
-  const errors: GeneralParsingError[] = []
+  const errors: ParseError[] = []
 
   if (schema.type === 'object') {
     if (schema.optional) {

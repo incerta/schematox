@@ -4,7 +4,7 @@ import { PARSE_ERROR_CODE } from './error'
 import type { EitherError } from './utils/fp'
 import type { BD_String, BD_Number } from './base-detailed-schema-types'
 import type { BaseSchema, Con_Schema_SubjT_P } from './compound-schema-types'
-import type { ParsingError } from './error'
+import type { BaseSchemaParseError } from './error'
 
 export type BaseSchemaSubjectType =
   | string
@@ -16,12 +16,12 @@ export type BaseSchemaSubjectType =
 export function parseBaseSchemaSubject<T extends BaseSchema>(
   schema: T,
   schemaSubject: unknown
-): EitherError<ParsingError, Con_Schema_SubjT_P<T>>
+): EitherError<BaseSchemaParseError, Con_Schema_SubjT_P<T>>
 
 export function parseBaseSchemaSubject(
   schema: BaseSchema,
   subject: unknown
-): EitherError<ParsingError, BaseSchemaSubjectType> {
+): EitherError<BaseSchemaParseError, BaseSchemaSubjectType> {
   if (typeof schema === 'string') {
     switch (schema) {
       case 'string?':
@@ -361,7 +361,7 @@ function getStringRangeError(
   schema: BD_String,
   subject: string,
   isSubjectFromSchemaDefault: boolean
-): ParsingError | undefined {
+): BaseSchemaParseError | undefined {
   if (typeof schema.minLength === 'number') {
     if (subject.length < schema.minLength) {
       return {
@@ -391,7 +391,7 @@ function getNumberRangeError(
   schema: BD_Number,
   subject: number,
   isSubjectFromSchemaDefault: boolean
-): ParsingError | undefined {
+): BaseSchemaParseError | undefined {
   if (typeof schema.min === 'number') {
     if (subject < schema.min) {
       return {

@@ -1,14 +1,19 @@
-import type { Schema } from './compound-schema-types'
+import type { Schema, BaseSchema } from './compound-schema-types'
 
-export type ParsingError = {
-  code: (typeof PARSE_ERROR_CODE)[keyof typeof PARSE_ERROR_CODE]
-  schema: Schema
+export type ParseErrorCode =
+  (typeof PARSE_ERROR_CODE)[keyof typeof PARSE_ERROR_CODE]
+export type ValidateErrorCode =
+  (typeof VALIDATE_ERROR_CODE)[keyof typeof VALIDATE_ERROR_CODE]
+
+export type BaseSchemaParseError = {
+  code: ParseErrorCode
+  schema: BaseSchema
   subject: unknown
 }
 
-export type ValidatingError = {
-  code: (typeof VALIDATE_ERROR_CODE)[keyof typeof VALIDATE_ERROR_CODE]
-  schema: Schema
+export type BaseSchemaValidateError = {
+  code: ValidateErrorCode
+  schema: BaseSchema
   subject: unknown
 }
 
@@ -16,12 +21,16 @@ export type ErrorPath = Array<
   string /* object key */ | number /* array index */
 >
 
-export type GeneralParsingError = ParsingError & {
+export type ParseError = {
   path: ErrorPath
+  schema: Schema
+  subject: unknown
 }
 
-export type GeneralValidatingError = ValidatingError & {
+export type ValidateError = {
   path: ErrorPath
+  schema: Schema
+  subject: unknown
 }
 
 export const PARSE_ERROR_CODE = {

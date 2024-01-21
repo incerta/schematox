@@ -4,18 +4,18 @@ import { validateBaseSchemaSubject } from './base-schema-validator'
 
 import type { EitherError } from './utils/fp'
 import type { Schema, Con_Schema_SubjT_V } from './compound-schema-types'
-import type { GeneralValidatingError, ErrorPath } from './error'
+import type { ValidateError, ErrorPath } from './error'
 
 export function validate<T extends Schema>(
   schema: T,
   subject: Con_Schema_SubjT_V<T>
-): EitherError<GeneralValidatingError[], Con_Schema_SubjT_V<T>>
+): EitherError<ValidateError[], Con_Schema_SubjT_V<T>>
 
 export function validate(
   this: ErrorPath | undefined,
   schema: Schema,
   subject: unknown
-): EitherError<GeneralValidatingError[], unknown> {
+): EitherError<ValidateError[], unknown> {
   if (
     typeof schema === 'string' ||
     schema.type === 'string' ||
@@ -34,7 +34,7 @@ export function validate(
     return data(subject)
   }
 
-  const errors: GeneralValidatingError[] = []
+  const errors: ValidateError[] = []
 
   if (schema.type === 'object') {
     if (schema.optional && subject === undefined) {

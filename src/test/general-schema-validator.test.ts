@@ -1,5 +1,6 @@
 import { validate } from '../general-schema-validator'
 import { VALIDATE_ERROR_CODE } from '../error'
+import { check, unknownX } from './test-utils'
 
 import type { Schema } from '../compound-schema-types'
 
@@ -1224,5 +1225,22 @@ describe('Check validate subject type constraints', () => {
     expect(() =>
       validate({ type: 'array', of: 'string', optional: true }, undefined)
     ).not.toThrow()
+  })
+
+  it('validate: object schema nested branded types', () => {
+    const schema = {
+      type: 'object',
+      of: {
+        x: { type: 'string', brand: ['key', 'value'] },
+      },
+    } as const satisfies Schema
+
+    const parsed = validate(schema, { x: 'y' as string & { __key: 'value' } })
+
+    if (parsed.error) {
+      throw Error('Not expected')
+    }
+
+    check<string & { __key: 'value' }>(unknownX as typeof parsed.data.x)
   })
 })

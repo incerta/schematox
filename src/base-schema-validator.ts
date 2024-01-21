@@ -3,7 +3,7 @@ import { VALIDATE_ERROR_CODE } from './error'
 
 import type { EitherError } from './utils/fp'
 import type { BaseSchema, Con_Schema_SubjT_V } from './compound-schema-types'
-import type { ValidatingError } from './error'
+import type { BaseSchemaValidateError } from './error'
 
 export type BaseSchemaSubjectType =
   | string
@@ -15,12 +15,12 @@ export type BaseSchemaSubjectType =
 export function validateBaseSchemaSubject<T extends BaseSchema>(
   schema: T,
   schemaSubject: unknown
-): EitherError<ValidatingError, Con_Schema_SubjT_V<T>>
+): EitherError<BaseSchemaValidateError, Con_Schema_SubjT_V<T>>
 
 export function validateBaseSchemaSubject(
   schema: BaseSchema,
   subject: unknown
-): EitherError<ValidatingError, BaseSchemaSubjectType> {
+): EitherError<BaseSchemaValidateError, BaseSchemaSubjectType> {
   if (typeof schema === 'string') {
     switch (schema) {
       case 'string?':
