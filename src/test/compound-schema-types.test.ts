@@ -46,6 +46,17 @@ describe('Construct BaseSchema subject type PARSED', () => {
     )
   })
 
+  it('Con_BaseSchema_SubjT_P<T>: check base detailed schema brand', () => {
+    const schema = {
+      type: 'string',
+      brand: ['key', 'value'],
+    } as const satisfies Schema
+
+    check<string>(unknownX as Con_BaseSchema_SubjT_P<typeof schema>)
+    // @ts-expect-error '{ __key: "value"; } & string' is not 'number'
+    check<number>(unknownX as Con_BaseSchema_SubjT_P<typeof schema>)
+  })
+
   it('Con_BaseSchema_SubjT_P<T>: should ignore schema optional property if default is set', () => {
     check<string>(
       unknownX as Con_BaseSchema_SubjT_P<{
@@ -878,6 +889,23 @@ describe('Construct ObjectSchema subject type VALIDATED', () => {
         of: { x: 'string' }
         optional: true
       }>
+    )
+  })
+
+  it('Con_ObjectSchema_SubjT_V<T>: nested branded types', () => {
+    const schema = {
+      type: 'object',
+      of: {
+        x: { type: 'string', brand: ['key', 'value'] },
+      },
+    } as const satisfies Schema
+
+    check<{ x: string & { __key: 'value' } }>(
+      unknownX as Con_ObjectSchema_SubjT_V<typeof schema>
+    )
+    check<{ x: number & { __key: 'value' } }>(
+      // @ts-expect-error '{ __key: "value"; } & string' is not assignable to type 'number'
+      unknownX as Con_ObjectSchema_SubjT_V<typeof schema>
     )
   })
 })

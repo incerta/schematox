@@ -48,7 +48,7 @@ export type Con_BaseSchema_SubjT_P<T extends BaseSchema> = T extends BS_Schema
   ? Con_BS_Schema_SubjT<T>
   : T extends BD_Schema
     ? Con_BD_Schema_SubjT_P<T>
-    : never
+    : 'NEVER:Con_BaseSchema_SubjT_P'
 
 export type Con_BaseSchema_SubjT_V<T extends BaseSchema> = T extends BS_Schema
   ? Con_BS_Schema_SubjT<T>

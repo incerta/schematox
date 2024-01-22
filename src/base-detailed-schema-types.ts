@@ -1,7 +1,7 @@
 /**
  * @example ['idFor', 'User'] -> T & { __idFor: 'User' }
  **/
-export type BrandSchema = [__key: string, __keyFor: string]
+export type BrandSchema = Readonly<[__key: string, __keyFor: string]>
 
 export type BD_String = {
   type: 'string'
@@ -90,10 +90,9 @@ export type Con_BD_Schema_TypeOnly_SubjT<T extends BD_Schema> =
               ? V
               : never
 
-export type Con_BrandSchema_SubjT<T extends BrandSchema> = T extends [
-  infer U,
-  infer V,
-]
+export type Con_BrandSchema_SubjT<T extends BrandSchema> = T extends Readonly<
+  [infer U, infer V]
+>
   ? U extends string
     ? { [k in `__${U}`]: V }
     : never

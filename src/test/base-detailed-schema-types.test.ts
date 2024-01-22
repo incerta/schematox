@@ -305,6 +305,21 @@ it('Con_BD_Schema_SubjT_P<T>: "stringUnion/numberUnion" required', () => {
   check<0 | 1>(unknownX as Con_BD_Schema_SubjT_P<typeof numberUnionSchema>)
 })
 
+it('Con_BD_Schema_SubjT_P<T>: check branded schema', () => {
+  const schema = {
+    type: 'string',
+    brand: ['key', 'value'],
+  } as const satisfies BD_Schema
+
+  check<string & { __key: 'value' }>(
+    unknownX as Con_BD_Schema_SubjT_P<typeof schema>
+  )
+  check<number & { __key: 'value' }>(
+    // @ts-expect-error '{ __key: "value"; } & string' is not 'number & { __key: "value"; }'
+    unknownX as Con_BD_Schema_SubjT_P<typeof schema>
+  )
+})
+
 it('ExtWith_BD_OptionalSchema_SubjT_V<T, U>: check `optional`', () => {
   check<string>(
     unknownX as ExtWith_BD_OptionalSchema_SubjT_V<{ type: 'string' }, string>
@@ -470,4 +485,19 @@ it('Con_BD_Schema_SubjT_V<T>: "stringUnion/numberUnion" required', () => {
   } as const satisfies BD_Schema
 
   check<0 | 1>(unknownX as Con_BD_Schema_SubjT_V<typeof numberUnionSchema>)
+})
+
+it('Con_BD_Schema_SubjT_V<T>: check branded schema', () => {
+  const schema = {
+    type: 'string',
+    brand: ['key', 'value'],
+  } as const satisfies BD_Schema
+
+  check<string & { __key: 'value' }>(
+    unknownX as Con_BD_Schema_SubjT_V<typeof schema>
+  )
+  check<number & { __key: 'value' }>(
+    // @ts-expect-error '{ __key: "value"; } & string' is not 'number & { __key: "value"; }'
+    unknownX as Con_BD_Schema_SubjT_V<typeof schema>
+  )
 })

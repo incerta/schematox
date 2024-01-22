@@ -53,3 +53,13 @@ export const VALIDATE_ERROR_CODE = {
   maxRange: 'MAX_RANGE',
   notInUnion: 'NOT_IN_UNION',
 } as const
+
+export const PROGRAMMATICALLY_DEFINED_ERROR_MSG = {
+  optionalDefined: 'Schema "optional" is already defined',
+  brandDefined: 'Schema "brand" is already defined',
+  minLengthDefined: 'Schema "minLength" is already defined',
+  maxLengthDefined: 'Schema "maxLength" is already defined',
+  descriptionDefined: 'Schema "description" is already defined',
+  defaultDefined: 'Schema "default" is already defined',
+  defaultNotAllowed: 'Schema "default" is allowed only for optional properties',
+} as const
