@@ -97,7 +97,7 @@ describe('String schema programmatic definition', () => {
     expect(validate(schemaX.__schema, 'x').error).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
-    expect(() => schemaX.optional('x')).toThrow(
+    expect(() => schemaX.optional()).toThrow(
       PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined
     )
   })
@@ -186,7 +186,7 @@ describe('String schema programmatic definition', () => {
     expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
 
     // @ts-expect-error 'minLength' does not exist
-    expect(() => schemaX.minLength('x')).toThrow(
+    expect(() => schemaX.minLength(1)).toThrow(
       PROGRAMMATICALLY_DEFINED_ERROR_MSG.minLengthDefined
     )
   })
@@ -238,7 +238,7 @@ describe('String schema programmatic definition', () => {
     expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
 
     // @ts-expect-error Property 'maxLength' does not exist
-    expect(() => schemaX.maxLength('x')).toThrow(
+    expect(() => schemaX.maxLength(1)).toThrow(
       PROGRAMMATICALLY_DEFINED_ERROR_MSG.maxLengthDefined
     )
   })
@@ -299,7 +299,7 @@ describe('String schema programmatic definition', () => {
     )
   })
 
-  it('string: string -> description -> maxLength -> minLength -> optional -> defalut -> brand', () => {
+  it('string: string -> description -> maxLength -> minLength -> optional -> default -> brand', () => {
     const schemaX = string()
       .description('x')
       .maxLength(1)

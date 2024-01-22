@@ -49,7 +49,7 @@ export type BD_Buffer = {
 
 export type BD_StringUnion<T extends string = string> = {
   type: 'stringUnion'
-  of: Array<T>
+  of: Readonly<Array<T>>
   optional?: boolean
 
   default?: string
@@ -59,7 +59,7 @@ export type BD_StringUnion<T extends string = string> = {
 
 export type BD_NumberUnion<T extends number = number> = {
   type: 'numberUnion'
-  of: Array<T>
+  of: Readonly<Array<T>>
   optional?: boolean
 
   default?: number

@@ -1,48 +1,48 @@
 import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../error'
 
-import type { BD_String } from '../base-detailed-schema-types'
+import type { BD_Number } from '../base-detailed-schema-types'
 
 type ExtWith_Option<
-  T extends BD_String,
+  T extends BD_Number,
   U,
-  V extends BD_String = Readonly<T & U>,
+  V extends BD_Number = Readonly<T & U>,
 > = {
   __schema: V
-} & (V extends { optional: true } ? StringOptional<V> : StringRequired<V>)
+} & (V extends { optional: true } ? NumberOptional<V> : NumberRequired<V>)
 
-type StringShared<T extends BD_String> = {
+type NumberShared<T extends BD_Number> = {
   brand: <U extends string, V extends string>(
     key: U,
     value: V
   ) => ExtWith_Option<T, { brand: Readonly<[U, V]> }>
 
-  minLength: (minLength: number) => ExtWith_Option<T, { minLength: number }>
-  maxLength: (maxLength: number) => ExtWith_Option<T, { maxLength: number }>
+  min: (min: number) => ExtWith_Option<T, { min: number }>
+  max: (max: number) => ExtWith_Option<T, { max: number }>
   description: (
     description: string
   ) => ExtWith_Option<T, { description: string }>
 }
 
-type StringOptional<T extends BD_String> = Omit<
+type NumberOptional<T extends BD_Number> = Omit<
   {
-    default: (defaultValue: string) => ExtWith_Option<T, { default: string }>
-  } & StringShared<T>,
+    default: (defaultValue: number) => ExtWith_Option<T, { default: number }>
+  } & NumberShared<T>,
   keyof T
 >
 
-type StringRequired<T extends BD_String> = Omit<
+type NumberRequired<T extends BD_Number> = Omit<
   {
     optional: () => ExtWith_Option<T, { optional: true }>
-  } & StringShared<T>,
+  } & NumberShared<T>,
   keyof T
 >
 
-function stringOptions<T extends BD_String>(
+function numberOptions<T extends BD_Number>(
   schema: T
-): T extends { optional: true } ? StringOptional<T> : StringRequired<T>
+): T extends { optional: true } ? NumberOptional<T> : NumberRequired<T>
 
-function stringOptions(schema: BD_String) {
-  const schemaKeys = Object.keys(schema) as Array<keyof BD_String>
+function numberOptions(schema: BD_Number) {
+  const schemaKeys = Object.keys(schema) as Array<keyof BD_Number>
   const except = new Set(schemaKeys)
 
   return {
@@ -55,7 +55,7 @@ function stringOptions(schema: BD_String) {
 
       return {
         __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
+        ...numberOptions(updatedSchema),
       }
     },
 
@@ -68,11 +68,11 @@ function stringOptions(schema: BD_String) {
 
       return {
         __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
+        ...numberOptions(updatedSchema),
       }
     },
 
-    default: (defaultParsedValue: string) => {
+    default: (defaultParsedValue: number) => {
       if (except.has('default')) {
         throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultDefined)
       }
@@ -85,33 +85,33 @@ function stringOptions(schema: BD_String) {
 
       return {
         __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
+        ...numberOptions(updatedSchema),
       }
     },
 
-    minLength: (minLength: number) => {
-      if (except.has('minLength')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.minLengthDefined)
+    min: (min: number) => {
+      if (except.has('min')) {
+        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.minDefined)
       }
 
-      const updatedSchema = { ...schema, minLength }
+      const updatedSchema = { ...schema, min }
 
       return {
         __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
+        ...numberOptions(updatedSchema),
       }
     },
 
-    maxLength: (maxLength: number) => {
-      if (except.has('maxLength')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.maxLengthDefined)
+    max: (max: number) => {
+      if (except.has('max')) {
+        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.maxDefined)
       }
 
-      const updatedSchema = { ...schema, maxLength }
+      const updatedSchema = { ...schema, max }
 
       return {
         __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
+        ...numberOptions(updatedSchema),
       }
     },
 
@@ -124,17 +124,17 @@ function stringOptions(schema: BD_String) {
 
       return {
         __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
+        ...numberOptions(updatedSchema),
       }
     },
   }
 }
 
-export function string() {
-  const schema = { type: 'string' } as const
+export function number() {
+  const schema = { type: 'number' } as const
 
   return {
     __schema: schema,
-    ...stringOptions(schema),
+    ...numberOptions(schema),
   }
 }

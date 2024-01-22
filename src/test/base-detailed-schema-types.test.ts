@@ -17,14 +17,14 @@ it('BD_StringUnion: check "as const" (immutability) constraint', () => {
   } satisfies BD_Schema
 
   // @ts-expect-error '{ type: "stringUnion"; of: string[]; }' is not '{ type: "stringUnion"; of: ["x", "y"]; }'
-  check<{ type: 'stringUnion'; of: ['x', 'y'] }>(mutableSchema)
+  check<{ type: 'stringUnion'; of: Readonly<['x', 'y']> }>(mutableSchema)
 
   const immutableSchema = {
     type: 'stringUnion',
     of: ['x', 'y'],
   } as const satisfies BD_Schema
 
-  check<{ type: 'stringUnion'; of: ['x', 'y'] }>(immutableSchema)
+  check<{ type: 'stringUnion'; of: Readonly<['x', 'y']> }>(immutableSchema)
 })
 
 it('BD_NumberUnion: check "as const" (immutability) constraint', () => {
@@ -33,15 +33,15 @@ it('BD_NumberUnion: check "as const" (immutability) constraint', () => {
     of: [0, 1],
   } satisfies BD_Schema
 
-  // @ts-expect-error '{ type: "numberUnion"; of: number[]; }' is not '{ type: "numberUnion"; of: [0, 1]; }'
-  check<{ type: 'numberUnion'; of: [0, 1] }>(mutableSchema)
+  // @ts-expect-error '{ type: "numberUnion"; of: number[]; }' is not '{ type: "numberUnion"; of: readonly [0, 1]; }'
+  check<{ type: 'numberUnion'; of: Readonly<[0, 1]> }>(mutableSchema)
 
   const immutableSchema = {
     type: 'numberUnion',
     of: [0, 1],
   } as const satisfies BD_Schema
 
-  check<{ type: 'numberUnion'; of: [0, 1] }>(immutableSchema)
+  check<{ type: 'numberUnion'; of: Readonly<[0, 1]> }>(immutableSchema)
 })
 
 it('Con_BD_Schema_TypeOnly_SubjT<T>: should construct schema base subject type', () => {

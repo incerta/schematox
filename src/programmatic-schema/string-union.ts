@@ -1,48 +1,52 @@
 import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../error'
 
-import type { BD_String } from '../base-detailed-schema-types'
+import type { BD_StringUnion } from '../base-detailed-schema-types'
 
 type ExtWith_Option<
-  T extends BD_String,
+  T extends BD_StringUnion,
   U,
-  V extends BD_String = Readonly<T & U>,
+  V extends BD_StringUnion = Readonly<T & U>,
 > = {
   __schema: V
-} & (V extends { optional: true } ? StringOptional<V> : StringRequired<V>)
+} & (V extends { optional: true }
+  ? StringUnionOptional<V>
+  : StringUnionRequired<V>)
 
-type StringShared<T extends BD_String> = {
+type StringUnionShared<T extends BD_StringUnion> = {
   brand: <U extends string, V extends string>(
     key: U,
     value: V
   ) => ExtWith_Option<T, { brand: Readonly<[U, V]> }>
 
-  minLength: (minLength: number) => ExtWith_Option<T, { minLength: number }>
-  maxLength: (maxLength: number) => ExtWith_Option<T, { maxLength: number }>
   description: (
     description: string
   ) => ExtWith_Option<T, { description: string }>
 }
 
-type StringOptional<T extends BD_String> = Omit<
+type StringUnionOptional<T extends BD_StringUnion> = Omit<
   {
-    default: (defaultValue: string) => ExtWith_Option<T, { default: string }>
-  } & StringShared<T>,
+    default: T extends { of: Readonly<Array<infer U>> }
+      ? (defaultValue: U) => ExtWith_Option<T, { default: U }>
+      : never
+  } & StringUnionShared<T>,
   keyof T
 >
 
-type StringRequired<T extends BD_String> = Omit<
+type StringUnionRequired<T extends BD_StringUnion> = Omit<
   {
     optional: () => ExtWith_Option<T, { optional: true }>
-  } & StringShared<T>,
+  } & StringUnionShared<T>,
   keyof T
 >
 
-function stringOptions<T extends BD_String>(
+function stringUnionOptions<T extends BD_StringUnion>(
   schema: T
-): T extends { optional: true } ? StringOptional<T> : StringRequired<T>
+): T extends { optional: true }
+  ? StringUnionOptional<T>
+  : StringUnionRequired<T>
 
-function stringOptions(schema: BD_String) {
-  const schemaKeys = Object.keys(schema) as Array<keyof BD_String>
+function stringUnionOptions(schema: BD_StringUnion) {
+  const schemaKeys = Object.keys(schema) as Array<keyof BD_StringUnion>
   const except = new Set(schemaKeys)
 
   return {
@@ -55,7 +59,7 @@ function stringOptions(schema: BD_String) {
 
       return {
         __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
+        ...stringUnionOptions(updatedSchema),
       }
     },
 
@@ -68,7 +72,7 @@ function stringOptions(schema: BD_String) {
 
       return {
         __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
+        ...stringUnionOptions(updatedSchema),
       }
     },
 
@@ -85,33 +89,7 @@ function stringOptions(schema: BD_String) {
 
       return {
         __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
-      }
-    },
-
-    minLength: (minLength: number) => {
-      if (except.has('minLength')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.minLengthDefined)
-      }
-
-      const updatedSchema = { ...schema, minLength }
-
-      return {
-        __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
-      }
-    },
-
-    maxLength: (maxLength: number) => {
-      if (except.has('maxLength')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.maxLengthDefined)
-      }
-
-      const updatedSchema = { ...schema, maxLength }
-
-      return {
-        __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
+        ...stringUnionOptions(updatedSchema),
       }
     },
 
@@ -124,17 +102,17 @@ function stringOptions(schema: BD_String) {
 
       return {
         __schema: updatedSchema,
-        ...stringOptions(updatedSchema),
+        ...stringUnionOptions(updatedSchema),
       }
     },
   }
 }
 
-export function string() {
-  const schema = { type: 'string' } as const
+export function stringUnion<T extends string>(...of: Readonly<[T, ...T[]]>) {
+  const schema = { type: 'stringUnion', of } as const
 
   return {
     __schema: schema,
-    ...stringOptions(schema),
+    ...stringUnionOptions(schema),
   }
 }
