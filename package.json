@@ -1,5 +1,5 @@
 {
-  "name": "SchematoX",
+  "name": "schematox",
   "version": "0.0.1",
   "description": "Define JSON compatible schema statically/programmatically and parse/validate its subject with typesafety",
   "author": "Konstantin Mazur",
@@ -15,6 +15,7 @@
     "typescript branding technique",
     "lightweight"
   ],
+  "repository": "git://github.com/incerta/schematox.git",
   "main": "dist/index.js",
   "types": "dist/index.ts",
   "scripts": {
