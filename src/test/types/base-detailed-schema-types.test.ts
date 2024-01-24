@@ -1,4 +1,4 @@
-import { check, unknownX } from './test-utils'
+import { check, unknownX } from '../test-utils'
 import type {
   Con_BrandSchema_SubjT,
   Con_BD_Schema_TypeOnly_SubjT,
@@ -8,7 +8,7 @@ import type {
   ExtWith_BD_OptionalSchema_SubjT_P,
   ExtWith_BD_OptionalSchema_SubjT_V,
   BD_Schema,
-} from '../base-detailed-schema-types'
+} from '../../types/base-detailed-schema-types'
 
 it('BD_StringUnion: check "as const" (immutability) constraint', () => {
   const mutableSchema = {

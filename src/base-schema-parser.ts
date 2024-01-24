@@ -2,8 +2,11 @@ import { error, data } from './utils/fp'
 import { PARSE_ERROR_CODE } from './error'
 
 import type { EitherError } from './utils/fp'
-import type { BD_String, BD_Number } from './base-detailed-schema-types'
-import type { BaseSchema, Con_Schema_SubjT_P } from './compound-schema-types'
+import type { BD_String, BD_Number } from './types/base-detailed-schema-types'
+import type {
+  BaseSchema,
+  Con_Schema_SubjT_P,
+} from './types/compound-schema-types'
 import type { BaseSchemaParseError } from './error'
 
 export type BaseSchemaSubjectType =

@@ -1,4 +1,4 @@
-import type { Schema, BaseSchema } from './compound-schema-types'
+import type { Schema, BaseSchema } from './types/compound-schema-types'
 
 export type ParseErrorCode =
   (typeof PARSE_ERROR_CODE)[keyof typeof PARSE_ERROR_CODE]

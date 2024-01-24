@@ -3,7 +3,7 @@ import { parseBaseSchemaSubject } from '../base-schema-parser'
 import { check, unknownX } from './test-utils'
 
 import type { BaseSchemaParseError } from '../error'
-import type { Schema } from '../compound-schema-types'
+import type { Schema } from '../types/compound-schema-types'
 
 describe('Parse base short schema with valid subject', () => {
   it('parseBaseSchemaSubject: subject `"x"` - schema `"string"`', () => {

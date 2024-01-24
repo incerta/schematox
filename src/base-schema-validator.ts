@@ -2,7 +2,10 @@ import { error, data } from './utils/fp'
 import { VALIDATE_ERROR_CODE } from './error'
 
 import type { EitherError } from './utils/fp'
-import type { BaseSchema, Con_Schema_SubjT_V } from './compound-schema-types'
+import type {
+  BaseSchema,
+  Con_Schema_SubjT_V,
+} from './types/compound-schema-types'
 import type { BaseSchemaValidateError } from './error'
 
 export type BaseSchemaSubjectType =

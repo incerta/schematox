@@ -3,7 +3,7 @@ import { PARSE_ERROR_CODE } from './error'
 import { parseBaseSchemaSubject } from './base-schema-parser'
 
 import type { EitherError } from './utils/fp'
-import type { Schema, Con_Schema_SubjT_P } from './compound-schema-types'
+import type { Schema, Con_Schema_SubjT_P } from './types/compound-schema-types'
 import type { ParseError, ErrorPath } from './error'
 
 export function parse<T extends Schema>(

@@ -1,4 +1,4 @@
-import { check, unknownX } from './test-utils'
+import { check, unknownX } from '../test-utils'
 import type {
   Con_BaseSchema_SubjT_P,
   Con_BaseSchema_SubjT_V,
@@ -9,7 +9,7 @@ import type {
   Con_Schema_SubjT_P,
   Con_Schema_SubjT_V,
   Schema,
-} from '../compound-schema-types'
+} from '../../types/compound-schema-types'
 
 describe('Construct BaseSchema subject type PARSED', () => {
   it('Con_BaseSchema_SubjT_P<T>: check base short schema required/optional cases', () => {

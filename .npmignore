@@ -1,0 +1,11 @@
+/node_modules
+/src
+/.husky
+/.git
+/.gitignore
+/coverage
+/tsconfig.json
+/CONTRIBUTING.md
+/jest.config.js
+/.prettierrc.json
+/.prettierignore

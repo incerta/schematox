@@ -3,7 +3,7 @@ import { VALIDATE_ERROR_CODE } from './error'
 import { validateBaseSchemaSubject } from './base-schema-validator'
 
 import type { EitherError } from './utils/fp'
-import type { Schema, Con_Schema_SubjT_V } from './compound-schema-types'
+import type { Schema, Con_Schema_SubjT_V } from './types/compound-schema-types'
 import type { ValidateError, ErrorPath } from './error'
 
 export function validate<T extends Schema>(

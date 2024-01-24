@@ -1,6 +1,6 @@
 import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../error'
 
-import type { BD_Number } from '../base-detailed-schema-types'
+import type { BD_Number } from '../types/base-detailed-schema-types'
 
 type ExtWith_Option<
   T extends BD_Number,

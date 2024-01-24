@@ -3,7 +3,7 @@ import { validateBaseSchemaSubject } from '../base-schema-validator'
 import { check, unknownX } from './test-utils'
 
 import type { BaseSchemaValidateError } from '../error'
-import type { Schema } from '../compound-schema-types'
+import type { Schema } from '../types/compound-schema-types'
 
 describe('Validate base short schema with valid subject', () => {
   it('validateBaseSchemaSubject: subject `"x"` - schema `"string"`', () => {

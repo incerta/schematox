@@ -1,10 +1,10 @@
-import { check, unknownX } from './test-utils'
+import { check, unknownX } from '../test-utils'
 import type {
   BS_Schema,
   Con_BS_Schema_Opt_SubjT,
   Con_BS_Schema_Req_SubjT,
   Con_BS_Schema_SubjT,
-} from '../base-short-schema-types'
+} from '../../types/base-short-schema-types'
 
 it('Con_BS_Schema_Req_SubjT<T>: check "string/number/boolean/buffer"', () => {
   check<string>(unknownX as Con_BS_Schema_Req_SubjT<'string'>)

@@ -1,16 +1,22 @@
 {
-  "name": "schematox",
+  "name": "SchematoX",
   "version": "0.0.1",
-  "description": "Schema-defined, functional, and type-safe parser for known or unknown data sources",
+  "description": "Define JSON compatible schema statically/programmatically and parse/validate its subject with typesafety",
   "author": "Konstantin Mazur",
   "license": "MIT",
   "keywords": [
-    "schema",
     "typescript",
+    "schema",
     "parser",
-    "either-error-handling",
-    "schema-default-values"
+    "validator",
+    "either style error handling",
+    "static schema definition",
+    "programmatic schema definition",
+    "typescript branding technique",
+    "lightweight"
   ],
+  "main": "dist/index.js",
+  "types": "dist/index.ts",
   "scripts": {
     "prepare": "husky install",
     "test": "jest",
@@ -19,8 +25,9 @@
     "prettier-check": "prettier --check . || (echo \"Please use 'npm run prettify' to fix the issue\" && exit 1)",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
+    "build": "tsc && rm -rf dist/types && cp -r src/types dist && rm dist/index.d.ts && cp src/index.ts dist",
     "quality-check": "npm run prettier-check && npm run lint && npm run type-check && npm run test",
-    "check-n-build": "npm run quality-check && tsc",
+    "check-n-build": "npm run quality-check && npm run build",
     "publish-patch": "npm run check-n-build && npm version patch && npm run check-n-build && npm publish",
     "publish-minor": "npm run check-n-build && npm version minor && npm run check-n-build && npm publish"
   },
