@@ -59,7 +59,7 @@ All those types is gathered under one identifier as union `BD_Schema`
 ## Detailed schema optional properties
 
 - `optional?: boolean` – affects schema validated/parsed subject type and parse/validate `schematoX` logic
-- `default?: T` – default value that should be populated on `schematoX` parse and ignored on validate flows. Exists for all base detailed and compound schemas
+- `default?: T` – default value that should be populated on `schematoX` parse and ignored on validate flows, exists for all base detailed schema types
 - `description?: string` – description of the particular schema property which can be used to provide more detailed information for the user/developer on `schematoX` validation/parse error
 - `brand?: [__key: string, __keyFor: string]` – schema brand definition resulting in brand subject type which will be intersection part of the schema subject type. Currently we support branding only for the base detailed schema, the necessity of branding for the compound schema types is currently up to debate.
 - `minLength/maxLength/min/max` – is used as limiting characteristic for schema value
