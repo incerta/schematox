@@ -54,12 +54,8 @@ it('Con_BD_Schema_TypeOnly_SubjT<T>: should construct schema base subject type',
   check<number>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'boolean' }>)
 
   check<boolean>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'boolean' }>)
-  // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
-  check<boolean>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'buffer' }>)
-
-  check<Buffer>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'buffer' }>)
-  // @ts-expect-error 'string' is not assignable to 'Buffer'
-  check<Buffer>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'string' }>)
+  // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
+  check<boolean>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'string' }>)
 
   check<'a' | 'b'>(
     unknownX as Con_BD_Schema_TypeOnly_SubjT<{
@@ -269,7 +265,13 @@ it('Con_BD_Schema_SubjT_P<T>: "string" optional defaulted', () => {
   )
 })
 
-it('Con_BD_Schema_SubjT_P<T>: "number/boolean/buffer" required', () => {
+it('Con_BD_Schema_SubjT_P<T>: "string/number/boolean" required', () => {
+  const stringSchema = {
+    type: 'string',
+  } as const satisfies BD_Schema
+
+  check<string>(unknownX as Con_BD_Schema_SubjT_P<typeof stringSchema>)
+
   const numberSchema = {
     type: 'number',
   } as const satisfies BD_Schema
@@ -281,12 +283,6 @@ it('Con_BD_Schema_SubjT_P<T>: "number/boolean/buffer" required', () => {
   } as const satisfies BD_Schema
 
   check<boolean>(unknownX as Con_BD_Schema_SubjT_P<typeof booleanSchema>)
-
-  const bufferSchema = {
-    type: 'buffer',
-  } as const satisfies BD_Schema
-
-  check<Buffer>(unknownX as Con_BD_Schema_SubjT_P<typeof bufferSchema>)
 })
 
 it('Con_BD_Schema_SubjT_P<T>: "stringUnion/numberUnion" required', () => {
@@ -451,7 +447,13 @@ it('Con_BD_Schema_SubjT_V<T>: "string" optional defaulted', () => {
   )
 })
 
-it('Con_BD_Schema_SubjT_V<T>: "number/boolean/buffer" required', () => {
+it('Con_BD_Schema_SubjT_V<T>: "string/number/boolean" required', () => {
+  const stringSchema = {
+    type: 'string',
+  } as const satisfies BD_Schema
+
+  check<string>(unknownX as Con_BD_Schema_SubjT_V<typeof stringSchema>)
+
   const numberSchema = {
     type: 'number',
   } as const satisfies BD_Schema
@@ -463,12 +465,6 @@ it('Con_BD_Schema_SubjT_V<T>: "number/boolean/buffer" required', () => {
   } as const satisfies BD_Schema
 
   check<boolean>(unknownX as Con_BD_Schema_SubjT_V<typeof booleanSchema>)
-
-  const bufferSchema = {
-    type: 'buffer',
-  } as const satisfies BD_Schema
-
-  check<Buffer>(unknownX as Con_BD_Schema_SubjT_V<typeof bufferSchema>)
 })
 
 it('Con_BD_Schema_SubjT_V<T>: "stringUnion/numberUnion" required', () => {

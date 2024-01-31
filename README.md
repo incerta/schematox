@@ -169,7 +169,6 @@ import {
   string,
   number,
   boolean,
-  buffer,
   stringUnion,
   numberUnion,
 } from 'schematox'
@@ -240,28 +239,6 @@ const staticDetailedBoolean = {
 const programmaticBoolean = boolean()
   .optional()
   .default(false)
-  .brand('x', 'y')
-  .description('y')
-
-// buffer
-// The default value is not supported because Buffer is not compatible with JSON
-
-const staticShortBufferRequired = 'buffer' satisfies Schema
-const staticShortBufferOptional = 'buffer?' satisfies Schema
-
-const staticDetailedBuffer = {
-  type: 'buffer',
-  optional: true,
-  brand: ['x', 'y'],
-  minLength: 1,
-  maxLength: 1,
-  description: 'x',
-} as const satisfies Schema
-
-const programmaticBuffer = buffer()
-  .optional()
-  .minLength(1)
-  .maxLength(1)
   .brand('x', 'y')
   .description('y')
 
@@ -359,7 +336,7 @@ The `result.error` will be:
 
 ## Parse/validate differences
 
-The parser provides a new object/primitive without references to the evaluated subject, except in the case of `Buffer` for better performance. This functionality is responsible for clearing the `array` schema result value from `undefined` optional schema values.
+The parser provides a new object/primitive without references to the evaluated subject. This functionality is responsible for clearing the `array` schema result value from `undefined` optional schema values.
 
 Moreover, the parser manages the `null` value as `undefined` and subsequently replaces it with `undefined`. It also swaps `optional` values with the `default` value, provided that the default values are explicitly stated in the schema.
 

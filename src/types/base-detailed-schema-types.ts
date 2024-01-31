@@ -36,17 +36,6 @@ export type BD_Boolean = {
   brand?: BrandSchema
 }
 
-export type BD_Buffer = {
-  type: 'buffer'
-  optional?: boolean
-
-  description?: string
-  brand?: BrandSchema
-
-  minLength?: number /* >= */
-  maxLength?: number /* <= */
-}
-
 export type BD_StringUnion<T extends string = string> = {
   type: 'stringUnion'
   of: Readonly<Array<T>>
@@ -71,7 +60,6 @@ export type BD_Schema =
   | BD_String
   | BD_Number
   | BD_Boolean
-  | BD_Buffer
   | BD_StringUnion
   | BD_NumberUnion
 
@@ -82,13 +70,11 @@ export type Con_BD_Schema_TypeOnly_SubjT<T extends BD_Schema> =
       ? number
       : T extends BD_Boolean
         ? boolean
-        : T extends BD_Buffer
-          ? Buffer
-          : T extends BD_StringUnion<infer U>
-            ? U
-            : T extends BD_NumberUnion<infer V>
-              ? V
-              : never
+        : T extends BD_StringUnion<infer U>
+          ? U
+          : T extends BD_NumberUnion<infer V>
+            ? V
+            : never
 
 export type Con_BrandSchema_SubjT<T extends BrandSchema> = T extends Readonly<
   [infer U, infer V]

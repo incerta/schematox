@@ -53,22 +53,6 @@ describe('Parse BASE schema with VALID subject', () => {
     expect(parse(schema, subject).error).toBe(undefined)
   })
 
-  it('parse: `"buffer"` schema', () => {
-    const schema = 'buffer' satisfies Schema
-    const subject = Buffer.from('x')
-
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
-  })
-
-  it('parse: `"buffer?"` schema', () => {
-    const schema = 'buffer?' satisfies Schema
-    const subject = Buffer.from('x')
-
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
-  })
-
   it('parse: `{ type: "string" }` schema', () => {
     const schema = { type: 'string' } satisfies Schema
     const subject = 'x'
@@ -88,14 +72,6 @@ describe('Parse BASE schema with VALID subject', () => {
   it('parse: `{ type: "boolean" }` schema', () => {
     const schema = { type: 'boolean' } satisfies Schema
     const subject = false
-
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
-  })
-
-  it('parse: `{ type: "buffer" }` schema', () => {
-    const schema = { type: 'buffer' } satisfies Schema
-    const subject = Buffer.from('x')
 
     expect(parse(schema, subject).data).toBe(subject)
     expect(parse(schema, subject).error).toBe(undefined)
@@ -197,10 +173,6 @@ describe('Parse OBJECT schema with VALID subject', () => {
         f: 'boolean?',
         nullF: 'boolean?',
         undefinedF: 'boolean?',
-        g: 'buffer',
-        h: 'buffer?',
-        nullH: 'buffer?',
-        undefinedH: 'buffer?',
       },
     } as const satisfies Schema
 
@@ -211,8 +183,6 @@ describe('Parse OBJECT schema with VALID subject', () => {
       d: 1,
       e: true,
       f: false,
-      g: Buffer.from('x'),
-      h: Buffer.from('y'),
     }
 
     const subject = {
@@ -223,8 +193,6 @@ describe('Parse OBJECT schema with VALID subject', () => {
       undefinedD: undefined,
       nullF: null,
       undefinedF: undefined,
-      nullH: null,
-      undefinedH: undefined,
       extraKeyWhichShouldBeIgnored: 'x',
     }
 
@@ -254,10 +222,6 @@ describe('Parse OBJECT schema with VALID subject', () => {
         undefinedF: { type: 'boolean', optional: true },
         nullFDef: { type: 'boolean', optional: true, default: true },
         undefinedFDef: { type: 'boolean', optional: true, default: false },
-        g: { type: 'buffer' },
-        h: { type: 'buffer', optional: true },
-        nullH: { type: 'buffer', optional: true },
-        undefinedH: { type: 'buffer', optional: true },
         i: { type: 'stringUnion', of: ['x', 'y'] },
         j: { type: 'stringUnion', of: ['x', 'y'], optional: true },
         nullJ: { type: 'stringUnion', of: ['x', 'y'], optional: true },
@@ -300,8 +264,6 @@ describe('Parse OBJECT schema with VALID subject', () => {
       d: 1,
       e: true,
       f: false,
-      g: Buffer.from('x'),
-      h: Buffer.from('y'),
       i: 'x',
       j: 'y',
       k: 0,
@@ -325,8 +287,6 @@ describe('Parse OBJECT schema with VALID subject', () => {
       d: 1,
       e: true,
       f: false,
-      g: Buffer.from('x'),
-      h: Buffer.from('y'),
       i: 'x',
       j: 'y',
       k: 0,
@@ -343,8 +303,6 @@ describe('Parse OBJECT schema with VALID subject', () => {
       undefinedF: undefined,
       nullFDef: null,
       undefinedFDef: undefined,
-      nullH: null,
-      undefinedH: undefined,
       nullJ: null,
       undefinedJ: undefined,
       nullJDef: null,
@@ -643,16 +601,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     expect(parse(booleanArrSchema, booleanSubj).data).toEqual(booleanSubj)
     expect(parse(booleanArrSchema, booleanSubj).error).toBe(undefined)
-
-    const bufferArrSchema = {
-      type: 'array',
-      of: 'buffer',
-    } as const satisfies Schema
-
-    const bufferSubj = [Buffer.from('x'), Buffer.from('y')]
-
-    expect(parse(bufferArrSchema, bufferSubj).data).toEqual(bufferSubj)
-    expect(parse(bufferArrSchema, bufferSubj).error).toBe(undefined)
   })
 
   it('parse: optional base short schema subject', () => {
@@ -693,18 +641,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
     expect(parse(optBoolSchema, boolSubject).error).toBe(undefined)
     expect(parse(optBoolSchema, arrWithNullable).data).toEqual([])
     expect(parse(optBoolSchema, arrWithNullable).error).toBe(undefined)
-
-    const optBuffSchema = {
-      type: 'array',
-      of: 'buffer?',
-    } as const satisfies Schema
-
-    const buffSubject = [Buffer.from('x'), Buffer.from('y')]
-
-    expect(parse(optBuffSchema, buffSubject).data).toEqual(buffSubject)
-    expect(parse(optBuffSchema, buffSubject).error).toBe(undefined)
-    expect(parse(optBuffSchema, arrWithNullable).data).toEqual([])
-    expect(parse(optBuffSchema, arrWithNullable).error).toBe(undefined)
   })
 
   it('parse: required base detailed schema subject', () => {
@@ -737,16 +673,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     expect(parse(boolSchema, boolSubj).data).toEqual(boolSubj)
     expect(parse(boolSchema, boolSubj).error).toBe(undefined)
-
-    const buffSchema = {
-      type: 'array',
-      of: { type: 'buffer' },
-    } as const satisfies Schema
-
-    const buffSubj = [Buffer.from('x'), Buffer.from('y')]
-
-    expect(parse(buffSchema, buffSubj).data).toEqual(buffSubj)
-    expect(parse(buffSchema, buffSubj).error).toBe(undefined)
 
     const strUnionSchema = {
       type: 'array',
@@ -813,18 +739,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
     expect(parse(boolSchema, boolSubj).error).toBe(undefined)
     expect(parse(boolSchema, arrWithNullable).data).toEqual([])
     expect(parse(boolSchema, arrWithNullable).error).toBe(undefined)
-
-    const buffSchema = {
-      type: 'array',
-      of: { type: 'buffer', optional: true },
-    } as const satisfies Schema
-
-    const buffSubj = [Buffer.from('x'), Buffer.from('y')]
-
-    expect(parse(buffSchema, buffSubj).data).toEqual(buffSubj)
-    expect(parse(buffSchema, buffSubj).error).toBe(undefined)
-    expect(parse(buffSchema, arrWithNullable).data).toEqual([])
-    expect(parse(buffSchema, arrWithNullable).error).toBe(undefined)
 
     const strUnionSchema = {
       type: 'array',

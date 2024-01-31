@@ -18,7 +18,6 @@ import type {
 export { string } from './programmatic-schema/string'
 export { number } from './programmatic-schema/number'
 export { boolean } from './programmatic-schema/boolean'
-export { buffer } from './programmatic-schema/buffer'
 export { stringUnion } from './programmatic-schema/string-union'
 export { numberUnion } from './programmatic-schema/number-union'
 

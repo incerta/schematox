@@ -9,7 +9,6 @@ import { object } from '../../programmatic-schema/object'
 import { string } from '../../programmatic-schema/string'
 import { number } from '../../programmatic-schema/number'
 import { boolean } from '../../programmatic-schema/boolean'
-import { buffer } from '../../programmatic-schema/buffer'
 import { stringUnion } from '../../programmatic-schema/string-union'
 import { numberUnion } from '../../programmatic-schema/number-union'
 
@@ -107,7 +106,6 @@ describe('Array schema programmatic definition', () => {
         a: number(),
         b: string(),
         c: boolean(),
-        d: buffer(),
         e: stringUnion('x'),
         f: numberUnion(0),
 
@@ -125,7 +123,6 @@ describe('Array schema programmatic definition', () => {
       a: 0,
       b: 'x',
       c: true,
-      d: Buffer.from('x'),
       e: 'x' as const,
       f: 0 as const,
 
