@@ -53,22 +53,6 @@ describe('Validate BASE schema with VALID subject', () => {
     expect(validate(schema, subject).error).toBe(undefined)
   })
 
-  it('validate: `"buffer"` schema', () => {
-    const schema = 'buffer' satisfies Schema
-    const subject = Buffer.from('x')
-
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
-  })
-
-  it('validate: `"buffer?"` schema', () => {
-    const schema = 'buffer?' satisfies Schema
-    const subject = Buffer.from('x')
-
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
-  })
-
   it('validate: `{ type: "string" }` schema', () => {
     const schema = { type: 'string' } satisfies Schema
     const subject = 'x'
@@ -88,14 +72,6 @@ describe('Validate BASE schema with VALID subject', () => {
   it('validate: `{ type: "boolean" }` schema', () => {
     const schema = { type: 'boolean' } satisfies Schema
     const subject = false
-
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
-  })
-
-  it('validate: `{ type: "buffer" }` schema', () => {
-    const schema = { type: 'buffer' } satisfies Schema
-    const subject = Buffer.from('x')
 
     expect(validate(schema, subject).data).toBe(subject)
     expect(validate(schema, subject).error).toBe(undefined)
@@ -202,9 +178,6 @@ describe('Validate OBJECT schema with VALID subject', () => {
         e: 'boolean',
         f: 'boolean?',
         undefinedF: 'boolean?',
-        g: 'buffer',
-        h: 'buffer?',
-        undefinedH: 'buffer?',
       },
     } as const satisfies Schema
 
@@ -215,12 +188,9 @@ describe('Validate OBJECT schema with VALID subject', () => {
       d: 1,
       e: true,
       f: false,
-      g: Buffer.from('x'),
-      h: Buffer.from('y'),
       undefinedB: undefined,
       undefinedD: undefined,
       undefinedF: undefined,
-      undefinedH: undefined,
       extraKeyThatShouldBeKept: 'x',
     }
 
@@ -241,9 +211,6 @@ describe('Validate OBJECT schema with VALID subject', () => {
         e: { type: 'boolean' },
         f: { type: 'boolean', optional: true },
         undefinedF: { type: 'boolean', optional: true },
-        g: { type: 'buffer' },
-        h: { type: 'buffer', optional: true },
-        undefinedH: { type: 'buffer', optional: true },
         i: { type: 'stringUnion', of: ['x', 'y'] },
         j: { type: 'stringUnion', of: ['x', 'y'], optional: true },
         undefinedJ: { type: 'stringUnion', of: ['x', 'y'], optional: true },
@@ -260,8 +227,6 @@ describe('Validate OBJECT schema with VALID subject', () => {
       d: 1,
       e: true,
       f: false,
-      g: Buffer.from('x'),
-      h: Buffer.from('y'),
       i: 'x',
       j: 'y',
       k: 0,
@@ -269,7 +234,6 @@ describe('Validate OBJECT schema with VALID subject', () => {
       undefinedB: undefined,
       undefinedD: undefined,
       undefinedF: undefined,
-      undefinedH: undefined,
       undefinedJ: undefined,
       undefinedL: undefined,
       extraKeyWhichShouldBeKept: 'x',
@@ -578,16 +542,6 @@ describe('Validate ARRAY schema with VALID subject', () => {
       booleanSubj
     )
     expect(validate(booleanArrSchema, booleanSubj).error).toBe(undefined)
-
-    const bufferArrSchema = {
-      type: 'array',
-      of: 'buffer',
-    } as const satisfies Schema
-
-    const bufferSubj = [Buffer.from('x'), Buffer.from('y')]
-
-    expect(validate(bufferArrSchema, bufferSubj).data).toStrictEqual(bufferSubj)
-    expect(validate(bufferArrSchema, bufferSubj).error).toBe(undefined)
   })
 
   it('validate: optional base short schema subject', () => {
@@ -628,18 +582,6 @@ describe('Validate ARRAY schema with VALID subject', () => {
     expect(validate(optBoolSchema, boolSubject).error).toBe(undefined)
     expect(validate(optBoolSchema, arrWithUnd).data).toStrictEqual(arrWithUnd)
     expect(validate(optBoolSchema, arrWithUnd).error).toBe(undefined)
-
-    const optBuffSchema = {
-      type: 'array',
-      of: 'buffer?',
-    } as const satisfies Schema
-
-    const buffSubject = [Buffer.from('x'), Buffer.from('y')]
-
-    expect(validate(optBuffSchema, buffSubject).data).toStrictEqual(buffSubject)
-    expect(validate(optBuffSchema, buffSubject).error).toBe(undefined)
-    expect(validate(optBuffSchema, arrWithUnd).data).toStrictEqual(arrWithUnd)
-    expect(validate(optBuffSchema, arrWithUnd).error).toBe(undefined)
   })
 
   it('validate: required base detailed schema subject', () => {
@@ -672,16 +614,6 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     expect(validate(boolSchema, boolSubj).data).toStrictEqual(boolSubj)
     expect(validate(boolSchema, boolSubj).error).toBe(undefined)
-
-    const buffSchema = {
-      type: 'array',
-      of: { type: 'buffer' },
-    } as const satisfies Schema
-
-    const buffSubj = [Buffer.from('x'), Buffer.from('y')]
-
-    expect(validate(buffSchema, buffSubj).data).toStrictEqual(buffSubj)
-    expect(validate(buffSchema, buffSubj).error).toBe(undefined)
 
     const strUnionSchema = {
       type: 'array',
@@ -754,18 +686,6 @@ describe('Validate ARRAY schema with VALID subject', () => {
     expect(validate(boolSchema, boolSubj).error).toBe(undefined)
     expect(validate(boolSchema, arrWithUndef).data).toStrictEqual(arrWithUndef)
     expect(validate(boolSchema, arrWithUndef).error).toBe(undefined)
-
-    const buffSchema = {
-      type: 'array',
-      of: { type: 'buffer', optional: true },
-    } as const satisfies Schema
-
-    const buffSubj = [Buffer.from('x'), Buffer.from('y')]
-
-    expect(validate(buffSchema, buffSubj).data).toStrictEqual(buffSubj)
-    expect(validate(buffSchema, buffSubj).error).toBe(undefined)
-    expect(validate(buffSchema, arrWithUndef).data).toStrictEqual(arrWithUndef)
-    expect(validate(buffSchema, arrWithUndef).error).toBe(undefined)
 
     const strUnionSchema = {
       type: 'array',
@@ -1020,7 +940,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 })
 
 describe('VALIDATE flow returns schema subject reference', () => {
-  it('validate: object -> array -> object -> buffer', () => {
+  it('validate: object -> array -> object -> number', () => {
     const schema = {
       type: 'object',
       of: {
@@ -1029,8 +949,8 @@ describe('VALIDATE flow returns schema subject reference', () => {
           of: {
             type: 'object',
             of: {
-              x: 'buffer',
-              y: 'buffer',
+              x: 'number',
+              y: 'number',
             },
           },
         },
@@ -1040,8 +960,8 @@ describe('VALIDATE flow returns schema subject reference', () => {
     const subject = {
       x: [
         {
-          x: Buffer.from('x'),
-          y: Buffer.from('y'),
+          x: 0,
+          y: 1,
         },
       ],
     }
@@ -1058,22 +978,22 @@ describe('VALIDATE flow returns schema subject reference', () => {
     expect(data.x[0]?.y === subject.x[0]?.y).toBe(true)
   })
 
-  it('validate: array -> object -> buffer', () => {
+  it('validate: array -> object -> number', () => {
     const schema = {
       type: 'array',
       of: {
         type: 'object',
         of: {
-          x: 'buffer',
-          y: 'buffer',
+          x: 'number',
+          y: 'number',
         },
       },
     } as const satisfies Schema
 
     const subject = [
       {
-        x: Buffer.from('x'),
-        y: Buffer.from('y'),
+        x: 0,
+        y: 1,
       },
     ]
 
@@ -1111,21 +1031,12 @@ describe('Check validate subject type constraints', () => {
 
     // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(() => validate('boolean', undefined)).not.toThrow()
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
-    expect(() => validate('boolean', Buffer.from('x'))).not.toThrow()
+    // @ts-expect-error argument of type 'string' is not assignable to parameter of type 'boolean'
+    expect(() => validate('boolean', 'x')).not.toThrow()
 
     expect(() => validate('boolean?', undefined)).not.toThrow()
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
-    expect(() => validate('boolean?', Buffer.from('x'))).not.toThrow()
-
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'Buffer'
-    expect(() => validate('buffer', undefined)).not.toThrow()
-    // @ts-expect-error 'string' is not assignable to parameter of type 'Buffer'
-    expect(() => validate('buffer', 'x')).not.toThrow()
-
-    expect(() => validate('buffer?', undefined)).not.toThrow()
-    // @ts-expect-error 'string' is not assignable to parameter of type 'Buffer'
-    expect(() => validate('buffer?', 'x')).not.toThrow()
+    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
+    expect(() => validate('boolean?', 'string')).not.toThrow()
   })
 
   it('validate: base detailed schema', () => {
@@ -1147,18 +1058,10 @@ describe('Check validate subject type constraints', () => {
 
     // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(() => validate({ type: 'boolean' }, undefined)).not.toThrow()
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
-    expect(() => validate({ type: 'boolean' }, Buffer.from('x'))).not.toThrow()
+    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
+    expect(() => validate({ type: 'boolean' }, 'x')).not.toThrow()
     expect(() =>
       validate({ type: 'boolean', optional: true }, undefined)
-    ).not.toThrow()
-
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'Buffer'
-    expect(() => validate({ type: 'buffer' }, undefined)).not.toThrow()
-    // @ts-expect-error 'string' is not assignable to parameter of type 'Buffer'
-    expect(() => validate({ type: 'buffer' }, 'x')).not.toThrow()
-    expect(() =>
-      validate({ type: 'buffer', optional: true }, undefined)
     ).not.toThrow()
 
     expect(() =>

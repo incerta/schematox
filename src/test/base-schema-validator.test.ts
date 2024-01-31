@@ -42,27 +42,6 @@ describe('Validate base short schema with valid subject', () => {
     expect(validateBaseSchemaSubject('boolean', false).data).toBe(false)
     expect(validateBaseSchemaSubject('boolean', false).error).toBe(undefined)
   })
-
-  it('validateBaseSchemaSubject: subject `Buffer` - schema `"buffer"`', () => {
-    expect(
-      Buffer.isBuffer(
-        validateBaseSchemaSubject('buffer', Buffer.from('x')).data
-      )
-    ).toBe(true)
-    expect(validateBaseSchemaSubject('buffer', Buffer.from('x')).error).toBe(
-      undefined
-    )
-  })
-  it('validateBaseSchemaSubject: subject `Buffer` - schema `"buffer?"`', () => {
-    expect(
-      Buffer.isBuffer(
-        validateBaseSchemaSubject('buffer?', Buffer.from('x')).data
-      )
-    ).toBe(true)
-    expect(validateBaseSchemaSubject('buffer?', Buffer.from('x')).error).toBe(
-      undefined
-    )
-  })
 })
 
 describe('Validate base short schema with `null | undefined` subject', () => {
@@ -228,48 +207,6 @@ describe('Validate base short schema with `null | undefined` subject', () => {
 
   it('validateBaseSchemaSubject: subject `null` - schema `"boolean?"`', () => {
     const schema = 'boolean?' satisfies Schema
-    const subject = null
-    const validated = validateBaseSchemaSubject(schema, subject)
-
-    expect(validated.data).toBe(undefined)
-  })
-
-  /* buffer | buffer? */
-
-  it('validateBaseSchemaSubject: subject `undefined` - schema `"buffer"`', () => {
-    const schema = 'buffer' satisfies Schema
-    const subject = undefined
-    const validated = validateBaseSchemaSubject(schema, subject)
-
-    expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.invalidType,
-      schema,
-      subject,
-    })
-  })
-
-  it('validateBaseSchemaSubject: subject `undefined` - schema `"buffer?"`', () => {
-    const schema = 'buffer?' satisfies Schema
-    const subject = undefined
-    const validated = validateBaseSchemaSubject(schema, subject)
-
-    expect(validated.data).toBe(undefined)
-  })
-
-  it('validateBaseSchemaSubject: subject `null` - schema `"buffer"`', () => {
-    const schema = 'buffer' satisfies Schema
-    const subject = null
-    const validated = validateBaseSchemaSubject(schema, subject)
-
-    expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.invalidType,
-      schema,
-      subject,
-    })
-  })
-
-  it('validateBaseSchemaSubject: subject `null` - schema `"buffer?"`', () => {
-    const schema = 'buffer?' satisfies Schema
     const subject = null
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -465,44 +402,6 @@ describe('Validate base short schema TYPE INFERENCE check', () => {
     // @ts-expect-error 'boolean | undefined' is not assignable to parameter of type 'boolean'
     check<boolean>(unknownX as typeof result.data)
   })
-
-  /* buffer/buffer? */
-
-  it('validateBaseSchemaSubject: buffer', () => {
-    const schema = 'buffer' satisfies Schema
-    const result = validateBaseSchemaSubject(schema, Buffer.from('x'))
-
-    if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: Buffer }>(
-        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<Buffer>(unknownX as typeof result.data)
-    // @ts-expect-error type 'Buffer' is not assignable to parameter of type 'string'
-    check<string>(unknownX as typeof result.data)
-  })
-
-  it('validateBaseSchemaSubject: buffer?', () => {
-    const schema = 'buffer?' satisfies Schema
-    const result = validateBaseSchemaSubject(schema, Buffer.from('x'))
-
-    if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: Buffer }>(
-        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<Buffer | undefined>(unknownX as typeof result.data)
-    // @ts-expect-error 'Buffer | undefined' is not assignable to parameter of type 'Buffer'
-    check<Buffer>(unknownX as typeof result.data)
-  })
 })
 
 describe('Validate base STRING detailed schema', () => {
@@ -546,14 +445,6 @@ describe('Validate base STRING detailed schema', () => {
     expect(validateBaseSchemaSubject(schema, booleanSubj).error).toEqual({
       ...error,
       subject: booleanSubj,
-    })
-
-    const bufferSubj = Buffer.from('x')
-
-    expect(validateBaseSchemaSubject(schema, bufferSubj).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, bufferSubj).error).toEqual({
-      ...error,
-      subject: bufferSubj,
     })
   })
 
@@ -700,14 +591,6 @@ describe('Validate base NUMBER detailed schema', () => {
     expect(validateBaseSchemaSubject(schema, booleanSubj).error).toEqual({
       ...error,
       subject: booleanSubj,
-    })
-
-    const bufferSubj = Buffer.from('x')
-
-    expect(validateBaseSchemaSubject(schema, bufferSubj).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, bufferSubj).error).toEqual({
-      ...error,
-      subject: bufferSubj,
     })
   })
 
@@ -894,14 +777,6 @@ describe('Validate base BOOLEAN detailed schema', () => {
       ...error,
       subject: numberSubj,
     })
-
-    const bufferSubj = Buffer.from('x')
-
-    expect(validateBaseSchemaSubject(schema, bufferSubj).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, bufferSubj).error).toEqual({
-      ...error,
-      subject: bufferSubj,
-    })
   })
 
   it('validateBaseSchemaSubject: optional schema with valid subject', () => {
@@ -945,160 +820,6 @@ describe('Validate base BOOLEAN detailed schema', () => {
       ...error,
       subject: numberSubj,
     })
-  })
-})
-
-describe('Validate base BUFFER detailed schema', () => {
-  it('validateBaseSchemaSubject: required schema with valid subject', () => {
-    const schema = { type: 'buffer' } as const satisfies Schema
-    const subject = Buffer.from('x')
-
-    expect(validateBaseSchemaSubject(schema, subject).data).toBe(subject)
-    expect(validateBaseSchemaSubject(schema, subject).error).toBe(undefined)
-  })
-
-  it('validateBaseSchemaSubject: required schema with invalid subject', () => {
-    const schema = { type: 'buffer' } as const satisfies Schema
-
-    const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
-      schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
-
-    const undefinedSubj = undefined
-
-    expect(validateBaseSchemaSubject(schema, undefinedSubj).data).toBe(
-      undefined
-    )
-    expect(validateBaseSchemaSubject(schema, undefinedSubj).error).toEqual({
-      ...error,
-      subject: undefinedSubj,
-    })
-
-    const numberSubj = 0
-
-    expect(validateBaseSchemaSubject(schema, numberSubj).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, numberSubj).error).toEqual({
-      ...error,
-      subject: numberSubj,
-    })
-
-    const booleanSubj = true
-
-    expect(validateBaseSchemaSubject(schema, booleanSubj).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, booleanSubj).error).toEqual({
-      ...error,
-      subject: booleanSubj,
-    })
-
-    const stringSubj = 'x'
-
-    expect(validateBaseSchemaSubject(schema, stringSubj).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, stringSubj).error).toEqual({
-      ...error,
-      subject: stringSubj,
-    })
-  })
-
-  it('validateBaseSchemaSubject: optional schema with valid subject', () => {
-    const schema = { type: 'buffer', optional: true } as const satisfies Schema
-    const bufferSubj = Buffer.from('x')
-
-    expect(validateBaseSchemaSubject(schema, bufferSubj).data).toBe(bufferSubj)
-    expect(validateBaseSchemaSubject(schema, bufferSubj).error).toBe(undefined)
-
-    const undefinedSubj = undefined
-
-    expect(validateBaseSchemaSubject(schema, undefinedSubj).data).toBe(
-      undefined
-    )
-    expect(validateBaseSchemaSubject(schema, undefinedSubj).error).toBe(
-      undefined
-    )
-  })
-
-  it('validateBaseSchemaSubject: optional schema with invalid subject', () => {
-    const schema = { type: 'buffer', optional: true } as const satisfies Schema
-    const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
-      schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
-
-    const numberSubj = 0
-
-    expect(validateBaseSchemaSubject(schema, numberSubj).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, numberSubj).error).toEqual({
-      ...error,
-      subject: numberSubj,
-    })
-
-    const booleanSubj = true
-
-    expect(validateBaseSchemaSubject(schema, booleanSubj).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, booleanSubj).error).toEqual({
-      ...error,
-      subject: booleanSubj,
-    })
-  })
-
-  it('validateBaseSchemaSubject: minLength schema with valid subject', () => {
-    const schema = {
-      type: 'buffer',
-      minLength: 1,
-    } as const satisfies Schema
-
-    const subject = Buffer.from('x')
-
-    expect(validateBaseSchemaSubject(schema, subject).data).toBe(subject)
-    expect(validateBaseSchemaSubject(schema, subject).error).toBe(undefined)
-  })
-
-  it('validateBaseSchemaSubject: minLength schema with invalid subject', () => {
-    const schema = {
-      type: 'buffer',
-      minLength: 2,
-    } as const satisfies Schema
-
-    const subject = Buffer.from('x')
-
-    const error = {
-      code: VALIDATE_ERROR_CODE.minRange,
-      schema,
-      subject,
-    } satisfies BaseSchemaValidateError
-
-    expect(validateBaseSchemaSubject(schema, subject).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, subject).error).toEqual(error)
-  })
-
-  it('validateBaseSchemaSubject: maxLength schema with valid subject', () => {
-    const schema = {
-      type: 'buffer',
-      maxLength: 1,
-    } as const satisfies Schema
-
-    const subject = Buffer.from('x')
-
-    expect(validateBaseSchemaSubject(schema, subject).data).toBe(subject)
-    expect(validateBaseSchemaSubject(schema, subject).error).toBe(undefined)
-  })
-
-  it('validateBaseSchemaSubject: minLength schema with invalid subject', () => {
-    const schema = {
-      type: 'buffer',
-      maxLength: 1,
-    } as const satisfies Schema
-
-    const subject = Buffer.from('xx')
-
-    const error = {
-      code: VALIDATE_ERROR_CODE.maxRange,
-      schema,
-      subject,
-    } satisfies BaseSchemaValidateError
-
-    expect(validateBaseSchemaSubject(schema, subject).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, subject).error).toEqual(error)
   })
 })
 
@@ -1155,14 +876,6 @@ describe('Validate base STRING UNION detailed schema', () => {
     expect(validateBaseSchemaSubject(schema, booleanSubj).error).toEqual({
       ...error,
       subject: booleanSubj,
-    })
-
-    const bufferSubj = Buffer.from('x')
-
-    expect(validateBaseSchemaSubject(schema, bufferSubj).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, bufferSubj).error).toEqual({
-      ...error,
-      subject: bufferSubj,
     })
 
     const stringZSubj = 'z'
@@ -1305,14 +1018,6 @@ describe('Validate base NUMBER UNION detailed schema', () => {
     expect(validateBaseSchemaSubject(schema, booleanSubj).error).toEqual({
       ...error,
       subject: booleanSubj,
-    })
-
-    const bufferSubj = Buffer.from('x')
-
-    expect(validateBaseSchemaSubject(schema, bufferSubj).data).toBe(undefined)
-    expect(validateBaseSchemaSubject(schema, bufferSubj).error).toEqual({
-      ...error,
-      subject: bufferSubj,
     })
 
     const number2Subj = 2
@@ -1518,44 +1223,6 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
 
     check<boolean | undefined>(unknownX as typeof result.data)
     // @ts-expect-error 'boolean | undefined' is not 'string | undefined'
-    check<string | undefined>(unknownX as typeof result.data)
-  })
-
-  /* buffer required/optional */
-
-  it('validateBaseSchemaSubject: buffer required', () => {
-    const schema = { type: 'buffer' } as const satisfies Schema
-    const result = validateBaseSchemaSubject(schema, Buffer.from('x'))
-
-    if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: Buffer }>(
-        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<Buffer>(unknownX as typeof result.data)
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'string'
-    check<string>(unknownX as typeof result.data)
-  })
-
-  it('validateBaseSchemaSubject: buffer optional', () => {
-    const schema = { type: 'buffer', optional: true } as const satisfies Schema
-    const result = validateBaseSchemaSubject(schema, undefined)
-
-    if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: Buffer }>(
-        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<Buffer | undefined>(unknownX as typeof result.data)
-    // @ts-expect-error 'Buffer | undefined' is not 'string | undefined'
     check<string | undefined>(unknownX as typeof result.data)
   })
 

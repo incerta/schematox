@@ -6,7 +6,6 @@ import { object } from '../programmatic-schema/object'
 import { string } from '../programmatic-schema/string'
 import { number } from '../programmatic-schema/number'
 import { boolean } from '../programmatic-schema/boolean'
-import { buffer } from '../programmatic-schema/buffer'
 import { stringUnion } from '../programmatic-schema/string-union'
 import { numberUnion } from '../programmatic-schema/number-union'
 
@@ -88,39 +87,6 @@ describe('X closure statically defined schema VALID', () => {
 
     expect(x('boolean?').validate(undefined).data).toBe(undefined)
     expect(x('boolean?').validate(undefined).error).toBe(undefined)
-
-    /* buffer/buffer? parse */
-
-    expect(x('buffer').parse(Buffer.from('x')).data).toStrictEqual(
-      Buffer.from('x')
-    )
-    expect(x('buffer').parse(Buffer.from('x')).error).toBe(undefined)
-
-    expect(x('buffer?').parse(Buffer.from('x')).data).toStrictEqual(
-      Buffer.from('x')
-    )
-    expect(x('buffer?').parse(Buffer.from('x')).error).toBe(undefined)
-
-    expect(x('buffer?').parse(undefined).data).toBe(undefined)
-    expect(x('buffer?').parse(undefined).error).toBe(undefined)
-
-    expect(x('buffer?').parse(null).data).toBe(undefined)
-    expect(x('buffer?').parse(null).error).toBe(undefined)
-
-    /* buffer/buffer? validate */
-
-    expect(x('buffer').validate(Buffer.from('x')).data).toStrictEqual(
-      Buffer.from('x')
-    )
-    expect(x('buffer').validate(Buffer.from('x')).error).toBe(undefined)
-
-    expect(x('buffer?').validate(Buffer.from('x')).data).toStrictEqual(
-      Buffer.from('x')
-    )
-    expect(x('buffer?').validate(Buffer.from('x')).error).toBe(undefined)
-
-    expect(x('buffer?').validate(undefined).data).toBe(undefined)
-    expect(x('buffer?').validate(undefined).error).toBe(undefined)
   })
 
   it('x: base detailed string schema required/optional/default parse/validate', () => {
@@ -253,33 +219,6 @@ describe('X closure statically defined schema VALID', () => {
 
     expect(boolDef.validate(undefined).data).toBe(undefined)
     expect(boolDef.validate(undefined).error).toBe(undefined)
-  })
-
-  it('x: base detailed buffer schema required/optional parse/validate', () => {
-    const buff = x({ type: 'buffer' })
-    const subj = Buffer.from('x')
-
-    expect(buff.parse(subj).data).toBe(subj)
-    expect(buff.parse(subj).error).toBe(undefined)
-
-    expect(buff.validate(subj).data).toBe(subj)
-    expect(buff.validate(subj).error).toBe(undefined)
-
-    const buffOpt = x({ type: 'buffer', optional: true })
-
-    expect(buffOpt.parse(subj).data).toBe(subj)
-    expect(buffOpt.parse(subj).error).toBe(undefined)
-
-    expect(buffOpt.parse(undefined).data).toBe(undefined)
-    expect(buffOpt.parse(undefined).error).toBe(undefined)
-    expect(buffOpt.parse(null).data).toBe(undefined)
-    expect(buffOpt.parse(null).error).toBe(undefined)
-
-    expect(buffOpt.validate(subj).data).toBe(subj)
-    expect(buffOpt.validate(subj).error).toBe(undefined)
-
-    expect(buffOpt.validate(undefined).data).toBe(undefined)
-    expect(buffOpt.validate(undefined).error).toBe(undefined)
   })
 
   it('x: base detailed stringUnion schema required/optional/default parse/validate', () => {
@@ -521,7 +460,7 @@ describe('X closure statically defined schema INVALID', () => {
   })
 
   it('x: base short boolean optional/required schema parse/validate', () => {
-    const boolInvSubj = Buffer.from('x')
+    const boolInvSubj = 'x'
     const boolReq = x('boolean')
 
     expect(boolReq.parse(undefined).data).toBe(undefined)
@@ -538,64 +477,20 @@ describe('X closure statically defined schema INVALID', () => {
     // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
-    expect(boolReq.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
-    expect(boolReq.validate(boolInvSubj).error).toMatchObject(errV)
-
     const boolOpt = x('boolean?')
 
     expect(boolOpt.parse(boolInvSubj).data).toBe(undefined)
     expect(boolOpt.parse(boolInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
+    // @ts-expect-error 'x' is not assignable to parameter of type 'boolean'
     expect(boolOpt.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
+    // @ts-expect-error 'x' is not assignable to parameter of type 'boolean'
     expect(boolOpt.validate(boolInvSubj).error).toMatchObject(errV)
 
     // @ts-expect-error 'null' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(null).data).toBe(undefined)
     // @ts-expect-error 'null' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(null).error).toMatchObject(errV)
-  })
-
-  it('x: base short buffer optional/required schema parse/validate', () => {
-    const bufInvSubj = 'x'
-    const bufReq = x('buffer')
-
-    expect(bufReq.parse(undefined).data).toBe(undefined)
-    expect(bufReq.parse(undefined).error).toMatchObject(errP)
-
-    expect(bufReq.parse(null).data).toBe(undefined)
-    expect(bufReq.parse(null).error).toMatchObject(errP)
-
-    expect(bufReq.parse(bufInvSubj).data).toBe(undefined)
-    expect(bufReq.parse(bufInvSubj).error).toMatchObject(errP)
-
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'Buffer'
-    expect(bufReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'Buffer'
-    expect(bufReq.validate(undefined).error).toMatchObject(errV)
-
-    // @ts-expect-error 'string' is not assignable to parameter of type 'Buffer'
-    expect(bufReq.validate(bufInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'Buffer'
-    expect(bufReq.validate(bufInvSubj).error).toMatchObject(errV)
-
-    const bufOpt = x('buffer?')
-
-    expect(bufOpt.parse(bufInvSubj).data).toBe(undefined)
-    expect(bufOpt.parse(bufInvSubj).error).toMatchObject(errP)
-
-    // @ts-expect-error 'string' is not assignable to parameter of type 'Buffer'
-    expect(bufOpt.validate(bufInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'Buffer'
-    expect(bufOpt.validate(bufInvSubj).error).toMatchObject(errV)
-
-    // @ts-expect-error 'null' is not assignable to parameter of type 'Buffer | undefined'
-    expect(bufOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'Buffer | undefined'
-    expect(bufOpt.validate(null).error).toMatchObject(errV)
   })
 
   it('x: base detailed string optional/required schema parse/validate', () => {
@@ -677,7 +572,7 @@ describe('X closure statically defined schema INVALID', () => {
   })
 
   it('x: base detailed boolean optional/required schema parse/validate', () => {
-    const boolInvSubj = Buffer.from('x')
+    const boolInvSubj = 'x'
     const boolReq = x({ type: 'boolean' })
 
     expect(boolReq.parse(undefined).data).toBe(undefined)
@@ -694,9 +589,9 @@ describe('X closure statically defined schema INVALID', () => {
     // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
+    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
+    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(boolInvSubj).error).toMatchObject(errV)
 
     const boolOpt = x({ type: 'boolean', optional: true })
@@ -704,9 +599,9 @@ describe('X closure statically defined schema INVALID', () => {
     expect(boolOpt.parse(boolInvSubj).data).toBe(undefined)
     expect(boolOpt.parse(boolInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean | undefined'
+    // @ts-expect-error 'x' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean | undefined'
+    // @ts-expect-error 'x' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(boolInvSubj).error).toMatchObject(errV)
 
     // @ts-expect-error 'null' is not assignable to parameter of type 'boolean | undefined'
@@ -1009,33 +904,6 @@ describe('X closure programmatically defined schema VALID', () => {
     expect(boolDef.validate(undefined).error).toBe(undefined)
   })
 
-  it('x: base buffer schema required/optional parse/validate', () => {
-    const buff = x(buffer())
-    const subj = Buffer.from('x')
-
-    expect(buff.parse(subj).data).toBe(subj)
-    expect(buff.parse(subj).error).toBe(undefined)
-
-    expect(buff.validate(subj).data).toBe(subj)
-    expect(buff.validate(subj).error).toBe(undefined)
-
-    const buffOpt = x(buffer().optional())
-
-    expect(buffOpt.parse(subj).data).toBe(subj)
-    expect(buffOpt.parse(subj).error).toBe(undefined)
-
-    expect(buffOpt.parse(undefined).data).toBe(undefined)
-    expect(buffOpt.parse(undefined).error).toBe(undefined)
-    expect(buffOpt.parse(null).data).toBe(undefined)
-    expect(buffOpt.parse(null).error).toBe(undefined)
-
-    expect(buffOpt.validate(subj).data).toBe(subj)
-    expect(buffOpt.validate(subj).error).toBe(undefined)
-
-    expect(buffOpt.validate(undefined).data).toBe(undefined)
-    expect(buffOpt.validate(undefined).error).toBe(undefined)
-  })
-
   it('x: base stringUnion schema required/optional/default parse/validate', () => {
     const unOf = ['x', 'y', 'z'] as const
     const strUn = x(stringUnion(...unOf))
@@ -1273,7 +1141,7 @@ describe('X closure programmatically defined schema INVALID', () => {
   })
 
   it('x: base boolean optional/required schema parse/validate', () => {
-    const boolInvSubj = Buffer.from('x')
+    const boolInvSubj = 'x'
     const boolReq = x(boolean())
 
     expect(boolReq.parse(undefined).data).toBe(undefined)
@@ -1290,9 +1158,9 @@ describe('X closure programmatically defined schema INVALID', () => {
     // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
+    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean'
+    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(boolInvSubj).error).toMatchObject(errV)
 
     const boolOpt = x(boolean().optional())
@@ -1300,9 +1168,9 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(boolOpt.parse(boolInvSubj).data).toBe(undefined)
     expect(boolOpt.parse(boolInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean | undefined'
+    // @ts-expect-error '"x"' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'Buffer' is not assignable to parameter of type 'boolean | undefined'
+    // @ts-expect-error '"x"' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(boolInvSubj).error).toMatchObject(errV)
 
     // @ts-expect-error 'null' is not assignable to parameter of type 'boolean | undefined'

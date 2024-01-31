@@ -604,18 +604,18 @@ describe('Construct ObjectSchema subject type PARSED', () => {
   })
 
   it('Con_ObjectSchema_SubjT_P<T>: check nested ObjectSchema subject type construction', () => {
-    check<{ x: { a: string; b: number }; y: { c: boolean; d: Buffer } }>(
+    check<{ x: { a: string; b: number }; y: { c: boolean; d: string } }>(
       unknownX as Con_ObjectSchema_SubjT_P<{
         type: 'object'
         of: {
           x: { type: 'object'; of: { a: 'string'; b: 'number' } }
-          y: { type: 'object'; of: { c: 'boolean'; d: 'buffer' } }
+          y: { type: 'object'; of: { c: 'boolean'; d: 'string' } }
         }
       }>
     )
 
-    check<{ x: { a: string; b: number }; y: { c: boolean; d: Buffer } }>(
-      // @ts-expect-error 'y.d' are incompatible; 'string' is not  'Buffer'
+    check<{ x: { a: string; b: number }; y: { c: boolean; d: number } }>(
+      // @ts-expect-error 'y.d' are incompatible; 'string' is not  'number'
       unknownX as Con_ObjectSchema_SubjT_P<{
         type: 'object'
         of: {
@@ -802,18 +802,18 @@ describe('Construct ObjectSchema subject type VALIDATED', () => {
   })
 
   it('Con_ObjectSchema_SubjT_V<T>: check nested ObjectSchema subject type construction', () => {
-    check<{ x: { a: string; b: number }; y: { c: boolean; d: Buffer } }>(
+    check<{ x: { a: string; b: number }; y: { c: boolean; d: string } }>(
       unknownX as Con_ObjectSchema_SubjT_V<{
         type: 'object'
         of: {
           x: { type: 'object'; of: { a: 'string'; b: 'number' } }
-          y: { type: 'object'; of: { c: 'boolean'; d: 'buffer' } }
+          y: { type: 'object'; of: { c: 'boolean'; d: 'string' } }
         }
       }>
     )
 
-    check<{ x: { a: string; b: number }; y: { c: boolean; d: Buffer } }>(
-      // @ts-expect-error 'y.d' are incompatible; 'string' is not  'Buffer'
+    check<{ x: { a: string; b: number }; y: { c: boolean; d: number } }>(
+      // @ts-expect-error 'y.d' are incompatible; 'string' is not 'number'
       unknownX as Con_ObjectSchema_SubjT_V<{
         type: 'object'
         of: {

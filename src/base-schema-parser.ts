@@ -9,12 +9,7 @@ import type {
 } from './types/compound-schema-types'
 import type { BaseSchemaParseError } from './error'
 
-export type BaseSchemaSubjectType =
-  | string
-  | number
-  | boolean
-  | Buffer
-  | undefined
+export type BaseSchemaSubjectType = string | number | boolean | undefined
 
 export function parseBaseSchemaSubject<T extends BaseSchema>(
   schema: T,
@@ -86,25 +81,6 @@ export function parseBaseSchemaSubject(
         if (typeof subject !== 'boolean') {
           if (subject === null || subject === undefined) {
             if (schema === 'boolean?') {
-              return data(undefined)
-            }
-          }
-
-          return error({
-            code: PARSE_ERROR_CODE.invalidType,
-            schema,
-            subject,
-          })
-        }
-
-        return data(subject)
-      }
-
-      case 'buffer?':
-      case 'buffer': {
-        if (Buffer.isBuffer(subject) === false) {
-          if (subject === null || subject === undefined) {
-            if (schema === 'buffer?') {
               return data(undefined)
             }
           }
@@ -231,44 +207,6 @@ export function parseBaseSchemaSubject(
           schema,
           subject,
         })
-      }
-
-      return data(subject)
-    }
-
-    case 'buffer': {
-      if (Buffer.isBuffer(subject) === false) {
-        if (subject === undefined || subject === null) {
-          if (schema.optional) {
-            return data(undefined)
-          }
-        }
-
-        return error({
-          code: PARSE_ERROR_CODE.invalidType,
-          schema,
-          subject,
-        })
-      }
-
-      if (typeof schema.minLength === 'number') {
-        if (subject.length < schema.minLength) {
-          return error({
-            code: PARSE_ERROR_CODE.minRange,
-            schema,
-            subject,
-          })
-        }
-      }
-
-      if (typeof schema.maxLength === 'number') {
-        if (subject.length > schema.maxLength) {
-          return error({
-            code: PARSE_ERROR_CODE.maxRange,
-            schema,
-            subject,
-          })
-        }
       }
 
       return data(subject)

@@ -21,7 +21,6 @@ export function parse(
     schema.type === 'string' ||
     schema.type === 'number' ||
     schema.type === 'boolean' ||
-    schema.type === 'buffer' ||
     schema.type === 'stringUnion' ||
     schema.type === 'numberUnion'
   ) {

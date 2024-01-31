@@ -8,12 +8,7 @@ import type {
 } from './types/compound-schema-types'
 import type { BaseSchemaValidateError } from './error'
 
-export type BaseSchemaSubjectType =
-  | string
-  | number
-  | boolean
-  | Buffer
-  | undefined
+export type BaseSchemaSubjectType = string | number | boolean | undefined
 
 export function validateBaseSchemaSubject<T extends BaseSchema>(
   schema: T,
@@ -80,23 +75,6 @@ export function validateBaseSchemaSubject(
       case 'boolean': {
         if (typeof subject !== 'boolean') {
           if (subject === undefined && schema === 'boolean?') {
-            return data(undefined)
-          }
-
-          return error({
-            code: VALIDATE_ERROR_CODE.invalidType,
-            schema,
-            subject,
-          })
-        }
-
-        return data(subject)
-      }
-
-      case 'buffer?':
-      case 'buffer': {
-        if (Buffer.isBuffer(subject) === false) {
-          if (subject === undefined && schema === 'buffer?') {
             return data(undefined)
           }
 
@@ -212,42 +190,6 @@ export function validateBaseSchemaSubject(
           schema,
           subject,
         })
-      }
-
-      return data(subject)
-    }
-
-    case 'buffer': {
-      if (Buffer.isBuffer(subject) === false) {
-        if (subject === undefined && schema.optional) {
-          return data(undefined)
-        }
-
-        return error({
-          code: VALIDATE_ERROR_CODE.invalidType,
-          schema,
-          subject,
-        })
-      }
-
-      if (typeof schema.minLength === 'number') {
-        if (subject.length < schema.minLength) {
-          return error({
-            code: VALIDATE_ERROR_CODE.minRange,
-            schema,
-            subject,
-          })
-        }
-      }
-
-      if (typeof schema.maxLength === 'number') {
-        if (subject.length > schema.maxLength) {
-          return error({
-            code: VALIDATE_ERROR_CODE.maxRange,
-            schema,
-            subject,
-          })
-        }
       }
 
       return data(subject)
