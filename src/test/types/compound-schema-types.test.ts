@@ -246,57 +246,62 @@ describe('Construct ArraySchema subject type PARSED', () => {
     )
   })
 
-  it('Con_ArraySchema_SubjT_P<T>: should ignore nested BaseSchema optionality', () => {
-    check<string[]>(
+  it('Con_ArraySchema_SubjT_P<T>: must not ignore nested BaseSchema optionality', () => {
+    check<Array<string | undefined>>(
       unknownX as Con_ArraySchema_SubjT_P<{ type: 'array'; of: 'string?' }>
     )
-    check<string[]>(
-      // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
-      unknownX as Con_ArraySchema_SubjT_P<{ type: 'array'; of: 'number?' }>
+    check<Array<string>>(
+      // @ts-expect-error '(string | undefined)[]' is not assignable to parameter of type 'string[]'
+      unknownX as Con_ArraySchema_SubjT_P<{ type: 'array'; of: 'string?' }>
     )
-    check<string[]>(
-      unknownX as Con_ArraySchema_SubjT_P<{
-        type: 'array'
-        of: { type: 'string'; optional: true }
-      }>
-    )
-    check<string[]>(
-      // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
-      unknownX as Con_ArraySchema_SubjT_P<{
-        type: 'array'
-        of: { type: 'number'; optional: true }
-      }>
+    check<Array<number | undefined>>(
+      // @ts-expect-error '(string | undefined)[]' is not '(number | undefined)[]'
+      unknownX as Con_ArraySchema_SubjT_P<{ type: 'array'; of: 'string?' }>
     )
   })
 
-  it('Con_ArraySchema_SubjT_P<T>: should ignore nested ArraySchema optionality', () => {
-    check<string[][]>(
+  it('Con_ArraySchema_SubjT_P<T>: must not ignore nested ArraySchema optionality', () => {
+    check<Array<string[] | undefined>>(
       unknownX as Con_ArraySchema_SubjT_P<{
         type: 'array'
         of: { type: 'array'; of: 'string'; optional: true }
       }>
     )
-    check<string[][]>(
-      // @ts-expect-error 'number[][]' is not assignable to parameter of type 'string[][]'
+    check<Array<string[]>>(
+      // @ts-expect-error '(string[] | undefined)[]' is not assignable to parameter of type 'string[][]'
       unknownX as Con_ArraySchema_SubjT_P<{
         type: 'array'
-        of: { type: 'array'; of: 'number'; optional: true }
+        of: { type: 'array'; of: 'string'; optional: true }
+      }>
+    )
+    check<Array<number[] | undefined>>(
+      // @ts-expect-error '(string[] | undefined)[]' is not '(number[] | undefined)[]'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'array'; of: 'string'; optional: true }
       }>
     )
   })
 
-  it('Con_ArraySchema_SubjT_P<T>: should ignore nested ObjectSchema optionality', () => {
-    check<Array<{ x: string }>>(
+  it('Con_ArraySchema_SubjT_P<T>: must not ignore ObjectSchema optionality', () => {
+    check<Array<{ x: string } | undefined>>(
       unknownX as Con_ArraySchema_SubjT_P<{
         type: 'array'
         of: { type: 'object'; of: { x: 'string' }; optional: true }
       }>
     )
     check<Array<{ x: string }>>(
-      // @ts-expect-error 'number' is not assignable to type 'string'
+      // @ts-expect-error '({ x: string; } | undefined)[]' is not '{ x: string; }[]'
       unknownX as Con_ArraySchema_SubjT_P<{
         type: 'array'
-        of: { type: 'object'; of: { x: 'number' }; optional: true }
+        of: { type: 'object'; of: { x: 'string' }; optional: true }
+      }>
+    )
+    check<Array<{ x: number } | undefined>>(
+      // @ts-expect-error '({ x: string; } | undefined)[]' is not '({ x: number; } | undefined)[]'
+      unknownX as Con_ArraySchema_SubjT_P<{
+        type: 'array'
+        of: { type: 'object'; of: { x: 'string' }; optional: true }
       }>
     )
   })
@@ -580,8 +585,8 @@ describe('Construct ObjectSchema subject type PARSED', () => {
     )
   })
 
-  it('Con_ObjectSchema_SubjT_P<T>: nested ArraySchema should ignore its nested schema optionality', () => {
-    check<{ x: string[]; y: number[] }>(
+  it('Con_ObjectSchema_SubjT_P<T>: nested ArraySchema must not ignore its nested schema optionality', () => {
+    check<{ x: Array<string | undefined>; y: Array<number | undefined> }>(
       unknownX as Con_ObjectSchema_SubjT_P<{
         type: 'object'
         of: {
@@ -590,14 +595,12 @@ describe('Construct ObjectSchema subject type PARSED', () => {
         }
       }>
     )
-
-    check<{ x: string[]; y: number[] }>(
-      // @ts-expect-error 'string' is not assignable to type 'number'
+    check<{ x: Array<string | undefined>; y: Array<number | undefined> }>(
       unknownX as Con_ObjectSchema_SubjT_P<{
         type: 'object'
         of: {
           x: { type: 'array'; of: 'string?' }
-          y: { type: 'array'; of: 'string?' }
+          y: { type: 'array'; of: 'number?' }
         }
       }>
     )
@@ -910,7 +913,7 @@ describe('Construct ObjectSchema subject type VALIDATED', () => {
   })
 })
 
-describe('Construct Schema subject type PARSED/VALIDATED diff', () => {
+describe('Construct Schema subject type PARSED/VALIDATED differences', () => {
   it('BaseSchema default property subject type diff depending on the SubjT_P/Subj_V context', () => {
     const stringSchemaWithDefaultProperty = {
       type: 'string',
@@ -927,24 +930,6 @@ describe('Construct Schema subject type PARSED/VALIDATED diff', () => {
     check<string>(
       // @ts-expect-error 'string | undefined' is not assignable to parameter of type 'string'
       unknownX as Con_Schema_SubjT_V<typeof stringSchemaWithDefaultProperty>
-    )
-  })
-
-  it('ArraySchema optional property subject type diff depending on the SubjT_P/Subj_V context', () => {
-    const arraySchemaWithOptionalNestedSchema = {
-      type: 'array',
-      of: { type: 'string', optional: true },
-    } as const satisfies Schema
-
-    check<string[]>(
-      unknownX as Con_Schema_SubjT_P<typeof arraySchemaWithOptionalNestedSchema>
-    )
-    check<(string | undefined)[]>(
-      unknownX as Con_Schema_SubjT_V<typeof arraySchemaWithOptionalNestedSchema>
-    )
-    check<string[]>(
-      // @ts-expect-error '(string | undefined)[]' is not assignable to parameter of type 'string[]'
-      unknownX as Con_Schema_SubjT_V<typeof arraySchemaWithOptionalNestedSchema>
     )
   })
 
@@ -1417,11 +1402,11 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
         arraySchema: {
           required: {
             requiredString: string[]
-            optionalString: string[]
+            optionalString: (string | undefined)[]
           }
           optional: {
             requiredString?: string[]
-            optionalString?: string[]
+            optionalString?: (string | undefined)[]
           }
         }
       }
@@ -1454,16 +1439,16 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
           required: {
             requiredString: string[]
             requiredStringBranded: Array<string & { __K: 'V' }>
-            optionalString: string[]
-            optionalStringBranded: Array<string & { __K: 'V' }>
+            optionalString: (undefined | string)[]
+            optionalStringBranded: Array<(string & { __K: 'V' }) | undefined>
             optionalStringDefault: string[]
             optionalStringDefaultBranded: Array<string & { __K: 'V' }>
           }
           optional?: {
             requiredString?: string[]
             requiredStringBranded?: Array<string & { __K: 'V' }>
-            optionalString?: string[]
-            optionalStringBranded?: Array<string & { __K: 'V' }>
+            optionalString?: (string | undefined)[]
+            optionalStringBranded?: Array<(string & { __K: 'V' }) | undefined>
             optionalStringDefault?: string[]
             optionalStringDefaultBranded?: Array<string & { __K: 'V' }>
           }

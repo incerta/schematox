@@ -348,6 +348,17 @@ describe('X closure statically defined schema VALID', () => {
     expect(strOpt.validate(undefined).error).toBe(undefined)
   })
 
+  it('x: compound array required schema inner optional parse/validate', () => {
+    const str = x({ type: 'array', of: 'string?' })
+    const subj = [undefined, 'x', undefined]
+
+    expect(str.parse(subj).data).toStrictEqual(subj)
+    expect(str.parse(subj).error).toBe(undefined)
+
+    expect(str.validate(subj).data).toStrictEqual(subj)
+    expect(str.validate(subj).error).toBe(undefined)
+  })
+
   it('x: compound object schema required/optional parse/validate', () => {
     const str = x({ type: 'object', of: { x: 'string' } })
     const subj = { x: 'x' }
