@@ -63,12 +63,6 @@ export type ExtWith_CompoundSchemaOptionality<
   U,
 > = T extends { optional: true } ? U | undefined : U
 
-// TODO: should work as expected only if we add `& {}`
-//        which is currently forbidden by our linter
-export type Prettify_ObjectSchema_SubjT<T> = {
-  [k in keyof T]: T[k]
-}
-
 /* Construct ArraySchema subject type */
 
 export type Con_ArraySchema_SubjT_P<T extends ArraySchema> =
@@ -76,11 +70,11 @@ export type Con_ArraySchema_SubjT_P<T extends ArraySchema> =
     T,
     T extends { of: infer U }
       ? U extends BaseSchema
-        ? Array<NonNullable<Con_BaseSchema_SubjT_P<U>>>
+        ? Array<Con_BaseSchema_SubjT_P<U>>
         : U extends ArraySchema
-          ? Array<NonNullable<Con_ArraySchema_SubjT_P<U>>>
+          ? Array<Con_ArraySchema_SubjT_P<U>>
           : U extends ObjectSchema
-            ? Array<NonNullable<Con_ObjectSchema_SubjT_P<U>>>
+            ? Array<Con_ObjectSchema_SubjT_P<U>>
             : never
       : never
   >

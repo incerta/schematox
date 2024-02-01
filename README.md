@@ -4,19 +4,17 @@ SchmatoX is a lightweight library for creating JSON compatible schemas. The subj
 
 ## Pros
 
-- The statically defined JSON compatible schema is a killer feature:
-  - It has great potential for automation in the context of DB model creation, CRUD backends, documentation, outer interface requirements etc.
-  - One can store schema changes as static JSON and potentially use it for creating coherent DB Model migration logic.
-  - One can check if the defined schema is compatible with our constraints using the "as const satisfies Schema".
-- Programmatically defined schemas are also supported, but as a means of creating statically defined schemas.
-- There is a clear separation of concerns for validating and parsing logic.
-  - The Schematox parser is used for dealing with an outer interface where the data type is not guaranteed.
-  - The Schematox validator is used for dealing with an internal interface where the data type is known.
-- Schematox uses an Ether-style error handling system. It never throws an error on an unsuccessful schema subject check. Instead, our parser/validator always returns an `EitherError` object.
-- We offer first-class support for branded base schema types.
+- The statically defined JSON compatible schema
+- Check defined schema correctness using non generic type `Schema`
+- Programmatically defined schemas supported as mean of creation statically defined schema
+- Clear separation of concerns for validating and parsing logic:
+  - Parser is used for dealing with an outer uknnown interface
+  - Validator is used for dealing with an internal known interface
+- Schematox uses an Ether-style error handling
+- We offer first-class support for branded base schema primitive types
 - We have zero dependencies. The runtime code logic is small and easy to grasp, consisting of just a couple of functions. Most of the library code is tests and types.
 
-Essentially, to define a schema, one doesn't even need to import any functions from our library, only the `Schema` type. This approach does come with a few limitations. The first is `stringUnion` and `numberUnion` schema default values are not constrained by the defined union choices, only the primitive type. We might fix this issue later, but for now, we prioritize this over the case when `default` extends union choice by its definition.
+Essentially, to define a schema, one doesn't need to import any functions from our library, only the `as const satisfies Schema` statement. This approach does come with a few limitations. The first is `stringUnion` and `numberUnion` schema default values are not constrained by the defined union choices, only the primitive type. We might fix this issue later, but for now, we prioritize this over the case when `default` extends union choice by its definition.
 
 A second limitation is the depth of the compound schema data structure. Currently, we support 7 layers of depth. It's easy to increase this number, but because of the exponential nature of stored type variants in memory, we want to determine how much RAM each next layer will use before increasing it.
 
@@ -24,11 +22,13 @@ It's crucial to separate parsing/validation logic from the schema itself. Librar
 
 ## Cons
 
+- The library is not ready for production yet, the version is 0 and public API might be changed
 - Currently we support only 7 layers of compound structure depth but most likely it will be higher soon
 - We do not support records, discriminated unions, object unions, array unions, intersections, functions, NaN, Infinity and other not JSON compatible structures
 - Null value is acceptable by the parser but will be treated as undefined and transformed to undefined
 - Null value is not acceptable by the validator
-- We only plan to support custom parser/normalizer integration logic.
+
+Check out [github issues](https://github.com/incerta/schematox/issues) of the project to know what we are planning to support soon.
 
 ## Installation
 
@@ -336,37 +336,16 @@ The `result.error` will be:
 
 ## Parse/validate differences
 
-The parser provides a new object/primitive without references to the evaluated subject. This functionality is responsible for clearing the `array` schema result value from `undefined` optional schema values.
+The parser returns `data` as new object/primitive without references to the parsed subject. Parser manages the `null` value as `undefined` and subsequently replaces it with `undefined`. It also swaps `optional` values with the `default` value from schema. One can infer schema parsed subject type by using `XParsed<typeof schema>` generic.
 
-Moreover, the parser manages the `null` value as `undefined` and subsequently replaces it with `undefined`. It also swaps `optional` values with the `default` value, provided that the default values are explicitly stated in the schema.
+The validator on the other hand returns the evaluated subject itself and not applying any mutation/transformation to it. The validator should be used in exceptional cases when we known subject type but not sure that it actually correct. One can infer schema validated subject type by using `XValidated<typeof schema>` generic.
 
-Particularly for this last function, the parser uses a separate type inference flow. This flow is accessible for the library user via the type generic `XParsed<T extends Schema>`. By leveraging this mechanism, the user can simplify the process and enhance efficiency.
+So the difference between `XParsed` and `XValidated` is just about handling `default` schema value. `XParsed` narrows optional schema subject type with default value in the way that it will not be optional, because optional `undefined` and `null` values will be replaced by the `default`. `XValidated` just ignores `default` schema value.
 
-The validator operates by returning a reference to the original object, rather than applying any form of mutations to it. This is a significant feature because it disregards the schema’s default values.
-
-Furthermore, the validator incorporates a type inference flow distinct from the parser's. Available for utilization through the type generic `XValidated<T extends Schema>`.
-
-Examples of described differences:
+Examples:
 
 ```typescript
 const optionalStrX = x('string?')
-
-/* Parser treats `null` as `undefined` */
-
-expect(optionalStrX.parse(null).data).toBe(undefined)
-expect(optionalStrX.parse(null).error).toBe(undefined)
-
-/* Validator is not */
-
-// @ts-expect-error 'null' is not assignable to parameter of type 'string | undefined'
-expect(optionalStrX.validate(null).error).toStrictEqual([
-  {
-    code: 'INVALID_TYPE',
-    schema: 'string?',
-    subject: null,
-    path: [],
-  },
-])
 
 /* Parser doesn't check subject type */
 
@@ -381,12 +360,29 @@ expect(optionalStrX.parse(0).error).toStrictEqual([
 
 /* Validator does */
 
-// @ts-expect-error 'number' is not assignable to parameter of type 'string'
+// @ts-expect-error 'number' is not 'string'
 expect(optionalStrX.validate(0).error).toStrictEqual([
   {
     code: 'INVALID_TYPE',
     schema: 'string?',
     subject: 0,
+    path: [],
+  },
+])
+
+/* Parser treats `null` as `undefined` */
+
+expect(optionalStrX.parse(null).data).toBe(undefined)
+expect(optionalStrX.parse(null).error).toBe(undefined)
+
+/* Validator is not */
+
+// @ts-expect-error 'null' is not 'string | undefined'
+expect(optionalStrX.validate(null).error).toStrictEqual([
+  {
+    code: 'INVALID_TYPE',
+    schema: 'string?',
+    subject: null,
     path: [],
   },
 ])
@@ -401,17 +397,6 @@ expect(defaultedStrX.parse(undefined).data).toBe('y')
 /* Validator ignores default value */
 
 expect(defaultedStrX.validate(undefined).data).toBe(undefined)
-
-/* Parser clears subject array from optional undefined */
-
-const arrX = x({ type: 'array', of: 'string?' })
-const subject = [undefined, 'y', undefined, 'z']
-
-expect(arrX.parse(subject).data).toStrictEqual(['y', 'z'])
-
-/* Validator keeps them */
-
-expect(arrX.validate(subject).data).toStrictEqual(subject)
 
 /* Parser returning new object */
 

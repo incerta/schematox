@@ -113,9 +113,7 @@ export function parse(
       continue
     }
 
-    if (parsed.data !== undefined) {
-      result.push(parsed.data)
-    }
+    result.push(parsed.data)
   }
 
   if (errors.length) {
