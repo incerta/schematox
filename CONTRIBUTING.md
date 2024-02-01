@@ -88,10 +88,8 @@ Will extend base detailed schema type with another type intersection.
 
 `SubjT_V` is shortened `SubjectTypeValidated`. `SubjT_P` is shortened `SujbectTypeParsed`. Used in conjunction with `Con_` prefix. Both suffixes representing schema subject type depending on the schema subject check method: parse or validate. We support two flows of type inference for two main reasons:
 
-- Validate flow returns reference to original object without any mutations on success validation so we can't omit `undefined` values from the `Array` of validation flow if user specified optional schema as the array schema child.
-- Parse flow returns deep copy of parsed object:
-  - The parse flow can populate absent object key values with `default` specified in the corresponding property value schema
-  - The runtime parser just ignores non specified optional values
+- Validate flow returns reference to original object without any mutations.
+- Parse flow returns deep copy of parsed object, replaces `null` with `undefined` and `undefined` with schema `default` value.
 
 Because `default` value can be specified on base detailed schema ground level (`BD_Schema`) all type constructors for all base detailed and compound schema subject type will be split accordingly.
 
