@@ -1,3 +1,4 @@
+import { check, unknownX } from './test-utils'
 import { PARSE_ERROR_CODE, VALIDATE_ERROR_CODE } from '../error'
 
 import { array } from '../programmatic-schema/array'
@@ -10,6 +11,8 @@ import { stringUnion } from '../programmatic-schema/string-union'
 import { numberUnion } from '../programmatic-schema/number-union'
 
 import { x } from '../x-closure'
+
+import { Schema } from '../types/compound-schema-types'
 
 describe('X closure statically defined schema VALID', () => {
   it('x: base short schema PARSE/VALIDATE', () => {
@@ -1348,5 +1351,72 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(objOpt.validate(null).data).toBe(undefined)
     // @ts-expect-error 'null' is not assignable to parameter of type '{ x: string } | undefined'
     expect(objOpt.validate(null).error).toMatchObject(errV)
+  })
+})
+
+describe('X closure type statically defined schema subject type inference check', () => {
+  it('x: base short schema parse', () => {
+    const strReqX = x('string').parse('x')
+    if (strReqX.error) return
+    check<string>(unknownX as typeof strReqX.data)
+
+    const strOptX = x('string?').parse('x')
+    if (strOptX.error) return
+    check<string | undefined>(unknownX as typeof strOptX.data)
+    // @ts-expect-error 'string | undefined' is not 'number | undefined'
+    check<number | undefined>(unknownX as typeof strOptX.data)
+
+    const numReqX = x('number').parse('x')
+    if (numReqX.error) return
+    check<number>(unknownX as typeof numReqX.data)
+
+    const numOptX = x('number?').parse('x')
+    if (numOptX.error) return
+    check<number | undefined>(unknownX as typeof numOptX.data)
+    // @ts-expect-error 'number | undefined' is not 'string | undefined'
+    check<string | undefined>(unknownX as typeof numOptX.data)
+
+    const boolReqX = x('boolean').parse('x')
+    if (boolReqX.error) return
+    check<boolean>(unknownX as typeof boolReqX.data)
+
+    const boolOptX = x('boolean?').parse('x')
+    if (boolOptX.error) return
+    check<boolean | undefined>(unknownX as typeof boolOptX.data)
+    // @ts-expect-error 'boolean | undefined' is not 'string | undefined'
+    check<string | undefined>(unknownX as typeof boolOptX.data)
+  })
+
+  it('x: ObjectSchema parse', () => {
+    const objSchReq = {
+      type: 'object',
+      of: {
+        x: 'string',
+        y: 'number',
+        z: 'boolean',
+      },
+    } as const satisfies Schema
+
+    const objXReq = x(objSchReq).parse('x')
+    if (objXReq.error) return
+    check<{ x: string; y: number; z: boolean }>(unknownX as typeof objXReq.data)
+
+    const objSchOpt = {
+      type: 'object',
+      of: {
+        x: 'string',
+        y: 'number',
+        z: 'boolean',
+      },
+      optional: true,
+    } as const satisfies Schema
+
+    const objXOpt = x(objSchOpt).parse('x')
+    if (objXOpt.error) return
+    check<{ x: string; y: number; z: boolean } | undefined>(
+      unknownX as typeof objXOpt.data
+    )
+    // @ts-expect-error "undefined" is not assignable to ...
+    check<{ x: string; y: number; z: boolean }>(unknownX as typeof objXOpt.data)
   })
 })

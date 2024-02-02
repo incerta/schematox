@@ -14,6 +14,9 @@ type R<T> =
   | ({ type: 'array'; of: T } & ArrSchemaOptProps)
   | ({ type: 'object'; of: Record<string, T> } & ObjSchemaOptProps)
 
+/* 7 layers of compound schema nesting is allowed */
+type NestedSchema = R<R<R<R<R<R<BaseSchema>>>>>>
+
 /* ArraySchema */
 
 export type ArrSchemaOptProps = {
@@ -23,11 +26,10 @@ export type ArrSchemaOptProps = {
   maxLength?: number /* <= */
 }
 
-export type ArraySchema<T extends Schema = R<R<R<R<R<R<BaseSchema>>>>>>> =
-  ArrSchemaOptProps & {
-    type: 'array'
-    of: T
-  }
+export type ArraySchema<T extends Schema = NestedSchema> = ArrSchemaOptProps & {
+  type: 'array'
+  of: T
+}
 
 /* ObjectSchema */
 
@@ -36,7 +38,7 @@ export type ObjSchemaOptProps = {
   description?: string
 }
 
-export type ObjectSchema<T extends Schema = R<R<R<R<R<R<BaseSchema>>>>>>> =
+export type ObjectSchema<T extends Schema = NestedSchema> =
   ObjSchemaOptProps & {
     type: 'object'
     of: Record<string, T>
