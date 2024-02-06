@@ -36,6 +36,11 @@ export { x } from './x-closure'
 
 export type { BaseSchema, Schema } from './types/compound-schema-types'
 
+/* Utils */
+
+export type { EitherError } from './utils/fp'
+export { isError, isData, error, data } from './utils/fp'
+
 /* XParsed infers set optional default schema value as always present */
 export type XParsed<T extends { __schema: Schema } | Schema> = T extends {
   __schema: Schema
