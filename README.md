@@ -299,7 +299,7 @@ const staticArray = {
 const programmaticArray = array(string())
 ```
 
-## Validate/parse error shape
+## Validate/parse InvalidSubject error shape
 
 Nested schema example. Subject `0` is invalid, should be a `string`:
 
@@ -333,6 +333,13 @@ The `result.error` will be:
   }
 ]
 ```
+
+If the `error` is present it's always an array which has at least one entry. Each entry has the following properties:
+
+- `code` – could be `INVALID_TYPE` if schema subject or schema default value is not satisfies schema type requirement. Another code `INVALID_RANGE` which is about `min/max` and `minLength/maxLength` schema requirements
+- `schema` – the particular chunk of the `schema` where invalid subject value is found
+- `subject` – the particular chunk of the validated subject where invalid value is found
+- `path` – the path to error subject chunk from the root of the evaluated subject. Strings is keys and numbers are the array indexes
 
 ## Parse/validate differences
 
