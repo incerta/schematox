@@ -112,5 +112,33 @@ export function validate(
     return error(errors)
   }
 
+  if (
+    typeof schema.minLength === 'number' &&
+    subject.length < schema.minLength
+  ) {
+    return error([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: this || [],
+        subject,
+        schema,
+      },
+    ])
+  }
+
+  if (
+    typeof schema.maxLength === 'number' &&
+    subject.length > schema.maxLength
+  ) {
+    return error([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: this || [],
+        subject,
+        schema,
+      },
+    ])
+  }
+
   return data(subject)
 }

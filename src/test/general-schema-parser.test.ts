@@ -852,6 +852,50 @@ describe('Parse ARRAY schema with INVALID subject', () => {
     ])
   })
 
+  it('parse: minLength INVALID_RANGE error', () => {
+    const schema = {
+      type: 'array',
+      of: 'string',
+      minLength: 2,
+    } as const satisfies Schema
+
+    const subject = ['x']
+
+    const parsed = parse(schema, subject)
+
+    expect(parsed.data).toBe(undefined)
+    expect(parsed.error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: [],
+        schema,
+        subject,
+      },
+    ])
+  })
+
+  it('parse: maxLength INVALID_RANGE error', () => {
+    const schema = {
+      type: 'array',
+      of: 'string',
+      maxLength: 1,
+    } as const satisfies Schema
+
+    const subject = ['x', 'y']
+
+    const parsed = parse(schema, subject)
+
+    expect(parsed.data).toBe(undefined)
+    expect(parsed.error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: [],
+        schema,
+        subject,
+      },
+    ])
+  })
+
   it('parse: optional array with invalid direct subject', () => {
     const schema = {
       type: 'array',

@@ -812,6 +812,50 @@ describe('Validate ARRAY schema with INVALID subject', () => {
     ])
   })
 
+  it('validate: minLength INVALID_RANGE error', () => {
+    const schema = {
+      type: 'array',
+      of: 'string',
+      minLength: 2,
+    } as const satisfies Schema
+
+    const subject = ['x']
+
+    const validated = validate(schema, subject)
+
+    expect(validated.data).toBe(undefined)
+    expect(validated.error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: [],
+        schema,
+        subject,
+      },
+    ])
+  })
+
+  it('validate: maxLength INVALID_RANGE error', () => {
+    const schema = {
+      type: 'array',
+      of: 'string',
+      maxLength: 1,
+    } as const satisfies Schema
+
+    const subject = ['x', 'y']
+
+    const validated = validate(schema, subject)
+
+    expect(validated.data).toBe(undefined)
+    expect(validated.error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: [],
+        schema,
+        subject,
+      },
+    ])
+  })
+
   it('validate: required array with two invalid subject arr elements', () => {
     const schema = {
       type: 'array',

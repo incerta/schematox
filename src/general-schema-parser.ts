@@ -120,5 +120,33 @@ export function parse(
     return error(errors)
   }
 
+  if (
+    typeof schema.minLength === 'number' &&
+    result.length < schema.minLength
+  ) {
+    return error([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: this || [],
+        subject,
+        schema,
+      },
+    ])
+  }
+
+  if (
+    typeof schema.maxLength === 'number' &&
+    result.length > schema.maxLength
+  ) {
+    return error([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: this || [],
+        subject,
+        schema,
+      },
+    ])
+  }
+
   return data(result)
 }
