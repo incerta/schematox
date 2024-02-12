@@ -1,21 +1,21 @@
 import { error, data } from './utils/fp'
-import { PARSE_ERROR_CODE } from './error'
+import { ERROR_CODE } from './error'
 import { parseBaseSchemaSubject } from './base-schema-parser'
 
 import type { EitherError } from './utils/fp'
 import type { Schema, Con_Schema_SubjT_P } from './types/compound-schema-types'
-import type { ParseError, ErrorPath } from './error'
+import type { InvalidSubject, ErrorPath } from './error'
 
 export function parse<T extends Schema>(
   schema: T,
   subject: unknown
-): EitherError<ParseError[], Con_Schema_SubjT_P<T>>
+): EitherError<InvalidSubject[], Con_Schema_SubjT_P<T>>
 
 export function parse(
-  this: ErrorPath | undefined,
+  this: ErrorPath | void,
   schema: Schema,
   subject: unknown
-): EitherError<ParseError[], unknown> {
+): EitherError<InvalidSubject[], unknown> {
   if (
     typeof schema === 'string' ||
     schema.type === 'string' ||
@@ -24,16 +24,16 @@ export function parse(
     schema.type === 'stringUnion' ||
     schema.type === 'numberUnion'
   ) {
-    const parsed = parseBaseSchemaSubject(schema, subject)
+    const parsed = parseBaseSchemaSubject.bind(this)(schema, subject)
 
     if (parsed.error) {
-      return error([{ ...parsed.error, path: this || [] }])
+      return error([parsed.error])
     }
 
     return parsed
   }
 
-  const errors: ParseError[] = []
+  const errors: InvalidSubject[] = []
 
   if (schema.type === 'object') {
     if (schema.optional) {
@@ -49,7 +49,7 @@ export function parse(
     ) {
       return error([
         {
-          code: PARSE_ERROR_CODE.invalidType,
+          code: ERROR_CODE.invalidType,
           path: this || [],
           schema,
           subject,
@@ -92,7 +92,7 @@ export function parse(
 
     return error([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         path: this || [],
         subject,
         schema,

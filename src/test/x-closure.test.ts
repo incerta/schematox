@@ -1,5 +1,5 @@
 import { check, unknownX } from './test-utils'
-import { PARSE_ERROR_CODE, VALIDATE_ERROR_CODE } from '../error'
+import { ERROR_CODE, VALIDATE_ERROR_CODE } from '../error'
 
 import { array } from '../programmatic-schema/array'
 import { object } from '../programmatic-schema/object'
@@ -392,7 +392,7 @@ describe('X closure statically defined schema VALID', () => {
 
 describe('X closure statically defined schema INVALID', () => {
   /* Strict invalid subject/schema error shapes is tested in direct parser/validator tests */
-  const errP = [{ code: PARSE_ERROR_CODE.invalidType }]
+  const errP = [{ code: ERROR_CODE.invalidType }]
   const errV = [{ code: VALIDATE_ERROR_CODE.invalidType }]
 
   it('x: base short string optional/required schema parse/validate', () => {
@@ -1073,7 +1073,7 @@ describe('X closure programmatically defined schema VALID', () => {
 
 describe('X closure programmatically defined schema INVALID', () => {
   /* Strict invalid subject/schema error shapes is tested in direct parser/validator tests */
-  const errP = [{ code: PARSE_ERROR_CODE.invalidType }]
+  const errP = [{ code: ERROR_CODE.invalidType }]
   const errV = [{ code: VALIDATE_ERROR_CODE.invalidType }]
 
   it('x: base string optional/required schema parse/validate', () => {
