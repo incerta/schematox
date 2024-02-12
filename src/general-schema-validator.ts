@@ -1,21 +1,21 @@
 import { error, data } from './utils/fp'
-import { VALIDATE_ERROR_CODE } from './error'
+import { ERROR_CODE } from './error'
 import { validateBaseSchemaSubject } from './base-schema-validator'
 
 import type { EitherError } from './utils/fp'
 import type { Schema, Con_Schema_SubjT_V } from './types/compound-schema-types'
-import type { ValidateError, ErrorPath } from './error'
+import type { InvalidSubject, ErrorPath } from './error'
 
 export function validate<T extends Schema>(
   schema: T,
   subject: Con_Schema_SubjT_V<T>
-): EitherError<ValidateError[], Con_Schema_SubjT_V<T>>
+): EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
 
 export function validate(
   this: ErrorPath | undefined,
   schema: Schema,
   subject: unknown
-): EitherError<ValidateError[], unknown> {
+): EitherError<InvalidSubject[], unknown> {
   if (
     typeof schema === 'string' ||
     schema.type === 'string' ||
@@ -24,16 +24,16 @@ export function validate(
     schema.type === 'stringUnion' ||
     schema.type === 'numberUnion'
   ) {
-    const validated = validateBaseSchemaSubject(schema, subject)
+    const validated = validateBaseSchemaSubject.bind(this)(schema, subject)
 
     if (validated.error) {
-      return error([{ ...validated.error, path: this || [] }])
+      return error([validated.error])
     }
 
     return data(subject)
   }
 
-  const errors: ValidateError[] = []
+  const errors: InvalidSubject[] = []
 
   if (schema.type === 'object') {
     if (schema.optional && subject === undefined) {
@@ -47,7 +47,7 @@ export function validate(
     ) {
       return error([
         {
-          code: VALIDATE_ERROR_CODE.invalidType,
+          code: ERROR_CODE.invalidType,
           path: this || [],
           schema,
           subject,
@@ -85,7 +85,7 @@ export function validate(
 
     return error([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         path: this || [],
         subject,
         schema,

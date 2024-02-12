@@ -60,7 +60,7 @@ export function parseBaseSchemaSubject(
           })
         }
 
-        if (Number.isNaN(subject) || Number.isFinite(subject) === false) {
+        if (Number.isFinite(subject) === false) {
           return error({
             code: ERROR_CODE.invalidType,
             path: this || [],
