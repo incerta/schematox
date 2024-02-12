@@ -1,24 +1,26 @@
 import { error, data } from './utils/fp'
-import { VALIDATE_ERROR_CODE } from './error'
+import { ERROR_CODE } from './error'
 
 import type { EitherError } from './utils/fp'
 import type {
   BaseSchema,
   Con_Schema_SubjT_V,
 } from './types/compound-schema-types'
-import type { BaseSchemaValidateError } from './error'
+import type { InvalidSubject, ErrorPath } from './error'
 
 export type BaseSchemaSubjectType = string | number | boolean | undefined
 
 export function validateBaseSchemaSubject<T extends BaseSchema>(
+  this: ErrorPath | void,
   schema: T,
   schemaSubject: unknown
-): EitherError<BaseSchemaValidateError, Con_Schema_SubjT_V<T>>
+): EitherError<InvalidSubject, Con_Schema_SubjT_V<T>>
 
 export function validateBaseSchemaSubject(
+  this: ErrorPath | void,
   schema: BaseSchema,
   subject: unknown
-): EitherError<BaseSchemaValidateError, BaseSchemaSubjectType> {
+): EitherError<InvalidSubject, BaseSchemaSubjectType> {
   if (typeof schema === 'string') {
     switch (schema) {
       case 'string?':
@@ -29,7 +31,8 @@ export function validateBaseSchemaSubject(
           }
 
           return error({
-            code: VALIDATE_ERROR_CODE.invalidType,
+            code: ERROR_CODE.invalidType,
+            path: this || [],
             schema,
             subject,
           })
@@ -46,15 +49,8 @@ export function validateBaseSchemaSubject(
           }
 
           return error({
-            code: VALIDATE_ERROR_CODE.invalidType,
-            schema,
-            subject,
-          })
-        }
-
-        if (Number.isNaN(subject)) {
-          return error({
-            code: VALIDATE_ERROR_CODE.NaN,
+            code: ERROR_CODE.invalidType,
+            path: this || [],
             schema,
             subject,
           })
@@ -62,7 +58,8 @@ export function validateBaseSchemaSubject(
 
         if (Number.isFinite(subject) === false) {
           return error({
-            code: VALIDATE_ERROR_CODE.infinity,
+            code: ERROR_CODE.invalidType,
+            path: this || [],
             schema,
             subject,
           })
@@ -79,7 +76,8 @@ export function validateBaseSchemaSubject(
           }
 
           return error({
-            code: VALIDATE_ERROR_CODE.invalidType,
+            code: ERROR_CODE.invalidType,
+            path: this || [],
             schema,
             subject,
           })
@@ -98,7 +96,8 @@ export function validateBaseSchemaSubject(
         }
 
         return error({
-          code: VALIDATE_ERROR_CODE.invalidType,
+          code: ERROR_CODE.invalidType,
+          path: this || [],
           schema,
           subject,
         })
@@ -107,7 +106,8 @@ export function validateBaseSchemaSubject(
       if (typeof schema.minLength === 'number') {
         if (subject.length < schema.minLength) {
           return error({
-            code: VALIDATE_ERROR_CODE.minRange,
+            code: ERROR_CODE.invalidRange,
+            path: this || [],
             schema,
             subject,
           })
@@ -117,7 +117,8 @@ export function validateBaseSchemaSubject(
       if (typeof schema.maxLength === 'number') {
         if (subject.length > schema.maxLength) {
           return error({
-            code: VALIDATE_ERROR_CODE.maxRange,
+            code: ERROR_CODE.invalidRange,
+            path: this || [],
             schema,
             subject,
           })
@@ -134,15 +135,8 @@ export function validateBaseSchemaSubject(
         }
 
         return error({
-          code: VALIDATE_ERROR_CODE.invalidType,
-          schema,
-          subject,
-        })
-      }
-
-      if (Number.isNaN(subject)) {
-        return error({
-          code: VALIDATE_ERROR_CODE.NaN,
+          code: ERROR_CODE.invalidType,
+          path: this || [],
           schema,
           subject,
         })
@@ -150,7 +144,8 @@ export function validateBaseSchemaSubject(
 
       if (Number.isFinite(subject) === false) {
         return error({
-          code: VALIDATE_ERROR_CODE.infinity,
+          code: ERROR_CODE.invalidType,
+          path: this || [],
           schema,
           subject,
         })
@@ -159,7 +154,8 @@ export function validateBaseSchemaSubject(
       if (typeof schema.min === 'number') {
         if (subject < schema.min) {
           return error({
-            code: VALIDATE_ERROR_CODE.minRange,
+            code: ERROR_CODE.invalidRange,
+            path: this || [],
             schema,
             subject,
           })
@@ -169,7 +165,8 @@ export function validateBaseSchemaSubject(
       if (typeof schema.max === 'number') {
         if (subject > schema.max) {
           return error({
-            code: VALIDATE_ERROR_CODE.maxRange,
+            code: ERROR_CODE.invalidRange,
+            path: this || [],
             schema,
             subject,
           })
@@ -186,7 +183,8 @@ export function validateBaseSchemaSubject(
         }
 
         return error({
-          code: VALIDATE_ERROR_CODE.invalidType,
+          code: ERROR_CODE.invalidType,
+          path: this || [],
           schema,
           subject,
         })
@@ -202,7 +200,8 @@ export function validateBaseSchemaSubject(
         }
 
         return error({
-          code: VALIDATE_ERROR_CODE.invalidType,
+          code: ERROR_CODE.invalidType,
+          path: this || [],
           schema,
           subject,
         })
@@ -212,7 +211,8 @@ export function validateBaseSchemaSubject(
 
       if (unionSet.has(subject) === false) {
         return error({
-          code: VALIDATE_ERROR_CODE.notInUnion,
+          code: ERROR_CODE.invalidType,
+          path: this || [],
           schema,
           subject,
         })
@@ -228,7 +228,8 @@ export function validateBaseSchemaSubject(
         }
 
         return error({
-          code: VALIDATE_ERROR_CODE.invalidType,
+          code: ERROR_CODE.invalidType,
+          path: this || [],
           schema,
           subject,
         })
@@ -238,7 +239,8 @@ export function validateBaseSchemaSubject(
 
       if (unionSet.has(subject) === false) {
         return error({
-          code: VALIDATE_ERROR_CODE.notInUnion,
+          code: ERROR_CODE.invalidType,
+          path: this || [],
           schema,
           subject,
         })

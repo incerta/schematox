@@ -1,5 +1,5 @@
 import { validate } from '../general-schema-validator'
-import { VALIDATE_ERROR_CODE } from '../error'
+import { ERROR_CODE } from '../error'
 import { check, unknownX } from './test-utils'
 
 import type { Schema } from '../types/compound-schema-types'
@@ -104,7 +104,7 @@ describe('Validate BASE schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(shortReqStrSchema, undefinedSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
         schema: shortReqStrSchema,
         path: [],
@@ -119,7 +119,7 @@ describe('Validate BASE schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(shortOptStrSchema, numberSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: numberSubj,
         schema: shortOptStrSchema,
         path: [],
@@ -136,7 +136,7 @@ describe('Validate BASE schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(detailedReqStrSchema, undefinedSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
         schema: detailedReqStrSchema,
         path: [],
@@ -155,7 +155,7 @@ describe('Validate BASE schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(detailedOptStrSchema, numberSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: numberSubj,
         schema: detailedOptStrSchema,
         path: [],
@@ -287,7 +287,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, undefinedSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
         schema,
         path: [],
@@ -301,7 +301,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, nullSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: nullSubj,
         schema,
         path: [],
@@ -315,7 +315,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, regExpSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: regExpSubj,
         schema,
         path: [],
@@ -329,7 +329,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, arraySubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: arraySubj,
         schema,
         path: [],
@@ -343,7 +343,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, mapSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: mapSubj,
         schema,
         path: [],
@@ -357,7 +357,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, setSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: setSubj,
         schema,
         path: [],
@@ -385,13 +385,13 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: subject[firstInvalidSubjKey],
         schema: schema.of[firstInvalidSubjKey],
         path: [firstInvalidSubjKey],
       },
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: subject[secondInvalidSubjKey],
         schema: schema.of[secondInvalidSubjKey],
         path: [secondInvalidSubjKey],
@@ -465,13 +465,13 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: 'string',
         path: ['a', 'b', 'cArr', 2, 'dArrObj'],
       },
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: 'string',
         path: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
@@ -500,7 +500,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: schema.of.x.of,
         path: ['x', 1],
@@ -754,7 +754,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, undefinedSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
         schema,
         path: [],
@@ -768,7 +768,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, nullSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: nullSubj,
         schema,
         path: [],
@@ -782,7 +782,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, stringSubj).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: stringSubj,
         schema,
         path: [],
@@ -804,10 +804,54 @@ describe('Validate ARRAY schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, strSubject).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: strSubject,
         schema,
         path: [],
+      },
+    ])
+  })
+
+  it('validate: minLength INVALID_RANGE error', () => {
+    const schema = {
+      type: 'array',
+      of: 'string',
+      minLength: 2,
+    } as const satisfies Schema
+
+    const subject = ['x']
+
+    const validated = validate(schema, subject)
+
+    expect(validated.data).toBe(undefined)
+    expect(validated.error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: [],
+        schema,
+        subject,
+      },
+    ])
+  })
+
+  it('validate: maxLength INVALID_RANGE error', () => {
+    const schema = {
+      type: 'array',
+      of: 'string',
+      maxLength: 1,
+    } as const satisfies Schema
+
+    const subject = ['x', 'y']
+
+    const validated = validate(schema, subject)
+
+    expect(validated.data).toBe(undefined)
+    expect(validated.error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: [],
+        schema,
+        subject,
       },
     ])
   })
@@ -836,13 +880,13 @@ describe('Validate ARRAY schema with INVALID subject', () => {
     expect(validate(schema, subject).data).toBe(undefined)
     expect(validate(schema, subject).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: schema.of,
         path: [firstInvalidIndex],
       },
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: schema.of,
         path: [secondInvalidIndex],
@@ -912,25 +956,25 @@ describe('Validate ARRAY schema with INVALID subject', () => {
     // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).error).toStrictEqual([
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubjForStr,
         schema: schema.of.of.of.of.of.x,
         path: [0, 0, 0, 0, 'x'],
       },
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubjForBool,
         schema: schema.of.of.of.of.of.y,
         path: [0, 0, 0, 0, 'y'],
       },
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubjForNumb,
         schema: schema.of.of.of.of.of.z.of.of.x,
         path: [0, 0, 0, 0, 'z', 1, 'x'],
       },
       {
-        code: VALIDATE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubjForNumb,
         schema: schema.of.of.of.of.of.z.of.of.x,
         path: [0, 0, 0, 0, 'z', 3, 'x'],

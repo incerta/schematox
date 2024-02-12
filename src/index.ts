@@ -35,6 +35,7 @@ export { x } from './x-closure'
 /* Typings */
 
 export type { BaseSchema, Schema } from './types/compound-schema-types'
+export type { InvalidSubject } from './error'
 
 /* Utils */
 

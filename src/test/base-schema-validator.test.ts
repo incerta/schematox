@@ -1,8 +1,8 @@
-import { VALIDATE_ERROR_CODE } from '../error'
+import { ERROR_CODE } from '../error'
 import { validateBaseSchemaSubject } from '../base-schema-validator'
 import { check, unknownX } from './test-utils'
 
-import type { BaseSchemaValidateError } from '../error'
+import type { InvalidSubject } from '../error'
 import type { Schema } from '../types/compound-schema-types'
 
 describe('Validate base short schema with valid subject', () => {
@@ -53,7 +53,8 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -73,7 +74,8 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -95,7 +97,8 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -115,7 +118,8 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -137,7 +141,8 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -157,7 +162,8 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -179,7 +185,8 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -199,7 +206,8 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -221,7 +229,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.NaN,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -233,7 +242,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.NaN,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -245,7 +255,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.infinity,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -257,7 +268,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.infinity,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -269,7 +281,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.infinity,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -281,7 +294,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.error).toEqual({
-      code: VALIDATE_ERROR_CODE.infinity,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
     })
@@ -296,8 +310,8 @@ describe('Validate base short schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, 'x')
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: number }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: number }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -314,8 +328,8 @@ describe('Validate base short schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, 'x')
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: number }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: number }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -334,8 +348,8 @@ describe('Validate base short schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, 0)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: number }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: number }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -352,8 +366,8 @@ describe('Validate base short schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, 0)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: number }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: number }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -372,8 +386,8 @@ describe('Validate base short schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, true)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: boolean }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -390,8 +404,8 @@ describe('Validate base short schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, true)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: boolean }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -417,9 +431,10 @@ describe('Validate base STRING detailed schema', () => {
     const schema = { type: 'string' } as const satisfies Schema
 
     const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
+    } satisfies Omit<InvalidSubject, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -468,9 +483,10 @@ describe('Validate base STRING detailed schema', () => {
   it('validateBaseSchemaSubject: optional schema with invalid subject', () => {
     const schema = { type: 'string', optional: true } as const satisfies Schema
     const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
+    } satisfies Omit<InvalidSubject, 'subject'>
 
     const numberSubj = 0
 
@@ -510,10 +526,11 @@ describe('Validate base STRING detailed schema', () => {
     const subject = ''
 
     const error = {
-      code: VALIDATE_ERROR_CODE.minRange,
+      code: ERROR_CODE.invalidRange,
+      path: [],
       schema,
       subject,
-    } satisfies BaseSchemaValidateError
+    } satisfies InvalidSubject
 
     expect(validateBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -540,10 +557,11 @@ describe('Validate base STRING detailed schema', () => {
     const subject = 'x'
 
     const error = {
-      code: VALIDATE_ERROR_CODE.maxRange,
+      code: ERROR_CODE.invalidRange,
+      path: [],
       schema,
       subject,
-    } satisfies BaseSchemaValidateError
+    } satisfies InvalidSubject
 
     expect(validateBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -563,9 +581,10 @@ describe('Validate base NUMBER detailed schema', () => {
     const schema = { type: 'number' } as const satisfies Schema
 
     const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
+    } satisfies Omit<InvalidSubject, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -614,9 +633,10 @@ describe('Validate base NUMBER detailed schema', () => {
   it('validateBaseSchemaSubject: optional schema with invalid subject', () => {
     const schema = { type: 'number', optional: true } as const satisfies Schema
     const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
+    } satisfies Omit<InvalidSubject, 'subject'>
 
     const stringSubj = 'x'
 
@@ -656,10 +676,11 @@ describe('Validate base NUMBER detailed schema', () => {
     const subject = 0
 
     const error = {
-      code: VALIDATE_ERROR_CODE.minRange,
+      code: ERROR_CODE.invalidRange,
+      path: [],
       schema,
       subject,
-    } satisfies BaseSchemaValidateError
+    } satisfies InvalidSubject
 
     expect(validateBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -686,10 +707,11 @@ describe('Validate base NUMBER detailed schema', () => {
     const subject = 1
 
     const error = {
-      code: VALIDATE_ERROR_CODE.maxRange,
+      code: ERROR_CODE.invalidRange,
+      path: [],
       schema,
       subject,
-    } satisfies BaseSchemaValidateError
+    } satisfies InvalidSubject
 
     expect(validateBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -699,10 +721,11 @@ describe('Validate base NUMBER detailed schema', () => {
     const schema = { type: 'number' } as const satisfies Schema
     const subject = NaN
     const error = {
-      code: VALIDATE_ERROR_CODE.NaN,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
-    } satisfies BaseSchemaValidateError
+    } satisfies InvalidSubject
 
     expect(validateBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -712,10 +735,11 @@ describe('Validate base NUMBER detailed schema', () => {
     const schema = { type: 'number' } as const satisfies Schema
     const subject = Infinity
     const error = {
-      code: VALIDATE_ERROR_CODE.infinity,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
-    } satisfies BaseSchemaValidateError
+    } satisfies InvalidSubject
 
     expect(validateBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -725,10 +749,11 @@ describe('Validate base NUMBER detailed schema', () => {
     const schema = { type: 'number' } as const satisfies Schema
     const subject = -Infinity
     const error = {
-      code: VALIDATE_ERROR_CODE.infinity,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
       subject,
-    } satisfies BaseSchemaValidateError
+    } satisfies InvalidSubject
 
     expect(validateBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, subject).error).toEqual(error)
@@ -748,9 +773,10 @@ describe('Validate base BOOLEAN detailed schema', () => {
     const schema = { type: 'boolean' } as const satisfies Schema
 
     const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
+    } satisfies Omit<InvalidSubject, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -801,9 +827,10 @@ describe('Validate base BOOLEAN detailed schema', () => {
   it('validateBaseSchemaSubject: optional schema with invalid subject', () => {
     const schema = { type: 'boolean', optional: true } as const satisfies Schema
     const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
+    } satisfies Omit<InvalidSubject, 'subject'>
 
     const stringSubj = 'x'
 
@@ -848,9 +875,10 @@ describe('Validate base STRING UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
+    } satisfies Omit<InvalidSubject, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -883,7 +911,7 @@ describe('Validate base STRING UNION detailed schema', () => {
     expect(validateBaseSchemaSubject(schema, stringZSubj).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, stringZSubj).error).toEqual({
       ...error,
-      code: VALIDATE_ERROR_CODE.notInUnion,
+      code: ERROR_CODE.invalidType,
       subject: stringZSubj,
     })
   })
@@ -926,9 +954,10 @@ describe('Validate base STRING UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
+    } satisfies Omit<InvalidSubject, 'subject'>
 
     const nullSubj = null
 
@@ -959,7 +988,7 @@ describe('Validate base STRING UNION detailed schema', () => {
     expect(validateBaseSchemaSubject(schema, stringZSubj).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, stringZSubj).error).toEqual({
       ...error,
-      code: VALIDATE_ERROR_CODE.notInUnion,
+      code: ERROR_CODE.invalidType,
       subject: stringZSubj,
     })
   })
@@ -990,9 +1019,10 @@ describe('Validate base NUMBER UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
+    } satisfies Omit<InvalidSubject, 'subject'>
 
     const undefinedSubj = undefined
 
@@ -1025,7 +1055,7 @@ describe('Validate base NUMBER UNION detailed schema', () => {
     expect(validateBaseSchemaSubject(schema, number2Subj).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, number2Subj).error).toEqual({
       ...error,
-      code: VALIDATE_ERROR_CODE.notInUnion,
+      code: ERROR_CODE.invalidType,
       subject: number2Subj,
     })
   })
@@ -1069,9 +1099,10 @@ describe('Validate base NUMBER UNION detailed schema', () => {
     } as const satisfies Schema
 
     const error = {
-      code: VALIDATE_ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidType,
+      path: [],
       schema,
-    } satisfies Omit<BaseSchemaValidateError, 'subject'>
+    } satisfies Omit<InvalidSubject, 'subject'>
 
     const nullSubj = null
 
@@ -1102,7 +1133,7 @@ describe('Validate base NUMBER UNION detailed schema', () => {
     expect(validateBaseSchemaSubject(schema, number2Subj).data).toBe(undefined)
     expect(validateBaseSchemaSubject(schema, number2Subj).error).toEqual({
       ...error,
-      code: VALIDATE_ERROR_CODE.notInUnion,
+      code: ERROR_CODE.invalidType,
       subject: number2Subj,
     })
   })
@@ -1116,8 +1147,8 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, 'x')
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: number }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: number }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -1135,8 +1166,8 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: number }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: number }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -1155,8 +1186,8 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, 0)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: number }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: number }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -1174,8 +1205,8 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: number }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: number }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -1194,8 +1225,8 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, false)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: boolean }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -1213,8 +1244,8 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: boolean }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -1237,8 +1268,8 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, 'x')
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: boolean }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -1260,8 +1291,8 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: boolean }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -1284,8 +1315,8 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, 0)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: boolean }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )
@@ -1307,8 +1338,8 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     const result = validateBaseSchemaSubject(schema, undefined)
 
     if (result.error) {
-      check<BaseSchemaValidateError>(unknownX as typeof result.error)
-      check<BaseSchemaValidateError & { x: boolean }>(
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
         // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
         unknownX as typeof result.error
       )

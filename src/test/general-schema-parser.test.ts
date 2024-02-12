@@ -1,5 +1,5 @@
 import { parse } from '../general-schema-parser'
-import { PARSE_ERROR_CODE } from '../error'
+import { ERROR_CODE } from '../error'
 import { check, unknownX } from './test-utils'
 
 import type { Schema } from '../types/compound-schema-types'
@@ -102,7 +102,7 @@ describe('Parse BASE schema with INVALID subject', () => {
     expect(parse(shortReqStrSchema, undefinedSubj).data).toBe(undefined)
     expect(parse(shortReqStrSchema, undefinedSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
         schema: shortReqStrSchema,
         path: [],
@@ -115,7 +115,7 @@ describe('Parse BASE schema with INVALID subject', () => {
     expect(parse(shortOptStrSchema, numberSubj).data).toBe(undefined)
     expect(parse(shortOptStrSchema, numberSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: numberSubj,
         schema: shortOptStrSchema,
         path: [],
@@ -130,7 +130,7 @@ describe('Parse BASE schema with INVALID subject', () => {
     expect(parse(detailedReqStrSchema, undefinedSubj).data).toBe(undefined)
     expect(parse(detailedReqStrSchema, undefinedSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
         schema: detailedReqStrSchema,
         path: [],
@@ -147,7 +147,7 @@ describe('Parse BASE schema with INVALID subject', () => {
     expect(parse(detailedOptStrSchema, numberSubj).data).toBe(undefined)
     expect(parse(detailedOptStrSchema, numberSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: numberSubj,
         schema: detailedOptStrSchema,
         path: [],
@@ -383,7 +383,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
     expect(parse(schema, undefinedSubj).data).toBe(undefined)
     expect(parse(schema, undefinedSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
         schema,
         path: [],
@@ -395,7 +395,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
     expect(parse(schema, nullSubj).data).toBe(undefined)
     expect(parse(schema, nullSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: nullSubj,
         schema,
         path: [],
@@ -407,7 +407,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
     expect(parse(schema, regExpSubj).data).toBe(undefined)
     expect(parse(schema, regExpSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: regExpSubj,
         schema,
         path: [],
@@ -419,7 +419,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
     expect(parse(schema, arraySubj).data).toBe(undefined)
     expect(parse(schema, arraySubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: arraySubj,
         schema,
         path: [],
@@ -431,7 +431,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
     expect(parse(schema, mapSubj).data).toBe(undefined)
     expect(parse(schema, mapSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: mapSubj,
         schema,
         path: [],
@@ -443,7 +443,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
     expect(parse(schema, setSubj).data).toBe(undefined)
     expect(parse(schema, setSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: setSubj,
         schema,
         path: [],
@@ -469,13 +469,13 @@ describe('Parse OBJECT schema with INVALID subject', () => {
     expect(parse(schema, subject).data).toBe(undefined)
     expect(parse(schema, subject).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: subject[firstInvalidSubjKey],
         schema: schema.of[firstInvalidSubjKey],
         path: [firstInvalidSubjKey],
       },
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: subject[secondInvalidSubjKey],
         schema: schema.of[secondInvalidSubjKey],
         path: [secondInvalidSubjKey],
@@ -547,13 +547,13 @@ describe('Parse OBJECT schema with INVALID subject', () => {
     expect(parse(schema, subject).data).toBe(undefined)
     expect(parse(schema, subject).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: 'string',
         path: ['a', 'b', 'cArr', 2, 'dArrObj'],
       },
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: 'string',
         path: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
@@ -580,7 +580,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
     expect(parse(schema, subject).data).toBe(undefined)
     expect(parse(schema, subject).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: schema.of.x.of,
         path: ['x', 1],
@@ -820,7 +820,7 @@ describe('Parse ARRAY schema with INVALID subject', () => {
     expect(parse(schema, undefinedSubj).data).toBe(undefined)
     expect(parse(schema, undefinedSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
         schema,
         path: [],
@@ -832,7 +832,7 @@ describe('Parse ARRAY schema with INVALID subject', () => {
     expect(parse(schema, nullSubj).data).toBe(undefined)
     expect(parse(schema, nullSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: nullSubj,
         schema,
         path: [],
@@ -844,10 +844,54 @@ describe('Parse ARRAY schema with INVALID subject', () => {
     expect(parse(schema, stringSubj).data).toBe(undefined)
     expect(parse(schema, stringSubj).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: stringSubj,
         schema,
         path: [],
+      },
+    ])
+  })
+
+  it('parse: minLength INVALID_RANGE error', () => {
+    const schema = {
+      type: 'array',
+      of: 'string',
+      minLength: 2,
+    } as const satisfies Schema
+
+    const subject = ['x']
+
+    const parsed = parse(schema, subject)
+
+    expect(parsed.data).toBe(undefined)
+    expect(parsed.error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: [],
+        schema,
+        subject,
+      },
+    ])
+  })
+
+  it('parse: maxLength INVALID_RANGE error', () => {
+    const schema = {
+      type: 'array',
+      of: 'string',
+      maxLength: 1,
+    } as const satisfies Schema
+
+    const subject = ['x', 'y']
+
+    const parsed = parse(schema, subject)
+
+    expect(parsed.data).toBe(undefined)
+    expect(parsed.error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: [],
+        schema,
+        subject,
       },
     ])
   })
@@ -864,7 +908,7 @@ describe('Parse ARRAY schema with INVALID subject', () => {
     expect(parse(schema, strSubject).data).toBe(undefined)
     expect(parse(schema, strSubject).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: strSubject,
         schema,
         path: [],
@@ -896,13 +940,13 @@ describe('Parse ARRAY schema with INVALID subject', () => {
     expect(parse(schema, subject).data).toBe(undefined)
     expect(parse(schema, subject).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: schema.of,
         path: [firstInvalidIndex],
       },
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: schema.of,
         path: [secondInvalidIndex],
@@ -970,25 +1014,25 @@ describe('Parse ARRAY schema with INVALID subject', () => {
     expect(parse(schema, subject).data).toBe(undefined)
     expect(parse(schema, subject).error).toStrictEqual([
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubjForStr,
         schema: schema.of.of.of.of.of.x,
         path: [0, 0, 0, 0, 'x'],
       },
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubjForBool,
         schema: schema.of.of.of.of.of.y,
         path: [0, 0, 0, 0, 'y'],
       },
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubjForNumb,
         schema: schema.of.of.of.of.of.z.of.of.x,
         path: [0, 0, 0, 0, 'z', 1, 'x'],
       },
       {
-        code: PARSE_ERROR_CODE.invalidType,
+        code: ERROR_CODE.invalidType,
         subject: invalidSubjForNumb,
         schema: schema.of.of.of.of.of.z.of.of.x,
         path: [0, 0, 0, 0, 'z', 3, 'x'],
