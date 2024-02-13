@@ -321,7 +321,7 @@ const schemaX = x(
 const result = schemaX.parse({ x: { y: [{ z: 0 }] } })
 ```
 
-The `result.error` will be:
+The `result.error` shape is:
 
 ```json
 [
@@ -334,12 +334,12 @@ The `result.error` will be:
 ]
 ```
 
-If the `error` is present it's always an array which has at least one entry. Each entry has the following properties:
+It's always an array with at least one entry. Each entry includes:
 
-- `code` – could be `INVALID_TYPE` if schema subject or schema default value is not satisfies schema type requirement. Another code `INVALID_RANGE` which is about `min/max` and `minLength/maxLength` schema requirements
-- `schema` – the particular chunk of the `schema` where invalid subject value is found
-- `subject` – the particular chunk of the validated subject where invalid value is found
-- `path` – the path to error subject chunk from the root of the evaluated subject. Strings is keys and numbers are the array indexes
+- `code`: Specifies either `INVALID_TYPE` (when schema subject or default value don't meet schema type specifications), or `INVALID_RANGE` (when `min/max` or `minLength/maxLength` schema requirements aren't met).
+- `schema`: The specific section of `schema` where the invalid value is found.
+- `subject`: The specific part of the validated subject where the invalid value exists.
+- `path`: Traces the route from the root to the error subject, with strings as keys and numbers as array indexes.
 
 ## Parse/validate differences
 

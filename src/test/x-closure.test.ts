@@ -1420,3 +1420,54 @@ describe('X closure type statically defined schema subject type inference check'
     check<{ x: string; y: number; z: boolean }>(unknownX as typeof objXOpt.data)
   })
 })
+
+describe('The parsed/validated subject type should be mutable', () => {
+  it('x: statically defined ObjectSchema', () => {
+    const schemaX = x({
+      type: 'object',
+      of: { x: 'string', y: 'number' },
+    } as const)
+    const subject = { x: 'x', y: 0 }
+
+    const parsed = schemaX.parse(subject)
+
+    if (parsed.error) {
+      throw Error('Not expected')
+    }
+
+    parsed.data.x = 'y'
+    expect(parsed.data.x).toBe('y')
+
+    const validated = schemaX.validate(subject)
+
+    if (validated.error) {
+      throw Error('Not expected')
+    }
+
+    validated.data.x = 'y'
+    expect(validated.data.x).toBe('y')
+  })
+
+  it('x: programmatically defined ObjectSchema', () => {
+    const schemaX = x(object({ x: string(), y: number() }))
+    const subject = { x: 'x', y: 0 }
+
+    const parsed = schemaX.parse(subject)
+
+    if (parsed.error) {
+      throw Error('Not expected')
+    }
+
+    parsed.data.x = 'y'
+    expect(parsed.data.x).toBe('y')
+
+    const validated = schemaX.validate(subject)
+
+    if (validated.error) {
+      throw Error('Not expected')
+    }
+
+    validated.data.x = 'y'
+    expect(validated.data.x).toBe('y')
+  })
+})

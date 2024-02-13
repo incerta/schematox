@@ -104,7 +104,7 @@ export type Con_ObjectSchema_SubjT_P<T extends ObjectSchema> =
       of: infer U
     }
       ? {
-          [k in keyof U]: U[k] extends BaseSchema
+          -readonly [k in keyof U]: U[k] extends BaseSchema
             ? Con_BaseSchema_SubjT_P<U[k]>
             : U[k] extends ObjectSchema
               ? Con_ObjectSchema_SubjT_P<U[k]>
@@ -122,7 +122,7 @@ export type Con_ObjectSchema_SubjT_V<T extends ObjectSchema> =
       of: infer U
     }
       ? {
-          [k in keyof U]: U[k] extends BaseSchema
+          -readonly [k in keyof U]: U[k] extends BaseSchema
             ? Con_BaseSchema_SubjT_V<U[k]>
             : U[k] extends ObjectSchema
               ? Con_ObjectSchema_SubjT_V<U[k]>
