@@ -17,7 +17,6 @@ export function parse(
   subject: unknown
 ): EitherError<InvalidSubject[], unknown> {
   if (
-    typeof schema === 'string' ||
     schema.type === 'string' ||
     schema.type === 'number' ||
     schema.type === 'boolean' ||

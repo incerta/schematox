@@ -2,9 +2,7 @@
 
 - `schema` – a JSON-compatible representation of JS runtime `primitive/object/array` entities
 - `base schema` – the most basic unit of a schema
-- `compound schema` – higher-order structure that connects base or other compound schemas
-- `short schema` – shortened form of the base schema
-- `detailed schema` – detailed version of the base schema
+- `compound schema` – higher-order structure that contains base or other compound schemas
 - `schema subject` – the JS runtime primitive or object that is intended to be tested against the schema
 - `schema subject type` – the TypeScript type of the schema subject
 - `schema validated subject type` – the resultant TypeScript type of the entity validated by `x`
@@ -19,24 +17,6 @@
 In our project, we have many plain and generic types. These represent the most sophisticated part of the `schematoX` library. In the early stages of development, it became obvious that we needed to shorten some names, like `ConstructPrimitiveSchemaSubjectTypeValidated`, because they were too long and noisy. However, we still needed a clear understanding of what these types are doing.
 
 So, the solution lies in adhering to naming conventions. The reason why our type identifiers were too long in the first place is because we want to test each layer of schema subject construction separately. Otherwise we will have tremendous tree of `T extends U` incomprehensible by any human.
-
-## Base short schema. "BS\_" prefix, "\_Req" & "\_Opt" suffixes
-
-`BS_` is shortened `BaseShort`. Base short short schema represented by string literal. The `_Req` identifier suffix signifies that schema subject type should be required and `_Opt` is optional.
-
-Required subject base schema short types:
-
-- `BS_String_Req` – result in `string` schema subject type
-- `BS_Number_Req` – result in `number` schema subject type
-- `BS_Boolean_Req` – result in `boolean` schema subject type
-
-Optional subject base schema short types:
-
-- `BS_String_Opt` – result in `string | undefined` schema subject type
-- `BS_Number_Opt` – result in `number | undefined` schema subject type
-- `BS_Boolean_Opt` – result in `boolean | undefined` schema subject type
-
-Those types gathered in unions by the following type identifiers:
 
 ## Base detailed schema. "BD_Schema". "BD\_" prefix
 

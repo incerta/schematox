@@ -5,226 +5,9 @@ import { check, unknownX } from './test-utils'
 import type { InvalidSubject } from '../error'
 import type { Schema } from '../types/compound-schema-types'
 
-describe('Parse base short schema with valid subject', () => {
-  it('parseBaseSchemaSubject: subject `"x"` - schema `"string"`', () => {
-    expect(parseBaseSchemaSubject('string', 'x').data).toBe('x')
-    expect(parseBaseSchemaSubject('string', 'x').error).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: subject `"x"` - schema `"string?"`', () => {
-    expect(parseBaseSchemaSubject('string', 'x').data).toBe('x')
-    expect(parseBaseSchemaSubject('string', 'x').error).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: subject `0` - schema `"number"`', () => {
-    expect(parseBaseSchemaSubject('number', 0).data).toBe(0)
-    expect(parseBaseSchemaSubject('number', 0).error).toBe(undefined)
-  })
-  it('parseBaseSchemaSubject: subject `0` - schema `"number?"`', () => {
-    expect(parseBaseSchemaSubject('number', 0).data).toBe(0)
-    expect(parseBaseSchemaSubject('number', 0).error).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: subject `true` - schema `"boolean"`', () => {
-    expect(parseBaseSchemaSubject('boolean', true).data).toBe(true)
-    expect(parseBaseSchemaSubject('boolean', true).error).toBe(undefined)
-  })
-  it('parseBaseSchemaSubject: subject `true` - schema `"boolean?"`', () => {
-    expect(parseBaseSchemaSubject('boolean', true).data).toBe(true)
-    expect(parseBaseSchemaSubject('boolean', true).error).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: subject `false` - schema `"boolean"`', () => {
-    expect(parseBaseSchemaSubject('boolean', false).data).toBe(false)
-    expect(parseBaseSchemaSubject('boolean', false).error).toBe(undefined)
-  })
-  it('parseBaseSchemaSubject: subject `false` - schema `"boolean?"`', () => {
-    expect(parseBaseSchemaSubject('boolean', false).data).toBe(false)
-    expect(parseBaseSchemaSubject('boolean', false).error).toBe(undefined)
-  })
-})
-
-describe('Parse base short schema with `null | undefined` subject', () => {
-  /* string | string? */
-
-  it('parseBaseSchemaSubject: subject `undefined` - schema `"string"`', () => {
-    const schema = 'string' satisfies Schema
-    const subject = undefined
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.error).toEqual({
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-      subject,
-    })
-  })
-
-  it('parseBaseSchemaSubject: subject `undefined` - schema `"string?"`', () => {
-    const schema = 'string?' satisfies Schema
-    const subject = undefined
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.data).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: subject `null` - schema `"string"`', () => {
-    const schema = 'string' satisfies Schema
-    const subject = null
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.error).toEqual({
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-      subject,
-    })
-  })
-
-  it('parseBaseSchemaSubject: subject `null` - schema `"string?"`', () => {
-    const schema = 'string?' satisfies Schema
-    const subject = null
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.data).toBe(undefined)
-  })
-
-  /* number | number? */
-
-  it('parseBaseSchemaSubject: subject `undefined` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
-    const subject = undefined
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.error).toEqual({
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-      subject,
-    })
-  })
-
-  it('parseBaseSchemaSubject: subject `undefined` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
-    const subject = undefined
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.data).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: subject `null` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
-    const subject = null
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.error).toEqual({
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-      subject,
-    })
-  })
-
-  it('parseBaseSchemaSubject: subject `null` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
-    const subject = null
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.data).toBe(undefined)
-  })
-
-  /* boolean | boolean? */
-
-  it('parseBaseSchemaSubject: subject `undefined` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
-    const subject = undefined
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.error).toEqual({
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-      subject,
-    })
-  })
-
-  it('parseBaseSchemaSubject: subject `undefined` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
-    const subject = undefined
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.data).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: subject `null` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
-    const subject = null
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.error).toEqual({
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-      subject,
-    })
-  })
-
-  it('parseBaseSchemaSubject: subject `null` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
-    const subject = null
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.data).toBe(undefined)
-  })
-
-  /* boolean | boolean? */
-
-  it('parseBaseSchemaSubject: subject `undefined` - schema `"boolean"`', () => {
-    const schema = 'boolean' satisfies Schema
-    const subject = undefined
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.error).toEqual({
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-      subject,
-    })
-  })
-
-  it('parseBaseSchemaSubject: subject `undefined` - schema `"boolean?"`', () => {
-    const schema = 'boolean?' satisfies Schema
-    const subject = undefined
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.data).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: subject `null` - schema `"boolean"`', () => {
-    const schema = 'boolean' satisfies Schema
-    const subject = null
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.error).toEqual({
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-      subject,
-    })
-  })
-
-  it('parseBaseSchemaSubject: subject `null` - schema `"boolean?"`', () => {
-    const schema = 'boolean?' satisfies Schema
-    const subject = null
-    const parsed = parseBaseSchemaSubject(schema, subject)
-
-    expect(parsed.data).toBe(undefined)
-  })
-})
-
 describe('Number base schema invalid subject parsing special cases', () => {
   it('parseBaseSchemaSubject: subject `NaN` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
+    const schema = { type: 'number' } satisfies Schema
     const subject = NaN
     const parsed = parseBaseSchemaSubject(schema, subject)
 
@@ -237,7 +20,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
   })
 
   it('parseBaseSchemaSubject: subject `NaN` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
+    const schema = { type: 'number', optional: true } satisfies Schema
     const subject = NaN
     const parsed = parseBaseSchemaSubject(schema, subject)
 
@@ -250,7 +33,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
   })
 
   it('parseBaseSchemaSubject: subject `Infinity` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
+    const schema = { type: 'number' } satisfies Schema
     const subject = Infinity
     const parsed = parseBaseSchemaSubject(schema, subject)
 
@@ -263,7 +46,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
   })
 
   it('parseBaseSchemaSubject: subject `Infinity` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
+    const schema = { type: 'number', optional: true } satisfies Schema
     const subject = Infinity
     const parsed = parseBaseSchemaSubject(schema, subject)
 
@@ -276,7 +59,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
   })
 
   it('parseBaseSchemaSubject: subject `-Infinity` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
+    const schema = { type: 'number' } satisfies Schema
     const subject = -Infinity
     const parsed = parseBaseSchemaSubject(schema, subject)
 
@@ -289,7 +72,7 @@ describe('Number base schema invalid subject parsing special cases', () => {
   })
 
   it('parseBaseSchemaSubject: subject `-Infinity` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
+    const schema = { type: 'number', optional: true } satisfies Schema
     const subject = -Infinity
     const parsed = parseBaseSchemaSubject(schema, subject)
 
@@ -299,122 +82,6 @@ describe('Number base schema invalid subject parsing special cases', () => {
       schema,
       subject,
     })
-  })
-})
-
-describe('Parse base short schema TYPE INFERENCE check', () => {
-  /* string/string? */
-
-  it('parseBaseSchemaSubject: string', () => {
-    const schema = 'string' satisfies Schema
-    const result = parseBaseSchemaSubject(schema, 'x')
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: number }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<string>(unknownX as typeof result.data)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'number'
-    check<number>(unknownX as typeof result.data)
-  })
-
-  it('parseBaseSchemaSubject: string?', () => {
-    const schema = 'string?' satisfies Schema
-    const result = parseBaseSchemaSubject(schema, 'x')
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: number }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<string | undefined>(unknownX as typeof result.data)
-    // @ts-expect-error 'string | undefined' is not assignable to parameter of type 'string'
-    check<string>(unknownX as typeof result.data)
-  })
-
-  /* number/number? */
-
-  it('parseBaseSchemaSubject: number', () => {
-    const schema = 'number' satisfies Schema
-    const result = parseBaseSchemaSubject(schema, 0)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: number }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<number>(unknownX as typeof result.data)
-    // @ts-expect-error type 'number' is not assignable to parameter of type 'string'
-    check<string>(unknownX as typeof result.data)
-  })
-
-  it('parseBaseSchemaSubject: number?', () => {
-    const schema = 'number?' satisfies Schema
-    const result = parseBaseSchemaSubject(schema, 0)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: number }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<number | undefined>(unknownX as typeof result.data)
-    // @ts-expect-error 'number | undefined' is not assignable to parameter of type 'number'
-    check<number>(unknownX as typeof result.data)
-  })
-
-  /* boolean/boolean? */
-
-  it('parseBaseSchemaSubject: boolean', () => {
-    const schema = 'boolean' satisfies Schema
-    const result = parseBaseSchemaSubject(schema, true)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: boolean }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<boolean>(unknownX as typeof result.data)
-    // @ts-expect-error type 'boolean' is not assignable to parameter of type 'string'
-    check<string>(unknownX as typeof result.data)
-  })
-
-  it('parseBaseSchemaSubject: boolean?', () => {
-    const schema = 'boolean?' satisfies Schema
-    const result = parseBaseSchemaSubject(schema, true)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: boolean }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<boolean | undefined>(unknownX as typeof result.data)
-    // @ts-expect-error 'boolean | undefined' is not assignable to parameter of type 'boolean'
-    check<boolean>(unknownX as typeof result.data)
   })
 })
 

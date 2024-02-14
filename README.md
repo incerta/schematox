@@ -75,7 +75,7 @@ export const userSchema = {
       },
       minLength: 1,
     },
-    bio: 'string?',
+    bio: { type: 'string', optional: true },
   },
 } as const satisfies Schema
 ```
@@ -179,10 +179,7 @@ import type { Schema } from 'schematox'
 
 // string
 
-const staticShortStringRequired = 'string' satisfies Schema
-const staticShortStringOptional = 'string?' satisfies Schema
-
-const staticDetailedString = {
+const staticString = {
   type: 'string',
   optional: true,
   default: 'x',
@@ -202,10 +199,7 @@ const programmaticString = string()
 
 // number
 
-const staticShortNumberRequired = 'number' satisfies Schema
-const staticShortNumberOptional = 'number?' satisfies Schema
-
-const staticDetailedNumber = {
+const staticNumber = {
   type: 'number',
   optional: true,
   default: 1,
@@ -225,10 +219,7 @@ const programmaticNumber = number()
 
 // boolean
 
-const staticShortBooleanRequired = 'boolean' satisfies Schema
-const staticShortBooleanOptional = 'boolean?' satisfies Schema
-
-const staticDetailedBoolean = {
+const staticBoolean = {
   type: 'boolean',
   optional: true,
   default: false,
@@ -341,7 +332,7 @@ It's always an array with at least one entry. Each entry includes:
 - `subject`: The specific part of the validated subject where the invalid value exists.
 - `path`: Traces the route from the root to the error subject, with strings as keys and numbers as array indexes.
 
-## Parse/validate differences
+## Parse and validate differences
 
 The parser returns `data` as new object/primitive without references to the parsed subject. Parser manages the `null` value as `undefined` and subsequently replaces it with `undefined`. It also swaps `optional` values with the `default` value from schema. One can infer schema parsed subject type by using `XParsed<typeof schema>` generic.
 
@@ -352,14 +343,14 @@ So the difference between `XParsed` and `XValidated` is just about handling `def
 Examples:
 
 ```typescript
-const optionalStrX = x('string?')
+const optionalStrX = x({ type: 'string', optional: true } as const)
 
 /* Parser doesn't check subject type */
 
 expect(optionalStrX.parse(0).error).toStrictEqual([
   {
     code: 'INVALID_TYPE',
-    schema: 'string?',
+    schema: { type: 'string', optional: true },
     subject: 0,
     path: [],
   },
@@ -371,7 +362,7 @@ expect(optionalStrX.parse(0).error).toStrictEqual([
 expect(optionalStrX.validate(0).error).toStrictEqual([
   {
     code: 'INVALID_TYPE',
-    schema: 'string?',
+    schema: { type: 'string', optional: true },
     subject: 0,
     path: [],
   },
@@ -388,7 +379,7 @@ expect(optionalStrX.parse(null).error).toBe(undefined)
 expect(optionalStrX.validate(null).error).toStrictEqual([
   {
     code: 'INVALID_TYPE',
-    schema: 'string?',
+    schema: { type: 'string', optional: true },
     subject: null,
     path: [],
   },

@@ -5,54 +5,6 @@ import { check, unknownX } from './test-utils'
 import type { Schema } from '../types/compound-schema-types'
 
 describe('Parse BASE schema with VALID subject', () => {
-  it('parse: `"string"` schema', () => {
-    const schema = 'string' satisfies Schema
-    const subject = 'x'
-
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
-  })
-
-  it('parse: `"string?"` schema', () => {
-    const schema = 'string?' satisfies Schema
-    const subject = 'x'
-
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
-  })
-
-  it('parse: `"number"` schema', () => {
-    const schema = 'number' satisfies Schema
-    const subject = 0
-
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
-  })
-
-  it('parse: `"number?"` schema', () => {
-    const schema = 'number?' satisfies Schema
-    const subject = 0
-
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
-  })
-
-  it('parse: `"boolean"` schema', () => {
-    const schema = 'boolean' satisfies Schema
-    const subject = true
-
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
-  })
-
-  it('parse: `"boolean?"` schema', () => {
-    const schema = 'boolean?' satisfies Schema
-    const subject = false
-
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
-  })
-
   it('parse: `{ type: "string" }` schema', () => {
     const schema = { type: 'string' } satisfies Schema
     const subject = 'x'
@@ -95,34 +47,6 @@ describe('Parse BASE schema with VALID subject', () => {
 })
 
 describe('Parse BASE schema with INVALID subject', () => {
-  it('parse: short base schema', () => {
-    const shortReqStrSchema = 'string' satisfies Schema
-    const undefinedSubj = undefined
-
-    expect(parse(shortReqStrSchema, undefinedSubj).data).toBe(undefined)
-    expect(parse(shortReqStrSchema, undefinedSubj).error).toStrictEqual([
-      {
-        code: ERROR_CODE.invalidType,
-        subject: undefinedSubj,
-        schema: shortReqStrSchema,
-        path: [],
-      },
-    ])
-
-    const shortOptStrSchema = 'string?' satisfies Schema
-    const numberSubj = 0
-
-    expect(parse(shortOptStrSchema, numberSubj).data).toBe(undefined)
-    expect(parse(shortOptStrSchema, numberSubj).error).toStrictEqual([
-      {
-        code: ERROR_CODE.invalidType,
-        subject: numberSubj,
-        schema: shortOptStrSchema,
-        path: [],
-      },
-    ])
-  })
-
   it('parse: base detailed schema', () => {
     const detailedReqStrSchema = { type: 'string' } satisfies Schema
     const undefinedSubj = undefined
@@ -161,18 +85,18 @@ describe('Parse OBJECT schema with VALID subject', () => {
     const schema = {
       type: 'object',
       of: {
-        a: 'string',
-        b: 'string?',
-        nullB: 'string?',
-        undefinedB: 'string?',
-        c: 'number',
-        d: 'number?',
-        nullD: 'number?',
-        undefinedD: 'number?',
-        e: 'boolean',
-        f: 'boolean?',
-        nullF: 'boolean?',
-        undefinedF: 'boolean?',
+        a: { type: 'string' },
+        b: { type: 'string', optional: true },
+        nullB: { type: 'string', optional: true },
+        undefinedB: { type: 'string', optional: true },
+        c: { type: 'number' },
+        d: { type: 'number', optional: true },
+        nullD: { type: 'number', optional: true },
+        undefinedD: { type: 'number', optional: true },
+        e: { type: 'boolean' },
+        f: { type: 'boolean', optional: true },
+        nullF: { type: 'boolean', optional: true },
+        undefinedF: { type: 'boolean', optional: true },
       },
     } as const satisfies Schema
 
@@ -340,8 +264,8 @@ describe('Parse OBJECT schema with VALID subject', () => {
     const schema = {
       type: 'object',
       of: {
-        strArrReq: { type: 'array', of: 'string' },
-        strArrOpt: { type: 'array', of: 'string', optional: true },
+        strArrReq: { type: 'array', of: { type: 'string' } },
+        strArrOpt: { type: 'array', of: { type: 'string' }, optional: true },
       },
     } as const satisfies Schema
 
@@ -360,7 +284,7 @@ describe('Parse OBJECT schema with VALID subject', () => {
   it('parse: can be optional by itself', () => {
     const schema = {
       type: 'object',
-      of: { x: 'string' },
+      of: { x: { type: 'string' } },
       optional: true,
     } as const satisfies Schema
 
@@ -375,7 +299,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
   it('parse: required object with invalid direct subject', () => {
     const schema = {
       type: 'object',
-      of: { x: 'string' },
+      of: { x: { type: 'string' } },
     } as const satisfies Schema
 
     const undefinedSubj = undefined
@@ -454,7 +378,11 @@ describe('Parse OBJECT schema with INVALID subject', () => {
   it('parse: required obejct with two invalid subjects', () => {
     const schema = {
       type: 'object',
-      of: { x: 'string', y: 'string', z: 'string' },
+      of: {
+        x: { type: 'string' },
+        y: { type: 'string' },
+        z: { type: 'string' },
+      },
     } as const satisfies Schema
 
     const firstInvalidSubjKey = 'y'
@@ -498,7 +426,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
                   of: {
                     type: 'object',
                     of: {
-                      dArrObj: 'string',
+                      dArrObj: { type: 'string' },
                     },
                   },
                 },
@@ -514,7 +442,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
                             f: {
                               type: 'object',
                               of: {
-                                g: 'string',
+                                g: { type: 'string' },
                               },
                             },
                           },
@@ -549,13 +477,13 @@ describe('Parse OBJECT schema with INVALID subject', () => {
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
-        schema: 'string',
+        schema: { type: 'string' },
         path: ['a', 'b', 'cArr', 2, 'dArrObj'],
       },
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
-        schema: 'string',
+        schema: { type: 'string' },
         path: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
       },
     ])
@@ -567,7 +495,7 @@ describe('Parse OBJECT schema with INVALID subject', () => {
       of: {
         x: {
           type: 'array',
-          of: 'string',
+          of: { type: 'string' },
         },
       },
     } as const satisfies Schema
@@ -593,7 +521,7 @@ describe('Parse ARRAY schema with VALID subject', () => {
   it('parse: required base short schema subject', () => {
     const stringArrSchema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
     } as const satisfies Schema
 
     const stringSubj = ['x', 'y']
@@ -603,7 +531,7 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const numberArrSchema = {
       type: 'array',
-      of: 'number',
+      of: { type: 'number' },
     } as const satisfies Schema
 
     const numberSubj = [0, 1]
@@ -613,7 +541,7 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const booleanArrSchema = {
       type: 'array',
-      of: 'boolean',
+      of: { type: 'boolean' },
     } as const satisfies Schema
 
     const booleanSubj = [true, false]
@@ -628,7 +556,7 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const optStrSchema = {
       type: 'array',
-      of: 'string?',
+      of: { type: 'string', optional: true },
     } as const satisfies Schema
 
     const strSubject = ['x', 'y']
@@ -640,7 +568,7 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const optNumSchema = {
       type: 'array',
-      of: 'number?',
+      of: { type: 'number', optional: true },
     } as const satisfies Schema
 
     const numSubject = [0, 1, 2, 3, 4]
@@ -652,7 +580,7 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const optBoolSchema = {
       type: 'array',
-      of: 'boolean?',
+      of: { type: 'boolean', optional: true },
     } as const satisfies Schema
 
     const boolSubject = [true, true, false, true]
@@ -797,7 +725,7 @@ describe('Parse ARRAY schema with VALID subject', () => {
   it('parse: can be optional by itself', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
       optional: true,
     } as const satisfies Schema
 
@@ -812,7 +740,7 @@ describe('Parse ARRAY schema with INVALID subject', () => {
   it('parse: required array with invalid direct subject', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
     } as const satisfies Schema
 
     const undefinedSubj = undefined
@@ -855,7 +783,7 @@ describe('Parse ARRAY schema with INVALID subject', () => {
   it('parse: minLength INVALID_RANGE error', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
       minLength: 2,
     } as const satisfies Schema
 
@@ -877,7 +805,7 @@ describe('Parse ARRAY schema with INVALID subject', () => {
   it('parse: maxLength INVALID_RANGE error', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
       maxLength: 1,
     } as const satisfies Schema
 
@@ -899,7 +827,7 @@ describe('Parse ARRAY schema with INVALID subject', () => {
   it('parse: optional array with invalid direct subject', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
       optional: true,
     } as const satisfies Schema
 
@@ -919,7 +847,7 @@ describe('Parse ARRAY schema with INVALID subject', () => {
   it('parse: required array with two invalid subject arr elements', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
     } as const satisfies Schema
 
     const subject = [
@@ -970,14 +898,14 @@ describe('Parse ARRAY schema with INVALID subject', () => {
             of: {
               type: 'object',
               of: {
-                x: 'string',
-                y: 'boolean',
+                x: { type: 'string' },
+                y: { type: 'boolean' },
                 z: {
                   type: 'array',
                   of: {
                     type: 'object',
                     of: {
-                      x: 'number',
+                      x: { type: 'number' },
                     },
                   },
                 },
