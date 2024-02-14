@@ -13,7 +13,7 @@ import type {
   Con_Schema_SubjT_V,
 } from './types/compound-schema-types'
 
-/* Programmatically base schema definition */
+/* Programmatic base schema definition */
 
 export { string } from './programmatic-schema/string'
 export { number } from './programmatic-schema/number'
@@ -21,16 +21,10 @@ export { boolean } from './programmatic-schema/boolean'
 export { stringUnion } from './programmatic-schema/string-union'
 export { numberUnion } from './programmatic-schema/number-union'
 
-/* Programmatically compound schema definition */
+/* Programmatic compound schema definition */
 
 export { array } from './programmatic-schema/array'
 export { object } from './programmatic-schema/object'
-
-/* Parser/validator/x-closure */
-
-export { parse } from './general-schema-parser'
-export { validate } from './general-schema-validator'
-export { x } from './x-closure'
 
 /* Typings */
 
@@ -41,6 +35,10 @@ export type { InvalidSubject } from './error'
 
 export type { EitherError } from './utils/fp'
 export { isError, isData, error, data } from './utils/fp'
+
+export { parse } from './general-schema-parser'
+export { validate } from './general-schema-validator'
+export { x } from './x-closure'
 
 /* XParsed infers set optional default schema value as always present */
 export type XParsed<T extends { __schema: Schema } | Schema> = T extends {

@@ -5,54 +5,6 @@ import { check, unknownX } from './test-utils'
 import type { Schema } from '../types/compound-schema-types'
 
 describe('Validate BASE schema with VALID subject', () => {
-  it('validate: `"string"` schema', () => {
-    const schema = 'string' satisfies Schema
-    const subject = 'x'
-
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
-  })
-
-  it('validate: `"string?"` schema', () => {
-    const schema = 'string?' satisfies Schema
-    const subject = 'x'
-
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
-  })
-
-  it('validate: `"number"` schema', () => {
-    const schema = 'number' satisfies Schema
-    const subject = 0
-
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
-  })
-
-  it('validate: `"number?"` schema', () => {
-    const schema = 'number?' satisfies Schema
-    const subject = 0
-
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
-  })
-
-  it('validate: `"boolean"` schema', () => {
-    const schema = 'boolean' satisfies Schema
-    const subject = true
-
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
-  })
-
-  it('validate: `"boolean?"` schema', () => {
-    const schema = 'boolean?' satisfies Schema
-    const subject = false
-
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
-  })
-
   it('validate: `{ type: "string" }` schema', () => {
     const schema = { type: 'string' } satisfies Schema
     const subject = 'x'
@@ -95,38 +47,6 @@ describe('Validate BASE schema with VALID subject', () => {
 })
 
 describe('Validate BASE schema with INVALID subject', () => {
-  it('validate: short base schema', () => {
-    const shortReqStrSchema = 'string' satisfies Schema
-    const undefinedSubj = undefined
-
-    // @ts-expect-error for the sake of testing
-    expect(validate(shortReqStrSchema, undefinedSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
-    expect(validate(shortReqStrSchema, undefinedSubj).error).toStrictEqual([
-      {
-        code: ERROR_CODE.invalidType,
-        subject: undefinedSubj,
-        schema: shortReqStrSchema,
-        path: [],
-      },
-    ])
-
-    const shortOptStrSchema = 'string?' satisfies Schema
-    const numberSubj = 0
-
-    // @ts-expect-error for the sake of testing
-    expect(validate(shortOptStrSchema, numberSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
-    expect(validate(shortOptStrSchema, numberSubj).error).toStrictEqual([
-      {
-        code: ERROR_CODE.invalidType,
-        subject: numberSubj,
-        schema: shortOptStrSchema,
-        path: [],
-      },
-    ])
-  })
-
   it('validate: base detailed schema', () => {
     const detailedReqStrSchema = { type: 'string' } satisfies Schema
     const undefinedSubj = undefined
@@ -169,15 +89,15 @@ describe('Validate OBJECT schema with VALID subject', () => {
     const schema = {
       type: 'object',
       of: {
-        a: 'string',
-        b: 'string?',
-        undefinedB: 'string?',
-        c: 'number',
-        d: 'number?',
-        undefinedD: 'number?',
-        e: 'boolean',
-        f: 'boolean?',
-        undefinedF: 'boolean?',
+        a: { type: 'string' },
+        b: { type: 'string', optional: true },
+        undefinedB: { type: 'string', optional: true },
+        c: { type: 'number' },
+        d: { type: 'number', optional: true },
+        undefinedD: { type: 'number', optional: true },
+        e: { type: 'boolean' },
+        f: { type: 'boolean', optional: true },
+        undefinedF: { type: 'boolean', optional: true },
       },
     } as const satisfies Schema
 
@@ -247,8 +167,8 @@ describe('Validate OBJECT schema with VALID subject', () => {
     const schema = {
       type: 'object',
       of: {
-        strArrReq: { type: 'array', of: 'string' },
-        strArrOpt: { type: 'array', of: 'string', optional: true },
+        strArrReq: { type: 'array', of: { type: 'string' } },
+        strArrOpt: { type: 'array', of: { type: 'string' }, optional: true },
       },
     } as const satisfies Schema
 
@@ -264,7 +184,7 @@ describe('Validate OBJECT schema with VALID subject', () => {
   it('validate: can be optional by itself', () => {
     const schema = {
       type: 'object',
-      of: { x: 'string' },
+      of: { x: { type: 'string' } },
       optional: true,
     } as const satisfies Schema
 
@@ -277,7 +197,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
   it('validate: required object with invalid direct subject', () => {
     const schema = {
       type: 'object',
-      of: { x: 'string' },
+      of: { x: { type: 'string' } },
     } as const satisfies Schema
 
     const undefinedSubj = undefined
@@ -368,7 +288,11 @@ describe('Validate OBJECT schema with INVALID subject', () => {
   it('validate: required obejct with two invalid subjects', () => {
     const schema = {
       type: 'object',
-      of: { x: 'string', y: 'string', z: 'string' },
+      of: {
+        x: { type: 'string' },
+        y: { type: 'string' },
+        z: { type: 'string' },
+      },
     } as const satisfies Schema
 
     const firstInvalidSubjKey = 'y'
@@ -414,7 +338,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
                   of: {
                     type: 'object',
                     of: {
-                      dArrObj: 'string',
+                      dArrObj: { type: 'string' },
                     },
                   },
                 },
@@ -430,7 +354,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
                             f: {
                               type: 'object',
                               of: {
-                                g: 'string',
+                                g: { type: 'string' },
                               },
                             },
                           },
@@ -467,13 +391,13 @@ describe('Validate OBJECT schema with INVALID subject', () => {
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
-        schema: 'string',
+        schema: { type: 'string' },
         path: ['a', 'b', 'cArr', 2, 'dArrObj'],
       },
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
-        schema: 'string',
+        schema: { type: 'string' },
         path: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
       },
     ])
@@ -485,7 +409,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
       of: {
         x: {
           type: 'array',
-          of: 'string',
+          of: { type: 'string' },
         },
       },
     } as const satisfies Schema
@@ -513,7 +437,7 @@ describe('Validate ARRAY schema with VALID subject', () => {
   it('validate: required base short schema subject', () => {
     const stringArrSchema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
     } as const satisfies Schema
 
     const stringSubj = ['x', 'y']
@@ -523,7 +447,7 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const numberArrSchema = {
       type: 'array',
-      of: 'number',
+      of: { type: 'number' },
     } as const satisfies Schema
 
     const numberSubj = [0, 1]
@@ -533,7 +457,7 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const booleanArrSchema = {
       type: 'array',
-      of: 'boolean',
+      of: { type: 'boolean' },
     } as const satisfies Schema
 
     const booleanSubj = [true, false]
@@ -549,7 +473,7 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const optStrSchema = {
       type: 'array',
-      of: 'string?',
+      of: { type: 'string', optional: true },
     } as const satisfies Schema
 
     const strSubject = ['x', 'y']
@@ -561,7 +485,7 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const optNumSchema = {
       type: 'array',
-      of: 'number?',
+      of: { type: 'number', optional: true },
     } as const satisfies Schema
 
     const numSubject = [0, 1, 2, 3, 4]
@@ -573,7 +497,7 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const optBoolSchema = {
       type: 'array',
-      of: 'boolean?',
+      of: { type: 'boolean', optional: true },
     } as const satisfies Schema
 
     const boolSubject = [true, true, false, true]
@@ -731,7 +655,7 @@ describe('Validate ARRAY schema with VALID subject', () => {
   it('validate: can be optional by itself', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
       optional: true,
     } as const satisfies Schema
 
@@ -744,7 +668,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
   it('validate: required array with invalid direct subject', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
     } as const satisfies Schema
 
     const undefinedSubj = undefined
@@ -793,7 +717,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
   it('validate: optional array with invalid direct subject', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
       optional: true,
     } as const satisfies Schema
 
@@ -815,7 +739,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
   it('validate: minLength INVALID_RANGE error', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
       minLength: 2,
     } as const satisfies Schema
 
@@ -837,7 +761,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
   it('validate: maxLength INVALID_RANGE error', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
       maxLength: 1,
     } as const satisfies Schema
 
@@ -859,7 +783,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
   it('validate: required array with two invalid subject arr elements', () => {
     const schema = {
       type: 'array',
-      of: 'string',
+      of: { type: 'string' },
     } as const satisfies Schema
 
     const subject = [
@@ -910,14 +834,14 @@ describe('Validate ARRAY schema with INVALID subject', () => {
             of: {
               type: 'object',
               of: {
-                x: 'string',
-                y: 'boolean',
+                x: { type: 'string' },
+                y: { type: 'boolean' },
                 z: {
                   type: 'array',
                   of: {
                     type: 'object',
                     of: {
-                      x: 'number',
+                      x: { type: 'number' },
                     },
                   },
                 },
@@ -993,8 +917,8 @@ describe('VALIDATE flow returns schema subject reference', () => {
           of: {
             type: 'object',
             of: {
-              x: 'number',
-              y: 'number',
+              x: { type: 'number' },
+              y: { type: 'number' },
             },
           },
         },
@@ -1028,8 +952,8 @@ describe('VALIDATE flow returns schema subject reference', () => {
       of: {
         type: 'object',
         of: {
-          x: 'number',
-          y: 'number',
+          x: { type: 'number' },
+          y: { type: 'number' },
         },
       },
     } as const satisfies Schema
@@ -1054,35 +978,6 @@ describe('VALIDATE flow returns schema subject reference', () => {
 })
 
 describe('Check validate subject type constraints', () => {
-  it('validate: base short schema', () => {
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string'
-    expect(() => validate('string', undefined)).not.toThrow()
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
-    expect(() => validate('string', 0)).not.toThrow()
-
-    expect(() => validate('string?', undefined)).not.toThrow()
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
-    expect(() => validate('string?', 0)).not.toThrow()
-
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'number'
-    expect(() => validate('number', undefined)).not.toThrow()
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
-    expect(() => validate('number', true)).not.toThrow()
-
-    expect(() => validate('number?', undefined)).not.toThrow()
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
-    expect(() => validate('number?', true)).not.toThrow()
-
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
-    expect(() => validate('boolean', undefined)).not.toThrow()
-    // @ts-expect-error argument of type 'string' is not assignable to parameter of type 'boolean'
-    expect(() => validate('boolean', 'x')).not.toThrow()
-
-    expect(() => validate('boolean?', undefined)).not.toThrow()
-    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
-    expect(() => validate('boolean?', 'string')).not.toThrow()
-  })
-
   it('validate: base detailed schema', () => {
     // @ts-expect-error 'undefined' is not assignable to parameter of type 'string'
     expect(() => validate({ type: 'string' }, undefined)).not.toThrow()
@@ -1141,18 +1036,27 @@ describe('Check validate subject type constraints', () => {
 
   it('validate: object schema', () => {
     expect(() =>
-      // @ts-expect-error 'undefined' is not '{ readonly x: string; }'
-      validate({ type: 'object', of: { x: 'string' } } as const, undefined)
+      validate(
+        { type: 'object', of: { x: { type: 'string' } } } as const,
+        // @ts-expect-error 'undefined' is not '{ readonly x: string; }'
+        undefined
+      )
     ).not.toThrow()
 
     expect(() =>
-      // @ts-expect-error 'y' does not exist in type '{ readonly x: string; }'
-      validate({ type: 'object', of: { x: 'string' } } as const, { y: 'x' })
+      validate({ type: 'object', of: { x: { type: 'string' } } } as const, {
+        // @ts-expect-error 'y' does not exist in type '{ readonly x: string; }'
+        y: 'x',
+      })
     ).not.toThrow()
 
     expect(() =>
       validate(
-        { type: 'object', of: { x: 'string' }, optional: true } as const,
+        {
+          type: 'object',
+          of: { x: { type: 'string' } },
+          optional: true,
+        } as const,
         undefined
       )
     ).not.toThrow()
@@ -1170,7 +1074,10 @@ describe('Check validate subject type constraints', () => {
     ).not.toThrow()
 
     expect(() =>
-      validate({ type: 'array', of: 'string', optional: true }, undefined)
+      validate(
+        { type: 'array', of: { type: 'string' }, optional: true },
+        undefined
+      )
     ).not.toThrow()
   })
 

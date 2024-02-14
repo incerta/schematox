@@ -15,83 +15,6 @@ import { x } from '../x-closure'
 import { Schema } from '../types/compound-schema-types'
 
 describe('X closure statically defined schema VALID', () => {
-  it('x: base short schema PARSE/VALIDATE', () => {
-    /* string/string? parse */
-
-    expect(x('string').parse('x').data).toBe('x')
-    expect(x('string').parse('x').error).toBe(undefined)
-
-    expect(x('string?').parse('x').data).toBe('x')
-    expect(x('string?').parse('x').error).toBe(undefined)
-
-    expect(x('string?').parse(undefined).data).toBe(undefined)
-    expect(x('string?').parse(undefined).error).toBe(undefined)
-
-    expect(x('string?').parse(null).data).toBe(undefined)
-    expect(x('string?').parse(null).error).toBe(undefined)
-
-    /* string/string? validate */
-
-    expect(x('string').validate('x').data).toBe('x')
-    expect(x('string').validate('x').error).toBe(undefined)
-
-    expect(x('string?').validate('x').data).toBe('x')
-    expect(x('string?').validate('x').error).toBe(undefined)
-
-    expect(x('string?').validate(undefined).data).toBe(undefined)
-    expect(x('string?').validate(undefined).error).toBe(undefined)
-
-    /* number/number? parse */
-
-    expect(x('number').parse(0).data).toBe(0)
-    expect(x('number').parse(0).error).toBe(undefined)
-
-    expect(x('number?').parse(0).data).toBe(0)
-    expect(x('number?').parse(0).error).toBe(undefined)
-
-    expect(x('number?').parse(undefined).data).toBe(undefined)
-    expect(x('number?').parse(undefined).error).toBe(undefined)
-
-    expect(x('number?').parse(null).data).toBe(undefined)
-    expect(x('number?').parse(null).error).toBe(undefined)
-
-    /* number/number? validate */
-
-    expect(x('number').validate(0).data).toBe(0)
-    expect(x('number').validate(0).error).toBe(undefined)
-
-    expect(x('number?').validate(0).data).toBe(0)
-    expect(x('number?').validate(0).error).toBe(undefined)
-
-    expect(x('number?').validate(undefined).data).toBe(undefined)
-    expect(x('number?').validate(undefined).error).toBe(undefined)
-
-    /* boolean/boolean? parse */
-
-    expect(x('boolean').parse(true).data).toBe(true)
-    expect(x('boolean').parse(true).error).toBe(undefined)
-
-    expect(x('boolean?').parse(false).data).toBe(false)
-    expect(x('boolean?').parse(false).error).toBe(undefined)
-
-    expect(x('boolean?').parse(undefined).data).toBe(undefined)
-    expect(x('boolean?').parse(undefined).error).toBe(undefined)
-
-    expect(x('boolean?').parse(null).data).toBe(undefined)
-    expect(x('boolean?').parse(null).error).toBe(undefined)
-
-    /* boolean/boolean? validate */
-
-    expect(x('boolean').validate(true).data).toBe(true)
-    expect(x('boolean').validate(true).error).toBe(undefined)
-
-    expect(x('boolean?').validate(false).data).toBe(false)
-    expect(x('boolean?').validate(false).error).toBe(undefined)
-
-    expect(x('boolean?').validate(undefined).data).toBe(undefined)
-    expect(x('boolean?').validate(undefined).error).toBe(undefined)
-  })
-
   it('x: base detailed string schema required/optional/default parse/validate', () => {
     const str = x({ type: 'string' })
     const subj = 'x'
@@ -325,7 +248,7 @@ describe('X closure statically defined schema VALID', () => {
   })
 
   it('x: compound array schema required/optional parse/validate', () => {
-    const str = x({ type: 'array', of: 'string' })
+    const str = x({ type: 'array', of: { type: 'string' } })
     const subj = ['x']
 
     expect(str.parse(subj).data).toStrictEqual(subj)
@@ -334,7 +257,7 @@ describe('X closure statically defined schema VALID', () => {
     expect(str.validate(subj).data).toStrictEqual(subj)
     expect(str.validate(subj).error).toBe(undefined)
 
-    const strOpt = x({ type: 'array', of: 'string', optional: true })
+    const strOpt = x({ type: 'array', of: { type: 'string' }, optional: true })
 
     expect(strOpt.parse(subj).data).toStrictEqual(subj)
     expect(strOpt.parse(subj).error).toBe(undefined)
@@ -352,7 +275,7 @@ describe('X closure statically defined schema VALID', () => {
   })
 
   it('x: compound array required schema inner optional parse/validate', () => {
-    const str = x({ type: 'array', of: 'string?' })
+    const str = x({ type: 'array', of: { type: 'string', optional: true } })
     const subj = [undefined, 'x', undefined]
 
     expect(str.parse(subj).data).toStrictEqual(subj)
@@ -363,7 +286,7 @@ describe('X closure statically defined schema VALID', () => {
   })
 
   it('x: compound object schema required/optional parse/validate', () => {
-    const str = x({ type: 'object', of: { x: 'string' } })
+    const str = x({ type: 'object', of: { x: { type: 'string' } } })
     const subj = { x: 'x' }
 
     expect(str.parse(subj).data).toStrictEqual(subj)
@@ -372,7 +295,11 @@ describe('X closure statically defined schema VALID', () => {
     expect(str.validate(subj).data).toStrictEqual(subj)
     expect(str.validate(subj).error).toBe(undefined)
 
-    const strOpt = x({ type: 'object', of: { x: 'string' }, optional: true })
+    const strOpt = x({
+      type: 'object',
+      of: { x: { type: 'string' } },
+      optional: true,
+    })
 
     expect(strOpt.parse(subj).data).toStrictEqual(subj)
     expect(strOpt.parse(subj).error).toBe(undefined)
@@ -397,7 +324,7 @@ describe('X closure statically defined schema INVALID', () => {
 
   it('x: base short string optional/required schema parse/validate', () => {
     const strInvSubj = 0
-    const strReq = x('string')
+    const strReq = x({ type: 'string' })
 
     expect(strReq.parse(undefined).data).toBe(undefined)
     expect(strReq.parse(undefined).error).toMatchObject(errP)
@@ -418,7 +345,7 @@ describe('X closure statically defined schema INVALID', () => {
     // @ts-expect-error 'number' is not assignable to parameter of type 'string'
     expect(strReq.validate(strInvSubj).error).toMatchObject(errV)
 
-    const strOpt = x('string?')
+    const strOpt = x({ type: 'string', optional: true })
 
     expect(strOpt.parse(strInvSubj).data).toBe(undefined)
     expect(strOpt.parse(strInvSubj).error).toMatchObject(errP)
@@ -436,7 +363,7 @@ describe('X closure statically defined schema INVALID', () => {
 
   it('x: base short number optional/required schema parse/validate', () => {
     const numInvSubj = true
-    const numReq = x('number')
+    const numReq = x({ type: 'number' })
 
     expect(numReq.parse(undefined).data).toBe(undefined)
     expect(numReq.parse(undefined).error).toMatchObject(errP)
@@ -457,7 +384,7 @@ describe('X closure statically defined schema INVALID', () => {
     // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
     expect(numReq.validate(numInvSubj).error).toMatchObject(errV)
 
-    const numOpt = x('number?')
+    const numOpt = x({ type: 'number', optional: true })
 
     expect(numOpt.parse(numInvSubj).data).toBe(undefined)
     expect(numOpt.parse(numInvSubj).error).toMatchObject(errP)
@@ -475,7 +402,7 @@ describe('X closure statically defined schema INVALID', () => {
 
   it('x: base short boolean optional/required schema parse/validate', () => {
     const boolInvSubj = 'x'
-    const boolReq = x('boolean')
+    const boolReq = x({ type: 'boolean' })
 
     expect(boolReq.parse(undefined).data).toBe(undefined)
     expect(boolReq.parse(undefined).error).toMatchObject(errP)
@@ -491,7 +418,7 @@ describe('X closure statically defined schema INVALID', () => {
     // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(undefined).error).toMatchObject(errV)
 
-    const boolOpt = x('boolean?')
+    const boolOpt = x({ type: 'boolean', optional: true })
 
     expect(boolOpt.parse(boolInvSubj).data).toBe(undefined)
     expect(boolOpt.parse(boolInvSubj).error).toMatchObject(errP)
@@ -708,7 +635,7 @@ describe('X closure statically defined schema INVALID', () => {
 
   it('x: compound array optional/required schema parse/validate', () => {
     const arrInvSubj = 'x'
-    const arrReq = x({ type: 'array', of: 'string' })
+    const arrReq = x({ type: 'array', of: { type: 'string' } })
 
     expect(arrReq.parse(undefined).data).toBe(undefined)
     expect(arrReq.parse(undefined).error).toMatchObject(errP)
@@ -729,7 +656,11 @@ describe('X closure statically defined schema INVALID', () => {
     // @ts-expect-error 'string' is not assignable to parameter of type 'string[]'
     expect(arrReq.validate(arrInvSubj).error).toMatchObject(errV)
 
-    const arrOpt = x({ type: 'array', of: 'string', optional: true })
+    const arrOpt = x({
+      type: 'array',
+      of: { type: 'string', optional: true },
+      optional: true,
+    })
 
     expect(arrOpt.parse(arrInvSubj).data).toBe(undefined)
     expect(arrOpt.parse(arrInvSubj).error).toMatchObject(errP)
@@ -747,7 +678,7 @@ describe('X closure statically defined schema INVALID', () => {
 
   it('x: compound object optional/required schema parse/validate', () => {
     const objInvSubj = 'x'
-    const objReq = x({ type: 'object', of: { x: 'string' } })
+    const objReq = x({ type: 'object', of: { x: { type: 'string' } } })
 
     expect(objReq.parse(undefined).data).toBe(undefined)
     expect(objReq.parse(undefined).error).toMatchObject(errP)
@@ -768,7 +699,11 @@ describe('X closure statically defined schema INVALID', () => {
     // @ts-expect-error 'string' is not assignable to parameter of type '{ x: string }'
     expect(objReq.validate(objInvSubj).error).toMatchObject(errV)
 
-    const objOpt = x({ type: 'object', of: { x: 'string' }, optional: true })
+    const objOpt = x({
+      type: 'object',
+      of: { x: { type: 'string' } },
+      optional: true,
+    })
 
     expect(objOpt.parse(objInvSubj).data).toBe(undefined)
     expect(objOpt.parse(objInvSubj).error).toMatchObject(errP)
@@ -1355,45 +1290,13 @@ describe('X closure programmatically defined schema INVALID', () => {
 })
 
 describe('X closure type statically defined schema subject type inference check', () => {
-  it('x: base short schema parse', () => {
-    const strReqX = x('string').parse('x')
-    if (strReqX.error) return
-    check<string>(unknownX as typeof strReqX.data)
-
-    const strOptX = x('string?').parse('x')
-    if (strOptX.error) return
-    check<string | undefined>(unknownX as typeof strOptX.data)
-    // @ts-expect-error 'string | undefined' is not 'number | undefined'
-    check<number | undefined>(unknownX as typeof strOptX.data)
-
-    const numReqX = x('number').parse('x')
-    if (numReqX.error) return
-    check<number>(unknownX as typeof numReqX.data)
-
-    const numOptX = x('number?').parse('x')
-    if (numOptX.error) return
-    check<number | undefined>(unknownX as typeof numOptX.data)
-    // @ts-expect-error 'number | undefined' is not 'string | undefined'
-    check<string | undefined>(unknownX as typeof numOptX.data)
-
-    const boolReqX = x('boolean').parse('x')
-    if (boolReqX.error) return
-    check<boolean>(unknownX as typeof boolReqX.data)
-
-    const boolOptX = x('boolean?').parse('x')
-    if (boolOptX.error) return
-    check<boolean | undefined>(unknownX as typeof boolOptX.data)
-    // @ts-expect-error 'boolean | undefined' is not 'string | undefined'
-    check<string | undefined>(unknownX as typeof boolOptX.data)
-  })
-
   it('x: ObjectSchema parse', () => {
     const objSchReq = {
       type: 'object',
       of: {
-        x: 'string',
-        y: 'number',
-        z: 'boolean',
+        x: { type: 'string' },
+        y: { type: 'number' },
+        z: { type: 'boolean' },
       },
     } as const satisfies Schema
 
@@ -1404,9 +1307,9 @@ describe('X closure type statically defined schema subject type inference check'
     const objSchOpt = {
       type: 'object',
       of: {
-        x: 'string',
-        y: 'number',
-        z: 'boolean',
+        x: { type: 'string' },
+        y: { type: 'number' },
+        z: { type: 'boolean' },
       },
       optional: true,
     } as const satisfies Schema
@@ -1425,7 +1328,7 @@ describe('The parsed/validated subject type should be mutable', () => {
   it('x: statically defined ObjectSchema', () => {
     const schemaX = x({
       type: 'object',
-      of: { x: 'string', y: 'number' },
+      of: { x: { type: 'string' }, y: { type: 'number' } },
     } as const)
     const subject = { x: 'x', y: 0 }
 

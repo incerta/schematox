@@ -1,11 +1,10 @@
-import type { BS_Schema, Con_BS_Schema_SubjT } from './base-short-schema-types'
 import type {
   BD_Schema,
   Con_BD_Schema_SubjT_P,
   Con_BD_Schema_SubjT_V,
 } from './base-detailed-schema-types'
 
-export type BaseSchema = BS_Schema | BD_Schema
+export type BaseSchema = BD_Schema
 export type CompoundSchema = ObjectSchema | ArraySchema
 export type Schema = BaseSchema | CompoundSchema
 
@@ -46,17 +45,13 @@ export type ObjectSchema<T extends Schema = NestedSchema> =
 
 /* Construct BaseSchema subject type */
 
-export type Con_BaseSchema_SubjT_P<T extends BaseSchema> = T extends BS_Schema
-  ? Con_BS_Schema_SubjT<T>
-  : T extends BD_Schema
-    ? Con_BD_Schema_SubjT_P<T>
-    : 'NEVER:Con_BaseSchema_SubjT_P'
-
-export type Con_BaseSchema_SubjT_V<T extends BaseSchema> = T extends BS_Schema
-  ? Con_BS_Schema_SubjT<T>
-  : T extends BD_Schema
-    ? Con_BD_Schema_SubjT_V<T>
-    : never
+// TODO: get rid of this intermediate type when the following issue is ready:
+//       "Remove support of default value on the schema level"
+//       https://github.com/incerta/schematox/issues/14
+export type Con_BaseSchema_SubjT_P<T extends BaseSchema> =
+  Con_BD_Schema_SubjT_P<T>
+export type Con_BaseSchema_SubjT_V<T extends BaseSchema> =
+  Con_BD_Schema_SubjT_V<T>
 
 /* Compound schema utility types */
 

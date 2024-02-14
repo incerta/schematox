@@ -5,50 +5,11 @@ import { check, unknownX } from './test-utils'
 import type { InvalidSubject } from '../error'
 import type { Schema } from '../types/compound-schema-types'
 
-describe('Validate base short schema with valid subject', () => {
-  it('validateBaseSchemaSubject: subject `"x"` - schema `"string"`', () => {
-    expect(validateBaseSchemaSubject('string', 'x').data).toBe('x')
-    expect(validateBaseSchemaSubject('string', 'x').error).toBe(undefined)
-  })
+describe('Validate base schema with `null | undefined` subject', () => {
+  /* string */
 
-  it('validateBaseSchemaSubject: subject `"x"` - schema `"string?"`', () => {
-    expect(validateBaseSchemaSubject('string', 'x').data).toBe('x')
-    expect(validateBaseSchemaSubject('string', 'x').error).toBe(undefined)
-  })
-
-  it('validateBaseSchemaSubject: subject `0` - schema `"number"`', () => {
-    expect(validateBaseSchemaSubject('number', 0).data).toBe(0)
-    expect(validateBaseSchemaSubject('number', 0).error).toBe(undefined)
-  })
-  it('validateBaseSchemaSubject: subject `0` - schema `"number?"`', () => {
-    expect(validateBaseSchemaSubject('number', 0).data).toBe(0)
-    expect(validateBaseSchemaSubject('number', 0).error).toBe(undefined)
-  })
-
-  it('validateBaseSchemaSubject: subject `true` - schema `"boolean"`', () => {
-    expect(validateBaseSchemaSubject('boolean', true).data).toBe(true)
-    expect(validateBaseSchemaSubject('boolean', true).error).toBe(undefined)
-  })
-  it('validateBaseSchemaSubject: subject `true` - schema `"boolean?"`', () => {
-    expect(validateBaseSchemaSubject('boolean', true).data).toBe(true)
-    expect(validateBaseSchemaSubject('boolean', true).error).toBe(undefined)
-  })
-
-  it('validateBaseSchemaSubject: subject `false` - schema `"boolean"`', () => {
-    expect(validateBaseSchemaSubject('boolean', false).data).toBe(false)
-    expect(validateBaseSchemaSubject('boolean', false).error).toBe(undefined)
-  })
-  it('validateBaseSchemaSubject: subject `false` - schema `"boolean?"`', () => {
-    expect(validateBaseSchemaSubject('boolean', false).data).toBe(false)
-    expect(validateBaseSchemaSubject('boolean', false).error).toBe(undefined)
-  })
-})
-
-describe('Validate base short schema with `null | undefined` subject', () => {
-  /* string | string? */
-
-  it('validateBaseSchemaSubject: subject `undefined` - schema `"string"`', () => {
-    const schema = 'string' satisfies Schema
+  it('validateBaseSchemaSubject: subject `undefined` - required string', () => {
+    const schema = { type: 'string' } satisfies Schema
     const subject = undefined
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -60,16 +21,16 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `undefined` - schema `"string?"`', () => {
-    const schema = 'string?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `undefined` - optional string', () => {
+    const schema = { type: 'string', optional: true } satisfies Schema
     const subject = undefined
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.data).toBe(undefined)
   })
 
-  it('validateBaseSchemaSubject: subject `null` - schema `"string"`', () => {
-    const schema = 'string' satisfies Schema
+  it('validateBaseSchemaSubject: subject `null` - required string', () => {
+    const schema = { type: 'string' } satisfies Schema
     const subject = null
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -81,18 +42,18 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `null` - schema `"string?"`', () => {
-    const schema = 'string?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `null` - optional string', () => {
+    const schema = { type: 'string', optional: true } satisfies Schema
     const subject = null
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.data).toBe(undefined)
   })
 
-  /* number | number? */
+  /* number */
 
-  it('validateBaseSchemaSubject: subject `undefined` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
+  it('validateBaseSchemaSubject: subject `undefined` - required number', () => {
+    const schema = { type: 'number' } satisfies Schema
     const subject = undefined
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -104,16 +65,16 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `undefined` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `undefined` - optional number', () => {
+    const schema = { type: 'number', optional: true } satisfies Schema
     const subject = undefined
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.data).toBe(undefined)
   })
 
-  it('validateBaseSchemaSubject: subject `null` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
+  it('validateBaseSchemaSubject: subject `null` - required number', () => {
+    const schema = { type: 'number' } satisfies Schema
     const subject = null
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -125,18 +86,18 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `null` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `null` - optional number', () => {
+    const schema = { type: 'number', optional: true } satisfies Schema
     const subject = null
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.data).toBe(undefined)
   })
 
-  /* boolean | boolean? */
+  /* boolean */
 
-  it('validateBaseSchemaSubject: subject `undefined` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
+  it('validateBaseSchemaSubject: subject `undefined` - required number', () => {
+    const schema = { type: 'number' } satisfies Schema
     const subject = undefined
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -148,16 +109,16 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `undefined` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `undefined` - optional number', () => {
+    const schema = { type: 'number' } satisfies Schema
     const subject = undefined
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.data).toBe(undefined)
   })
 
-  it('validateBaseSchemaSubject: subject `null` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
+  it('validateBaseSchemaSubject: subject `null` - required number', () => {
+    const schema = { type: 'number' } satisfies Schema
     const subject = null
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -169,18 +130,18 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `null` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `null` - optional number', () => {
+    const schema = { type: 'number', optional: true } satisfies Schema
     const subject = null
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.data).toBe(undefined)
   })
 
-  /* boolean | boolean? */
+  /* boolean */
 
-  it('validateBaseSchemaSubject: subject `undefined` - schema `"boolean"`', () => {
-    const schema = 'boolean' satisfies Schema
+  it('validateBaseSchemaSubject: subject `undefined` - required boolean', () => {
+    const schema = { type: 'boolean' } satisfies Schema
     const subject = undefined
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -192,16 +153,16 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `undefined` - schema `"boolean?"`', () => {
-    const schema = 'boolean?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `undefined` - optional boolean', () => {
+    const schema = { type: 'boolean', optional: true } satisfies Schema
     const subject = undefined
     const validated = validateBaseSchemaSubject(schema, subject)
 
     expect(validated.data).toBe(undefined)
   })
 
-  it('validateBaseSchemaSubject: subject `null` - schema `"boolean"`', () => {
-    const schema = 'boolean' satisfies Schema
+  it('validateBaseSchemaSubject: subject `null` - required boolean', () => {
+    const schema = { type: 'boolean' } satisfies Schema
     const subject = null
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -213,8 +174,8 @@ describe('Validate base short schema with `null | undefined` subject', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `null` - schema `"boolean?"`', () => {
-    const schema = 'boolean?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `null` - optional boolean', () => {
+    const schema = { type: 'boolean', optional: true } satisfies Schema
     const subject = null
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -223,8 +184,8 @@ describe('Validate base short schema with `null | undefined` subject', () => {
 })
 
 describe('Number base schema invalid subject validation special cases', () => {
-  it('validateBaseSchemaSubject: subject `NaN` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
+  it('validateBaseSchemaSubject: subject `NaN` - required number', () => {
+    const schema = { type: 'number' } satisfies Schema
     const subject = NaN
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -236,8 +197,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `NaN` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `NaN` - optional number', () => {
+    const schema = { type: 'number', optional: true } satisfies Schema
     const subject = NaN
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -249,8 +210,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `Infinity` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
+  it('validateBaseSchemaSubject: subject `Infinity` - required number', () => {
+    const schema = { type: 'number' } satisfies Schema
     const subject = Infinity
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -262,8 +223,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `Infinity` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `Infinity` - optional number', () => {
+    const schema = { type: 'number', optional: true } satisfies Schema
     const subject = Infinity
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -275,8 +236,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `-Infinity` - schema `"number"`', () => {
-    const schema = 'number' satisfies Schema
+  it('validateBaseSchemaSubject: subject `-Infinity` - required number', () => {
+    const schema = { type: 'number' } satisfies Schema
     const subject = -Infinity
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -288,8 +249,8 @@ describe('Number base schema invalid subject validation special cases', () => {
     })
   })
 
-  it('validateBaseSchemaSubject: subject `-Infinity` - schema `"number?"`', () => {
-    const schema = 'number?' satisfies Schema
+  it('validateBaseSchemaSubject: subject `-Infinity` - optional number', () => {
+    const schema = { type: 'number', optional: true } satisfies Schema
     const subject = -Infinity
     const validated = validateBaseSchemaSubject(schema, subject)
 
@@ -299,122 +260,6 @@ describe('Number base schema invalid subject validation special cases', () => {
       schema,
       subject,
     })
-  })
-})
-
-describe('Validate base short schema TYPE INFERENCE check', () => {
-  /* string/string? */
-
-  it('validateBaseSchemaSubject: string', () => {
-    const schema = 'string' satisfies Schema
-    const result = validateBaseSchemaSubject(schema, 'x')
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: number }>(
-        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<string>(unknownX as typeof result.data)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'number'
-    check<number>(unknownX as typeof result.data)
-  })
-
-  it('validateBaseSchemaSubject: string?', () => {
-    const schema = 'string?' satisfies Schema
-    const result = validateBaseSchemaSubject(schema, 'x')
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: number }>(
-        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<string | undefined>(unknownX as typeof result.data)
-    // @ts-expect-error 'string | undefined' is not assignable to parameter of type 'string'
-    check<string>(unknownX as typeof result.data)
-  })
-
-  /* number/number? */
-
-  it('validateBaseSchemaSubject: number', () => {
-    const schema = 'number' satisfies Schema
-    const result = validateBaseSchemaSubject(schema, 0)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: number }>(
-        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<number>(unknownX as typeof result.data)
-    // @ts-expect-error type 'number' is not assignable to parameter of type 'string'
-    check<string>(unknownX as typeof result.data)
-  })
-
-  it('validateBaseSchemaSubject: number?', () => {
-    const schema = 'number?' satisfies Schema
-    const result = validateBaseSchemaSubject(schema, 0)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: number }>(
-        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<number | undefined>(unknownX as typeof result.data)
-    // @ts-expect-error 'number | undefined' is not assignable to parameter of type 'number'
-    check<number>(unknownX as typeof result.data)
-  })
-
-  /* boolean/boolean? */
-
-  it('validateBaseSchemaSubject: boolean', () => {
-    const schema = 'boolean' satisfies Schema
-    const result = validateBaseSchemaSubject(schema, true)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: boolean }>(
-        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<boolean>(unknownX as typeof result.data)
-    // @ts-expect-error type 'boolean' is not assignable to parameter of type 'string'
-    check<string>(unknownX as typeof result.data)
-  })
-
-  it('validateBaseSchemaSubject: boolean?', () => {
-    const schema = 'boolean?' satisfies Schema
-    const result = validateBaseSchemaSubject(schema, true)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: boolean }>(
-        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<boolean | undefined>(unknownX as typeof result.data)
-    // @ts-expect-error 'boolean | undefined' is not assignable to parameter of type 'boolean'
-    check<boolean>(unknownX as typeof result.data)
   })
 })
 
