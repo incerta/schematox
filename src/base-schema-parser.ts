@@ -4,7 +4,7 @@ import { ERROR_CODE } from './error'
 import type { EitherError } from './utils/fp'
 import type {
   BaseSchema,
-  Con_Schema_SubjT_P,
+  Con_Schema_SubjT_V,
 } from './types/compound-schema-types'
 import type { InvalidSubject, ErrorPath } from './error'
 
@@ -14,42 +14,35 @@ export function parseBaseSchemaSubject<T extends BaseSchema>(
   this: ErrorPath | void,
   schema: T,
   schemaSubject: unknown
-): EitherError<InvalidSubject, Con_Schema_SubjT_P<T>>
+): EitherError<InvalidSubject, Con_Schema_SubjT_V<T>>
 
 export function parseBaseSchemaSubject(
   this: ErrorPath | void,
   schema: BaseSchema,
   subject: unknown
 ): EitherError<InvalidSubject, BaseSchemaSubjectType> {
-  const updatedSubject =
-    typeof schema.default !== undefined &&
-    schema.optional &&
-    (subject === null || subject === undefined)
-      ? schema.default
-      : subject
-
   if (schema.optional) {
-    if (updatedSubject === null || updatedSubject === undefined) {
+    if (subject === null || subject === undefined) {
       return data(undefined)
     }
   }
 
   switch (schema.type) {
     case 'string': {
-      if (typeof updatedSubject !== 'string') {
+      if (typeof subject !== 'string') {
         return error({
           code: ERROR_CODE.invalidType,
-          subject: updatedSubject,
+          subject: subject,
           path: this || [],
           schema,
         })
       }
 
       if (typeof schema.minLength === 'number') {
-        if (updatedSubject.length < schema.minLength) {
+        if (subject.length < schema.minLength) {
           return error({
             code: ERROR_CODE.invalidRange,
-            subject: updatedSubject,
+            subject: subject,
             path: this || [],
             schema,
           })
@@ -57,43 +50,43 @@ export function parseBaseSchemaSubject(
       }
 
       if (typeof schema.maxLength === 'number') {
-        if (updatedSubject.length > schema.maxLength) {
+        if (subject.length > schema.maxLength) {
           return error({
             code: ERROR_CODE.invalidRange,
-            subject: updatedSubject,
+            subject: subject,
             path: this || [],
             schema,
           })
         }
       }
 
-      return data(updatedSubject)
+      return data(subject)
     }
 
     case 'number': {
-      if (typeof updatedSubject !== 'number') {
+      if (typeof subject !== 'number') {
         return error({
           code: ERROR_CODE.invalidType,
-          subject: updatedSubject,
+          subject: subject,
           path: this || [],
           schema,
         })
       }
 
-      if (Number.isFinite(updatedSubject) === false) {
+      if (Number.isFinite(subject) === false) {
         return error({
           code: ERROR_CODE.invalidType,
-          subject: updatedSubject,
+          subject: subject,
           path: this || [],
           schema,
         })
       }
 
       if (typeof schema.min === 'number') {
-        if (updatedSubject < schema.min) {
+        if (subject < schema.min) {
           return error({
             code: ERROR_CODE.invalidRange,
-            subject: updatedSubject,
+            subject: subject,
             path: this || [],
             schema,
           })
@@ -101,37 +94,37 @@ export function parseBaseSchemaSubject(
       }
 
       if (typeof schema.max === 'number') {
-        if (updatedSubject > schema.max) {
+        if (subject > schema.max) {
           return error({
             code: ERROR_CODE.invalidRange,
-            subject: updatedSubject,
+            subject: subject,
             path: this || [],
             schema,
           })
         }
       }
 
-      return data(updatedSubject)
+      return data(subject)
     }
 
     case 'boolean': {
-      if (typeof updatedSubject !== 'boolean') {
+      if (typeof subject !== 'boolean') {
         return error({
           code: ERROR_CODE.invalidType,
-          subject: updatedSubject,
+          subject: subject,
           path: this || [],
           schema,
         })
       }
 
-      return data(updatedSubject)
+      return data(subject)
     }
 
     case 'stringUnion': {
-      if (typeof updatedSubject !== 'string') {
+      if (typeof subject !== 'string') {
         return error({
           code: ERROR_CODE.invalidType,
-          subject: updatedSubject,
+          subject: subject,
           path: this || [],
           schema,
         })
@@ -139,23 +132,23 @@ export function parseBaseSchemaSubject(
 
       const unionSet = new Set(schema.of)
 
-      if (unionSet.has(updatedSubject) === false) {
+      if (unionSet.has(subject) === false) {
         return error({
           code: ERROR_CODE.invalidType,
-          subject: updatedSubject,
+          subject: subject,
           path: this || [],
           schema,
         })
       }
 
-      return data(updatedSubject)
+      return data(subject)
     }
 
     case 'numberUnion': {
-      if (typeof updatedSubject !== 'number') {
+      if (typeof subject !== 'number') {
         return error({
           code: ERROR_CODE.invalidType,
-          subject: updatedSubject,
+          subject: subject,
           path: this || [],
           schema,
         })
@@ -163,16 +156,16 @@ export function parseBaseSchemaSubject(
 
       const unionSet = new Set(schema.of)
 
-      if (unionSet.has(updatedSubject) === false) {
+      if (unionSet.has(subject) === false) {
         return error({
           code: ERROR_CODE.invalidType,
-          subject: updatedSubject,
+          subject: subject,
           path: this || [],
           schema,
         })
       }
 
-      return data(updatedSubject)
+      return data(subject)
     }
   }
 }

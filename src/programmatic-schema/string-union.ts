@@ -24,11 +24,7 @@ type StringUnionShared<T extends BD_StringUnion> = {
 }
 
 type StringUnionOptional<T extends BD_StringUnion> = Omit<
-  {
-    default: T extends { of: Readonly<Array<infer U>> }
-      ? (defaultValue: U) => ExtWith_Option<T, { default: U }>
-      : never
-  } & StringUnionShared<T>,
+  StringUnionShared<T>,
   keyof T
 >
 
@@ -69,23 +65,6 @@ function stringUnionOptions(schema: BD_StringUnion) {
       }
 
       const updatedSchema = { ...schema, optional: true }
-
-      return {
-        __schema: updatedSchema,
-        ...stringUnionOptions(updatedSchema),
-      }
-    },
-
-    default: (defaultParsedValue: string) => {
-      if (except.has('default')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultDefined)
-      }
-
-      if (schema.optional === undefined) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultNotAllowed)
-      }
-
-      const updatedSchema = { ...schema, default: defaultParsedValue }
 
       return {
         __schema: updatedSchema,

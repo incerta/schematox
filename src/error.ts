@@ -18,6 +18,7 @@ export const ERROR_CODE = {
   invalidRange: 'INVALID_RANGE',
 }
 
+// FIXME: don't forget to remove before PR
 export const PROGRAMMATICALLY_DEFINED_ERROR_MSG = {
   optionalDefined: 'Schema "optional" is already defined',
   brandDefined: 'Schema "brand" is already defined',

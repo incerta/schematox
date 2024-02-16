@@ -8,7 +8,7 @@ import type { InvalidSubject, ErrorPath } from './error'
 
 export function validate<T extends Schema>(
   schema: T,
-  subject: Con_Schema_SubjT_V<T>
+  subject: unknown
 ): EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
 
 export function validate(
@@ -16,6 +16,8 @@ export function validate(
   schema: Schema,
   subject: unknown
 ): EitherError<InvalidSubject[], unknown> {
+  // FIXME: we actually don't need to check those variants
+  //        just move condition scope content to the very end of the function
   if (
     schema.type === 'string' ||
     schema.type === 'number' ||
