@@ -1,7 +1,7 @@
 import { parse } from './general-schema-parser'
 import { validate } from './general-schema-validator'
 
-import type { Schema, Con_Schema_SubjT_V } from './types/compound-schema-types'
+import type { Schema } from './types/compound-schema-types'
 
 export function x<T extends Schema>(schemaDefinition: T | { __schema: T }) {
   const schema =
@@ -11,8 +11,7 @@ export function x<T extends Schema>(schemaDefinition: T | { __schema: T }) {
 
   return {
     __schema: schema,
-    validate: (subject: Con_Schema_SubjT_V<typeof schema>) =>
-      validate(schema, subject),
+    validate: <T = unknown>(subject: T) => validate(schema, subject),
     parse: <T = unknown>(subject: T) => parse(schema, subject),
   }
 }

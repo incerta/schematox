@@ -7,11 +7,7 @@
  * but only with a MINOR version update.
  **/
 
-import type {
-  Schema,
-  Con_Schema_SubjT_P,
-  Con_Schema_SubjT_V,
-} from './types/compound-schema-types'
+import type { Schema, Con_Schema_SubjT_V } from './types/compound-schema-types'
 
 /* Programmatic base schema definition */
 
@@ -20,37 +16,24 @@ export { number } from './programmatic-schema/number'
 export { boolean } from './programmatic-schema/boolean'
 export { stringUnion } from './programmatic-schema/string-union'
 export { numberUnion } from './programmatic-schema/number-union'
-
-/* Programmatic compound schema definition */
-
 export { array } from './programmatic-schema/array'
 export { object } from './programmatic-schema/object'
 
-/* Typings */
-
-export type { BaseSchema, Schema } from './types/compound-schema-types'
-export type { InvalidSubject } from './error'
-
 /* Utils */
 
-export type { EitherError } from './utils/fp'
 export { isError, isData, error, data } from './utils/fp'
 
 export { parse } from './general-schema-parser'
 export { validate } from './general-schema-validator'
 export { x } from './x-closure'
 
-/* XParsed infers set optional default schema value as always present */
-export type XParsed<T extends { __schema: Schema } | Schema> = T extends {
-  __schema: Schema
-}
-  ? Con_Schema_SubjT_P<T['__schema']>
-  : T extends Schema
-    ? Con_Schema_SubjT_P<T>
-    : never
+/* Typings */
 
-/* XValidated ignores schema default values */
-export type XValidated<T extends { __schema: Schema } | Schema> = T extends {
+export type { BaseSchema, Schema, R } from './types/compound-schema-types'
+export type { InvalidSubject } from './error'
+export type { EitherError } from './utils/fp'
+
+export type SubjectType<T extends { __schema: Schema } | Schema> = T extends {
   __schema: Schema
 }
   ? Con_Schema_SubjT_V<T['__schema']>

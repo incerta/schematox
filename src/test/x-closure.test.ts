@@ -46,17 +46,6 @@ describe('X closure statically defined schema VALID', () => {
 
     expect(strDef.parse(subj).data).toBe(subj)
     expect(strDef.parse(subj).error).toBe(undefined)
-
-    expect(strDef.parse(undefined).data).toBe(subjDef)
-    expect(strDef.parse(undefined).error).toBe(undefined)
-    expect(strDef.parse(null).data).toBe(subjDef)
-    expect(strDef.parse(null).error).toBe(undefined)
-
-    expect(strDef.validate(subj).data).toBe(subj)
-    expect(strDef.validate(subj).error).toBe(undefined)
-
-    expect(strDef.validate(undefined).data).toBe(undefined)
-    expect(strDef.validate(undefined).error).toBe(undefined)
   })
 
   it('x: base detailed number schema required/optional/default parse/validate', () => {
@@ -84,23 +73,6 @@ describe('X closure statically defined schema VALID', () => {
 
     expect(numOpt.validate(undefined).data).toBe(undefined)
     expect(numOpt.validate(undefined).error).toBe(undefined)
-
-    const subjDef = 1
-    const numDef = x({ type: 'number', optional: true, default: subjDef })
-
-    expect(numDef.parse(subj).data).toBe(subj)
-    expect(numDef.parse(subj).error).toBe(undefined)
-
-    expect(numDef.parse(undefined).data).toBe(subjDef)
-    expect(numDef.parse(undefined).error).toBe(undefined)
-    expect(numDef.parse(null).data).toBe(subjDef)
-    expect(numDef.parse(null).error).toBe(undefined)
-
-    expect(numDef.validate(subj).data).toBe(subj)
-    expect(numDef.validate(subj).error).toBe(undefined)
-
-    expect(numDef.validate(undefined).data).toBe(undefined)
-    expect(numDef.validate(undefined).error).toBe(undefined)
   })
 
   it('x: base detailed boolean schema required/optional/default parse/validate', () => {
@@ -128,23 +100,6 @@ describe('X closure statically defined schema VALID', () => {
 
     expect(boolOpt.validate(undefined).data).toBe(undefined)
     expect(boolOpt.validate(undefined).error).toBe(undefined)
-
-    const subjDef = false
-    const boolDef = x({ type: 'boolean', optional: true, default: subjDef })
-
-    expect(boolDef.parse(subj).data).toBe(subj)
-    expect(boolDef.parse(subj).error).toBe(undefined)
-
-    expect(boolDef.parse(undefined).data).toBe(subjDef)
-    expect(boolDef.parse(undefined).error).toBe(undefined)
-    expect(boolDef.parse(null).data).toBe(subjDef)
-    expect(boolDef.parse(null).error).toBe(undefined)
-
-    expect(boolDef.validate(subj).data).toBe(subj)
-    expect(boolDef.validate(subj).error).toBe(undefined)
-
-    expect(boolDef.validate(undefined).data).toBe(undefined)
-    expect(boolDef.validate(undefined).error).toBe(undefined)
   })
 
   it('x: base detailed stringUnion schema required/optional/default parse/validate', () => {
@@ -173,28 +128,6 @@ describe('X closure statically defined schema VALID', () => {
 
     expect(strUnOpt.validate(undefined).data).toBe(undefined)
     expect(strUnOpt.validate(undefined).error).toBe(undefined)
-
-    const subjDef = 'z'
-    const strUnDef = x({
-      type: 'stringUnion',
-      of: unOf,
-      optional: true,
-      default: subjDef,
-    })
-
-    expect(strUnDef.parse(subj).data).toBe(subj)
-    expect(strUnDef.parse(subj).error).toBe(undefined)
-
-    expect(strUnDef.parse(undefined).data).toBe(subjDef)
-    expect(strUnDef.parse(undefined).error).toBe(undefined)
-    expect(strUnDef.parse(null).data).toBe(subjDef)
-    expect(strUnDef.parse(null).error).toBe(undefined)
-
-    expect(strUnDef.validate(subj).data).toBe(subj)
-    expect(strUnDef.validate(subj).error).toBe(undefined)
-
-    expect(strUnDef.validate(undefined).data).toBe(undefined)
-    expect(strUnDef.validate(undefined).error).toBe(undefined)
   })
 
   it('x: base detailed numberUnion schema required/optional/default parse/validate', () => {
@@ -223,28 +156,6 @@ describe('X closure statically defined schema VALID', () => {
 
     expect(numUnOpt.validate(undefined).data).toBe(undefined)
     expect(numUnOpt.validate(undefined).error).toBe(undefined)
-
-    const subjDef = 2
-    const numUnDef = x({
-      type: 'numberUnion',
-      of: unOf,
-      optional: true,
-      default: subjDef,
-    })
-
-    expect(numUnDef.parse(subj).data).toBe(subj)
-    expect(numUnDef.parse(subj).error).toBe(undefined)
-
-    expect(numUnDef.parse(undefined).data).toBe(subjDef)
-    expect(numUnDef.parse(undefined).error).toBe(undefined)
-    expect(numUnDef.parse(null).data).toBe(subjDef)
-    expect(numUnDef.parse(null).error).toBe(undefined)
-
-    expect(numUnDef.validate(subj).data).toBe(subj)
-    expect(numUnDef.validate(subj).error).toBe(undefined)
-
-    expect(numUnDef.validate(undefined).data).toBe(undefined)
-    expect(numUnDef.validate(undefined).error).toBe(undefined)
   })
 
   it('x: compound array schema required/optional parse/validate', () => {
@@ -318,121 +229,10 @@ describe('X closure statically defined schema VALID', () => {
 })
 
 describe('X closure statically defined schema INVALID', () => {
+  // TODO: reduce to `errP` and `errV` to `err`
   /* Strict invalid subject/schema error shapes is tested in direct parser/validator tests */
   const errP = [{ code: ERROR_CODE.invalidType }]
   const errV = [{ code: ERROR_CODE.invalidType }]
-
-  it('x: base short string optional/required schema parse/validate', () => {
-    const strInvSubj = 0
-    const strReq = x({ type: 'string' })
-
-    expect(strReq.parse(undefined).data).toBe(undefined)
-    expect(strReq.parse(undefined).error).toMatchObject(errP)
-
-    expect(strReq.parse(null).data).toBe(undefined)
-    expect(strReq.parse(null).error).toMatchObject(errP)
-
-    expect(strReq.parse(strInvSubj).data).toBe(undefined)
-    expect(strReq.parse(strInvSubj).error).toMatchObject(errP)
-
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string'
-    expect(strReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string'
-    expect(strReq.validate(undefined).error).toMatchObject(errV)
-
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
-    expect(strReq.validate(strInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
-    expect(strReq.validate(strInvSubj).error).toMatchObject(errV)
-
-    const strOpt = x({ type: 'string', optional: true })
-
-    expect(strOpt.parse(strInvSubj).data).toBe(undefined)
-    expect(strOpt.parse(strInvSubj).error).toMatchObject(errP)
-
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
-    expect(strOpt.validate(strInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
-    expect(strOpt.validate(strInvSubj).error).toMatchObject(errV)
-
-    // @ts-expect-error 'null' is not assignable to parameter of type 'string | undefined'
-    expect(strOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'string | undefined'
-    expect(strOpt.validate(null).error).toMatchObject(errV)
-  })
-
-  it('x: base short number optional/required schema parse/validate', () => {
-    const numInvSubj = true
-    const numReq = x({ type: 'number' })
-
-    expect(numReq.parse(undefined).data).toBe(undefined)
-    expect(numReq.parse(undefined).error).toMatchObject(errP)
-
-    expect(numReq.parse(null).data).toBe(undefined)
-    expect(numReq.parse(null).error).toMatchObject(errP)
-
-    expect(numReq.parse(numInvSubj).data).toBe(undefined)
-    expect(numReq.parse(numInvSubj).error).toMatchObject(errP)
-
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'number'
-    expect(numReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'number'
-    expect(numReq.validate(undefined).error).toMatchObject(errV)
-
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
-    expect(numReq.validate(numInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
-    expect(numReq.validate(numInvSubj).error).toMatchObject(errV)
-
-    const numOpt = x({ type: 'number', optional: true })
-
-    expect(numOpt.parse(numInvSubj).data).toBe(undefined)
-    expect(numOpt.parse(numInvSubj).error).toMatchObject(errP)
-
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
-    expect(numOpt.validate(numInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
-    expect(numOpt.validate(numInvSubj).error).toMatchObject(errV)
-
-    // @ts-expect-error 'null' is not assignable to parameter of type 'number | undefined'
-    expect(numOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'number | undefined'
-    expect(numOpt.validate(null).error).toMatchObject(errV)
-  })
-
-  it('x: base short boolean optional/required schema parse/validate', () => {
-    const boolInvSubj = 'x'
-    const boolReq = x({ type: 'boolean' })
-
-    expect(boolReq.parse(undefined).data).toBe(undefined)
-    expect(boolReq.parse(undefined).error).toMatchObject(errP)
-
-    expect(boolReq.parse(null).data).toBe(undefined)
-    expect(boolReq.parse(null).error).toMatchObject(errP)
-
-    expect(boolReq.parse(boolInvSubj).data).toBe(undefined)
-    expect(boolReq.parse(boolInvSubj).error).toMatchObject(errP)
-
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
-    expect(boolReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
-    expect(boolReq.validate(undefined).error).toMatchObject(errV)
-
-    const boolOpt = x({ type: 'boolean', optional: true })
-
-    expect(boolOpt.parse(boolInvSubj).data).toBe(undefined)
-    expect(boolOpt.parse(boolInvSubj).error).toMatchObject(errP)
-
-    // @ts-expect-error 'x' is not assignable to parameter of type 'boolean'
-    expect(boolOpt.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'x' is not assignable to parameter of type 'boolean'
-    expect(boolOpt.validate(boolInvSubj).error).toMatchObject(errV)
-
-    // @ts-expect-error 'null' is not assignable to parameter of type 'boolean | undefined'
-    expect(boolOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'boolean | undefined'
-    expect(boolOpt.validate(null).error).toMatchObject(errV)
-  })
 
   it('x: base detailed string optional/required schema parse/validate', () => {
     const strInvSubj = 0
@@ -447,14 +247,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(strReq.parse(strInvSubj).data).toBe(undefined)
     expect(strReq.parse(strInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string'
     expect(strReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string'
     expect(strReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
     expect(strReq.validate(strInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
     expect(strReq.validate(strInvSubj).error).toMatchObject(errV)
 
     const strOpt = x({ type: 'string', optional: true })
@@ -462,14 +258,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(strOpt.parse(strInvSubj).data).toBe(undefined)
     expect(strOpt.parse(strInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
     expect(strOpt.validate(strInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
     expect(strOpt.validate(strInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type 'string | undefined'
     expect(strOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'string | undefined'
     expect(strOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -486,14 +278,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(numReq.parse(numInvSubj).data).toBe(undefined)
     expect(numReq.parse(numInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'number'
     expect(numReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'number'
     expect(numReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
     expect(numReq.validate(numInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
     expect(numReq.validate(numInvSubj).error).toMatchObject(errV)
 
     const numOpt = x({ type: 'number', optional: true })
@@ -501,14 +289,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(numOpt.parse(numInvSubj).data).toBe(undefined)
     expect(numOpt.parse(numInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
     expect(numOpt.validate(numInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
     expect(numOpt.validate(numInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type 'number | undefined'
     expect(numOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'number | undefined'
     expect(numOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -525,14 +309,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(boolReq.parse(boolInvSubj).data).toBe(undefined)
     expect(boolReq.parse(boolInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(boolInvSubj).error).toMatchObject(errV)
 
     const boolOpt = x({ type: 'boolean', optional: true })
@@ -540,14 +320,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(boolOpt.parse(boolInvSubj).data).toBe(undefined)
     expect(boolOpt.parse(boolInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'x' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'x' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(boolInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -566,14 +342,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(strUnReq.parse(strUnInvSubj).data).toBe(undefined)
     expect(strUnReq.parse(strUnInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '"x" | "y"'
     expect(strUnReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '"x" | "y"'
     expect(strUnReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'number' is not assignable to parameter of type '"x" | "y"'
     expect(strUnReq.validate(strUnInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'number' is not assignable to parameter of type '"x" | "y"'
     expect(strUnReq.validate(strUnInvSubj).error).toMatchObject(errV)
 
     const strUnOpt = x({ type: 'stringUnion', of: unOf, optional: true })
@@ -581,14 +353,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(strUnOpt.parse(strUnInvSubj).data).toBe(undefined)
     expect(strUnOpt.parse(strUnInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error '0' is not assignable to parameter of type '"x" | "y" | undefined'
     expect(strUnOpt.validate(strUnInvSubj).data).toBe(undefined)
-    // @ts-expect-error '0' is not assignable to parameter of type '"x" | "y" | undefined'
     expect(strUnOpt.validate(strUnInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type '"x" | "y" | undefined'
     expect(strUnOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type '"x" | "y" | undefined'
     expect(strUnOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -607,14 +375,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(numUnReq.parse(numUnInvSubj).data).toBe(undefined)
     expect(numUnReq.parse(numUnInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '0 | 1'
     expect(numUnReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '0 | 1'
     expect(numUnReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error '"x"' is not assignable to parameter of type '0 | 1'
     expect(numUnReq.validate(numUnInvSubj).data).toBe(undefined)
-    // @ts-expect-error '"x"' is not assignable to parameter of type '0 | 1'
     expect(numUnReq.validate(numUnInvSubj).error).toMatchObject(errV)
 
     const numUnOpt = x({ type: 'numberUnion', of: unOf, optional: true })
@@ -622,14 +386,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(numUnOpt.parse(numUnInvSubj).data).toBe(undefined)
     expect(numUnOpt.parse(numUnInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error '"x"' is not assignable to parameter of type '0 | 1 | undefined'
     expect(numUnOpt.validate(numUnInvSubj).data).toBe(undefined)
-    // @ts-expect-error '"x"' is not assignable to parameter of type '0 | 1 | undefined'
     expect(numUnOpt.validate(numUnInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type '0 | 1 | undefined'
     expect(numUnOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type '0 | 1 | undefined'
     expect(numUnOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -646,14 +406,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(arrReq.parse(arrInvSubj).data).toBe(undefined)
     expect(arrReq.parse(arrInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string[]'
     expect(arrReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string[]'
     expect(arrReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'string' is not assignable to parameter of type 'string[]'
     expect(arrReq.validate(arrInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'string[]'
     expect(arrReq.validate(arrInvSubj).error).toMatchObject(errV)
 
     const arrOpt = x({
@@ -665,14 +421,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(arrOpt.parse(arrInvSubj).data).toBe(undefined)
     expect(arrOpt.parse(arrInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'string' is not assignable to parameter of type 'string[]'
     expect(arrOpt.validate(arrInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'string[]'
     expect(arrOpt.validate(arrInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type 'string[] | undefined'
     expect(arrOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'string[] | undefined'
     expect(arrOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -689,14 +441,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(objReq.parse(objInvSubj).data).toBe(undefined)
     expect(objReq.parse(objInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '{ x: string }'
     expect(objReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '{ x: string }'
     expect(objReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'string' is not assignable to parameter of type '{ x: string }'
     expect(objReq.validate(objInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type '{ x: string }'
     expect(objReq.validate(objInvSubj).error).toMatchObject(errV)
 
     const objOpt = x({
@@ -708,14 +456,10 @@ describe('X closure statically defined schema INVALID', () => {
     expect(objOpt.parse(objInvSubj).data).toBe(undefined)
     expect(objOpt.parse(objInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'string' is not assignable to parameter of type '{ x: string }'
     expect(objOpt.validate(objInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type '{ x: string }'
     expect(objOpt.validate(objInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type '{ x: string } | undefined'
     expect(objOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type '{ x: string } | undefined'
     expect(objOpt.validate(null).error).toMatchObject(errV)
   })
 })
@@ -746,23 +490,6 @@ describe('X closure programmatically defined schema VALID', () => {
 
     expect(strOpt.validate(undefined).data).toBe(undefined)
     expect(strOpt.validate(undefined).error).toBe(undefined)
-
-    const subjDef = 'y'
-    const strDef = x(string().optional().default(subjDef))
-
-    expect(strDef.parse(subj).data).toBe(subj)
-    expect(strDef.parse(subj).error).toBe(undefined)
-
-    expect(strDef.parse(undefined).data).toBe(subjDef)
-    expect(strDef.parse(undefined).error).toBe(undefined)
-    expect(strDef.parse(null).data).toBe(subjDef)
-    expect(strDef.parse(null).error).toBe(undefined)
-
-    expect(strDef.validate(subj).data).toBe(subj)
-    expect(strDef.validate(subj).error).toBe(undefined)
-
-    expect(strDef.validate(undefined).data).toBe(undefined)
-    expect(strDef.validate(undefined).error).toBe(undefined)
   })
 
   it('x: base number schema required/optional/default parse/validate', () => {
@@ -790,23 +517,6 @@ describe('X closure programmatically defined schema VALID', () => {
 
     expect(numOpt.validate(undefined).data).toBe(undefined)
     expect(numOpt.validate(undefined).error).toBe(undefined)
-
-    const subjDef = 1
-    const numDef = x(number().optional().default(subjDef))
-
-    expect(numDef.parse(subj).data).toBe(subj)
-    expect(numDef.parse(subj).error).toBe(undefined)
-
-    expect(numDef.parse(undefined).data).toBe(subjDef)
-    expect(numDef.parse(undefined).error).toBe(undefined)
-    expect(numDef.parse(null).data).toBe(subjDef)
-    expect(numDef.parse(null).error).toBe(undefined)
-
-    expect(numDef.validate(subj).data).toBe(subj)
-    expect(numDef.validate(subj).error).toBe(undefined)
-
-    expect(numDef.validate(undefined).data).toBe(undefined)
-    expect(numDef.validate(undefined).error).toBe(undefined)
   })
 
   it('x: base boolean schema required/optional/default parse/validate', () => {
@@ -834,23 +544,6 @@ describe('X closure programmatically defined schema VALID', () => {
 
     expect(boolOpt.validate(undefined).data).toBe(undefined)
     expect(boolOpt.validate(undefined).error).toBe(undefined)
-
-    const subjDef = false
-    const boolDef = x(boolean().optional().default(subjDef))
-
-    expect(boolDef.parse(subj).data).toBe(subj)
-    expect(boolDef.parse(subj).error).toBe(undefined)
-
-    expect(boolDef.parse(undefined).data).toBe(subjDef)
-    expect(boolDef.parse(undefined).error).toBe(undefined)
-    expect(boolDef.parse(null).data).toBe(subjDef)
-    expect(boolDef.parse(null).error).toBe(undefined)
-
-    expect(boolDef.validate(subj).data).toBe(subj)
-    expect(boolDef.validate(subj).error).toBe(undefined)
-
-    expect(boolDef.validate(undefined).data).toBe(undefined)
-    expect(boolDef.validate(undefined).error).toBe(undefined)
   })
 
   it('x: base stringUnion schema required/optional/default parse/validate', () => {
@@ -879,27 +572,6 @@ describe('X closure programmatically defined schema VALID', () => {
 
     expect(strUnOpt.validate(undefined).data).toBe(undefined)
     expect(strUnOpt.validate(undefined).error).toBe(undefined)
-
-    const subjDef = 'z'
-    const strUnDef = x(
-      stringUnion(...unOf)
-        .optional()
-        .default(subjDef)
-    )
-
-    expect(strUnDef.parse(subj).data).toBe(subj)
-    expect(strUnDef.parse(subj).error).toBe(undefined)
-
-    expect(strUnDef.parse(undefined).data).toBe(subjDef)
-    expect(strUnDef.parse(undefined).error).toBe(undefined)
-    expect(strUnDef.parse(null).data).toBe(subjDef)
-    expect(strUnDef.parse(null).error).toBe(undefined)
-
-    expect(strUnDef.validate(subj).data).toBe(subj)
-    expect(strUnDef.validate(subj).error).toBe(undefined)
-
-    expect(strUnDef.validate(undefined).data).toBe(undefined)
-    expect(strUnDef.validate(undefined).error).toBe(undefined)
   })
 
   it('x: base numberUnion schema required/optional/default parse/validate', () => {
@@ -928,27 +600,6 @@ describe('X closure programmatically defined schema VALID', () => {
 
     expect(numUnOpt.validate(undefined).data).toBe(undefined)
     expect(numUnOpt.validate(undefined).error).toBe(undefined)
-
-    const subjDef = 2
-    const numUnDef = x(
-      numberUnion(...unOf)
-        .optional()
-        .default(subjDef)
-    )
-
-    expect(numUnDef.parse(subj).data).toBe(subj)
-    expect(numUnDef.parse(subj).error).toBe(undefined)
-
-    expect(numUnDef.parse(undefined).data).toBe(subjDef)
-    expect(numUnDef.parse(undefined).error).toBe(undefined)
-    expect(numUnDef.parse(null).data).toBe(subjDef)
-    expect(numUnDef.parse(null).error).toBe(undefined)
-
-    expect(numUnDef.validate(subj).data).toBe(subj)
-    expect(numUnDef.validate(subj).error).toBe(undefined)
-
-    expect(numUnDef.validate(undefined).data).toBe(undefined)
-    expect(numUnDef.validate(undefined).error).toBe(undefined)
   })
 
   it('x: compound array schema required/optional parse/validate', () => {
@@ -1024,14 +675,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(strReq.parse(strInvSubj).data).toBe(undefined)
     expect(strReq.parse(strInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string'
     expect(strReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string'
     expect(strReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
     expect(strReq.validate(strInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
     expect(strReq.validate(strInvSubj).error).toMatchObject(errV)
 
     const strOpt = x(string().optional())
@@ -1039,14 +686,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(strOpt.parse(strInvSubj).data).toBe(undefined)
     expect(strOpt.parse(strInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
     expect(strOpt.validate(strInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
     expect(strOpt.validate(strInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type 'string | undefined'
     expect(strOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'string | undefined'
     expect(strOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -1063,14 +706,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(numReq.parse(numInvSubj).data).toBe(undefined)
     expect(numReq.parse(numInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'number'
     expect(numReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'number'
     expect(numReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
     expect(numReq.validate(numInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
     expect(numReq.validate(numInvSubj).error).toMatchObject(errV)
 
     const numOpt = x(number().optional())
@@ -1078,14 +717,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(numOpt.parse(numInvSubj).data).toBe(undefined)
     expect(numOpt.parse(numInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
     expect(numOpt.validate(numInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
     expect(numOpt.validate(numInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type 'number | undefined'
     expect(numOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'number | undefined'
     expect(numOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -1102,14 +737,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(boolReq.parse(boolInvSubj).data).toBe(undefined)
     expect(boolReq.parse(boolInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
     expect(boolReq.validate(boolInvSubj).error).toMatchObject(errV)
 
     const boolOpt = x(boolean().optional())
@@ -1117,14 +748,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(boolOpt.parse(boolInvSubj).data).toBe(undefined)
     expect(boolOpt.parse(boolInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error '"x"' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(boolInvSubj).data).toBe(undefined)
-    // @ts-expect-error '"x"' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(boolInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'boolean | undefined'
     expect(boolOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -1143,14 +770,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(strUnReq.parse(strUnInvSubj).data).toBe(undefined)
     expect(strUnReq.parse(strUnInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '"x" | "y"'
     expect(strUnReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '"x" | "y"'
     expect(strUnReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'number' is not assignable to parameter of type '"x" | "y"'
     expect(strUnReq.validate(strUnInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'number' is not assignable to parameter of type '"x" | "y"'
     expect(strUnReq.validate(strUnInvSubj).error).toMatchObject(errV)
 
     const strUnOpt = x({ type: 'stringUnion', of: unOf, optional: true })
@@ -1158,14 +781,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(strUnOpt.parse(strUnInvSubj).data).toBe(undefined)
     expect(strUnOpt.parse(strUnInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error '0' is not assignable to parameter of type '"x" | "y" | undefined'
     expect(strUnOpt.validate(strUnInvSubj).data).toBe(undefined)
-    // @ts-expect-error '0' is not assignable to parameter of type '"x" | "y" | undefined'
     expect(strUnOpt.validate(strUnInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type '"x" | "y" | undefined'
     expect(strUnOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type '"x" | "y" | undefined'
     expect(strUnOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -1184,14 +803,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(numUnReq.parse(numUnInvSubj).data).toBe(undefined)
     expect(numUnReq.parse(numUnInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '0 | 1'
     expect(numUnReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '0 | 1'
     expect(numUnReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error '"x"' is not assignable to parameter of type '0 | 1'
     expect(numUnReq.validate(numUnInvSubj).data).toBe(undefined)
-    // @ts-expect-error '"x"' is not assignable to parameter of type '0 | 1'
     expect(numUnReq.validate(numUnInvSubj).error).toMatchObject(errV)
 
     const numUnOpt = x(numberUnion(...unOf).optional())
@@ -1199,14 +814,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(numUnOpt.parse(numUnInvSubj).data).toBe(undefined)
     expect(numUnOpt.parse(numUnInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error '"x"' is not assignable to parameter of type '0 | 1 | undefined'
     expect(numUnOpt.validate(numUnInvSubj).data).toBe(undefined)
-    // @ts-expect-error '"x"' is not assignable to parameter of type '0 | 1 | undefined'
     expect(numUnOpt.validate(numUnInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type '0 | 1 | undefined'
     expect(numUnOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type '0 | 1 | undefined'
     expect(numUnOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -1223,14 +834,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(arrReq.parse(arrInvSubj).data).toBe(undefined)
     expect(arrReq.parse(arrInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string[]'
     expect(arrReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string[]'
     expect(arrReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'string' is not assignable to parameter of type 'string[]'
     expect(arrReq.validate(arrInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'string[]'
     expect(arrReq.validate(arrInvSubj).error).toMatchObject(errV)
 
     const arrOpt = x(array(string()).optional())
@@ -1238,14 +845,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(arrOpt.parse(arrInvSubj).data).toBe(undefined)
     expect(arrOpt.parse(arrInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'string' is not assignable to parameter of type 'string[]'
     expect(arrOpt.validate(arrInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'string[]'
     expect(arrOpt.validate(arrInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type 'string[] | undefined'
     expect(arrOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type 'string[] | undefined'
     expect(arrOpt.validate(null).error).toMatchObject(errV)
   })
 
@@ -1262,14 +865,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(objReq.parse(objInvSubj).data).toBe(undefined)
     expect(objReq.parse(objInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '{ x: string }'
     expect(objReq.validate(undefined).data).toBe(undefined)
-    // @ts-expect-error 'undefined' is not assignable to parameter of type '{ x: string }'
     expect(objReq.validate(undefined).error).toMatchObject(errV)
 
-    // @ts-expect-error 'string' is not assignable to parameter of type '{ x: string }'
     expect(objReq.validate(objInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type '{ x: string }'
     expect(objReq.validate(objInvSubj).error).toMatchObject(errV)
 
     const objOpt = x(object({ x: string() }).optional())
@@ -1277,14 +876,10 @@ describe('X closure programmatically defined schema INVALID', () => {
     expect(objOpt.parse(objInvSubj).data).toBe(undefined)
     expect(objOpt.parse(objInvSubj).error).toMatchObject(errP)
 
-    // @ts-expect-error 'string' is not assignable to parameter of type '{ x: string }'
     expect(objOpt.validate(objInvSubj).data).toBe(undefined)
-    // @ts-expect-error 'string' is not assignable to parameter of type '{ x: string }'
     expect(objOpt.validate(objInvSubj).error).toMatchObject(errV)
 
-    // @ts-expect-error 'null' is not assignable to parameter of type '{ x: string } | undefined'
     expect(objOpt.validate(null).data).toBe(undefined)
-    // @ts-expect-error 'null' is not assignable to parameter of type '{ x: string } | undefined'
     expect(objOpt.validate(null).error).toMatchObject(errV)
   })
 })

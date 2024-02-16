@@ -3,19 +3,21 @@ import { ERROR_CODE } from './error'
 import { parseBaseSchemaSubject } from './base-schema-parser'
 
 import type { EitherError } from './utils/fp'
-import type { Schema, Con_Schema_SubjT_P } from './types/compound-schema-types'
+import type { Schema, Con_Schema_SubjT_V } from './types/compound-schema-types'
 import type { InvalidSubject, ErrorPath } from './error'
 
 export function parse<T extends Schema>(
   schema: T,
   subject: unknown
-): EitherError<InvalidSubject[], Con_Schema_SubjT_P<T>>
+): EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
 
 export function parse(
   this: ErrorPath | void,
   schema: Schema,
   subject: unknown
 ): EitherError<InvalidSubject[], unknown> {
+  // FIXME: we actually don't need to check those variants
+  //        just move condition scope content to the very end of the function
   if (
     schema.type === 'string' ||
     schema.type === 'number' ||

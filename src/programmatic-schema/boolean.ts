@@ -21,12 +21,7 @@ type BooleanShared<T extends BD_Boolean> = {
   ) => ExtWith_Option<T, { description: string }>
 }
 
-type BooleanOptional<T extends BD_Boolean> = Omit<
-  {
-    default: (defaultValue: boolean) => ExtWith_Option<T, { default: boolean }>
-  } & BooleanShared<T>,
-  keyof T
->
+type BooleanOptional<T extends BD_Boolean> = Omit<BooleanShared<T>, keyof T>
 
 type BooleanRequired<T extends BD_Boolean> = Omit<
   {
@@ -63,23 +58,6 @@ function booleanOptions(schema: BD_Boolean) {
       }
 
       const updatedSchema = { ...schema, optional: true }
-
-      return {
-        __schema: updatedSchema,
-        ...booleanOptions(updatedSchema),
-      }
-    },
-
-    default: (defaultParsedValue: boolean) => {
-      if (except.has('default')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultDefined)
-      }
-
-      if (schema.optional === undefined) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultNotAllowed)
-      }
-
-      const updatedSchema = { ...schema, default: defaultParsedValue }
 
       return {
         __schema: updatedSchema,

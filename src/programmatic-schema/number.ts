@@ -23,12 +23,7 @@ type NumberShared<T extends BD_Number> = {
   ) => ExtWith_Option<T, { description: string }>
 }
 
-type NumberOptional<T extends BD_Number> = Omit<
-  {
-    default: (defaultValue: number) => ExtWith_Option<T, { default: number }>
-  } & NumberShared<T>,
-  keyof T
->
+type NumberOptional<T extends BD_Number> = Omit<NumberShared<T>, keyof T>
 
 type NumberRequired<T extends BD_Number> = Omit<
   {
@@ -65,23 +60,6 @@ function numberOptions(schema: BD_Number) {
       }
 
       const updatedSchema = { ...schema, optional: true }
-
-      return {
-        __schema: updatedSchema,
-        ...numberOptions(updatedSchema),
-      }
-    },
-
-    default: (defaultParsedValue: number) => {
-      if (except.has('default')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultDefined)
-      }
-
-      if (schema.optional === undefined) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultNotAllowed)
-      }
-
-      const updatedSchema = { ...schema, default: defaultParsedValue }
 
       return {
         __schema: updatedSchema,

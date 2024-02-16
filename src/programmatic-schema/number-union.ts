@@ -24,11 +24,7 @@ type NumberUnionShared<T extends BD_NumberUnion> = {
 }
 
 type NumberUnionOptional<T extends BD_NumberUnion> = Omit<
-  {
-    default: T extends { of: Readonly<Array<infer U>> }
-      ? (defaultValue: U) => ExtWith_Option<T, { default: U }>
-      : never
-  } & NumberUnionShared<T>,
+  NumberUnionShared<T>,
   keyof T
 >
 
@@ -69,23 +65,6 @@ function numberUnionOptions(schema: BD_NumberUnion) {
       }
 
       const updatedSchema = { ...schema, optional: true }
-
-      return {
-        __schema: updatedSchema,
-        ...numberUnionOptions(updatedSchema),
-      }
-    },
-
-    default: (defaultParsedValue: number) => {
-      if (except.has('default')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultDefined)
-      }
-
-      if (schema.optional === undefined) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultNotAllowed)
-      }
-
-      const updatedSchema = { ...schema, default: defaultParsedValue }
 
       return {
         __schema: updatedSchema,

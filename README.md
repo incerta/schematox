@@ -50,32 +50,7 @@ export const userSchema = {
       type: 'string',
       brand: ['idFor', 'User'],
     },
-    email: {
-      type: 'string',
-      optional: true,
-      brand: ['format', 'email'],
-    },
-    updatedAt: {
-      type: 'number',
-      brand: ['format', 'msUnixTimestamp'],
-    },
-    canRead: {
-      type: 'array',
-      of: {
-        type: 'string',
-        brand: ['idFor', 'User'],
-      },
-      minLength: 1,
-    },
-    canWrite: {
-      type: 'array',
-      of: {
-        type: 'string',
-        brand: ['idFor', 'User'],
-      },
-      minLength: 1,
-    },
-    bio: { type: 'string', optional: true },
+    name: { type: 'string' },
   },
 } as const satisfies Schema
 ```
@@ -83,80 +58,52 @@ export const userSchema = {
 Same schema but defined programmatically:
 
 ```typescript
-import { object, string, number, boolean, array } from 'schematox'
-
-const userIdX = string().brand('idFor', 'User')
-const emailX = string().brand('format', 'email')
-const msUnixTimestampX = number().brand('format', 'msUnixTimestamp')
+import { object, string } from 'schematox'
 
 export const userSchema = object({
-  id: userIdX,
-  email: emailX,
-  updatedAt: updatedAtX,
-  canRead: array(userId),
-  canWrite: array(userId),
-  bio: string().optional(true),
-})
+  id: string().brand('idFor', 'User'),
+  name: string(),
+}).__schema
 ```
 
 Parse/validate:
 
 ```typescript
-import { parse, validate, x } from 'schematox'
-import { userSchema, userId, emailX, msUnixTimestampX } './schema'
+import { x } from 'schematox'
+import { userSchema } './schema'
 
-import type { XParse } from 'schematox'
+import type { SubjectType } from 'schematox'
 
-type UserId = XParse<typeof userId>
-type Email = XParse<typeof emailX>
-type MsUnixTimestamp = XParse<typeof msUnixTimestamp>
+const userX = x(userSchema)
 
-const adminUserId = '1' as UserId
-
-const schemaSubject = {
-  id: adminUserId,
-  email: 'john@dow.com' as Email,
-  updatedAt: Date.now() as MsUnixTimestamp,
-  canRead: [userId],
-  canWrite: [userId],
-  bio: undefined,
+const subject = {
+  id: '1' as SubjectType<typeof userSchema.id>,
+  name: 'John'
 }
 
-const parsed = parse(userSchema, schemaSubject)
+const parsed = userX.parse(schemaSubject)
 
-// We need a type guard before accessing the prased.data
 if (parsed.error) {
   throw Error('Not expected')
 }
 
-console.log(parsed.data)
+console.log(parsed.data) // { id: '1', name: 'John' }
 
-const validated = validate(userSchema, schemaSubject)
+const validated = userX.validate(schemaSubject)
 
-// We need a type guard before accessing the validated.data
-if (parsed.error) {
+if (validated.error) {
   throw Error('Not expected')
 }
 
-console.log(validated.data)
-
-/* Another way of doing the same */
-
-const userSchemaX = x(userSchema)
-
-const parsedByX = userSchemaX.parse(schemaSubject)
-const validatedByX = userSchemaX.validate(schemaSubject)
+console.log(validated.data) // { id: '1', name: 'John' }
 ```
 
-Result type of `parsedByX.data` or `validatedByX.data`
+Result `data` type:
 
 ```typescript
-type Data = {
+{
   id: string & { __idFor: 'User' }
-  email: string & { __format: 'email' }
-  updatedAt: number & { __format: 'msUnixTimestamp' }
-  canRead: Array<string & { __idFor: 'User' }>
-  canWrite: Array<string & { __idFor: 'User' }>
+  name: string
 }
 ```
 
@@ -182,7 +129,6 @@ import type { Schema } from 'schematox'
 const staticString = {
   type: 'string',
   optional: true,
-  default: 'x',
   brand: ['x', 'y'],
   minLength: 1,
   maxLength: 1,
@@ -191,7 +137,6 @@ const staticString = {
 
 const programmaticString = string()
   .optional()
-  .default('x')
   .minLength(1)
   .maxLength(1)
   .brand('x', 'y')
@@ -202,7 +147,6 @@ const programmaticString = string()
 const staticNumber = {
   type: 'number',
   optional: true,
-  default: 1,
   brand: ['x', 'y'],
   min: 1,
   max: 1,
@@ -211,7 +155,6 @@ const staticNumber = {
 
 const programmaticNumber = number()
   .optional()
-  .default(1)
   .min(1)
   .max(1)
   .brand('x', 'y')
@@ -229,7 +172,6 @@ const staticBoolean = {
 
 const programmaticBoolean = boolean()
   .optional()
-  .default(false)
   .brand('x', 'y')
   .description('y')
 
@@ -290,7 +232,7 @@ const staticArray = {
 const programmaticArray = array(string())
 ```
 
-## Validate/parse InvalidSubject error shape
+## Verification error shape
 
 Nested schema example. Subject `0` is invalid, should be a `string`:
 
@@ -334,73 +276,6 @@ It's always an array with at least one entry. Each entry includes:
 
 ## Parse and validate differences
 
-The parser returns `data` as new object/primitive without references to the parsed subject. Parser manages the `null` value as `undefined` and subsequently replaces it with `undefined`. It also swaps `optional` values with the `default` value from schema. One can infer schema parsed subject type by using `XParsed<typeof schema>` generic.
+The `parser` returns `data` as new object without references to the parsed subject. Parser manages the `null` value as `undefined` and subsequently replaces it with `undefined`.
 
-The validator on the other hand returns the evaluated subject itself and not applying any mutation/transformation to it. The validator should be used in exceptional cases when we known subject type but not sure that it actually correct. One can infer schema validated subject type by using `XValidated<typeof schema>` generic.
-
-So the difference between `XParsed` and `XValidated` is just about handling `default` schema value. `XParsed` narrows optional schema subject type with default value in the way that it will not be optional, because optional `undefined` and `null` values will be replaced by the `default`. `XValidated` just ignores `default` schema value.
-
-Examples:
-
-```typescript
-const optionalStrX = x({ type: 'string', optional: true } as const)
-
-/* Parser doesn't check subject type */
-
-expect(optionalStrX.parse(0).error).toStrictEqual([
-  {
-    code: 'INVALID_TYPE',
-    schema: { type: 'string', optional: true },
-    subject: 0,
-    path: [],
-  },
-])
-
-/* Validator does */
-
-// @ts-expect-error 'number' is not 'string'
-expect(optionalStrX.validate(0).error).toStrictEqual([
-  {
-    code: 'INVALID_TYPE',
-    schema: { type: 'string', optional: true },
-    subject: 0,
-    path: [],
-  },
-])
-
-/* Parser treats `null` as `undefined` */
-
-expect(optionalStrX.parse(null).data).toBe(undefined)
-expect(optionalStrX.parse(null).error).toBe(undefined)
-
-/* Validator is not */
-
-// @ts-expect-error 'null' is not 'string | undefined'
-expect(optionalStrX.validate(null).error).toStrictEqual([
-  {
-    code: 'INVALID_TYPE',
-    schema: { type: 'string', optional: true },
-    subject: null,
-    path: [],
-  },
-])
-
-const defaultedStrX = x({ type: 'string', optional: true, default: 'y' })
-
-/* Parser uses `default` value on `null` or `undefined` subject  */
-
-expect(defaultedStrX.parse(null).data).toBe('y')
-expect(defaultedStrX.parse(undefined).data).toBe('y')
-
-/* Validator ignores default value */
-
-expect(defaultedStrX.validate(undefined).data).toBe(undefined)
-
-/* Parser returning new object */
-
-expect(arrX.parse(subject).data === subject).toBe(false)
-
-/* Validator keeps the subject reference */
-
-expect(arrX.validate(subject).data === subject).toBe(true)
-```
+The `validator` returns the evaluated subject itself and not applying any mutation/transformation to it. The validator should be used in exceptional cases when we known subject type but not sure that it actually correct.
