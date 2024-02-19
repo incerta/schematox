@@ -1,61 +1,60 @@
-import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../error'
+import { validate } from '../general-schema-validator'
+import { parse } from '../general-schema-parser'
 
-type ExtWith_Option<T, U, V = T & U> = {
-  __schema: V
-} & ObjectOptions<V>
+import type { EitherError } from '../utils/fp'
+import type {
+  Con_Schema_SubjT_V,
+  ObjectSchema,
+  SchemaLess,
+  NestedSchema,
+} from '../types/compound-schema-types'
+import type { InvalidSubject } from '../error'
 
-type ObjectOptions<T> = Omit<
+type Struct<T extends ObjectSchema> = Omit<
   {
-    optional: () => ExtWith_Option<T, { optional: true }>
-    description: (
-      description: string
-    ) => ExtWith_Option<T, { description: string }>
+    optional: () => Struct<T & { optional: true }>
+    description: (description: string) => Struct<T & { description: string }>
   },
   keyof T
->
+> & {
+  __schema: T
 
-function objectOptions<T>(schema: T): ObjectOptions<T>
-function objectOptions<T>(schema: T) {
-  const schemaKeys = Object.keys(schema as Record<string, unknown>) as Array<
-    'optional' | 'description'
-  >
-  const except = new Set(schemaKeys)
+  parse: (
+    subject: unknown
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
 
+  validate: (
+    subject: unknown
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+
+  guard: (subject: unknown) => subject is Con_Schema_SubjT_V<T>
+}
+
+function struct<T extends ObjectSchema>(schema: T): Struct<T>
+function struct(schema: any) {
   return {
+    __schema: schema,
+
+    parse: (subj: unknown) => parse(schema, subj),
+    validate: (subj: unknown) => validate(schema, subj),
+    guard: (subj: unknown): subj is string | undefined =>
+      validate(schema, subj).error === undefined,
+
     optional: () => {
-      if (except.has('optional')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined)
-      }
-
-      const updatedSchema = { ...schema, optional: true }
-
-      return {
-        __schema: updatedSchema,
-        ...objectOptions(updatedSchema),
-      }
+      return struct({ ...schema, optional: true })
     },
-
     description: (description: string) => {
-      if (except.has('description')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined)
-      }
-
-      const updatedSchema = { ...schema, description }
-
-      return {
-        __schema: updatedSchema,
-        ...objectOptions(updatedSchema),
-      }
+      return struct({ ...schema, description })
     },
   }
 }
 
 export function object<
-  T,
-  U extends Record<string, { __schema: Record<string, T> }>,
+  T extends SchemaLess,
+  U extends Record<string, { __schema: T }>,
   V extends {
     type: 'object'
-    of: Record<string, unknown>
+    of: Record<string, NestedSchema>
   } = { type: 'object'; of: { [k in keyof U]: U[k]['__schema'] } },
 >(of: U) {
   const schema = { type: 'object', of: {} } as V
@@ -64,8 +63,5 @@ export function object<
     schema.of[key] = (of[key] as NonNullable<(typeof of)[typeof key]>).__schema
   }
 
-  return {
-    __schema: schema,
-    ...objectOptions(schema),
-  }
+  return struct(schema)
 }

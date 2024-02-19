@@ -1,4 +1,3 @@
-import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../../error'
 import { parse } from '../../general-schema-parser'
 import { validate } from '../../general-schema-validator'
 import { boolean } from '../../programmatic-schema/boolean'
@@ -46,21 +45,10 @@ describe('Boolean schema programmatic definition', () => {
 
     expect(parse(schemaX.__schema, false).data).toBe(false)
     expect(parse(schemaX.__schema, false).error).toBe(undefined)
-    expect(
-      validate(schemaX.__schema, false as boolean & { __x: 'y' }).data
-    ).toBe(false)
-    // @ts-expect-error 'false' is not '{ __x: "y"; } & boolean'
-    expect(validate(schemaX.__schema, false).error).toBe(undefined)
+    expect(validate(schemaX.__schema, false).data).toBe(false)
 
     // @ts-expect-error Property 'brand' does not exist on type
-    expect(() => schemaX.brand('x', 'y')).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.brandDefined
-    )
-
-    // @ts-expect-error Property 'default' does not exist
-    expect(() => schemaX.default()).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultNotAllowed
-    )
+    expect(() => schemaX.brand('x', 'y')).not.toThrow()
   })
 
   it('boolean: boolean -> brand -> optional', () => {
@@ -90,71 +78,20 @@ describe('Boolean schema programmatic definition', () => {
 
     expect(parse(schemaX.__schema, false).data).toBe(false)
     expect(parse(schemaX.__schema, false).error).toBe(undefined)
-    expect(
-      validate(schemaX.__schema, true as boolean & { __x: 'y' }).data
-    ).toBe(true)
-    // @ts-expect-error 'true' is not '({ __x: "y"; } & boolean) | undefined'
+    expect(validate(schemaX.__schema, true).data).toBe(true)
     expect(validate(schemaX.__schema, true).error).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
-    expect(() => schemaX.optional()).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined
-    )
+    expect(() => schemaX.optional()).not.toThrow()
   })
 
-  it('boolean: boolean -> brand -> optional -> default', () => {
-    const schemaX = boolean().brand('x', 'y').optional().default(false)
+  it('boolean: boolean -> brand -> optional -> description', () => {
+    const schemaX = boolean().brand('x', 'y').optional().description('x')
 
     expect(schemaX.__schema).toStrictEqual({
       type: 'boolean',
       brand: ['x', 'y'],
       optional: true,
-      default: false,
-    })
-
-    check<{
-      __schema: {
-        type: 'boolean'
-        brand: Readonly<['x', 'y']>
-        optional: true
-        default: boolean
-      }
-    }>(unknownX as typeof schemaX)
-    check<{
-      __schema: {
-        type: 'string'
-        brand: Readonly<['x', 'y']>
-        optional: true
-        default: boolean
-      }
-      // @ts-expect-error '"boolean"' is not assignable to type '"string"'
-    }>(unknownX as typeof schemaX)
-
-    expect(parse(schemaX.__schema, false).data).toBe(false)
-    expect(parse(schemaX.__schema, false).error).toBe(undefined)
-    expect(validate(schemaX.__schema, undefined).data).toBe(undefined)
-    expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
-    expect(parse(schemaX.__schema, undefined).data).toBe(false)
-    expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
-
-    // @ts-expect-error Property 'default' does not exist
-    expect(() => schemaX.default(false)).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.defaultDefined
-    )
-  })
-
-  it('boolean: boolean -> brand -> optional -> default -> description', () => {
-    const schemaX = boolean()
-      .brand('x', 'y')
-      .optional()
-      .default(false)
-      .description('x')
-
-    expect(schemaX.__schema).toStrictEqual({
-      type: 'boolean',
-      brand: ['x', 'y'],
-      optional: true,
-      default: false,
       description: 'x',
     })
 
@@ -163,7 +100,6 @@ describe('Boolean schema programmatic definition', () => {
         type: 'boolean'
         brand: Readonly<['x', 'y']>
         optional: true
-        default: boolean
         description: string
       }
     }>(unknownX as typeof schemaX)
@@ -172,7 +108,6 @@ describe('Boolean schema programmatic definition', () => {
         type: 'string'
         brand: Readonly<['x', 'y']>
         optional: true
-        default: boolean
         description: string
       }
       // @ts-expect-error '"boolean"' is not assignable to type '"string"'
@@ -182,27 +117,18 @@ describe('Boolean schema programmatic definition', () => {
     expect(parse(schemaX.__schema, false).error).toBe(undefined)
     expect(validate(schemaX.__schema, undefined).data).toBe(undefined)
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
-    expect(parse(schemaX.__schema, undefined).data).toBe(false)
-    expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
 
     // @ts-expect-error Property 'description' does not exist
-    expect(() => schemaX.description('x')).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined
-    )
+    expect(() => schemaX.description('x')).not.toThrow()
   })
 
-  it('boolean: boolean -> description -> optional -> default -> brand', () => {
-    const schemaX = boolean()
-      .description('x')
-      .optional()
-      .default(true)
-      .brand('x', 'y')
+  it('boolean: boolean -> description -> optional -> brand', () => {
+    const schemaX = boolean().description('x').optional().brand('x', 'y')
 
     expect(schemaX.__schema).toStrictEqual({
       type: 'boolean',
       brand: ['x', 'y'],
       optional: true,
-      default: true,
       description: 'x',
     })
 
@@ -211,7 +137,6 @@ describe('Boolean schema programmatic definition', () => {
         type: 'boolean'
         brand: Readonly<['x', 'y']>
         optional: true
-        default: boolean
         description: string
       }
     }>(unknownX as typeof schemaX)
@@ -220,7 +145,6 @@ describe('Boolean schema programmatic definition', () => {
         type: 'string'
         brand: Readonly<['x', 'y']>
         optional: true
-        default: boolean
         description: string
       }
       // @ts-expect-error '"boolean"' is not assignable to type '"string"'
@@ -230,12 +154,38 @@ describe('Boolean schema programmatic definition', () => {
     expect(parse(schemaX.__schema, true).error).toBe(undefined)
     expect(validate(schemaX.__schema, undefined).data).toBe(undefined)
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
-    expect(parse(schemaX.__schema, undefined).data).toBe(true)
-    expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
 
     // @ts-expect-error Property 'description' does not exist
-    expect(() => schemaX.description('x')).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined
-    )
+    expect(() => schemaX.description('x')).not.toThrow()
+  })
+})
+
+describe('Validate/parse/guard using struct', () => {
+  it('boolean: parse', () => {
+    expect(boolean().parse(true).data).toBe(true)
+    expect(boolean().parse(true).error).toBe(undefined)
+
+    expect(boolean().parse(undefined).data).toBe(undefined)
+    expect(boolean().parse(undefined).error).toBeTruthy()
+  })
+
+  it('boolean: validate', () => {
+    expect(boolean().validate(true).data).toBe(true)
+    expect(boolean().validate(true).error).toBe(undefined)
+
+    expect(boolean().validate(undefined).data).toBe(undefined)
+    expect(boolean().validate(undefined).error).toBeTruthy()
+  })
+
+  it('boolean: guard', () => {
+    const struct = boolean()
+    const subj: unknown = true
+    const guard = struct.guard(subj)
+
+    if (guard) {
+      check<boolean>(subj)
+      // @ts-expect-error 'boolean' is not assignable to parameter of type 'string'
+      check<string>(subj)
+    }
   })
 })

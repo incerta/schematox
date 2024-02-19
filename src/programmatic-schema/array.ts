@@ -1,67 +1,75 @@
-import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../error'
+import { validate } from '../general-schema-validator'
+import { parse } from '../general-schema-parser'
 
-type ExtWith_Option<T, U, V = T & U> = {
-  __schema: V
-} & ArrayOptions<V>
+import type { EitherError } from '../utils/fp'
+import type {
+  Con_Schema_SubjT_V,
+  SchemaLess,
+  ArraySchema,
+} from '../types/compound-schema-types'
+import type { InvalidSubject } from '../error'
 
-type ArrayOptions<T> = Omit<
+type Struct<T extends ArraySchema> = Omit<
   {
-    optional: () => ExtWith_Option<T, { optional: true }>
-    description: (
-      description: string
-    ) => ExtWith_Option<T, { description: string }>
+    optional: () => Struct<T & { optional: true }>
+
+    minLength: (minLength: number) => Struct<T & { minLength: number }>
+    maxLength: (maxLength: number) => Struct<T & { maxLength: number }>
+
+    description: (description: string) => Struct<T & { description: string }>
   },
   keyof T
->
+> & {
+  __schema: T
 
-function arrayOptions<T>(schema: T): ArrayOptions<T>
-function arrayOptions<T>(schema: T) {
-  const schemaKeys = Object.keys(schema as Record<string, unknown>) as Array<
-    'optional' | 'description'
-  >
-  const except = new Set(schemaKeys)
+  parse: (
+    subject: unknown
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
 
+  validate: (
+    subject: unknown
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+
+  guard: (subject: unknown) => subject is Con_Schema_SubjT_V<T>
+}
+
+function struct<T extends ArraySchema>(schema: T): Struct<T>
+function struct(schema: any) {
   return {
+    __schema: schema,
+
+    parse: (subj: unknown) => parse(schema, subj),
+    validate: (subj: unknown) => validate(schema, subj),
+    guard: (subj: unknown): subj is string | undefined =>
+      validate(schema, subj).error === undefined,
+
     optional: () => {
-      if (except.has('optional')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined)
-      }
+      return struct({ ...schema, optional: true })
+    },
 
-      const updatedSchema = { ...schema, optional: true }
+    minLength: (minLength: number) => {
+      return struct({ ...schema, minLength })
+    },
 
-      return {
-        __schema: updatedSchema,
-        ...arrayOptions(updatedSchema),
-      }
+    maxLength: (maxLength: number) => {
+      return struct({ ...schema, maxLength })
     },
 
     description: (description: string) => {
-      if (except.has('description')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined)
-      }
-
-      const updatedSchema = { ...schema, description }
-
-      return {
-        __schema: updatedSchema,
-        ...arrayOptions(updatedSchema),
-      }
+      return struct({ ...schema, description })
     },
   }
 }
 
 export function array<
-  T,
+  T extends SchemaLess,
   U extends { __schema: T },
-  V extends { type: 'array'; of: unknown } = {
+  V extends { type: 'array'; of: SchemaLess } = {
     type: 'array'
     of: U['__schema']
   },
 >(of: U) {
   const schema = { type: 'array', of: of.__schema } as V
 
-  return {
-    __schema: schema,
-    ...arrayOptions(schema),
-  }
+  return struct(schema)
 }
