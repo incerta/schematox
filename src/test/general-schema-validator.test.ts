@@ -51,9 +51,7 @@ describe('Validate BASE schema with INVALID subject', () => {
     const detailedReqStrSchema = { type: 'string' } satisfies Schema
     const undefinedSubj = undefined
 
-    // @ts-expect-error for the sake of testing
     expect(validate(detailedReqStrSchema, undefinedSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(detailedReqStrSchema, undefinedSubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -70,9 +68,7 @@ describe('Validate BASE schema with INVALID subject', () => {
 
     const numberSubj = 0
 
-    // @ts-expect-error for the sake of testing
     expect(validate(detailedOptStrSchema, numberSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(detailedOptStrSchema, numberSubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -202,9 +198,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const undefinedSubj = undefined
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, undefinedSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, undefinedSubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -216,9 +210,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const nullSubj = null
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, nullSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, nullSubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -230,9 +222,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const regExpSubj = /^x/
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, regExpSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, regExpSubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -244,9 +234,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const arraySubj = [] as unknown
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, arraySubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, arraySubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -258,9 +246,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const mapSubj = new Map()
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, mapSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, mapSubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -272,9 +258,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const setSubj = new Set()
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, setSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, setSubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -304,9 +288,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
       [secondInvalidSubjKey]: undefined,
     }
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -384,9 +366,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
       },
     } as const
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -419,9 +399,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
       x: ['valid', invalidSubject],
     }
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -673,9 +651,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 
     const undefinedSubj = undefined
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, undefinedSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, undefinedSubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -687,9 +663,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 
     const nullSubj = null
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, nullSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, nullSubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -701,9 +675,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 
     const stringSubj = 'x'
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, stringSubj).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, stringSubj).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -723,9 +695,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 
     const strSubject = 'x'
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, strSubject).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, strSubject).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -875,9 +845,7 @@ describe('Validate ARRAY schema with INVALID subject', () => {
       ],
     ]
 
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).data).toBe(undefined)
-    // @ts-expect-error for the sake of testing
     expect(validate(schema, subject).error).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
@@ -979,36 +947,28 @@ describe('VALIDATE flow returns schema subject reference', () => {
 
 describe('Check validate subject type constraints', () => {
   it('validate: base detailed schema', () => {
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'string'
     expect(() => validate({ type: 'string' }, undefined)).not.toThrow()
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
     expect(() => validate({ type: 'string' }, 0)).not.toThrow()
     expect(() =>
       validate({ type: 'string', optional: true }, undefined)
     ).not.toThrow()
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'number'
     expect(() => validate({ type: 'number' }, undefined)).not.toThrow()
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'number'
     expect(() => validate({ type: 'number' }, true)).not.toThrow()
     expect(() =>
       validate({ type: 'number', optional: true }, undefined)
     ).not.toThrow()
 
-    // @ts-expect-error 'undefined' is not assignable to parameter of type 'boolean'
     expect(() => validate({ type: 'boolean' }, undefined)).not.toThrow()
-    // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
     expect(() => validate({ type: 'boolean' }, 'x')).not.toThrow()
     expect(() =>
       validate({ type: 'boolean', optional: true }, undefined)
     ).not.toThrow()
 
     expect(() =>
-      // @ts-expect-error 'undefined' is not assignable to parameter of type '"x" | "y"'
       validate({ type: 'stringUnion', of: ['x', 'y'] } as const, undefined)
     ).not.toThrow()
     expect(() =>
-      // @ts-expect-error '"z"' is not assignable to parameter of type '"x" | "y"'
       validate({ type: 'stringUnion', of: ['x', 'y'] } as const, 'z')
     ).not.toThrow()
     expect(() =>
@@ -1019,11 +979,9 @@ describe('Check validate subject type constraints', () => {
     ).not.toThrow()
 
     expect(() =>
-      // @ts-expect-error 'undefined' is not assignable to parameter of type '0 | 1'
       validate({ type: 'numberUnion', of: [0, 1] } as const, undefined)
     ).not.toThrow()
     expect(() =>
-      // @ts-expect-error '2' is not assignable to parameter of type '0 | 1'
       validate({ type: 'numberUnion', of: [0, 1] } as const, 2)
     ).not.toThrow()
     expect(() =>
@@ -1038,14 +996,12 @@ describe('Check validate subject type constraints', () => {
     expect(() =>
       validate(
         { type: 'object', of: { x: { type: 'string' } } } as const,
-        // @ts-expect-error 'undefined' is not '{ readonly x: string; }'
         undefined
       )
     ).not.toThrow()
 
     expect(() =>
       validate({ type: 'object', of: { x: { type: 'string' } } } as const, {
-        // @ts-expect-error 'y' does not exist in type '{ readonly x: string; }'
         y: 'x',
       })
     ).not.toThrow()

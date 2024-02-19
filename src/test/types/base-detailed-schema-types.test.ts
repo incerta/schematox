@@ -2,10 +2,8 @@ import { check, unknownX } from '../test-utils'
 import type {
   Con_BrandSchema_SubjT,
   Con_BD_Schema_TypeOnly_SubjT,
-  Con_BD_Schema_SubjT_P,
   Con_BD_Schema_SubjT_V,
   ExtWith_BrandSchema_SubjT,
-  ExtWith_BD_OptionalSchema_SubjT_P,
   ExtWith_BD_OptionalSchema_SubjT_V,
   BD_Schema,
 } from '../../types/base-detailed-schema-types'
@@ -129,193 +127,6 @@ it('ExtWith_BrandSchema_SubjT<T, U>: should narrow U type with brand schema subj
   )
 })
 
-it('ExtWith_BD_OptionalSchema_SubjT_P<T, U>: optional case only', () => {
-  check<string>(
-    unknownX as ExtWith_BD_OptionalSchema_SubjT_P<{ type: 'string' }, string>
-  )
-
-  check<string>(
-    unknownX as NonNullable<
-      ExtWith_BD_OptionalSchema_SubjT_P<
-        { type: 'string'; optional: true },
-        string
-      >
-    >
-  )
-
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable 'string'
-    unknownX as ExtWith_BD_OptionalSchema_SubjT_P<
-      { type: 'string'; optional: true },
-      string
-    >
-  )
-})
-
-it('ExtWith_BD_OptionalSchema_SubjT_P<T, U>: optional + default case', () => {
-  check<string>(
-    unknownX as ExtWith_BD_OptionalSchema_SubjT_P<
-      { type: 'string'; optional: true; default: 'x' },
-      string
-    >
-  )
-
-  check<string>(
-    unknownX as ExtWith_BD_OptionalSchema_SubjT_P<
-      { type: 'string'; optional: true; default: 'x' },
-      string
-    >
-  )
-
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as ExtWith_BD_OptionalSchema_SubjT_P<
-      { type: 'string'; optional: true; default: undefined },
-      string
-    >
-  )
-})
-
-it('Con_BD_Schema_SubjT_P<T>: check optionality extension', () => {
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as Con_BD_Schema_SubjT_P<{
-      type: 'string'
-      optional: true
-    }>
-  )
-
-  check<string>(
-    unknownX as NonNullable<
-      Con_BD_Schema_SubjT_P<{
-        type: 'string'
-        optional: true
-      }>
-    >
-  )
-
-  check<string>(
-    unknownX as Con_BD_Schema_SubjT_P<{
-      type: 'string'
-      optional: true
-      default: 'x'
-    }>
-  )
-})
-
-it('Con_BD_Schema_SubjT_P<T>: check brand schema subject type extension', () => {
-  check<string & { __id: 'X' }>(
-    unknownX as Con_BD_Schema_SubjT_P<{
-      type: 'string'
-      brand: ['id', 'X']
-    }>
-  )
-
-  check<string & { __id: 'Y' }>(
-    // @ts-expect-error '"X"' is not assignable to type '"Y"'
-    unknownX as Con_BD_Schema_SubjT_P<{
-      type: 'string'
-      brand: ['id', 'X']
-    }>
-  )
-})
-
-it('Con_BD_Schema_SubjT_P<T>: "string" required', () => {
-  const stringRequired = {
-    type: 'string',
-  } as const satisfies BD_Schema
-
-  check<string>(unknownX as Con_BD_Schema_SubjT_P<typeof stringRequired>)
-})
-
-it('Con_BD_Schema_SubjT_P<T>: "string" required & branded', () => {
-  const stringRequired = {
-    type: 'string',
-    brand: ['id', 'X'],
-  } as const satisfies BD_Schema
-
-  check<string & { __id: 'X' }>(
-    unknownX as Con_BD_Schema_SubjT_P<typeof stringRequired>
-  )
-})
-
-it('Con_BD_Schema_SubjT_P<T>: "string" optional', () => {
-  const stringOptional = {
-    type: 'string',
-    optional: true,
-  } as const satisfies BD_Schema
-
-  check<string | undefined>(
-    unknownX as Con_BD_Schema_SubjT_P<typeof stringOptional>
-  )
-  check<string>(
-    unknownX as NonNullable<Con_BD_Schema_SubjT_P<typeof stringOptional>>
-  )
-})
-
-it('Con_BD_Schema_SubjT_P<T>: "string" optional defaulted', () => {
-  const stringOptionalDefaulted = {
-    type: 'string',
-    optional: true,
-    default: 'test',
-  } as const satisfies BD_Schema
-
-  check<string>(
-    unknownX as Con_BD_Schema_SubjT_P<typeof stringOptionalDefaulted>
-  )
-})
-
-it('Con_BD_Schema_SubjT_P<T>: "string/number/boolean" required', () => {
-  const stringSchema = {
-    type: 'string',
-  } as const satisfies BD_Schema
-
-  check<string>(unknownX as Con_BD_Schema_SubjT_P<typeof stringSchema>)
-
-  const numberSchema = {
-    type: 'number',
-  } as const satisfies BD_Schema
-
-  check<number>(unknownX as Con_BD_Schema_SubjT_P<typeof numberSchema>)
-
-  const booleanSchema = {
-    type: 'boolean',
-  } as const satisfies BD_Schema
-
-  check<boolean>(unknownX as Con_BD_Schema_SubjT_P<typeof booleanSchema>)
-})
-
-it('Con_BD_Schema_SubjT_P<T>: "stringUnion/numberUnion" required', () => {
-  const stringUnionSchema = {
-    type: 'stringUnion',
-    of: ['a', 'b'],
-  } as const satisfies BD_Schema
-
-  check<'a' | 'b'>(unknownX as Con_BD_Schema_SubjT_P<typeof stringUnionSchema>)
-
-  const numberUnionSchema = {
-    type: 'numberUnion',
-    of: [0, 1],
-  } as const satisfies BD_Schema
-
-  check<0 | 1>(unknownX as Con_BD_Schema_SubjT_P<typeof numberUnionSchema>)
-})
-
-it('Con_BD_Schema_SubjT_P<T>: check branded schema', () => {
-  const schema = {
-    type: 'string',
-    brand: ['key', 'value'],
-  } as const satisfies BD_Schema
-
-  check<string & { __key: 'value' }>(
-    unknownX as Con_BD_Schema_SubjT_P<typeof schema>
-  )
-  check<number & { __key: 'value' }>(
-    // @ts-expect-error '{ __key: "value"; } & string' is not 'number & { __key: "value"; }'
-    unknownX as Con_BD_Schema_SubjT_P<typeof schema>
-  )
-})
-
 it('ExtWith_BD_OptionalSchema_SubjT_V<T, U>: check `optional`', () => {
   check<string>(
     unknownX as ExtWith_BD_OptionalSchema_SubjT_V<{ type: 'string' }, string>
@@ -431,19 +242,6 @@ it('Con_BD_Schema_SubjT_V<T>: "string" optional', () => {
   )
   check<string>(
     unknownX as NonNullable<Con_BD_Schema_SubjT_V<typeof stringOptional>>
-  )
-})
-
-it('Con_BD_Schema_SubjT_V<T>: "string" optional defaulted', () => {
-  const stringOptionalDefaulted = {
-    type: 'string',
-    optional: true,
-    default: 'test',
-  } as const satisfies BD_Schema
-
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as Con_BD_Schema_SubjT_V<typeof stringOptionalDefaulted>
   )
 })
 
