@@ -1,4 +1,4 @@
-import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../../error'
+import { check } from '../test-utils'
 
 import { parse } from '../../general-schema-parser'
 import { validate } from '../../general-schema-validator'
@@ -41,9 +41,7 @@ describe('Array schema programmatic definition', () => {
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
-    expect(() => schemaX.optional()).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined
-    )
+    expect(() => schemaX.optional()).not.toThrow()
   })
 
   it('array: required array -> optional -> description', () => {
@@ -63,14 +61,10 @@ describe('Array schema programmatic definition', () => {
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
-    expect(() => schemaX.optional()).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined
-    )
+    expect(() => schemaX.optional()).not.toThrow()
 
     // @ts-expect-error Property 'description' does not exist
-    expect(() => schemaX.description('x')).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined
-    )
+    expect(() => schemaX.description('x')).not.toThrow()
   })
 
   it('array: required array -> description -> optional', () => {
@@ -90,14 +84,10 @@ describe('Array schema programmatic definition', () => {
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
-    expect(() => schemaX.optional()).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined
-    )
+    expect(() => schemaX.optional()).not.toThrow()
 
     // @ts-expect-error Property 'description' does not exist
-    expect(() => schemaX.description('x')).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined
-    )
+    expect(() => schemaX.description('x')).not.toThrow()
   })
 
   it('array: nested object structure', () => {
@@ -136,5 +126,81 @@ describe('Array schema programmatic definition', () => {
 
     expect(validate(schemaX.__schema, subject).data).toStrictEqual(subject)
     expect(validate(schemaX.__schema, subject).error).toBe(undefined)
+  })
+
+  it('array: minLength -> maxLength', () => {
+    const struct = array(string()).minLength(1).maxLength(2)
+
+    expect(struct.__schema).toStrictEqual({
+      type: 'array',
+      of: { type: 'string' },
+      minLength: 1,
+      maxLength: 2,
+    })
+
+    expect(struct.parse(['x']).data).toStrictEqual(['x'])
+    expect(struct.parse(['x']).error).toBeUndefined()
+    expect(struct.validate(['x']).data).toStrictEqual(['x'])
+    expect(struct.validate(['x']).error).toBeUndefined()
+
+    // invalid subject minLength
+    expect(struct.parse([]).data).toBeUndefined()
+    expect(struct.parse([]).error).toBeTruthy()
+    expect(struct.validate([]).data).toBeUndefined()
+    expect(struct.validate([]).error).toBeTruthy()
+
+    const invalidSubj = ['x', 'y', 'z']
+
+    // invalid subject maxLength
+    expect(struct.parse(invalidSubj).data).toBeUndefined()
+    expect(struct.parse(invalidSubj).error).toBeTruthy()
+    expect(struct.validate(invalidSubj).data).toBeUndefined()
+    expect(struct.validate(invalidSubj).error).toBeTruthy()
+  })
+})
+
+describe('Check type inference and parse/validate/guard struct method', () => {
+  const struct = array(string())
+  const subject = ['x', 'y']
+
+  it('array: parse', () => {
+    const result = struct.parse(subject)
+
+    if (!result.error) {
+      check<string[]>(result.data)
+      // @ts-expect-error 'string[]' is not assignable to parameter of type 'number[]'
+      check<number[]>(result.data)
+    }
+
+    expect(result.data).toStrictEqual(subject)
+    expect(result.error).toBeUndefined()
+  })
+
+  it('array: validate', () => {
+    const result = struct.validate(subject)
+
+    if (!result.error) {
+      check<string[]>(result.data)
+      // @ts-expect-error 'string[]' is not assignable to parameter of type 'number[]'
+      check<number[]>(result.data)
+    }
+
+    expect(result.data).toStrictEqual(subject)
+    expect(result.error).toBeUndefined()
+  })
+
+  it('array: guard', () => {
+    const result = struct.guard(subject)
+
+    expect(result).toBe(true)
+
+    if (result) {
+      check<string[]>(subject)
+      // @ts-expect-error 'string[]' is not assignable to parameter of type 'number[]'
+      check<number[]>(subject)
+      return
+    }
+
+    throw Error('Not expected')
   })
 })

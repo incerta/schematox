@@ -1,90 +1,61 @@
-import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../error'
+import { validate } from '../general-schema-validator'
+import { parse } from '../general-schema-parser'
 
 import type { BD_Boolean } from '../types/base-detailed-schema-types'
+import type { EitherError } from '../utils/fp'
+import type { Con_Schema_SubjT_V } from '../types/compound-schema-types'
+import type { InvalidSubject } from '../error'
 
-type ExtWith_Option<
-  T extends BD_Boolean,
-  U,
-  V extends BD_Boolean = Readonly<T & U>,
-> = {
-  __schema: V
-} & (V extends { optional: true } ? BooleanOptional<V> : BooleanRequired<V>)
+type Struct<T extends BD_Boolean> = Omit<
+  {
+    optional: () => Struct<T & { optional: true }>
 
-type BooleanShared<T extends BD_Boolean> = {
-  brand: <U extends string, V extends string>(
-    key: U,
-    value: V
-  ) => ExtWith_Option<T, { brand: Readonly<[U, V]> }>
+    brand: <U extends string, V extends string>(
+      key: U,
+      value: V
+    ) => Struct<T & { brand: Readonly<[U, V]> }>
 
-  description: (
-    description: string
-  ) => ExtWith_Option<T, { description: string }>
+    description: (description: string) => Struct<T & { description: string }>
+  },
+  keyof T
+> & {
+  __schema: T
+
+  parse: (
+    subject: unknown
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+
+  validate: (
+    subject: unknown
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+
+  guard: (subject: unknown) => subject is Con_Schema_SubjT_V<T>
 }
 
-type BooleanOptional<T extends BD_Boolean> = Omit<BooleanShared<T>, keyof T>
-
-type BooleanRequired<T extends BD_Boolean> = Omit<
-  {
-    optional: () => ExtWith_Option<T, { optional: true }>
-  } & BooleanShared<T>,
-  keyof T
->
-
-function booleanOptions<T extends BD_Boolean>(
-  schema: T
-): T extends { optional: true } ? BooleanOptional<T> : BooleanRequired<T>
-
-function booleanOptions(schema: BD_Boolean) {
-  const schemaKeys = Object.keys(schema) as Array<keyof BD_Boolean>
-  const except = new Set(schemaKeys)
-
+function struct<T extends BD_Boolean>(schema: T): Struct<T>
+function struct(schema: BD_Boolean) {
   return {
+    __schema: schema,
+
+    parse: (subj: unknown) => parse(schema, subj),
+    validate: (subj: unknown) => validate(schema, subj),
+    guard: (subj: unknown): subj is boolean | undefined =>
+      validate(schema, subj).error === undefined,
+
     brand: (key: string, value: string) => {
-      if (except.has('brand')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.brandDefined)
-      }
-
-      const updatedSchema = { ...schema, brand: [key, value] as const }
-
-      return {
-        __schema: updatedSchema,
-        ...booleanOptions(updatedSchema),
-      }
+      return struct({ ...schema, brand: [key, value] as const })
     },
 
     optional: () => {
-      if (except.has('optional')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined)
-      }
-
-      const updatedSchema = { ...schema, optional: true }
-
-      return {
-        __schema: updatedSchema,
-        ...booleanOptions(updatedSchema),
-      }
+      return struct({ ...schema, optional: true })
     },
 
     description: (description: string) => {
-      if (except.has('description')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined)
-      }
-
-      const updatedSchema = { ...schema, description }
-
-      return {
-        __schema: updatedSchema,
-        ...booleanOptions(updatedSchema),
-      }
+      return struct({ ...schema, description })
     },
   }
 }
 
 export function boolean() {
-  const schema = { type: 'boolean' } as const
-
-  return {
-    __schema: schema,
-    ...booleanOptions(schema),
-  }
+  return struct({ type: 'boolean' })
 }

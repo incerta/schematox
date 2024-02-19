@@ -1,4 +1,4 @@
-import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../../error'
+import { check } from '../test-utils'
 
 import { parse } from '../../general-schema-parser'
 import { validate } from '../../general-schema-validator'
@@ -16,7 +16,7 @@ describe('Object schema programmatic definition', () => {
   it('object: required object with nested structure', () => {
     const schemaX = object({
       x: string(),
-      y: boolean().optional().default(false),
+      y: boolean().optional(),
       z: object({
         x: number().min(1),
         y: object({
@@ -32,7 +32,7 @@ describe('Object schema programmatic definition', () => {
       type: 'object',
       of: {
         x: { type: 'string' },
-        y: { type: 'boolean', optional: true, default: false },
+        y: { type: 'boolean', optional: true },
         z: {
           type: 'object',
           of: {
@@ -70,7 +70,7 @@ describe('Object schema programmatic definition', () => {
 
     expect(parse(schemaX.__schema, subject).data).toStrictEqual({
       x: 'xValue',
-      y: false,
+      y: undefined,
       z: {
         x: 1,
         y: {
@@ -102,9 +102,7 @@ describe('Object schema programmatic definition', () => {
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
-    expect(() => schemaX.optional()).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined
-    )
+    expect(() => schemaX.optional()).not.toThrow()
   })
 
   it('object: optional -> description', () => {
@@ -123,14 +121,10 @@ describe('Object schema programmatic definition', () => {
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
-    expect(() => schemaX.optional()).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined
-    )
+    expect(() => schemaX.optional()).not.toThrow()
 
     // @ts-expect-error Property 'description' does not exist
-    expect(() => schemaX.description('x')).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined
-    )
+    expect(() => schemaX.description('x')).not.toThrow()
   })
 
   it('object: description -> optional', () => {
@@ -149,14 +143,10 @@ describe('Object schema programmatic definition', () => {
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
-    expect(() => schemaX.optional()).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined
-    )
+    expect(() => schemaX.optional()).not.toThrow()
 
     // @ts-expect-error Property 'description' does not exist
-    expect(() => schemaX.description('x')).toThrow(
-      PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined
-    )
+    expect(() => schemaX.description('x')).not.toThrow()
   })
 
   it('array: nested object structure', () => {
@@ -197,5 +187,51 @@ describe('Object schema programmatic definition', () => {
 
     expect(validate(schemaX.__schema, subject).data).toStrictEqual(subject)
     expect(validate(schemaX.__schema, subject).error).toBe(undefined)
+  })
+})
+
+describe('Check type inference and parse/validate/guard struct method', () => {
+  const struct = object({ x: string(), y: number() })
+  const subject = { x: 'x', y: 0 }
+
+  it('object: parse', () => {
+    const result = struct.parse(subject)
+
+    if (!result.error) {
+      check<{ x: string; y: number }>(result.data)
+      // @ts-expect-error '{ x: string; y: number; }' is not '{ x: string; y: number; z: boolean; }'
+      check<{ x: string; y: number; z: boolean }>(result.data)
+    }
+
+    expect(result.data).toStrictEqual(subject)
+    expect(result.error).toBeUndefined()
+  })
+
+  it('object: validate', () => {
+    const result = struct.validate(subject)
+
+    if (!result.error) {
+      check<{ x: string; y: number }>(result.data)
+      // @ts-expect-error '{ x: string; y: number; }' is not '{ x: string; y: number; z: boolean; }'
+      check<{ x: string; y: number; z: boolean }>(result.data)
+    }
+
+    expect(result.data).toStrictEqual(subject)
+    expect(result.error).toBeUndefined()
+  })
+
+  it('object: guard', () => {
+    const result = struct.guard(subject)
+
+    expect(result).toBe(true)
+
+    if (result) {
+      check<{ x: string; y: number }>(subject)
+      // @ts-expect-error '{ x: string; y: number; }' is not '{ x: string; y: number; z: boolean; }'
+      check<{ x: string; y: number; z: boolean }>(subject)
+      return
+    }
+
+    throw Error('Not expected')
   })
 })

@@ -274,8 +274,10 @@ describe('String schema programmatic definition', () => {
     // @ts-expect-error Property 'description' does not exist
     expect(() => schemaX.description('x')).not.toThrow()
   })
+})
 
-  it('Parse using the struct', () => {
+describe('Validate/parse/guard using struct', () => {
+  it('string: parse', () => {
     expect(string().parse('x').data).toBe('x')
     expect(string().parse('x').error).toBe(undefined)
 
@@ -283,7 +285,7 @@ describe('String schema programmatic definition', () => {
     expect(string().parse(undefined).error).toBeTruthy()
   })
 
-  it('Validate using the struct', () => {
+  it('string: validate', () => {
     expect(string().validate('x').data).toBe('x')
     expect(string().validate('x').error).toBe(undefined)
 
@@ -291,7 +293,7 @@ describe('String schema programmatic definition', () => {
     expect(string().validate(undefined).error).toBeTruthy()
   })
 
-  it('Guard using the struct', () => {
+  it('string: guard', () => {
     const struct = string()
     const subj: unknown = 'x'
     const guard = struct.guard(subj)

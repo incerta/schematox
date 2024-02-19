@@ -1,118 +1,72 @@
-import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../error'
+import { validate } from '../general-schema-validator'
+import { parse } from '../general-schema-parser'
 
 import type { BD_Number } from '../types/base-detailed-schema-types'
+import type { EitherError } from '../utils/fp'
+import type { Con_Schema_SubjT_V } from '../types/compound-schema-types'
+import type { InvalidSubject } from '../error'
 
-type ExtWith_Option<
-  T extends BD_Number,
-  U,
-  V extends BD_Number = Readonly<T & U>,
-> = {
-  __schema: V
-} & (V extends { optional: true } ? NumberOptional<V> : NumberRequired<V>)
+type Struct<T extends BD_Number> = Omit<
+  {
+    optional: () => Struct<T & { optional: true }>
 
-type NumberShared<T extends BD_Number> = {
-  brand: <U extends string, V extends string>(
-    key: U,
-    value: V
-  ) => ExtWith_Option<T, { brand: Readonly<[U, V]> }>
+    brand: <U extends string, V extends string>(
+      key: U,
+      value: V
+    ) => Struct<T & { brand: Readonly<[U, V]> }>
 
-  min: (min: number) => ExtWith_Option<T, { min: number }>
-  max: (max: number) => ExtWith_Option<T, { max: number }>
-  description: (
-    description: string
-  ) => ExtWith_Option<T, { description: string }>
+    min: (min: number) => Struct<T & { min: number }>
+    max: (max: number) => Struct<T & { max: number }>
+
+    description: (description: string) => Struct<T & { description: string }>
+  },
+  keyof T
+> & {
+  __schema: T
+
+  parse: (
+    subject: unknown
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+
+  validate: (
+    subject: unknown
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+
+  guard: (subject: unknown) => subject is Con_Schema_SubjT_V<T>
 }
 
-type NumberOptional<T extends BD_Number> = Omit<NumberShared<T>, keyof T>
-
-type NumberRequired<T extends BD_Number> = Omit<
-  {
-    optional: () => ExtWith_Option<T, { optional: true }>
-  } & NumberShared<T>,
-  keyof T
->
-
-function numberOptions<T extends BD_Number>(
-  schema: T
-): T extends { optional: true } ? NumberOptional<T> : NumberRequired<T>
-
-function numberOptions(schema: BD_Number) {
-  const schemaKeys = Object.keys(schema) as Array<keyof BD_Number>
-  const except = new Set(schemaKeys)
-
+function struct<T extends BD_Number>(schema: T): Struct<T>
+function struct(schema: BD_Number) {
   return {
+    __schema: schema,
+
+    parse: (subj: unknown) => parse(schema, subj),
+    validate: (subj: unknown) => validate(schema, subj),
+    guard: (subj: unknown): subj is number | undefined =>
+      validate(schema, subj).error === undefined,
+
     brand: (key: string, value: string) => {
-      if (except.has('brand')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.brandDefined)
-      }
-
-      const updatedSchema = { ...schema, brand: [key, value] as const }
-
-      return {
-        __schema: updatedSchema,
-        ...numberOptions(updatedSchema),
-      }
+      return struct({ ...schema, brand: [key, value] as const })
     },
 
     optional: () => {
-      if (except.has('optional')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined)
-      }
-
-      const updatedSchema = { ...schema, optional: true }
-
-      return {
-        __schema: updatedSchema,
-        ...numberOptions(updatedSchema),
-      }
+      return struct({ ...schema, optional: true })
     },
 
     min: (min: number) => {
-      if (except.has('min')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.minDefined)
-      }
-
-      const updatedSchema = { ...schema, min }
-
-      return {
-        __schema: updatedSchema,
-        ...numberOptions(updatedSchema),
-      }
+      return struct({ ...schema, min })
     },
 
     max: (max: number) => {
-      if (except.has('max')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.maxDefined)
-      }
-
-      const updatedSchema = { ...schema, max }
-
-      return {
-        __schema: updatedSchema,
-        ...numberOptions(updatedSchema),
-      }
+      return struct({ ...schema, max })
     },
 
     description: (description: string) => {
-      if (except.has('description')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined)
-      }
-
-      const updatedSchema = { ...schema, description }
-
-      return {
-        __schema: updatedSchema,
-        ...numberOptions(updatedSchema),
-      }
+      return struct({ ...schema, description })
     },
   }
 }
 
 export function number() {
-  const schema = { type: 'number' } as const
-
-  return {
-    __schema: schema,
-    ...numberOptions(schema),
-  }
+  return struct({ type: 'number' })
 }

@@ -1,88 +1,57 @@
-import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../error'
+import { validate } from '../general-schema-validator'
+import { parse } from '../general-schema-parser'
 
 import type { BD_NumberUnion } from '../types/base-detailed-schema-types'
+import type { EitherError } from '../utils/fp'
+import type { Con_Schema_SubjT_V } from '../types/compound-schema-types'
+import type { InvalidSubject } from '../error'
 
-type ExtWith_Option<
-  T extends BD_NumberUnion,
-  U,
-  V extends BD_NumberUnion = Readonly<T & U>,
-> = {
-  __schema: V
-} & (V extends { optional: true }
-  ? NumberUnionOptional<V>
-  : NumberUnionRequired<V>)
+type Struct<T extends BD_NumberUnion> = Omit<
+  {
+    optional: () => Struct<T & { optional: true }>
 
-type NumberUnionShared<T extends BD_NumberUnion> = {
-  brand: <U extends string, V extends string>(
-    key: U,
-    value: V
-  ) => ExtWith_Option<T, { brand: Readonly<[U, V]> }>
+    brand: <U extends string, V extends string>(
+      key: U,
+      value: V
+    ) => Struct<T & { brand: Readonly<[U, V]> }>
 
-  description: (
-    description: string
-  ) => ExtWith_Option<T, { description: string }>
+    description: (description: string) => Struct<T & { description: string }>
+  },
+  keyof T
+> & {
+  __schema: T
+
+  parse: (
+    subject: unknown
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+
+  validate: (
+    subject: unknown
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+
+  guard: (subject: unknown) => subject is Con_Schema_SubjT_V<T>
 }
 
-type NumberUnionOptional<T extends BD_NumberUnion> = Omit<
-  NumberUnionShared<T>,
-  keyof T
->
-
-type NumberUnionRequired<T extends BD_NumberUnion> = Omit<
-  {
-    optional: () => ExtWith_Option<T, { optional: true }>
-  } & NumberUnionShared<T>,
-  keyof T
->
-
-function numberUnionOptions<T extends BD_NumberUnion>(
-  schema: T
-): T extends { optional: true }
-  ? NumberUnionOptional<T>
-  : NumberUnionRequired<T>
-
-function numberUnionOptions(schema: BD_NumberUnion) {
-  const schemaKeys = Object.keys(schema) as Array<keyof BD_NumberUnion>
-  const except = new Set(schemaKeys)
-
+function struct<T extends BD_NumberUnion>(schema: T): Struct<T>
+function struct(schema: BD_NumberUnion) {
   return {
+    __schema: schema,
+
+    parse: (subj: unknown) => parse(schema, subj),
+    validate: (subj: unknown) => validate(schema, subj),
+    guard: (subj: unknown): subj is string | undefined =>
+      validate(schema, subj).error === undefined,
+
     brand: (key: string, value: string) => {
-      if (except.has('brand')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.brandDefined)
-      }
-
-      const updatedSchema = { ...schema, brand: [key, value] as const }
-
-      return {
-        __schema: updatedSchema,
-        ...numberUnionOptions(updatedSchema),
-      }
+      return struct({ ...schema, brand: [key, value] as const })
     },
 
     optional: () => {
-      if (except.has('optional')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.optionalDefined)
-      }
-
-      const updatedSchema = { ...schema, optional: true }
-
-      return {
-        __schema: updatedSchema,
-        ...numberUnionOptions(updatedSchema),
-      }
+      return struct({ ...schema, optional: true })
     },
 
     description: (description: string) => {
-      if (except.has('description')) {
-        throw Error(PROGRAMMATICALLY_DEFINED_ERROR_MSG.descriptionDefined)
-      }
-
-      const updatedSchema = { ...schema, description }
-
-      return {
-        __schema: updatedSchema,
-        ...numberUnionOptions(updatedSchema),
-      }
+      return struct({ ...schema, description })
     },
   }
 }
@@ -90,8 +59,5 @@ function numberUnionOptions(schema: BD_NumberUnion) {
 export function numberUnion<T extends number>(...of: Readonly<[T, ...T[]]>) {
   const schema = { type: 'numberUnion', of } as const
 
-  return {
-    __schema: schema,
-    ...numberUnionOptions(schema),
-  }
+  return struct(schema)
 }
