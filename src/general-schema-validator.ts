@@ -16,24 +16,6 @@ export function validate(
   schema: Schema,
   subject: unknown
 ): EitherError<InvalidSubject[], unknown> {
-  // FIXME: we actually don't need to check those variants
-  //        just move condition scope content to the very end of the function
-  if (
-    schema.type === 'string' ||
-    schema.type === 'number' ||
-    schema.type === 'boolean' ||
-    schema.type === 'stringUnion' ||
-    schema.type === 'numberUnion'
-  ) {
-    const validated = validateBaseSchemaSubject.bind(this)(schema, subject)
-
-    if (validated.error) {
-      return error([validated.error])
-    }
-
-    return data(subject)
-  }
-
   const errors: InvalidSubject[] = []
 
   if (schema.type === 'object') {
@@ -79,66 +61,76 @@ export function validate(
     return data(subject)
   }
 
-  if (Array.isArray(subject) === false) {
-    if (schema.optional && subject === undefined) {
-      return data(undefined)
+  if (schema.type === 'array') {
+    if (Array.isArray(subject) === false) {
+      if (schema.optional && subject === undefined) {
+        return data(undefined)
+      }
+
+      return error([
+        {
+          code: ERROR_CODE.invalidType,
+          path: this || [],
+          subject,
+          schema,
+        },
+      ])
     }
 
-    return error([
-      {
-        code: ERROR_CODE.invalidType,
-        path: this || [],
-        subject,
-        schema,
-      },
-    ])
-  }
+    for (let i = 0; i < subject.length; i++) {
+      const nestedSchema = schema.of
+      const nestedValue = subject[i]
 
-  for (let i = 0; i < subject.length; i++) {
-    const nestedSchema = schema.of
-    const nestedValue = subject[i]
+      const validated = validate.bind([...(this || []), i])(
+        nestedSchema,
+        nestedValue
+      )
 
-    const validated = validate.bind([...(this || []), i])(
-      nestedSchema,
-      nestedValue
-    )
-
-    if (validated.error) {
-      validated.error.forEach((err) => errors.push(err))
-      continue
+      if (validated.error) {
+        validated.error.forEach((err) => errors.push(err))
+        continue
+      }
     }
+
+    if (errors.length) {
+      return error(errors)
+    }
+
+    if (
+      typeof schema.minLength === 'number' &&
+      subject.length < schema.minLength
+    ) {
+      return error([
+        {
+          code: ERROR_CODE.invalidRange,
+          path: this || [],
+          subject,
+          schema,
+        },
+      ])
+    }
+
+    if (
+      typeof schema.maxLength === 'number' &&
+      subject.length > schema.maxLength
+    ) {
+      return error([
+        {
+          code: ERROR_CODE.invalidRange,
+          path: this || [],
+          subject,
+          schema,
+        },
+      ])
+    }
+
+    return data(subject)
   }
 
-  if (errors.length) {
-    return error(errors)
-  }
+  const validated = validateBaseSchemaSubject.bind(this)(schema, subject)
 
-  if (
-    typeof schema.minLength === 'number' &&
-    subject.length < schema.minLength
-  ) {
-    return error([
-      {
-        code: ERROR_CODE.invalidRange,
-        path: this || [],
-        subject,
-        schema,
-      },
-    ])
-  }
-
-  if (
-    typeof schema.maxLength === 'number' &&
-    subject.length > schema.maxLength
-  ) {
-    return error([
-      {
-        code: ERROR_CODE.invalidRange,
-        path: this || [],
-        subject,
-        schema,
-      },
-    ])
+  if (validated.error) {
+    return error([validated.error])
   }
 
   return data(subject)

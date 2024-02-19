@@ -16,24 +16,6 @@ export function parse(
   schema: Schema,
   subject: unknown
 ): EitherError<InvalidSubject[], unknown> {
-  // FIXME: we actually don't need to check those variants
-  //        just move condition scope content to the very end of the function
-  if (
-    schema.type === 'string' ||
-    schema.type === 'number' ||
-    schema.type === 'boolean' ||
-    schema.type === 'stringUnion' ||
-    schema.type === 'numberUnion'
-  ) {
-    const parsed = parseBaseSchemaSubject.bind(this)(schema, subject)
-
-    if (parsed.error) {
-      return error([parsed.error])
-    }
-
-    return parsed
-  }
-
   const errors: InvalidSubject[] = []
 
   if (schema.type === 'object') {
@@ -84,70 +66,82 @@ export function parse(
     return data(result)
   }
 
-  if (Array.isArray(subject) === false) {
-    if (schema.optional) {
-      if (subject === undefined || subject === null) {
-        return data(undefined)
+  if (schema.type === 'array') {
+    if (Array.isArray(subject) === false) {
+      if (schema.optional) {
+        if (subject === undefined || subject === null) {
+          return data(undefined)
+        }
       }
+
+      return error([
+        {
+          code: ERROR_CODE.invalidType,
+          path: this || [],
+          subject,
+          schema,
+        },
+      ])
     }
 
-    return error([
-      {
-        code: ERROR_CODE.invalidType,
-        path: this || [],
-        subject,
-        schema,
-      },
-    ])
-  }
+    const result: unknown[] = []
 
-  const result: unknown[] = []
+    for (let i = 0; i < subject.length; i++) {
+      const nestedSchema = schema.of
+      const nestedValue = subject[i]
 
-  for (let i = 0; i < subject.length; i++) {
-    const nestedSchema = schema.of
-    const nestedValue = subject[i]
+      const parsed = parse.bind([...(this || []), i])(nestedSchema, nestedValue)
 
-    const parsed = parse.bind([...(this || []), i])(nestedSchema, nestedValue)
+      if (parsed.error) {
+        parsed.error.forEach((err) => errors.push(err))
+        continue
+      }
 
-    if (parsed.error) {
-      parsed.error.forEach((err) => errors.push(err))
-      continue
+      result.push(parsed.data)
     }
 
-    result.push(parsed.data)
+    if (errors.length) {
+      return error(errors)
+    }
+
+    if (
+      typeof schema.minLength === 'number' &&
+      result.length < schema.minLength
+    ) {
+      return error([
+        {
+          code: ERROR_CODE.invalidRange,
+          path: this || [],
+          subject,
+          schema,
+        },
+      ])
+    }
+
+    if (
+      typeof schema.maxLength === 'number' &&
+      result.length > schema.maxLength
+    ) {
+      return error([
+        {
+          code: ERROR_CODE.invalidRange,
+          path: this || [],
+          subject,
+          schema,
+        },
+      ])
+    }
+
+    return data(result)
   }
 
-  if (errors.length) {
-    return error(errors)
+  // Base schema variants
+
+  const parsed = parseBaseSchemaSubject.bind(this)(schema, subject)
+
+  if (parsed.error) {
+    return error([parsed.error])
   }
 
-  if (
-    typeof schema.minLength === 'number' &&
-    result.length < schema.minLength
-  ) {
-    return error([
-      {
-        code: ERROR_CODE.invalidRange,
-        path: this || [],
-        subject,
-        schema,
-      },
-    ])
-  }
-
-  if (
-    typeof schema.maxLength === 'number' &&
-    result.length > schema.maxLength
-  ) {
-    return error([
-      {
-        code: ERROR_CODE.invalidRange,
-        path: this || [],
-        subject,
-        schema,
-      },
-    ])
-  }
-
-  return data(result)
+  return parsed
 }
