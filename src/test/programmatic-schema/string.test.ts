@@ -1,4 +1,3 @@
-import { PROGRAMMATICALLY_DEFINED_ERROR_MSG } from '../../error'
 import { parse } from '../../general-schema-parser'
 import { validate } from '../../general-schema-validator'
 import { string } from '../../programmatic-schema/string'
@@ -274,5 +273,33 @@ describe('String schema programmatic definition', () => {
 
     // @ts-expect-error Property 'description' does not exist
     expect(() => schemaX.description('x')).not.toThrow()
+  })
+
+  it('Parse using the struct', () => {
+    expect(string().parse('x').data).toBe('x')
+    expect(string().parse('x').error).toBe(undefined)
+
+    expect(string().parse(undefined).data).toBe(undefined)
+    expect(string().parse(undefined).error).toBeTruthy()
+  })
+
+  it('Validate using the struct', () => {
+    expect(string().validate('x').data).toBe('x')
+    expect(string().validate('x').error).toBe(undefined)
+
+    expect(string().validate(undefined).data).toBe(undefined)
+    expect(string().validate(undefined).error).toBeTruthy()
+  })
+
+  it('Guard using the struct', () => {
+    const struct = string()
+    const subj: unknown = 'x'
+    const guard = struct.guard(subj)
+
+    if (guard) {
+      check<string>(subj)
+      // @ts-expect-error 'string' is not assignable to parameter of type 'number'
+      check<number>(subj)
+    }
   })
 })
