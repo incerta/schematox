@@ -969,3 +969,213 @@ describe('The parsed/validated subject type should be mutable', () => {
     expect(validated.data.x).toBe('y')
   })
 })
+
+describe('X closure "gurard" method', () => {
+  it('x: base static required string valid', () => {
+    const struct = x({ type: 'string' })
+    const subject = 'x' as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<string>(subject)
+      // @ts-expect-error 'string' is not assignable to parameter of type 'number'
+      check<number>(subject)
+    }
+  })
+
+  it('x: base static optional string valid', () => {
+    const struct = x({ type: 'string', optional: true })
+    const subject = 'x' as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<string | undefined>(subject)
+      // @ts-expect-error 'string | undefined' is not assignable to parameter of type 'string'
+      check<string>(subject)
+    }
+  })
+
+  it('x: base programattic required string valid', () => {
+    const struct = x(string())
+    const subject = 'x' as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<string>(subject)
+      // @ts-expect-error 'string' is not assignable to parameter of type 'number'
+      check<number>(subject)
+    }
+  })
+
+  it('x: base programmatic optional string valid', () => {
+    const struct = x(string().optional())
+    const subject = 'x' as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<string | undefined>(subject)
+      // @ts-expect-error 'string | undefined' is not assignable to parameter of type 'string'
+      check<string>(subject)
+    }
+  })
+
+  it('x: string invalid', () => {
+    expect(x({ type: 'string' }).guard(undefined)).toBe(false)
+    expect(x({ type: 'string' }).guard(null)).toBe(false)
+    expect(x({ type: 'string', optional: true }).guard(0)).toBe(false)
+    expect(x(string()).guard(undefined)).toBe(false)
+    expect(x(string()).guard(null)).toBe(false)
+    expect(x(string().optional()).guard(0)).toBe(false)
+  })
+
+  it('x: base static required number valid', () => {
+    const struct = x({ type: 'number' })
+    const subject = 0 as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<number>(subject)
+      // @ts-expect-error 'number' is not assignable to parameter of type 'boolean'
+      check<boolean>(subject)
+    }
+  })
+
+  it('x: base static optional number valid', () => {
+    const struct = x({ type: 'number', optional: true })
+    const subject = 0 as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<number | undefined>(subject)
+      // @ts-expect-error 'number | undefined' is not assignable to parameter of type 'number'
+      check<number>(subject)
+    }
+  })
+
+  it('x: base programmatic required number valid', () => {
+    const struct = x(number())
+    const subject = 0 as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<number>(subject)
+      // @ts-expect-error 'number' is not assignable to parameter of type 'boolean'
+      check<boolean>(subject)
+    }
+  })
+
+  it('x: base static optional number valid', () => {
+    const struct = x(number().optional())
+    const subject = 0 as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<number | undefined>(subject)
+      // @ts-expect-error 'number | undefined' is not assignable to parameter of type 'number'
+      check<number>(subject)
+    }
+  })
+
+  it('x: number invalid', () => {
+    expect(x({ type: 'number' }).guard(undefined)).toBe(false)
+    expect(x({ type: 'number' }).guard(null)).toBe(false)
+    expect(x({ type: 'number', optional: true }).guard(true)).toBe(false)
+    expect(x(number()).guard(undefined)).toBe(false)
+    expect(x(number()).guard(null)).toBe(false)
+    expect(x(number().optional()).guard('x')).toBe(false)
+  })
+
+  it('x: ArraySchema static valid', () => {
+    const struct = x({ type: 'array', of: { type: 'string' } })
+    const subject = ['x', 'y'] as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<string[]>(subject)
+      // @ts-expect-error 'string[]' is not assignable to parameter of type 'number[]'
+      check<number[]>(subject)
+    }
+  })
+
+  it('x: ArraySchema programmatic valid', () => {
+    const struct = x(array(string()))
+    const subject = ['x', 'y'] as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<string[]>(subject)
+      // @ts-expect-error 'string[]' is not assignable to parameter of type 'number[]'
+      check<number[]>(subject)
+    }
+  })
+
+  it('x: ArraySchema invalid', () => {
+    expect(x({ type: 'array', of: { type: 'string' } }).guard([0])).toBe(false)
+    expect(x(array(string())).guard([0])).toBe(false)
+  })
+
+  it('x: ObjectSchema static valid', () => {
+    const struct = x({
+      type: 'object',
+      of: { x: { type: 'string' }, y: { type: 'number' } },
+    })
+
+    const subject = { x: 'x', y: 0 } as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<{ x: string; y: number }>(subject)
+      // @ts-expect-error '{ x: string; y: number; }' is not '{ x: string; y: number; z: boolean; }'
+      check<{ x: string; y: number; z: boolean }>(subject)
+    }
+  })
+
+  it('x: ObjectSchema programmatic valid', () => {
+    const struct = x(
+      object({
+        x: string(),
+        y: number(),
+      })
+    )
+
+    const subject = { x: 'x', y: 0 } as unknown
+    const guard = struct.guard(subject)
+
+    expect(guard).toBe(true)
+
+    if (guard) {
+      check<{ x: string; y: number }>(subject)
+      // @ts-expect-error '{ x: string; y: number; }' is not '{ x: string; y: number; z: boolean; }'
+      check<{ x: string; y: number; z: boolean }>(subject)
+    }
+  })
+
+  it('x: ObjectSchema invalid', () => {
+    expect(
+      x({ type: 'object', of: { x: { type: 'string' } } }).guard({ y: 0 })
+    ).toBe(false)
+    expect(x(object({ x: string() })).guard({ y: 0 })).toBe(false)
+  })
+})

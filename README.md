@@ -66,7 +66,7 @@ export const userSchema = object({
 }).__schema
 ```
 
-Parse/validate:
+Parse/validate/guard:
 
 ```typescript
 import { x } from 'schematox'
@@ -74,14 +74,14 @@ import { userSchema } './schema'
 
 import type { SubjectType } from 'schematox'
 
-const userX = x(userSchema)
+const userStruct = x(userSchema)
 
 const subject = {
   id: '1' as SubjectType<typeof userSchema.id>,
   name: 'John'
 }
 
-const parsed = userX.parse(schemaSubject)
+const parsed = userStruct.parse(subject)
 
 if (parsed.error) {
   throw Error('Not expected')
@@ -89,13 +89,19 @@ if (parsed.error) {
 
 console.log(parsed.data) // { id: '1', name: 'John' }
 
-const validated = userX.validate(schemaSubject)
+const validated = userStruct.validate(subject)
 
 if (validated.error) {
   throw Error('Not expected')
 }
 
 console.log(validated.data) // { id: '1', name: 'John' }
+
+const guard = userStruct.guard(subject)
+
+if (guard) {
+  subject // { id: string & { __idFor: 'User' }; name: string }
+}
 ```
 
 Result `data` type:
