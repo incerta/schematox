@@ -128,39 +128,6 @@ describe('Parse base STRING detailed schema', () => {
     })
   })
 
-  it('parseBaseSchemaSubject: default schema property should be skipped in required schema', () => {
-    const schema = { type: 'string', default: 'x' } as const satisfies Schema
-    const error = {
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-    } satisfies Omit<InvalidSubject, 'subject'>
-
-    const undefinedSubj = undefined
-
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).error).toEqual({
-      ...error,
-      subject: undefinedSubj,
-    })
-
-    const nullSubj = null
-
-    expect(parseBaseSchemaSubject(schema, nullSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, nullSubj).error).toEqual({
-      ...error,
-      subject: nullSubj,
-    })
-
-    const numberSubj = 0
-
-    expect(parseBaseSchemaSubject(schema, numberSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, numberSubj).error).toEqual({
-      ...error,
-      subject: numberSubj,
-    })
-  })
-
   it('parseBaseSchemaSubject: optional schema with valid subject', () => {
     const schema = { type: 'string', optional: true } as const satisfies Schema
     const stringSubj = 'x'
@@ -176,61 +143,6 @@ describe('Parse base STRING detailed schema', () => {
 
   it('parseBaseSchemaSubject: optional schema with invalid subject', () => {
     const schema = { type: 'string', optional: true } as const satisfies Schema
-    const error = {
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-    } satisfies Omit<InvalidSubject, 'subject'>
-
-    const numberSubj = 0
-
-    expect(parseBaseSchemaSubject(schema, numberSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, numberSubj).error).toEqual({
-      ...error,
-      subject: numberSubj,
-    })
-
-    const booleanSubj = true
-
-    expect(parseBaseSchemaSubject(schema, booleanSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, booleanSubj).error).toEqual({
-      ...error,
-      subject: booleanSubj,
-    })
-  })
-
-  it('parseBaseSchemaSubject: optional default schema with valid subject', () => {
-    const schema = {
-      type: 'string',
-      optional: true,
-      default: 'DEFAULT_VALUE',
-    } as const satisfies Schema
-
-    const stringSubj = 'x'
-
-    expect(parseBaseSchemaSubject(schema, stringSubj).data).toBe(stringSubj)
-    expect(parseBaseSchemaSubject(schema, stringSubj).error).toBe(undefined)
-
-    const undefinedSubj = undefined
-
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).data).toBe(
-      schema.default
-    )
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).error).toBe(undefined)
-
-    const nullSubj = null
-
-    expect(parseBaseSchemaSubject(schema, nullSubj).data).toBe(schema.default)
-    expect(parseBaseSchemaSubject(schema, nullSubj).error).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: optional default schema with invalid subject', () => {
-    const schema = {
-      type: 'string',
-      optional: true,
-      default: 'DEFAULT_VALUE',
-    } as const satisfies Schema
-
     const error = {
       code: ERROR_CODE.invalidType,
       path: [],
@@ -315,52 +227,6 @@ describe('Parse base STRING detailed schema', () => {
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
     expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
   })
-
-  it('parseBaseSchemaSubject: invalid default value in the context of minLength', () => {
-    const defaultValue = ''
-
-    const schema = {
-      type: 'string',
-      optional: true,
-      minLength: 1,
-      default: defaultValue,
-    } as const satisfies Schema
-
-    const subject = undefined
-
-    const error = {
-      code: ERROR_CODE.invalidRange,
-      subject: defaultValue,
-      path: [],
-      schema,
-    } satisfies InvalidSubject
-
-    expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
-  })
-
-  it('parseBaseSchemaSubject: invalid default value in the context of maxLength', () => {
-    const defaultValue = 'x'
-
-    const schema = {
-      type: 'string',
-      optional: true,
-      maxLength: 0,
-      default: defaultValue,
-    } as const satisfies Schema
-
-    const subject = undefined
-
-    const error = {
-      code: ERROR_CODE.invalidRange,
-      subject: defaultValue,
-      path: [],
-      schema,
-    } satisfies InvalidSubject
-
-    expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
-  })
 })
 
 describe('Parse base NUMBER detailed schema', () => {
@@ -406,39 +272,6 @@ describe('Parse base NUMBER detailed schema', () => {
     })
   })
 
-  it('parseBaseSchemaSubject: default schema property should be skipped in required schema', () => {
-    const schema = { type: 'number', default: 0 } as const satisfies Schema
-    const error = {
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-    } satisfies Omit<InvalidSubject, 'subject'>
-
-    const undefinedSubj = undefined
-
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).error).toEqual({
-      ...error,
-      subject: undefinedSubj,
-    })
-
-    const nullSubj = null
-
-    expect(parseBaseSchemaSubject(schema, nullSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, nullSubj).error).toEqual({
-      ...error,
-      subject: nullSubj,
-    })
-
-    const stringSubject = 'x'
-
-    expect(parseBaseSchemaSubject(schema, stringSubject).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, stringSubject).error).toEqual({
-      ...error,
-      subject: stringSubject,
-    })
-  })
-
   it('parseBaseSchemaSubject: optional schema with valid subject', () => {
     const schema = { type: 'number', optional: true } as const satisfies Schema
     const numberSubj = 0
@@ -454,61 +287,6 @@ describe('Parse base NUMBER detailed schema', () => {
 
   it('parseBaseSchemaSubject: optional schema with invalid subject', () => {
     const schema = { type: 'number', optional: true } as const satisfies Schema
-    const error = {
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-    } satisfies Omit<InvalidSubject, 'subject'>
-
-    const stringSubj = 'x'
-
-    expect(parseBaseSchemaSubject(schema, stringSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, stringSubj).error).toEqual({
-      ...error,
-      subject: stringSubj,
-    })
-
-    const booleanSubj = true
-
-    expect(parseBaseSchemaSubject(schema, booleanSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, booleanSubj).error).toEqual({
-      ...error,
-      subject: booleanSubj,
-    })
-  })
-
-  it('parseBaseSchemaSubject: optional default schema with valid subject', () => {
-    const schema = {
-      type: 'number',
-      optional: true,
-      default: 0,
-    } as const satisfies Schema
-
-    const numberSubj = 1
-
-    expect(parseBaseSchemaSubject(schema, numberSubj).data).toBe(numberSubj)
-    expect(parseBaseSchemaSubject(schema, numberSubj).error).toBe(undefined)
-
-    const undefinedSubj = undefined
-
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).data).toBe(
-      schema.default
-    )
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).error).toBe(undefined)
-
-    const nullSubj = null
-
-    expect(parseBaseSchemaSubject(schema, nullSubj).data).toBe(schema.default)
-    expect(parseBaseSchemaSubject(schema, nullSubj).error).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: optional default schema with invalid subject', () => {
-    const schema = {
-      type: 'number',
-      optional: true,
-      default: 0,
-    } as const satisfies Schema
-
     const error = {
       code: ERROR_CODE.invalidType,
       path: [],
@@ -588,52 +366,6 @@ describe('Parse base NUMBER detailed schema', () => {
       path: [],
       schema,
       subject,
-    } satisfies InvalidSubject
-
-    expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
-  })
-
-  it('parseBaseSchemaSubject: invalid default value in the context of min', () => {
-    const defaultValue = 0
-
-    const schema = {
-      type: 'number',
-      optional: true,
-      min: 1,
-      default: defaultValue,
-    } as const satisfies Schema
-
-    const subject = undefined
-
-    const error = {
-      code: ERROR_CODE.invalidRange,
-      subject: defaultValue,
-      path: [],
-      schema,
-    } satisfies InvalidSubject
-
-    expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
-  })
-
-  it('parseBaseSchemaSubject: invalid default value in the context of max', () => {
-    const defaultValue = 1
-
-    const schema = {
-      type: 'number',
-      optional: true,
-      max: 0,
-      default: defaultValue,
-    } as const satisfies Schema
-
-    const subject = undefined
-
-    const error = {
-      code: ERROR_CODE.invalidRange,
-      subject: defaultValue,
-      path: [],
-      schema,
     } satisfies InvalidSubject
 
     expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
@@ -723,39 +455,6 @@ describe('Parse base BOOLEAN detailed schema', () => {
     expect(parseBaseSchemaSubject(schema, numberSubj).error).toEqual({
       ...error,
       subject: numberSubj,
-    })
-  })
-
-  it('parseBaseSchemaSubject: default schema property should be skipped in required schema', () => {
-    const schema = { type: 'boolean', default: false } as const satisfies Schema
-    const error = {
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-    } satisfies Omit<InvalidSubject, 'subject'>
-
-    const undefinedSubj = undefined
-
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).error).toEqual({
-      ...error,
-      subject: undefinedSubj,
-    })
-
-    const nullSubj = null
-
-    expect(parseBaseSchemaSubject(schema, nullSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, nullSubj).error).toEqual({
-      ...error,
-      subject: nullSubj,
-    })
-
-    const stringSubject = 'x'
-
-    expect(parseBaseSchemaSubject(schema, stringSubject).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, stringSubject).error).toEqual({
-      ...error,
-      subject: stringSubject,
     })
   })
 
@@ -862,44 +561,6 @@ describe('Parse base STRING UNION detailed schema', () => {
     })
   })
 
-  it('parseBaseSchemaSubject: default schema property should be skipped in required schema', () => {
-    const schema = {
-      type: 'stringUnion',
-      of: ['x', 'y'],
-      default: 'x',
-    } as const satisfies Schema
-
-    const error = {
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-    } satisfies Omit<InvalidSubject, 'subject'>
-
-    const undefinedSubj = undefined
-
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).error).toEqual({
-      ...error,
-      subject: undefinedSubj,
-    })
-
-    const nullSubj = null
-
-    expect(parseBaseSchemaSubject(schema, nullSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, nullSubj).error).toEqual({
-      ...error,
-      subject: nullSubj,
-    })
-
-    const numberSubj = 0
-
-    expect(parseBaseSchemaSubject(schema, numberSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, numberSubj).error).toEqual({
-      ...error,
-      subject: numberSubj,
-    })
-  })
-
   it('parseBaseSchemaSubject: optional schema with valid subject', () => {
     const schema = {
       type: 'stringUnion',
@@ -965,86 +626,6 @@ describe('Parse base STRING UNION detailed schema', () => {
       subject: stringZSubj,
     })
   })
-
-  it('parseBaseSchemaSubject: optional default schema with valid subject', () => {
-    const schema = {
-      type: 'stringUnion',
-      of: ['x', 'y'],
-      optional: true,
-      default: 'y',
-    } as const satisfies Schema
-
-    const stringSubj = 'x'
-
-    expect(parseBaseSchemaSubject(schema, stringSubj).data).toBe(stringSubj)
-    expect(parseBaseSchemaSubject(schema, stringSubj).error).toBe(undefined)
-
-    const undefinedSubj = undefined
-
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).data).toBe(
-      schema.default
-    )
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).error).toBe(undefined)
-
-    const nullSubj = null
-
-    expect(parseBaseSchemaSubject(schema, nullSubj).data).toBe(schema.default)
-    expect(parseBaseSchemaSubject(schema, nullSubj).error).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: optional default schema with invalid subject', () => {
-    const schema = {
-      type: 'stringUnion',
-      optional: true,
-      of: ['x', 'y'],
-      default: 'y',
-    } as const satisfies Schema
-
-    const error = {
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-    } satisfies Omit<InvalidSubject, 'subject'>
-
-    const numberSubj = 0
-
-    expect(parseBaseSchemaSubject(schema, numberSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, numberSubj).error).toEqual({
-      ...error,
-      subject: numberSubj,
-    })
-
-    const booleanSubj = true
-
-    expect(parseBaseSchemaSubject(schema, booleanSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, booleanSubj).error).toEqual({
-      ...error,
-      subject: booleanSubj,
-    })
-  })
-
-  it('parseBaseSchemaSubject: invalid default value (NotInUnion)', () => {
-    const defaultValue = 'z'
-
-    const schema = {
-      type: 'stringUnion',
-      of: ['x', 'y'],
-      optional: true,
-      default: defaultValue,
-    } as const satisfies Schema
-
-    const subject = undefined
-
-    const error = {
-      code: ERROR_CODE.invalidType,
-      subject: defaultValue,
-      path: [],
-      schema,
-    } satisfies InvalidSubject
-
-    expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
-  })
 })
 
 describe('Parse base NUMBER UNION detailed schema', () => {
@@ -1108,44 +689,6 @@ describe('Parse base NUMBER UNION detailed schema', () => {
       ...error,
       code: ERROR_CODE.invalidType,
       subject: number2Subj,
-    })
-  })
-
-  it('parseBaseSchemaSubject: default schema property should be skipped in required schema', () => {
-    const schema = {
-      type: 'numberUnion',
-      of: [0, 1],
-      default: 0,
-    } as const satisfies Schema
-
-    const error = {
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-    } satisfies Omit<InvalidSubject, 'subject'>
-
-    const undefinedSubj = undefined
-
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).error).toEqual({
-      ...error,
-      subject: undefinedSubj,
-    })
-
-    const nullSubj = null
-
-    expect(parseBaseSchemaSubject(schema, nullSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, nullSubj).error).toEqual({
-      ...error,
-      subject: nullSubj,
-    })
-
-    const stringSubj = 'x'
-
-    expect(parseBaseSchemaSubject(schema, stringSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, stringSubj).error).toEqual({
-      ...error,
-      subject: stringSubj,
     })
   })
 
@@ -1215,86 +758,6 @@ describe('Parse base NUMBER UNION detailed schema', () => {
       subject: number2Subj,
     })
   })
-
-  it('parseBaseSchemaSubject: optional default schema with valid subject', () => {
-    const schema = {
-      type: 'numberUnion',
-      of: [0, 1],
-      optional: true,
-      default: 0,
-    } as const satisfies Schema
-
-    const numberSubj = 0
-
-    expect(parseBaseSchemaSubject(schema, numberSubj).data).toBe(numberSubj)
-    expect(parseBaseSchemaSubject(schema, numberSubj).error).toBe(undefined)
-
-    const undefinedSubj = undefined
-
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).data).toBe(
-      schema.default
-    )
-    expect(parseBaseSchemaSubject(schema, undefinedSubj).error).toBe(undefined)
-
-    const nullSubj = null
-
-    expect(parseBaseSchemaSubject(schema, nullSubj).data).toBe(schema.default)
-    expect(parseBaseSchemaSubject(schema, nullSubj).error).toBe(undefined)
-  })
-
-  it('parseBaseSchemaSubject: optional default schema with invalid subject', () => {
-    const schema = {
-      type: 'numberUnion',
-      optional: true,
-      of: [0, 1],
-      default: 0,
-    } as const satisfies Schema
-
-    const error = {
-      code: ERROR_CODE.invalidType,
-      path: [],
-      schema,
-    } satisfies Omit<InvalidSubject, 'subject'>
-
-    const stringSubj = 'x'
-
-    expect(parseBaseSchemaSubject(schema, stringSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, stringSubj).error).toEqual({
-      ...error,
-      subject: stringSubj,
-    })
-
-    const booleanSubj = true
-
-    expect(parseBaseSchemaSubject(schema, booleanSubj).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, booleanSubj).error).toEqual({
-      ...error,
-      subject: booleanSubj,
-    })
-  })
-
-  it('parseBaseSchemaSubject: invalid default value (NotInUnion)', () => {
-    const defaultValue = 2
-
-    const schema = {
-      type: 'numberUnion',
-      of: [0, 1],
-      optional: true,
-      default: defaultValue,
-    } as const satisfies Schema
-
-    const subject = undefined
-
-    const error = {
-      code: ERROR_CODE.invalidType,
-      subject: defaultValue,
-      path: [],
-      schema,
-    } satisfies InvalidSubject
-
-    expect(parseBaseSchemaSubject(schema, subject).data).toBe(undefined)
-    expect(parseBaseSchemaSubject(schema, subject).error).toEqual(error)
-  })
 })
 
 describe('Parse base detailed schema TYPE INFERENCE check', () => {
@@ -1337,30 +800,7 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     check<number | undefined>(unknownX as typeof result.data)
   })
 
-  it('parseBaseSchemaSubject: string optional default', () => {
-    const schema = {
-      type: 'string',
-      optional: true,
-      default: 'x',
-    } as const satisfies Schema
-
-    const result = parseBaseSchemaSubject(schema, undefined)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: number }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<string>(unknownX as typeof result.data)
-    // @ts-expect-error 'string' is not assignable to parameter of type 'number'
-    check<number>(unknownX as typeof result.data)
-  })
-
-  /* number required/optional/default */
+  /* number required/optional */
 
   it('parseBaseSchemaSubject: number required', () => {
     const schema = { type: 'number' } as const satisfies Schema
@@ -1399,30 +839,7 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     check<string | undefined>(unknownX as typeof result.data)
   })
 
-  it('parseBaseSchemaSubject: number optional default', () => {
-    const schema = {
-      type: 'number',
-      optional: true,
-      default: 0,
-    } as const satisfies Schema
-
-    const result = parseBaseSchemaSubject(schema, undefined)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: number }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<number>(unknownX as typeof result.data)
-    // @ts-expect-error 'number' is not assignable to parameter of type 'string'
-    check<string>(unknownX as typeof result.data)
-  })
-
-  /* boolean required/optional/default */
+  /* boolean required/optional */
 
   it('parseBaseSchemaSubject: boolean required', () => {
     const schema = { type: 'boolean' } as const satisfies Schema
@@ -1461,30 +878,7 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     check<string | undefined>(unknownX as typeof result.data)
   })
 
-  it('parseBaseSchemaSubject: boolean optional default', () => {
-    const schema = {
-      type: 'boolean',
-      optional: true,
-      default: false,
-    } as const satisfies Schema
-
-    const result = parseBaseSchemaSubject(schema, undefined)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: boolean }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<boolean>(unknownX as typeof result.data)
-    // @ts-expect-error 'boolean' is not assignable to parameter of type 'string'
-    check<string>(unknownX as typeof result.data)
-  })
-
-  /* stringUnion required/optional/default */
+  /* stringUnion required/optional */
 
   it('parseBaseSchemaSubject: stringUnion required', () => {
     const schema = {
@@ -1531,31 +925,7 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     check<'x' | 'y'>(unknownX as typeof result.data)
   })
 
-  it('parseBaseSchemaSubject: stringUnion optional default', () => {
-    const schema = {
-      type: 'stringUnion',
-      of: ['x', 'y'],
-      optional: true,
-      default: 'x',
-    } as const satisfies Schema
-
-    const result = parseBaseSchemaSubject(schema, undefined)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: boolean }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<'x' | 'y'>(unknownX as typeof result.data)
-    // @ts-expect-error '"x" | "y"' is not assignable to parameter of type '"x"'
-    check<'x'>(unknownX as typeof result.data)
-  })
-
-  /* numberUnion required/optional/default */
+  /* numberUnion required/optional */
 
   it('parseBaseSchemaSubject: numberUnion required', () => {
     const schema = {
@@ -1600,29 +970,5 @@ describe('Parse base detailed schema TYPE INFERENCE check', () => {
     check<0 | 1 | undefined>(unknownX as typeof result.data)
     // @ts-expect-error '0 | 1 | undefined' is not  '0 | 1'
     check<0 | 1>(unknownX as typeof result.data)
-  })
-
-  it('parseBaseSchemaSubject: numberUnion optional default', () => {
-    const schema = {
-      type: 'numberUnion',
-      of: [0, 1],
-      optional: true,
-      default: 0,
-    } as const satisfies Schema
-
-    const result = parseBaseSchemaSubject(schema, undefined)
-
-    if (result.error) {
-      check<InvalidSubject>(unknownX as typeof result.error)
-      check<InvalidSubject & { x: boolean }>(
-        // @ts-expect-error Property 'x' is missing in type 'InvalidSubject'
-        unknownX as typeof result.error
-      )
-      throw Error('Not expected')
-    }
-
-    check<0 | 1>(unknownX as typeof result.data)
-    // @ts-expect-error  '0 | 1' is not assignable to parameter of type '0'
-    check<0>(unknownX as typeof result.data)
   })
 })
