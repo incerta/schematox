@@ -127,6 +127,29 @@ export function validate(
     return data(subject)
   }
 
+  if (schema.type === 'union') {
+    if (schema.optional) {
+      if (subject === undefined) {
+        return data(undefined)
+      }
+    }
+
+    for (const subSchema of schema.of) {
+      if (validate(subSchema, subject).error === undefined) {
+        return data(subject)
+      }
+    }
+
+    return error([
+      {
+        code: ERROR_CODE.invalidType,
+        path: this || [],
+        subject,
+        schema,
+      },
+    ])
+  }
+
   const validated = validateBaseSchemaSubject.bind(this)(schema, subject)
 
   if (validated.error) {

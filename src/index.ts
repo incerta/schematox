@@ -17,6 +17,8 @@ export {
   boolean,
   stringUnion,
   numberUnion,
+  literal,
+  union,
   array,
   object,
 } from './programmatic-schema'

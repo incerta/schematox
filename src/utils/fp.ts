@@ -18,6 +18,7 @@ export const isData = <T, U>(e: EitherError<T, U>): e is Data<U> => {
   return e.data !== undefined
 }
 
+// TODO: rename to `errors`
 export const error = <T>(value: T): Error<T> => ({ error: value })
 export const data = <U>(value: U): Data<U> => ({ data: value })
 

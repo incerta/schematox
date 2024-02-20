@@ -135,6 +135,31 @@ export function parse(
     return data(result)
   }
 
+  if (schema.type === 'union') {
+    if (schema.optional) {
+      if (subject === null || subject === undefined) {
+        return data(undefined)
+      }
+    }
+
+    for (const subSchema of schema.of) {
+      const parsed = parse(subSchema, subject)
+
+      if (parsed.error === undefined) {
+        return data(parsed.data)
+      }
+    }
+
+    return error([
+      {
+        code: ERROR_CODE.invalidType,
+        path: this || [],
+        subject,
+        schema,
+      },
+    ])
+  }
+
   // Base schema variants
 
   const parsed = parseBaseSchemaSubject.bind(this)(schema, subject)
