@@ -1,14 +1,15 @@
 import { check, unknownX } from './test-utils'
 import { ERROR_CODE } from '../error'
 
-import { array } from '../programmatic-schema/array'
-import { object } from '../programmatic-schema/object'
-
-import { string } from '../programmatic-schema/string'
-import { number } from '../programmatic-schema/number'
-import { boolean } from '../programmatic-schema/boolean'
-import { stringUnion } from '../programmatic-schema/string-union'
-import { numberUnion } from '../programmatic-schema/number-union'
+import {
+  string,
+  number,
+  boolean,
+  stringUnion,
+  numberUnion,
+  array,
+  object,
+} from '../programmatic-schema'
 
 import { x } from '../x-closure'
 

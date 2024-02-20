@@ -16,13 +16,13 @@ export type R<T> =
 export type NestedSchema = R<R<R<R<R<R<BaseSchema>>>>>>
 
 /*
- * NestedSchemaLess is NestedSchema without one layer or recursion
+ * Schema without one layer or recursion.
  * Required for programmatic compound struct definition.
  **/
-export type NestedSchemaLess = R<R<R<R<R<BaseSchema>>>>>
-export type SchemaLess =
-  | ArraySchema<NestedSchemaLess>
-  | ObjectSchema<NestedSchemaLess>
+export type NestedStructSchema = R<R<R<R<R<BaseSchema>>>>>
+export type StructSchema =
+  | ArraySchema<NestedStructSchema>
+  | ObjectSchema<NestedStructSchema>
   | BaseSchema
 
 /* ArraySchema */

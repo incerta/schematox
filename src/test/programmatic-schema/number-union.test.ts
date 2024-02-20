@@ -1,6 +1,6 @@
 import { parse } from '../../general-schema-parser'
 import { validate } from '../../general-schema-validator'
-import { numberUnion } from '../../programmatic-schema/number-union'
+import { numberUnion } from '../../programmatic-schema'
 import { check, unknownX } from '../test-utils'
 
 describe('Number union schema programmatic definition', () => {

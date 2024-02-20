@@ -3,14 +3,14 @@ import { check } from '../test-utils'
 import { parse } from '../../general-schema-parser'
 import { validate } from '../../general-schema-validator'
 
-import { array } from '../../programmatic-schema/array'
-import { object } from '../../programmatic-schema/object'
+import { array } from '../../programmatic-schema'
+import { object } from '../../programmatic-schema'
 
-import { string } from '../../programmatic-schema/string'
-import { number } from '../../programmatic-schema/number'
-import { boolean } from '../../programmatic-schema/boolean'
-import { stringUnion } from '../../programmatic-schema/string-union'
-import { numberUnion } from '../../programmatic-schema/number-union'
+import { string } from '../../programmatic-schema'
+import { number } from '../../programmatic-schema'
+import { boolean } from '../../programmatic-schema'
+import { stringUnion } from '../../programmatic-schema'
+import { numberUnion } from '../../programmatic-schema'
 
 describe('Array schema programmatic definition', () => {
   it('array: required array', () => {
