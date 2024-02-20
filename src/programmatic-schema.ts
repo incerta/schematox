@@ -159,6 +159,16 @@ export function numberUnion<T extends number>(...of: Readonly<[T, ...T[]]>) {
   return makeStruct({ type: 'numberUnion', of }, NUMBER_UNION_PARAMS)
 }
 
+const LITERAL_PARAMS = new Set([
+  'optional',
+  'brand',
+  'description',
+]) satisfies Set<StructParams>
+
+export function literal<T extends string | number>(of: T) {
+  return makeStruct({ type: 'literal', of }, LITERAL_PARAMS)
+}
+
 const OBJECT_PARAMS = new Set([
   'optional',
   'brand',

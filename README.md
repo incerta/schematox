@@ -7,18 +7,17 @@ SchmatoX is a lightweight library for creating JSON compatible schemas. The subj
 - The statically defined JSON compatible schema
 - Check defined schema correctness using non generic type `Schema`
 - Programmatically defined schemas supported as mean of creation statically defined schema
-- Clear separation of concerns for validating and parsing logic:
-  - Parser is used for dealing with an outer uknnown interface
-  - Validator is used for dealing with an internal known interface
-- Schematox uses an Ether-style error handling
+- Clear separation of concerns for `validator` and `parser`:
+  - Parse: constructs new object based on the given schema and subject
+  - Validate: checks and returns reference to the original schema subject with narrowed type
+- Schematox uses an Ether-style error handling (no unexpected throws) with an exception of `assert` function
 - We offer first-class support for branded base schema primitive types
-- We have zero dependencies. The runtime code logic is small and easy to grasp, consisting of just a couple of functions. Most of the library code is tests and types.
+- We have zero dependencies and our runtime code logic is small and easy to grasp, consisting of just a couple of functions
+- Our schemas are just JSON compatible objects, which can be completely independent from our library
 
 Essentially, to define a schema, one doesn't need to import any functions from our library, only the `as const satisfies Schema` statement. This approach does come with a few limitations. The first is `stringUnion` and `numberUnion` schema default values are not constrained by the defined union choices, only the primitive type. We might fix this issue later, but for now, we prioritize this over the case when `default` extends union choice by its definition.
 
-A second limitation is the depth of the compound schema data structure. Currently, we support 7 layers of depth. It's easy to increase this number, but because of the exponential nature of stored type variants in memory, we want to determine how much RAM each next layer will use before increasing it.
-
-It's crucial to separate parsing/validation logic from the schema itself. Libraries like `superstract` or `zod` mix these two elements. While that's handy for starters, it reduces our ability to create independent parsers/validators. The same goes for building infrastructure based on top of these great alternatives. As mentioned, our schemas are just JSON compatible objects, which can be completely independent from our library.
+A second limitation is the depth of the compound schema data structure. Currently, we support 7 layers of depth. It's easy to increase this number, but because of the exponential nature of stored type variants in memory, we want to determine how much RAM each next layer will use before increasing it drastically. It will be certainly done before version 1 release.
 
 ## Cons
 

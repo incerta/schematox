@@ -16,4 +16,4 @@ export type ErrorPath = Array<
 export const ERROR_CODE = {
   invalidType: 'INVALID_TYPE',
   invalidRange: 'INVALID_RANGE',
-}
+} as const
