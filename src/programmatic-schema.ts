@@ -61,14 +61,14 @@ function makeStruct<T extends Schema, U extends StructParams>(
   params: Set<U>
 ): Struct<T, U>
 function makeStruct(schema: StructSchema, params: Set<StructParams>) {
-  const result = {
+  const result: Record<string, unknown> = {
     __schema: schema,
 
     parse: (subj: unknown) => parse(schema, subj),
     validate: (subj: unknown) => validate(schema, subj),
     guard: (subj: unknown): subj is string | undefined =>
       validate(schema, subj).error === undefined,
-  } as any
+  }
 
   if (params.has('optional')) {
     result.optional = () => makeStruct({ ...schema, optional: true }, params)
@@ -139,26 +139,6 @@ export function boolean() {
   return makeStruct({ type: 'boolean' }, BOOLEAN_PARAMS)
 }
 
-const STRING_UNION_PARAMS = new Set([
-  'optional',
-  'brand',
-  'description',
-]) satisfies Set<StructParams>
-
-export function stringUnion<T extends string>(...of: Readonly<[T, ...T[]]>) {
-  return makeStruct({ type: 'stringUnion', of }, STRING_UNION_PARAMS)
-}
-
-const NUMBER_UNION_PARAMS = new Set([
-  'optional',
-  'brand',
-  'description',
-]) satisfies Set<StructParams>
-
-export function numberUnion<T extends number>(...of: Readonly<[T, ...T[]]>) {
-  return makeStruct({ type: 'numberUnion', of }, NUMBER_UNION_PARAMS)
-}
-
 const LITERAL_PARAMS = new Set([
   'optional',
   'brand',
@@ -224,7 +204,7 @@ export function union<
     of: Array<NestedSchema>
   } = { type: 'union'; of: Array<U['__schema']> },
 >(of: Array<U>) {
-  const schema = { type: 'union', of: [] as any } as V
+  const schema = { type: 'union', of: [] as unknown[] } as V
 
   for (const subSchema of of) {
     schema.of.push(subSchema.__schema)

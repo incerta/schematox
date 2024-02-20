@@ -8,40 +8,6 @@ import type {
   BD_Schema,
 } from '../../types/base-detailed-schema-types'
 
-it('BD_StringUnion: check "as const" (immutability) constraint', () => {
-  const mutableSchema = {
-    type: 'stringUnion',
-    of: ['x', 'y'],
-  } satisfies BD_Schema
-
-  // @ts-expect-error '{ type: "stringUnion"; of: string[]; }' is not '{ type: "stringUnion"; of: ["x", "y"]; }'
-  check<{ type: 'stringUnion'; of: Readonly<['x', 'y']> }>(mutableSchema)
-
-  const immutableSchema = {
-    type: 'stringUnion',
-    of: ['x', 'y'],
-  } as const satisfies BD_Schema
-
-  check<{ type: 'stringUnion'; of: Readonly<['x', 'y']> }>(immutableSchema)
-})
-
-it('BD_NumberUnion: check "as const" (immutability) constraint', () => {
-  const mutableSchema = {
-    type: 'numberUnion',
-    of: [0, 1],
-  } satisfies BD_Schema
-
-  // @ts-expect-error '{ type: "numberUnion"; of: number[]; }' is not '{ type: "numberUnion"; of: readonly [0, 1]; }'
-  check<{ type: 'numberUnion'; of: Readonly<[0, 1]> }>(mutableSchema)
-
-  const immutableSchema = {
-    type: 'numberUnion',
-    of: [0, 1],
-  } as const satisfies BD_Schema
-
-  check<{ type: 'numberUnion'; of: Readonly<[0, 1]> }>(immutableSchema)
-})
-
 it('Con_BD_Schema_TypeOnly_SubjT<T>: should construct schema base subject type', () => {
   check<string>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'string' }>)
   // @ts-expect-error 'number' is not assignable 'string'
@@ -54,49 +20,6 @@ it('Con_BD_Schema_TypeOnly_SubjT<T>: should construct schema base subject type',
   check<boolean>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'boolean' }>)
   // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
   check<boolean>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'string' }>)
-
-  check<'a' | 'b'>(
-    unknownX as Con_BD_Schema_TypeOnly_SubjT<{
-      type: 'stringUnion'
-      of: ['a', 'b']
-    }>
-  )
-
-  check<'a' | 'b'>(
-    // @ts-expect-error '"a" | "b" | "c"' is not assignable to '"a" | "b"'
-    unknownX as Con_BD_Schema_TypeOnly_SubjT<{
-      type: 'stringUnion'
-      of: ['a', 'b', 'c']
-    }>
-  )
-
-  check<'a' | 'b'>(
-    // @ts-expect-error '2 | 1' is not assignable to '"a" | "b"'
-    unknownX as Con_BD_Schema_TypeOnly_SubjT<{
-      type: 'numberUnion'
-      of: [0, 1]
-    }>
-  )
-
-  check<0 | 1>(
-    unknownX as Con_BD_Schema_TypeOnly_SubjT<{
-      type: 'numberUnion'
-      of: [0, 1]
-    }>
-  )
-
-  check<0 | 1>(
-    // @ts-expect-error '0 | 2 | 1' is not assignable to '0 | 1'
-    unknownX as Con_BD_Schema_TypeOnly_SubjT<{
-      type: 'numberUnion'
-      of: [0, 1, 2]
-    }>
-  )
-
-  check<0 | 1>(
-    // @ts-expect-error 'string' is not assignable to parameter of type '0 | 1'
-    unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'string' }>
-  )
 })
 
 it('Con_BrandSchema_SubjT<T>: should construct schema subject brand type', () => {
@@ -263,22 +186,6 @@ it('Con_BD_Schema_SubjT_V<T>: "string/number/boolean" required', () => {
   } as const satisfies BD_Schema
 
   check<boolean>(unknownX as Con_BD_Schema_SubjT_V<typeof booleanSchema>)
-})
-
-it('Con_BD_Schema_SubjT_V<T>: "stringUnion/numberUnion" required', () => {
-  const stringUnionSchema = {
-    type: 'stringUnion',
-    of: ['a', 'b'],
-  } as const satisfies BD_Schema
-
-  check<'a' | 'b'>(unknownX as Con_BD_Schema_SubjT_V<typeof stringUnionSchema>)
-
-  const numberUnionSchema = {
-    type: 'numberUnion',
-    of: [0, 1],
-  } as const satisfies BD_Schema
-
-  check<0 | 1>(unknownX as Con_BD_Schema_SubjT_V<typeof numberUnionSchema>)
 })
 
 it('Con_BD_Schema_SubjT_V<T>: check branded schema', () => {

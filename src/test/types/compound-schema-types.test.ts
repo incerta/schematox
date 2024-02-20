@@ -285,11 +285,9 @@ describe('Construct UnionSchema subject type', () => {
     type Subject = Con_UnionSchema_SubjT_V<{
       type: 'union'
       of: Array<
-        | { type: 'string' }
+        | { type: 'string'; optional: true }
         | { type: 'number' }
         | { type: 'boolean' }
-        | { type: 'stringUnion'; of: ['x', 'y'] }
-        | { type: 'numberUnion'; of: [0, 1]; optional: true }
         | { type: 'literal'; of: 'z' }
         | { type: 'literal'; of: 2 }
         | { type: 'object'; of: { x: { type: 'string' } } }

@@ -36,38 +36,13 @@ export type BD_Boolean = {
 export type BD_Literal<T extends string | number = string | number> = {
   type: 'literal'
   of: T
-
   optional?: boolean
 
   description?: string
   brand?: BrandSchema
 }
 
-export type BD_StringUnion<T extends string = string> = {
-  type: 'stringUnion'
-  of: Readonly<Array<T>>
-  optional?: boolean
-
-  description?: string
-  brand?: BrandSchema
-}
-
-export type BD_NumberUnion<T extends number = number> = {
-  type: 'numberUnion'
-  of: Readonly<Array<T>>
-  optional?: boolean
-
-  description?: string
-  brand?: BrandSchema
-}
-
-export type BD_Schema =
-  | BD_String
-  | BD_Number
-  | BD_Boolean
-  | BD_StringUnion
-  | BD_NumberUnion
-  | BD_Literal
+export type BD_Schema = BD_String | BD_Number | BD_Boolean | BD_Literal
 
 export type Con_BD_Schema_TypeOnly_SubjT<T extends BD_Schema> =
   T extends BD_String
@@ -76,13 +51,9 @@ export type Con_BD_Schema_TypeOnly_SubjT<T extends BD_Schema> =
       ? number
       : T extends BD_Boolean
         ? boolean
-        : T extends BD_StringUnion<infer U>
+        : T extends BD_Literal<infer U>
           ? U
-          : T extends BD_NumberUnion<infer V>
-            ? V
-            : T extends BD_Literal<infer W>
-              ? W
-              : never
+          : never
 
 export type Con_BrandSchema_SubjT<T extends BrandSchema> = T extends Readonly<
   [infer U, infer V]

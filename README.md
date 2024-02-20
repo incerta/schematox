@@ -149,8 +149,6 @@ import {
   string,
   number,
   boolean,
-  stringUnion,
-  numberUnion,
   literal,
 } from 'schematox'
 
@@ -222,36 +220,6 @@ const programmaticLiteral = literal()
   .brand('x', 'y')
   .description('y')
 
-// stringUnion
-
-const staticStringUnion = {
-  type: 'stringUnion',
-  of: ['x', 'y', 'z'],
-  optional: true,
-  brand: ['x', 'y'],
-  description: 'x',
-} as const satisfies Schema
-
-const programmaticStringUnion = stringUnion('x', 'y', 'z')
-  .optional()
-  .brand('x', 'y')
-  .description('y')
-
-// stringUnion
-
-const staticNumberUnion = {
-  type: 'numberUnion',
-  of: [0, 1, 2],
-  optional: true,
-  brand: ['x', 'y'],
-  description: 'x',
-} as const satisfies Schema
-
-const programmaticNumberUnion = numberUnion(0, 1, 2)
-  .optional()
-  .brand('x', 'y')
-  .description('y')
-
 /* Compound schema */
 
 // object
@@ -304,7 +272,7 @@ const programmaticUnion = union([string(), number()])
   .description('x')
 ```
 
-## Verification error shape
+## Error shape
 
 Nested schema example. Subject `0` is invalid, should be a `string`:
 
