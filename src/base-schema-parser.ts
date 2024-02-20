@@ -167,5 +167,21 @@ export function parseBaseSchemaSubject(
 
       return data(subject)
     }
+
+    case 'literal': {
+      if (
+        (typeof subject !== 'string' && typeof subject !== 'number') ||
+        subject !== schema.of
+      ) {
+        return error({
+          code: ERROR_CODE.invalidType,
+          subject: subject,
+          path: this || [],
+          schema,
+        })
+      }
+
+      return data(subject)
+    }
   }
 }

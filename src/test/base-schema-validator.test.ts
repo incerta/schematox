@@ -695,6 +695,100 @@ describe('Validate base BOOLEAN detailed schema', () => {
   })
 })
 
+describe('Validate base LITERAL detailed schema', () => {
+  it('validateBaseSchemaSubject: required schema with valid subject', () => {
+    const schema = { type: 'literal', of: 'x' } as const satisfies Schema
+    const subject = 'x'
+
+    expect(validateBaseSchemaSubject(schema, subject).data).toBe('x')
+    expect(validateBaseSchemaSubject(schema, subject).error).toBe(undefined)
+  })
+
+  it('validateBaseSchemaSubject: required schema with invalid subject', () => {
+    const schema = { type: 'literal', of: 'x' } as const satisfies Schema
+
+    const error = {
+      code: ERROR_CODE.invalidType,
+      path: [],
+      schema,
+    } satisfies Omit<InvalidSubject, 'subject'>
+
+    const undefinedSubj = undefined
+
+    expect(validateBaseSchemaSubject(schema, undefinedSubj).data).toBe(
+      undefined
+    )
+    expect(validateBaseSchemaSubject(schema, undefinedSubj).error).toEqual({
+      ...error,
+      subject: undefinedSubj,
+    })
+
+    const stringSubj = 'y'
+
+    expect(validateBaseSchemaSubject(schema, stringSubj).data).toBe(undefined)
+    expect(validateBaseSchemaSubject(schema, stringSubj).error).toEqual({
+      ...error,
+      subject: stringSubj,
+    })
+
+    const numberSubj = 0
+
+    expect(validateBaseSchemaSubject(schema, numberSubj).data).toBe(undefined)
+    expect(validateBaseSchemaSubject(schema, numberSubj).error).toEqual({
+      ...error,
+      subject: numberSubj,
+    })
+  })
+
+  it('validateBaseSchemaSubject: optional schema with valid subject', () => {
+    const schema = {
+      type: 'literal',
+      of: 0,
+      optional: true,
+    } as const satisfies Schema
+
+    const litSubj = 0
+
+    expect(validateBaseSchemaSubject(schema, litSubj).data).toBe(litSubj)
+    expect(validateBaseSchemaSubject(schema, litSubj).error).toBe(undefined)
+
+    const undSubj = undefined
+
+    expect(validateBaseSchemaSubject(schema, undSubj).data).toBe(undefined)
+    expect(validateBaseSchemaSubject(schema, undSubj).error).toBe(undefined)
+  })
+
+  it('validateBaseSchemaSubject: optional schema with invalid subject', () => {
+    const schema = {
+      type: 'literal',
+      of: 'z',
+      optional: true,
+    } as const satisfies Schema
+
+    const error = {
+      code: ERROR_CODE.invalidType,
+      path: [],
+      schema,
+    } satisfies Omit<InvalidSubject, 'subject'>
+
+    const stringSubj = 'x'
+
+    expect(validateBaseSchemaSubject(schema, stringSubj).data).toBe(undefined)
+    expect(validateBaseSchemaSubject(schema, stringSubj).error).toEqual({
+      ...error,
+      subject: stringSubj,
+    })
+
+    const numberSubj = 0
+
+    expect(validateBaseSchemaSubject(schema, numberSubj).data).toBe(undefined)
+    expect(validateBaseSchemaSubject(schema, numberSubj).error).toEqual({
+      ...error,
+      subject: numberSubj,
+    })
+  })
+})
+
 describe('Validate base STRING UNION detailed schema', () => {
   it('validateBaseSchemaSubject: required schema with valid subject', () => {
     const schema = {
@@ -1194,5 +1288,99 @@ describe('Validate base detailed schema TYPE INFERENCE check', () => {
     check<0 | 1 | undefined>(unknownX as typeof result.data)
     // @ts-expect-error '0 | 1 | undefined' is not  '0 | 1'
     check<0 | 1>(unknownX as typeof result.data)
+  })
+
+  /* string literal required/optional */
+
+  it('validateBaseSchemaSubject: string literal required', () => {
+    const schema = {
+      type: 'literal',
+      of: 'x',
+    } as const satisfies Schema
+
+    const result = validateBaseSchemaSubject(schema, 'x')
+
+    if (result.error) {
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
+        unknownX as typeof result.error
+      )
+      throw Error('Not expected')
+    }
+
+    check<'x'>(unknownX as typeof result.data)
+    // @ts-expect-error '"x"' is not assignable to parameter of type '"y"'
+    check<'y'>(unknownX as typeof result.data)
+  })
+
+  it('validateBaseSchemaSubject: string literal optional', () => {
+    const schema = {
+      type: 'literal',
+      of: 'x',
+      optional: true,
+    } as const satisfies Schema
+
+    const result = validateBaseSchemaSubject(schema, undefined)
+
+    if (result.error) {
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
+        unknownX as typeof result.error
+      )
+      throw Error('Not expected')
+    }
+
+    check<'x' | undefined>(unknownX as typeof result.data)
+    // @ts-expect-error '"x" | undefined' is not assignable to parameter of type '"x"'
+    check<'x'>(unknownX as typeof result.data)
+  })
+
+  /* number literal required/optional */
+
+  it('validateBaseSchemaSubject: number literal required', () => {
+    const schema = {
+      type: 'literal',
+      of: 0,
+    } as const satisfies Schema
+
+    const result = validateBaseSchemaSubject(schema, 0)
+
+    if (result.error) {
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
+        unknownX as typeof result.error
+      )
+      throw Error('Not expected')
+    }
+
+    check<0>(unknownX as typeof result.data)
+    // @ts-expect-error '0' is not assignable to parameter of type '1'
+    check<1>(unknownX as typeof result.data)
+  })
+
+  it('validateBaseSchemaSubject: number literal optional', () => {
+    const schema = {
+      type: 'literal',
+      of: 0,
+      optional: true,
+    } as const satisfies Schema
+
+    const result = validateBaseSchemaSubject(schema, undefined)
+
+    if (result.error) {
+      check<InvalidSubject>(unknownX as typeof result.error)
+      check<InvalidSubject & { x: boolean }>(
+        // @ts-expect-error Property 'x' is missing in type 'BaseSchemaValidateError'
+        unknownX as typeof result.error
+      )
+      throw Error('Not expected')
+    }
+
+    check<0 | undefined>(unknownX as typeof result.data)
+    // @ts-expect-error '0 | undefined' is not assignable to parameter of type '0'
+    check<0>(unknownX as typeof result.data)
   })
 })
