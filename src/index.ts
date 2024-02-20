@@ -11,20 +11,24 @@ import type { Schema, Con_Schema_SubjT_V } from './types/compound-schema-types'
 
 /* Programmatic base schema definition */
 
-export { string } from './programmatic-schema/string'
-export { number } from './programmatic-schema/number'
-export { boolean } from './programmatic-schema/boolean'
-export { stringUnion } from './programmatic-schema/string-union'
-export { numberUnion } from './programmatic-schema/number-union'
-export { array } from './programmatic-schema/array'
-export { object } from './programmatic-schema/object'
+export {
+  string,
+  number,
+  boolean,
+  stringUnion,
+  numberUnion,
+  array,
+  object,
+} from './programmatic-schema'
 
 /* Utils */
 
 export { isError, isData, error, data } from './utils/fp'
 
 export { parse } from './general-schema-parser'
-export { validate } from './general-schema-validator'
+export { validate, guard, assert } from './general-schema-validator'
+
+// FIXME: the method is deprecated
 export { x } from './x-closure'
 
 /* Typings */

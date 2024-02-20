@@ -1,6 +1,6 @@
 import { parse } from '../../general-schema-parser'
 import { validate } from '../../general-schema-validator'
-import { number } from '../../programmatic-schema/number'
+import { number } from '../../programmatic-schema'
 import { check, unknownX } from '../test-utils'
 
 describe('Number schema programmatic definition', () => {

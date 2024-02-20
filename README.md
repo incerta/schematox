@@ -36,11 +36,12 @@ Check out [github issues](https://github.com/incerta/schematox/issues) of the pr
 npm install schematox
 ```
 
-## Example
+## Static schema example
 
 Statically defined schema:
 
 ```typescript
+import { parse, validate, guard, assert } from 'schematox'
 import type { Schema } from 'schematox'
 
 export const userSchema = {
@@ -53,33 +54,57 @@ export const userSchema = {
     name: { type: 'string' },
   },
 } as const satisfies Schema
+
+const subject = {
+  id: '1' as SubjectType<typeof userSchema.id>,
+  name: 'John',
+} as unknown
+
+const parsed = parse(userSchema, subject)
+
+if (parsed.error) {
+  throw Error('Not expected')
+}
+
+console.log(parsed.data) // { id: '1', name: 'John' }
+
+const validated = validate(userSchema, subject)
+
+if (validated.error) {
+  throw Error('Not expected')
+}
+
+console.log(validated.data) // { id: '1', name: 'John' }
+
+if (guard(userSchema, subject)) {
+  subject // type is narrowed: { id: string & { __idFor: 'User' }; name: string }
+}
+
+const anotherSubject = { ...subject } as unknown
+
+// Throws error if subject is not valid
+assert(userSchema, anotherSubject)
+
+anotherSubject // type is narrowed: { id: string & { __idFor: 'User' }; name: string }
 ```
+
+## Programmatic schema example
 
 Same schema but defined programmatically:
 
 ```typescript
-import { object, string } from 'schematox'
-
-export const userSchema = object({
-  id: string().brand('idFor', 'User'),
-  name: string(),
-}).__schema
-```
-
-Parse/validate/guard:
-
-```typescript
-import { x } from 'schematox'
-import { userSchema } './schema'
-
+import { object, string, assert } from 'schematox'
 import type { SubjectType } from 'schematox'
 
-const userStruct = x(userSchema)
+const userStruct = object({
+  id: string().brand('idFor', 'User'),
+  name: string(),
+})
 
 const subject = {
   id: '1' as SubjectType<typeof userSchema.id>,
-  name: 'John'
-}
+  name: 'John',
+} as unknown
 
 const parsed = userStruct.parse(subject)
 
@@ -102,16 +127,20 @@ const guard = userStruct.guard(subject)
 if (guard) {
   subject // { id: string & { __idFor: 'User' }; name: string }
 }
-```
 
-Result `data` type:
-
-```typescript
-{
-  id: string & { __idFor: 'User' }
-  name: string
+if (userStruct.guard(subject)) {
+  subject // type is narrowed: { id: string & { __idFor: 'User' }; name: string }
 }
+
+const anotherSubject = { ...subject } as unknown
+
+// Throws error if subject is not valid
+assert(userStruct.__schema, anotherSubject)
+
+anotherSubject // type is narrowed: { id: string & { __idFor: 'User' }; name: string }
 ```
+
+Unfortunately we can't currently integrate `assert` as struct method due to [typescript limitations](https://github.com/microsoft/TypeScript/issues/36931#issuecomment-1949131317). But all programmatically defined schemas are the same as static, one just needs to access it through `__schema`. We can mix static/programmatic schemas either accessing it through `__schema` or wrap it by `{ __schema: T }` if consumer is programmatic schema.
 
 ## All supported data types
 

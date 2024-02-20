@@ -1,6 +1,6 @@
 import { parse } from '../../general-schema-parser'
 import { validate } from '../../general-schema-validator'
-import { stringUnion } from '../../programmatic-schema/string-union'
+import { stringUnion } from '../../programmatic-schema'
 import { check, unknownX } from '../test-utils'
 
 describe('String union schema programmatic definition', () => {

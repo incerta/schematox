@@ -135,3 +135,21 @@ export function validate(
 
   return data(subject)
 }
+
+export function guard<T extends Schema>(
+  schema: T,
+  subject: unknown
+): subject is Con_Schema_SubjT_V<T> {
+  return validate(schema, subject).error === undefined
+}
+
+export function assert<T extends Schema>(
+  schema: T,
+  subject: unknown
+): asserts subject is Con_Schema_SubjT_V<T> {
+  const { error } = validate(schema, subject)
+
+  if (error !== undefined) {
+    throw error
+  }
+}

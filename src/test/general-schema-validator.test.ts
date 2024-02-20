@@ -1,4 +1,5 @@
-import { validate } from '../general-schema-validator'
+import { object, string, number } from '../programmatic-schema'
+import { validate, guard, assert } from '../general-schema-validator'
 import { ERROR_CODE } from '../error'
 import { check, unknownX } from './test-utils'
 
@@ -1052,5 +1053,58 @@ describe('Check validate subject type constraints', () => {
     }
 
     check<string & { __key: 'value' }>(unknownX as typeof parsed.data.x)
+  })
+})
+
+describe('Extra validators guard/assert', () => {
+  it('guard: should narrow subject type and return boolean', () => {
+    const schema = {
+      type: 'object',
+      of: { x: { type: 'string' }, y: { type: 'number' } },
+    } as const satisfies Schema
+
+    const subject = { x: 'x', y: 0 } as unknown
+
+    const guarded = guard(schema, subject)
+
+    expect(guarded).toBe(true)
+    expect(guard(schema, {})).toBe(false)
+
+    if (guarded) {
+      check<{ x: string; y: number }>(subject)
+      // @ts-expect-error '{ x: string; y: number; }' is not '{ x: string; y: number; z: boolean; }'
+      check<{ x: string; y: number; z: boolean }>(subject)
+    }
+  })
+
+  it('assert: should narrow subject type and throw error', () => {
+    const schema = {
+      type: 'object',
+      of: { x: { type: 'string' }, y: { type: 'number' } },
+    } as const satisfies Schema
+
+    const subject = { x: 'x', y: 0 } as unknown
+
+    assert(schema, subject)
+
+    check<{ x: string; y: number }>(subject)
+    // @ts-expect-error '{ x: string; y: number; }' is not '{ x: string; y: number; z: boolean; }'
+    check<{ x: string; y: number; z: boolean }>(subject)
+
+    expect(() => assert(schema, {})).toThrow()
+  })
+
+  it('assert: progrmmatically defined schema assertion', () => {
+    const struct = object({ x: string(), y: number() })
+
+    const subject = { x: 'x', y: 0 } as unknown
+
+    assert(struct.__schema, subject)
+
+    check<{ x: string; y: number }>(subject)
+    // @ts-expect-error '{ x: string; y: number; }' is not '{ x: string; y: number; z: boolean; }'
+    check<{ x: string; y: number; z: boolean }>(subject)
+
+    expect(() => assert(struct.__schema, {})).toThrow()
   })
 })
