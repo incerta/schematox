@@ -151,3 +151,13 @@ export type Con_Schema_SubjT_V<T extends Schema> = T extends BaseSchema
       : T extends UnionSchema
         ? Con_UnionSchema_SubjT_V<T>
         : never
+
+/* Construct Schema subject type from schema or schema struct */
+
+export type SubjectType<T extends { __schema: Schema } | Schema> = T extends {
+  __schema: Schema
+}
+  ? Con_Schema_SubjT_V<T['__schema']>
+  : T extends Schema
+    ? Con_Schema_SubjT_V<T>
+    : never

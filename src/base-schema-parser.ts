@@ -120,54 +120,6 @@ export function parseBaseSchemaSubject(
       return data(subject)
     }
 
-    case 'stringUnion': {
-      if (typeof subject !== 'string') {
-        return error({
-          code: ERROR_CODE.invalidType,
-          subject: subject,
-          path: this || [],
-          schema,
-        })
-      }
-
-      const unionSet = new Set(schema.of)
-
-      if (unionSet.has(subject) === false) {
-        return error({
-          code: ERROR_CODE.invalidType,
-          subject: subject,
-          path: this || [],
-          schema,
-        })
-      }
-
-      return data(subject)
-    }
-
-    case 'numberUnion': {
-      if (typeof subject !== 'number') {
-        return error({
-          code: ERROR_CODE.invalidType,
-          subject: subject,
-          path: this || [],
-          schema,
-        })
-      }
-
-      const unionSet = new Set(schema.of)
-
-      if (unionSet.has(subject) === false) {
-        return error({
-          code: ERROR_CODE.invalidType,
-          subject: subject,
-          path: this || [],
-          schema,
-        })
-      }
-
-      return data(subject)
-    }
-
     case 'literal': {
       if (
         (typeof subject !== 'string' && typeof subject !== 'number') ||

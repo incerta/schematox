@@ -1,15 +1,7 @@
 import { check, unknownX } from './test-utils'
 import { ERROR_CODE } from '../error'
 
-import {
-  string,
-  number,
-  boolean,
-  stringUnion,
-  numberUnion,
-  array,
-  object,
-} from '../programmatic-schema'
+import { string, number, boolean, array, object } from '../programmatic-schema'
 
 import { x } from '../x-closure'
 
@@ -101,62 +93,6 @@ describe('X closure statically defined schema VALID', () => {
 
     expect(boolOpt.validate(undefined).data).toBe(undefined)
     expect(boolOpt.validate(undefined).error).toBe(undefined)
-  })
-
-  it('x: base detailed stringUnion schema required/optional/default parse/validate', () => {
-    const unOf = ['x', 'y', 'z'] as const
-    const strUn = x({ type: 'stringUnion', of: unOf })
-    const subj = 'y'
-
-    expect(strUn.parse(subj).data).toBe(subj)
-    expect(strUn.parse(subj).error).toBe(undefined)
-
-    expect(strUn.validate(subj).data).toBe(subj)
-    expect(strUn.validate(subj).error).toBe(undefined)
-
-    const strUnOpt = x({ type: 'stringUnion', of: unOf, optional: true })
-
-    expect(strUnOpt.parse(subj).data).toBe(subj)
-    expect(strUnOpt.parse(subj).error).toBe(undefined)
-
-    expect(strUnOpt.parse(undefined).data).toBe(undefined)
-    expect(strUnOpt.parse(undefined).error).toBe(undefined)
-    expect(strUnOpt.parse(null).data).toBe(undefined)
-    expect(strUnOpt.parse(null).error).toBe(undefined)
-
-    expect(strUnOpt.validate(subj).data).toBe(subj)
-    expect(strUnOpt.validate(subj).error).toBe(undefined)
-
-    expect(strUnOpt.validate(undefined).data).toBe(undefined)
-    expect(strUnOpt.validate(undefined).error).toBe(undefined)
-  })
-
-  it('x: base detailed numberUnion schema required/optional/default parse/validate', () => {
-    const unOf = [0, 1, 2] as const
-    const numUn = x({ type: 'numberUnion', of: unOf })
-    const subj = 1
-
-    expect(numUn.parse(subj).data).toBe(subj)
-    expect(numUn.parse(subj).error).toBe(undefined)
-
-    expect(numUn.validate(subj).data).toBe(subj)
-    expect(numUn.validate(subj).error).toBe(undefined)
-
-    const numUnOpt = x({ type: 'numberUnion', of: unOf, optional: true })
-
-    expect(numUnOpt.parse(subj).data).toBe(subj)
-    expect(numUnOpt.parse(subj).error).toBe(undefined)
-
-    expect(numUnOpt.parse(undefined).data).toBe(undefined)
-    expect(numUnOpt.parse(undefined).error).toBe(undefined)
-    expect(numUnOpt.parse(null).data).toBe(undefined)
-    expect(numUnOpt.parse(null).error).toBe(undefined)
-
-    expect(numUnOpt.validate(subj).data).toBe(subj)
-    expect(numUnOpt.validate(subj).error).toBe(undefined)
-
-    expect(numUnOpt.validate(undefined).data).toBe(undefined)
-    expect(numUnOpt.validate(undefined).error).toBe(undefined)
   })
 
   it('x: compound array schema required/optional parse/validate', () => {
@@ -328,72 +264,6 @@ describe('X closure statically defined schema INVALID', () => {
     expect(boolOpt.validate(null).error).toMatchObject(errV)
   })
 
-  it('x: base detailed stringUnion optional/required schema parse/validate', () => {
-    const strUnInvSubj = 0
-
-    const unOf = ['x', 'y'] as const
-    const strUnReq = x({ type: 'stringUnion', of: unOf })
-
-    expect(strUnReq.parse(undefined).data).toBe(undefined)
-    expect(strUnReq.parse(undefined).error).toMatchObject(errP)
-
-    expect(strUnReq.parse(null).data).toBe(undefined)
-    expect(strUnReq.parse(null).error).toMatchObject(errP)
-
-    expect(strUnReq.parse(strUnInvSubj).data).toBe(undefined)
-    expect(strUnReq.parse(strUnInvSubj).error).toMatchObject(errP)
-
-    expect(strUnReq.validate(undefined).data).toBe(undefined)
-    expect(strUnReq.validate(undefined).error).toMatchObject(errV)
-
-    expect(strUnReq.validate(strUnInvSubj).data).toBe(undefined)
-    expect(strUnReq.validate(strUnInvSubj).error).toMatchObject(errV)
-
-    const strUnOpt = x({ type: 'stringUnion', of: unOf, optional: true })
-
-    expect(strUnOpt.parse(strUnInvSubj).data).toBe(undefined)
-    expect(strUnOpt.parse(strUnInvSubj).error).toMatchObject(errP)
-
-    expect(strUnOpt.validate(strUnInvSubj).data).toBe(undefined)
-    expect(strUnOpt.validate(strUnInvSubj).error).toMatchObject(errV)
-
-    expect(strUnOpt.validate(null).data).toBe(undefined)
-    expect(strUnOpt.validate(null).error).toMatchObject(errV)
-  })
-
-  it('x: base detailed numberUnion optional/required schema parse/validate', () => {
-    const numUnInvSubj = 'x'
-
-    const unOf = [0, 1] as const
-    const numUnReq = x({ type: 'numberUnion', of: unOf })
-
-    expect(numUnReq.parse(undefined).data).toBe(undefined)
-    expect(numUnReq.parse(undefined).error).toMatchObject(errP)
-
-    expect(numUnReq.parse(null).data).toBe(undefined)
-    expect(numUnReq.parse(null).error).toMatchObject(errP)
-
-    expect(numUnReq.parse(numUnInvSubj).data).toBe(undefined)
-    expect(numUnReq.parse(numUnInvSubj).error).toMatchObject(errP)
-
-    expect(numUnReq.validate(undefined).data).toBe(undefined)
-    expect(numUnReq.validate(undefined).error).toMatchObject(errV)
-
-    expect(numUnReq.validate(numUnInvSubj).data).toBe(undefined)
-    expect(numUnReq.validate(numUnInvSubj).error).toMatchObject(errV)
-
-    const numUnOpt = x({ type: 'numberUnion', of: unOf, optional: true })
-
-    expect(numUnOpt.parse(numUnInvSubj).data).toBe(undefined)
-    expect(numUnOpt.parse(numUnInvSubj).error).toMatchObject(errP)
-
-    expect(numUnOpt.validate(numUnInvSubj).data).toBe(undefined)
-    expect(numUnOpt.validate(numUnInvSubj).error).toMatchObject(errV)
-
-    expect(numUnOpt.validate(null).data).toBe(undefined)
-    expect(numUnOpt.validate(null).error).toMatchObject(errV)
-  })
-
   it('x: compound array optional/required schema parse/validate', () => {
     const arrInvSubj = 'x'
     const arrReq = x({ type: 'array', of: { type: 'string' } })
@@ -547,62 +417,6 @@ describe('X closure programmatically defined schema VALID', () => {
     expect(boolOpt.validate(undefined).error).toBe(undefined)
   })
 
-  it('x: base stringUnion schema required/optional/default parse/validate', () => {
-    const unOf = ['x', 'y', 'z'] as const
-    const strUn = x(stringUnion(...unOf))
-    const subj = 'y'
-
-    expect(strUn.parse(subj).data).toBe(subj)
-    expect(strUn.parse(subj).error).toBe(undefined)
-
-    expect(strUn.validate(subj).data).toBe(subj)
-    expect(strUn.validate(subj).error).toBe(undefined)
-
-    const strUnOpt = x(stringUnion(...unOf).optional())
-
-    expect(strUnOpt.parse(subj).data).toBe(subj)
-    expect(strUnOpt.parse(subj).error).toBe(undefined)
-
-    expect(strUnOpt.parse(undefined).data).toBe(undefined)
-    expect(strUnOpt.parse(undefined).error).toBe(undefined)
-    expect(strUnOpt.parse(null).data).toBe(undefined)
-    expect(strUnOpt.parse(null).error).toBe(undefined)
-
-    expect(strUnOpt.validate(subj).data).toBe(subj)
-    expect(strUnOpt.validate(subj).error).toBe(undefined)
-
-    expect(strUnOpt.validate(undefined).data).toBe(undefined)
-    expect(strUnOpt.validate(undefined).error).toBe(undefined)
-  })
-
-  it('x: base numberUnion schema required/optional/default parse/validate', () => {
-    const unOf = [0, 1, 2] as const
-    const numUn = x(numberUnion(...unOf))
-    const subj = 1
-
-    expect(numUn.parse(subj).data).toBe(subj)
-    expect(numUn.parse(subj).error).toBe(undefined)
-
-    expect(numUn.validate(subj).data).toBe(subj)
-    expect(numUn.validate(subj).error).toBe(undefined)
-
-    const numUnOpt = x(numberUnion(...unOf).optional())
-
-    expect(numUnOpt.parse(subj).data).toBe(subj)
-    expect(numUnOpt.parse(subj).error).toBe(undefined)
-
-    expect(numUnOpt.parse(undefined).data).toBe(undefined)
-    expect(numUnOpt.parse(undefined).error).toBe(undefined)
-    expect(numUnOpt.parse(null).data).toBe(undefined)
-    expect(numUnOpt.parse(null).error).toBe(undefined)
-
-    expect(numUnOpt.validate(subj).data).toBe(subj)
-    expect(numUnOpt.validate(subj).error).toBe(undefined)
-
-    expect(numUnOpt.validate(undefined).data).toBe(undefined)
-    expect(numUnOpt.validate(undefined).error).toBe(undefined)
-  })
-
   it('x: compound array schema required/optional parse/validate', () => {
     const str = x(array(string()))
     const subj = ['x']
@@ -754,72 +568,6 @@ describe('X closure programmatically defined schema INVALID', () => {
 
     expect(boolOpt.validate(null).data).toBe(undefined)
     expect(boolOpt.validate(null).error).toMatchObject(errV)
-  })
-
-  it('x: base stringUnion optional/required schema parse/validate', () => {
-    const strUnInvSubj = 0
-
-    const unOf = ['x', 'y'] as const
-    const strUnReq = x(stringUnion(...unOf))
-
-    expect(strUnReq.parse(undefined).data).toBe(undefined)
-    expect(strUnReq.parse(undefined).error).toMatchObject(errP)
-
-    expect(strUnReq.parse(null).data).toBe(undefined)
-    expect(strUnReq.parse(null).error).toMatchObject(errP)
-
-    expect(strUnReq.parse(strUnInvSubj).data).toBe(undefined)
-    expect(strUnReq.parse(strUnInvSubj).error).toMatchObject(errP)
-
-    expect(strUnReq.validate(undefined).data).toBe(undefined)
-    expect(strUnReq.validate(undefined).error).toMatchObject(errV)
-
-    expect(strUnReq.validate(strUnInvSubj).data).toBe(undefined)
-    expect(strUnReq.validate(strUnInvSubj).error).toMatchObject(errV)
-
-    const strUnOpt = x({ type: 'stringUnion', of: unOf, optional: true })
-
-    expect(strUnOpt.parse(strUnInvSubj).data).toBe(undefined)
-    expect(strUnOpt.parse(strUnInvSubj).error).toMatchObject(errP)
-
-    expect(strUnOpt.validate(strUnInvSubj).data).toBe(undefined)
-    expect(strUnOpt.validate(strUnInvSubj).error).toMatchObject(errV)
-
-    expect(strUnOpt.validate(null).data).toBe(undefined)
-    expect(strUnOpt.validate(null).error).toMatchObject(errV)
-  })
-
-  it('x: base numberUnion optional/required schema parse/validate', () => {
-    const numUnInvSubj = 'x'
-
-    const unOf = [0, 1] as const
-    const numUnReq = x(numberUnion(...unOf))
-
-    expect(numUnReq.parse(undefined).data).toBe(undefined)
-    expect(numUnReq.parse(undefined).error).toMatchObject(errP)
-
-    expect(numUnReq.parse(null).data).toBe(undefined)
-    expect(numUnReq.parse(null).error).toMatchObject(errP)
-
-    expect(numUnReq.parse(numUnInvSubj).data).toBe(undefined)
-    expect(numUnReq.parse(numUnInvSubj).error).toMatchObject(errP)
-
-    expect(numUnReq.validate(undefined).data).toBe(undefined)
-    expect(numUnReq.validate(undefined).error).toMatchObject(errV)
-
-    expect(numUnReq.validate(numUnInvSubj).data).toBe(undefined)
-    expect(numUnReq.validate(numUnInvSubj).error).toMatchObject(errV)
-
-    const numUnOpt = x(numberUnion(...unOf).optional())
-
-    expect(numUnOpt.parse(numUnInvSubj).data).toBe(undefined)
-    expect(numUnOpt.parse(numUnInvSubj).error).toMatchObject(errP)
-
-    expect(numUnOpt.validate(numUnInvSubj).data).toBe(undefined)
-    expect(numUnOpt.validate(numUnInvSubj).error).toMatchObject(errV)
-
-    expect(numUnOpt.validate(null).data).toBe(undefined)
-    expect(numUnOpt.validate(null).error).toMatchObject(errV)
   })
 
   it('x: compound array optional/required schema parse/validate', () => {

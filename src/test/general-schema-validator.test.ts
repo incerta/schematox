@@ -30,17 +30,9 @@ describe('Validate BASE schema with VALID subject', () => {
     expect(validate(schema, subject).error).toBe(undefined)
   })
 
-  it('validate: `{ type: "stringUnion" }` schema', () => {
-    const schema = { type: 'stringUnion', of: ['x', 'y'] } satisfies Schema
-    const subject = 'y'
-
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
-  })
-
-  it('validate: `{ type: "numberUnion" }` schema', () => {
-    const schema = { type: 'numberUnion', of: [0, 1] } satisfies Schema
-    const subject = 1
+  it('validate: `{ type: "literal" }` schema', () => {
+    const schema = { type: 'literal', of: 'x' } as const satisfies Schema
+    const subject = 'x'
 
     expect(validate(schema, subject).data).toBe(subject)
     expect(validate(schema, subject).error).toBe(undefined)
@@ -128,12 +120,8 @@ describe('Validate OBJECT schema with VALID subject', () => {
         e: { type: 'boolean' },
         f: { type: 'boolean', optional: true },
         undefinedF: { type: 'boolean', optional: true },
-        i: { type: 'stringUnion', of: ['x', 'y'] },
-        j: { type: 'stringUnion', of: ['x', 'y'], optional: true },
-        undefinedJ: { type: 'stringUnion', of: ['x', 'y'], optional: true },
-        k: { type: 'numberUnion', of: [0, 1] },
-        l: { type: 'numberUnion', of: [0, 1], optional: true },
-        undefinedL: { type: 'numberUnion', of: [0, 1], optional: true },
+        i: { type: 'literal', of: 'x' },
+        j: { type: 'literal', of: 'x', optional: true },
       },
     } as const satisfies Schema
 
@@ -145,14 +133,11 @@ describe('Validate OBJECT schema with VALID subject', () => {
       e: true,
       f: false,
       i: 'x',
-      j: 'y',
-      k: 0,
-      l: 1,
+      j: 'x',
       undefinedB: undefined,
       undefinedD: undefined,
       undefinedF: undefined,
       undefinedJ: undefined,
-      undefinedL: undefined,
       extraKeyWhichShouldBeKept: 'x',
     } as const
 
@@ -518,37 +503,29 @@ describe('Validate ARRAY schema with VALID subject', () => {
     expect(validate(boolSchema, boolSubj).data).toStrictEqual(boolSubj)
     expect(validate(boolSchema, boolSubj).error).toBe(undefined)
 
-    const strUnionSchema = {
+    const strLiteralSchema = {
       type: 'array',
-      of: {
-        type: 'stringUnion',
-        of: ['x', 'y'],
-      },
+      of: { type: 'literal', of: 'x' },
     } as const satisfies Schema
 
-    // TODO: describe this `as` caveat in README.md
-    const strUnionSubj = ['x', 'y', 'x', 'y'] as Array<'x' | 'y'>
+    const strLiteralSubj = ['x', 'x']
 
-    expect(validate(strUnionSchema, strUnionSubj).data).toStrictEqual(
-      strUnionSubj
+    expect(validate(strLiteralSchema, strLiteralSubj).data).toStrictEqual(
+      strLiteralSubj
     )
-    expect(validate(strUnionSchema, strUnionSubj).error).toBe(undefined)
+    expect(validate(strLiteralSchema, strLiteralSubj).error).toBe(undefined)
 
-    const numUnionSchema = {
+    const numLiteralSchema = {
       type: 'array',
-      of: {
-        type: 'numberUnion',
-        of: [0, 1],
-      },
+      of: { type: 'literal', of: 0 },
     } as const satisfies Schema
 
-    // TODO: describe this `as` caveat in README.md
-    const numUnionSubj = [0, 1, 0, 1] as Array<0 | 1>
+    const numLiteralSubj = [0, 0]
 
-    expect(validate(numUnionSchema, numUnionSubj).data).toStrictEqual(
-      numUnionSubj
+    expect(validate(numLiteralSchema, numLiteralSubj).data).toStrictEqual(
+      numLiteralSubj
     )
-    expect(validate(numUnionSchema, numUnionSubj).error).toBe(undefined)
+    expect(validate(numLiteralSchema, numLiteralSubj).error).toBe(undefined)
   })
 
   it('validate: optional base detailed schema subject', () => {
@@ -559,7 +536,7 @@ describe('Validate ARRAY schema with VALID subject', () => {
       of: { type: 'string', optional: true },
     } as const satisfies Schema
 
-    const strSubj = ['x', 'y', 'x', 'y'] as Array<'x' | 'y'>
+    const strSubj = ['x', 'y', 'x', 'y']
 
     expect(validate(strSchema, strSubj).data).toStrictEqual(strSubj)
     expect(validate(strSchema, strSubj).error).toBe(undefined)
@@ -590,45 +567,45 @@ describe('Validate ARRAY schema with VALID subject', () => {
     expect(validate(boolSchema, arrWithUndef).data).toStrictEqual(arrWithUndef)
     expect(validate(boolSchema, arrWithUndef).error).toBe(undefined)
 
-    const strUnionSchema = {
+    const strLiteralSchema = {
       type: 'array',
       of: {
-        type: 'stringUnion',
-        of: ['x', 'y'],
+        type: 'literal',
+        of: 'x',
         optional: true,
       },
     } as const satisfies Schema
 
-    const strUnionSubj = ['x', 'y', 'x', 'y'] as Array<'x' | 'y'>
+    const strLiteralSubj = ['x', 'x']
 
-    expect(validate(strUnionSchema, strUnionSubj).data).toStrictEqual(
-      strUnionSubj
+    expect(validate(strLiteralSchema, strLiteralSubj).data).toStrictEqual(
+      strLiteralSubj
     )
-    expect(validate(strUnionSchema, strUnionSubj).error).toBe(undefined)
-    expect(validate(strUnionSchema, arrWithUndef).data).toStrictEqual(
+    expect(validate(strLiteralSchema, strLiteralSubj).error).toBe(undefined)
+    expect(validate(strLiteralSchema, arrWithUndef).data).toStrictEqual(
       arrWithUndef
     )
-    expect(validate(strUnionSchema, arrWithUndef).error).toBe(undefined)
+    expect(validate(strLiteralSchema, arrWithUndef).error).toBe(undefined)
 
-    const numUnionSchema = {
+    const numLiteralSchema = {
       type: 'array',
       of: {
-        type: 'numberUnion',
-        of: [0, 1],
+        type: 'literal',
+        of: 0,
         optional: true,
       },
     } as const satisfies Schema
 
-    const numUnionSubj = [0, 1, 0, 1] as Array<0 | 1>
+    const numLiteralSubj = [0, 0]
 
-    expect(validate(numUnionSchema, numUnionSubj).data).toStrictEqual(
-      numUnionSubj
+    expect(validate(numLiteralSchema, numLiteralSubj).data).toStrictEqual(
+      numLiteralSubj
     )
-    expect(validate(numUnionSchema, numUnionSubj).error).toBe(undefined)
-    expect(validate(numUnionSchema, arrWithUndef).data).toStrictEqual(
+    expect(validate(numLiteralSchema, numLiteralSubj).error).toBe(undefined)
+    expect(validate(numLiteralSchema, arrWithUndef).data).toStrictEqual(
       arrWithUndef
     )
-    expect(validate(numUnionSchema, arrWithUndef).error).toBe(undefined)
+    expect(validate(numLiteralSchema, arrWithUndef).error).toBe(undefined)
   })
 
   it('validate: can be optional by itself', () => {
@@ -1088,8 +1065,6 @@ describe('Validate UNION schema with VALID subject', () => {
         { type: 'string' },
         { type: 'number' },
         { type: 'boolean' },
-        { type: 'stringUnion', of: ['x', 'y'] },
-        { type: 'numberUnion', of: [0, 1] },
         { type: 'literal', of: 'z' },
         { type: 'literal', of: 2 },
         { type: 'object', of: { x: { type: 'string' } } },
@@ -1268,8 +1243,6 @@ describe('Validate UNION schema with INVALID subject', () => {
         { type: 'string' },
         { type: 'number' },
         { type: 'boolean' },
-        { type: 'stringUnion', of: ['x', 'y'] },
-        { type: 'numberUnion', of: [0, 1] },
         { type: 'literal', of: 'z' },
         { type: 'literal', of: 2 },
         { type: 'object', of: { x: { type: 'string' } } },
@@ -1309,32 +1282,6 @@ describe('Check validate subject type constraints', () => {
     expect(() => validate({ type: 'boolean' }, 'x')).not.toThrow()
     expect(() =>
       validate({ type: 'boolean', optional: true }, undefined)
-    ).not.toThrow()
-
-    expect(() =>
-      validate({ type: 'stringUnion', of: ['x', 'y'] } as const, undefined)
-    ).not.toThrow()
-    expect(() =>
-      validate({ type: 'stringUnion', of: ['x', 'y'] } as const, 'z')
-    ).not.toThrow()
-    expect(() =>
-      validate(
-        { type: 'stringUnion', of: ['x', 'y'], optional: true } as const,
-        undefined
-      )
-    ).not.toThrow()
-
-    expect(() =>
-      validate({ type: 'numberUnion', of: [0, 1] } as const, undefined)
-    ).not.toThrow()
-    expect(() =>
-      validate({ type: 'numberUnion', of: [0, 1] } as const, 2)
-    ).not.toThrow()
-    expect(() =>
-      validate(
-        { type: 'numberUnion', of: [0, 1], optional: true } as const,
-        undefined
-      )
     ).not.toThrow()
   })
 
