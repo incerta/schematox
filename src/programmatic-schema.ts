@@ -171,7 +171,6 @@ export function literal<T extends string | number>(of: T) {
 
 const OBJECT_PARAMS = new Set([
   'optional',
-  'brand',
   'description',
 ]) satisfies Set<StructParams>
 
@@ -194,7 +193,6 @@ export function object<
 
 const ARRAY_PARAMS = new Set([
   'optional',
-  'brand',
   'minLength',
   'maxLength',
   'description',
@@ -211,4 +209,26 @@ export function array<
   const schema = { type: 'array', of: of.__schema } as V
 
   return makeStruct(schema, ARRAY_PARAMS)
+}
+
+const UNION_PARAMS = new Set([
+  'optional',
+  'description',
+]) satisfies Set<StructParams>
+
+export function union<
+  T extends StructSchema,
+  U extends { __schema: T },
+  V extends {
+    type: 'union'
+    of: Array<NestedSchema>
+  } = { type: 'union'; of: Array<U['__schema']> },
+>(of: Array<U>) {
+  const schema = { type: 'union', of: [] as any } as V
+
+  for (const subSchema of of) {
+    schema.of.push(subSchema.__schema)
+  }
+
+  return makeStruct(schema, UNION_PARAMS)
 }

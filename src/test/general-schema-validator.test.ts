@@ -946,6 +946,351 @@ describe('VALIDATE flow returns schema subject reference', () => {
   })
 })
 
+describe('Validate UNION schema with VALID subject', () => {
+  it('validate: required mixed base schema union', () => {
+    const schema = {
+      type: 'union',
+      of: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+    } as const satisfies Schema
+
+    const strSubj = 'x'
+
+    expect(validate(schema, strSubj).data).toBe(strSubj)
+    expect(validate(schema, strSubj).error).toBeUndefined()
+
+    const numSubj = 0
+
+    expect(validate(schema, numSubj).data).toBe(numSubj)
+    expect(validate(schema, numSubj).error).toBeUndefined()
+
+    const boolSubj = false
+
+    expect(validate(schema, boolSubj).data).toBe(boolSubj)
+    expect(validate(schema, boolSubj).error).toBeUndefined()
+  })
+
+  it('validate: optional mixed base schema union', () => {
+    const schema = {
+      type: 'union',
+      of: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+      optional: true,
+    } as const satisfies Schema
+
+    const strSubj = 'x'
+
+    expect(validate(schema, strSubj).data).toBe(strSubj)
+    expect(validate(schema, strSubj).error).toBeUndefined()
+
+    const numSubj = 0
+
+    expect(validate(schema, numSubj).data).toBe(numSubj)
+    expect(validate(schema, numSubj).error).toBeUndefined()
+
+    const boolSubj = false
+
+    expect(validate(schema, boolSubj).data).toBe(boolSubj)
+    expect(validate(schema, boolSubj).error).toBeUndefined()
+
+    const undefSubj = undefined
+
+    expect(validate(schema, undefSubj).data).toBe(undefSubj)
+    expect(validate(schema, undefSubj).error).toBeUndefined()
+  })
+
+  it('validate: LiteralSchema union', () => {
+    const schema = {
+      type: 'union',
+      of: [
+        { type: 'literal', of: 0 },
+        { type: 'literal', of: 1 },
+        { type: 'literal', of: 'x' },
+        { type: 'literal', of: 'y' },
+      ],
+    } as const satisfies Schema
+
+    const subj0 = 0
+
+    expect(validate(schema, subj0).data).toStrictEqual(subj0)
+    expect(validate(schema, subj0).error).toBeUndefined()
+
+    const subj1 = 0
+
+    expect(validate(schema, subj1).data).toStrictEqual(subj1)
+    expect(validate(schema, subj1).error).toBeUndefined()
+
+    const subjX = 'x'
+
+    expect(validate(schema, subjX).data).toStrictEqual(subjX)
+    expect(validate(schema, subjX).error).toBeUndefined()
+
+    const subjY = 'y'
+
+    expect(validate(schema, subjY).data).toStrictEqual(subjY)
+    expect(validate(schema, subjY).error).toBeUndefined()
+  })
+
+  it('validate: ObjectSchema union', () => {
+    const schema = {
+      type: 'union',
+      of: [
+        { type: 'object', of: { x: { type: 'string' } } },
+        { type: 'object', of: { y: { type: 'number' } } },
+        { type: 'object', of: { z: { type: 'boolean' } } },
+      ],
+    } as const satisfies Schema
+
+    const xSubj = { x: 'x' }
+
+    expect(validate(schema, xSubj).data).toStrictEqual(xSubj)
+    expect(validate(schema, xSubj).error).toBeUndefined()
+
+    const ySubj = { y: 0 }
+
+    expect(validate(schema, ySubj).data).toStrictEqual(ySubj)
+    expect(validate(schema, ySubj).error).toBeUndefined()
+
+    const zSubj = { z: false }
+
+    expect(validate(schema, zSubj).data).toStrictEqual(zSubj)
+    expect(validate(schema, zSubj).error).toBeUndefined()
+  })
+
+  it('validate: ArraySchema union', () => {
+    const schema = {
+      type: 'union',
+      of: [
+        { type: 'array', of: { type: 'string' } },
+        { type: 'array', of: { type: 'number' } },
+        { type: 'array', of: { type: 'boolean' } },
+      ],
+    } as const satisfies Schema
+
+    const xSubj = ['x', 'y']
+
+    expect(validate(schema, xSubj).data).toStrictEqual(xSubj)
+    expect(validate(schema, xSubj).error).toBeUndefined()
+
+    const ySubj = [0, 1]
+
+    expect(validate(schema, ySubj).data).toStrictEqual(ySubj)
+    expect(validate(schema, ySubj).error).toBeUndefined()
+
+    const zSubj = [true, false]
+
+    expect(validate(schema, zSubj).data).toStrictEqual(zSubj)
+    expect(validate(schema, zSubj).error).toBeUndefined()
+  })
+
+  it('validate: union of all types', () => {
+    const schema = {
+      type: 'union',
+      of: [
+        { type: 'string' },
+        { type: 'number' },
+        { type: 'boolean' },
+        { type: 'stringUnion', of: ['x', 'y'] },
+        { type: 'numberUnion', of: [0, 1] },
+        { type: 'literal', of: 'z' },
+        { type: 'literal', of: 2 },
+        { type: 'object', of: { x: { type: 'string' } } },
+        { type: 'array', of: { type: 'number' } },
+      ],
+    } as const satisfies Schema
+
+    const strSubj = 'xxx'
+
+    expect(validate(schema, strSubj).data).toStrictEqual(strSubj)
+    expect(validate(schema, strSubj).error).toBeUndefined()
+
+    const numSubj = 3
+
+    expect(validate(schema, numSubj).data).toStrictEqual(numSubj)
+    expect(validate(schema, numSubj).error).toBeUndefined()
+
+    const boolSubj = false
+
+    expect(validate(schema, boolSubj).data).toStrictEqual(boolSubj)
+    expect(validate(schema, boolSubj).error).toBeUndefined()
+
+    const litZ = 'z'
+
+    expect(validate(schema, litZ).data).toStrictEqual(litZ)
+    expect(validate(schema, litZ).error).toBeUndefined()
+
+    const lit2 = 2
+
+    expect(validate(schema, lit2).data).toStrictEqual(lit2)
+    expect(validate(schema, lit2).error).toBeUndefined()
+
+    const objSubj = { x: 'x' }
+
+    expect(validate(schema, objSubj).data).toStrictEqual(objSubj)
+    expect(validate(schema, objSubj).error).toBeUndefined()
+
+    const arrSubj = [0, 1]
+
+    expect(validate(schema, arrSubj).data).toStrictEqual(arrSubj)
+    expect(validate(schema, arrSubj).error).toBeUndefined()
+  })
+})
+
+describe('Validate UNION schema with INVALID subject', () => {
+  it('validate: required mixed base schema union', () => {
+    const schema = {
+      type: 'union',
+      of: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+    } as const satisfies Schema
+
+    const undefSubj = undefined
+
+    expect(validate(schema, undefSubj).data).toBeUndefined()
+    expect(validate(schema, undefSubj).error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: undefSubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const nullSubj = null
+
+    expect(validate(schema, nullSubj).data).toBeUndefined()
+    expect(validate(schema, nullSubj).error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: nullSubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const objSubj = {}
+
+    expect(validate(schema, objSubj).data).toBeUndefined()
+    expect(validate(schema, objSubj).error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: objSubj,
+        schema,
+        path: [],
+      },
+    ])
+  })
+
+  it('validate: optional mixed base schema union', () => {
+    const schema = {
+      type: 'union',
+      of: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+      optional: true,
+    } as const satisfies Schema
+
+    const objSubj = {}
+
+    expect(validate(schema, objSubj).data).toBeUndefined()
+    expect(validate(schema, objSubj).error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: objSubj,
+        schema,
+        path: [],
+      },
+    ])
+  })
+
+  it('validate: LiteralSchema union', () => {
+    const schema = {
+      type: 'union',
+      of: [
+        { type: 'literal', of: 0 },
+        { type: 'literal', of: 1 },
+        { type: 'literal', of: 'x' },
+        { type: 'literal', of: 'y' },
+      ],
+    } as const satisfies Schema
+
+    const subjY = 'y'
+
+    expect(validate(schema, subjY).data).toStrictEqual(subjY)
+    expect(validate(schema, subjY).error).toBeUndefined()
+  })
+
+  it('validate: ObjectSchema union', () => {
+    const schema = {
+      type: 'union',
+      of: [
+        { type: 'object', of: { x: { type: 'string' } } },
+        { type: 'object', of: { y: { type: 'number' } } },
+        { type: 'object', of: { z: { type: 'boolean' } } },
+      ],
+    } as const satisfies Schema
+
+    const subjZ = { z: 'x' }
+
+    expect(validate(schema, subjZ).data).toBeUndefined()
+    expect(validate(schema, subjZ).error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: subjZ,
+        schema,
+        path: [],
+      },
+    ])
+  })
+
+  it('validate: ArraySchema union', () => {
+    const schema = {
+      type: 'union',
+      of: [
+        { type: 'array', of: { type: 'string' } },
+        { type: 'array', of: { type: 'number' } },
+        { type: 'array', of: { type: 'boolean' } },
+      ],
+    } as const satisfies Schema
+
+    const subjZ = { z: 'x' }
+
+    expect(validate(schema, subjZ).data).toBeUndefined()
+    expect(validate(schema, subjZ).error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: subjZ,
+        schema,
+        path: [],
+      },
+    ])
+  })
+
+  it('validate: union of all types', () => {
+    const schema = {
+      type: 'union',
+      of: [
+        { type: 'string' },
+        { type: 'number' },
+        { type: 'boolean' },
+        { type: 'stringUnion', of: ['x', 'y'] },
+        { type: 'numberUnion', of: [0, 1] },
+        { type: 'literal', of: 'z' },
+        { type: 'literal', of: 2 },
+        { type: 'object', of: { x: { type: 'string' } } },
+        { type: 'array', of: { type: 'number' } },
+      ],
+    } as const satisfies Schema
+
+    const subjZ = { z: 'x' }
+
+    expect(validate(schema, subjZ).data).toBeUndefined()
+    expect(validate(schema, subjZ).error).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: subjZ,
+        schema,
+        path: [],
+      },
+    ])
+  })
+})
+
 describe('Check validate subject type constraints', () => {
   it('validate: base detailed schema', () => {
     expect(() => validate({ type: 'string' }, undefined)).not.toThrow()

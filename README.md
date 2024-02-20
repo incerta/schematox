@@ -15,15 +15,13 @@ SchmatoX is a lightweight library for creating JSON compatible schemas. The subj
 - We have zero dependencies and our runtime code logic is small and easy to grasp, consisting of just a couple of functions
 - Our schemas are just JSON compatible objects, which can be completely independent from our library
 
-Essentially, to define a schema, one doesn't need to import any functions from our library, only the `as const satisfies Schema` statement. This approach does come with a few limitations. The first is `stringUnion` and `numberUnion` schema default values are not constrained by the defined union choices, only the primitive type. We might fix this issue later, but for now, we prioritize this over the case when `default` extends union choice by its definition.
-
-A second limitation is the depth of the compound schema data structure. Currently, we support 7 layers of depth. It's easy to increase this number, but because of the exponential nature of stored type variants in memory, we want to determine how much RAM each next layer will use before increasing it drastically. It will be certainly done before version 1 release.
+Essentially, to define a schema, one doesn't need to import any functions from our library, only the `Schema` type. This approach does come with compound schema depth limitation. Currently, we support 7 layers of depth. It's easy to increase this number, so most likely it's going to change soon.
 
 ## Cons
 
 - The library is not ready for production yet, the version is 0 and public API might be changed
 - Currently we support only 7 layers of compound structure depth but most likely it will be higher soon
-- We do not support records, discriminated unions, object unions, array unions, intersections, functions, NaN, Infinity and other not JSON compatible structures
+- We are not planning to support intersection schema any time soon
 - Null value is acceptable by the parser but will be treated as undefined and transformed to undefined
 - Null value is not acceptable by the validator
 
@@ -145,6 +143,7 @@ Unfortunately we can't currently integrate `assert` as struct method due to [typ
 
 ```typescript
 import {
+  union,
   array,
   object,
   string,
@@ -152,6 +151,7 @@ import {
   boolean,
   stringUnion,
   numberUnion,
+  literal,
 } from 'schematox'
 
 import type { Schema } from 'schematox'
@@ -199,12 +199,25 @@ const programmaticNumber = number()
 const staticBoolean = {
   type: 'boolean',
   optional: true,
-  default: false,
   brand: ['x', 'y'],
   description: 'x',
 } as const satisfies Schema
 
 const programmaticBoolean = boolean()
+  .optional()
+  .brand('x', 'y')
+  .description('y')
+
+// literal
+
+const staticLiteral = {
+  type: 'literal',
+  of: 'x',
+  optional: true,
+  brand: ['x', 'y'],
+} as const satisfies Schema
+
+const programmaticLiteral = literal()
   .optional()
   .brand('x', 'y')
   .description('y')
@@ -249,21 +262,46 @@ const staticObject = {
     x: 'string',
     y: 'number?',
   },
+  optional: true,
+  description: 'x',
 } as const satisfies Schema
 
 const programmaticObject = object({
   x: string(),
   y: number().optional(),
 })
+  .optional()
+  .description('x')
 
 // array
 
 const staticArray = {
   type: 'array',
   of: 'string',
+  optional: true,
+  minLength: 1,
+  maxLength: 1000,
+  description: 'x',
 } as const satisfies Schema
 
 const programmaticArray = array(string())
+  .optional()
+  .minLength(1)
+  .maxLength(1000)
+  .description('x')
+
+// union
+
+const staticUnion = {
+  type: 'union',
+  of: [{ type: 'string' }, { type: 'number' }],
+  optional: true,
+  description: 'x',
+} as const satisfies Schema
+
+const programmaticUnion = union([string(), number()])
+  .optional()
+  .description('x')
 ```
 
 ## Verification error shape

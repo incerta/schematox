@@ -4,11 +4,12 @@ import type {
 } from './base-detailed-schema-types'
 
 export type BaseSchema = BD_Schema
-export type CompoundSchema = ObjectSchema | ArraySchema
+export type CompoundSchema = ObjectSchema | ArraySchema | UnionSchema
 export type Schema = BaseSchema | CompoundSchema
 
 export type R<T> =
   | T
+  | ({ type: 'union'; of: Readonly<Array<T>> } & UniSchemaOptProps)
   | ({ type: 'array'; of: T } & ArrSchemaOptProps)
   | ({ type: 'object'; of: Record<string, T> } & ObjSchemaOptProps)
 
@@ -23,6 +24,7 @@ export type NestedStructSchema = R<R<R<R<R<BaseSchema>>>>>
 export type StructSchema =
   | ArraySchema<NestedStructSchema>
   | ObjectSchema<NestedStructSchema>
+  | UnionSchema<NestedStructSchema>
   | BaseSchema
 
 /* ArraySchema */
@@ -52,6 +54,18 @@ export type ObjectSchema<T extends Schema = NestedSchema> =
     of: Record<string, T>
   }
 
+/* Union schema */
+
+export type UniSchemaOptProps = {
+  optional?: boolean
+  description?: string
+}
+
+export type UnionSchema<T extends Schema = NestedSchema> = {
+  type: 'union'
+  of: Readonly<Array<T>>
+} & UniSchemaOptProps
+
 /* Construct BaseSchema subject type */
 
 // FIXME: should be removed before submitting current PR
@@ -77,7 +91,9 @@ export type Con_ArraySchema_SubjT_V<T extends ArraySchema> =
           ? Array<Con_ArraySchema_SubjT_V<U>>
           : U extends ObjectSchema
             ? Array<Con_ObjectSchema_SubjT_V<U>>
-            : never
+            : U extends UnionSchema
+              ? Array<Con_UnionSchema_SubjT_V<U>>
+              : never
       : never
   >
 
@@ -96,8 +112,31 @@ export type Con_ObjectSchema_SubjT_V<T extends ObjectSchema> =
               ? Con_ObjectSchema_SubjT_V<U[k]>
               : U[k] extends ArraySchema
                 ? Con_ArraySchema_SubjT_V<U[k]>
-                : never
+                : U[k] extends UnionSchema
+                  ? Con_UnionSchema_SubjT_V<U[k]>
+                  : never
         }
+      : never
+  >
+
+/* Construct UnionSchema subject type */
+
+export type Con_UnionSchema_SubjT_V<T extends UnionSchema> =
+  ExtWith_CompoundSchemaOptionality<
+    T,
+    T extends {
+      type: 'union'
+      of: Array<infer U>
+    }
+      ? U extends BaseSchema
+        ? Con_BaseSchema_SubjT_V<U>
+        : U extends ArraySchema
+          ? Con_ArraySchema_SubjT_V<U>
+          : U extends ObjectSchema
+            ? Con_ObjectSchema_SubjT_V<U>
+            : U extends UnionSchema
+              ? Con_UnionSchema_SubjT_V<U>
+              : never
       : never
   >
 
@@ -109,4 +148,6 @@ export type Con_Schema_SubjT_V<T extends Schema> = T extends BaseSchema
     ? Con_ArraySchema_SubjT_V<T>
     : T extends ObjectSchema
       ? Con_ObjectSchema_SubjT_V<T>
-      : never
+      : T extends UnionSchema
+        ? Con_UnionSchema_SubjT_V<T>
+        : never
