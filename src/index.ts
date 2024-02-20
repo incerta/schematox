@@ -21,9 +21,7 @@ export { isError, isData, error, data } from './utils/fp'
 
 export { parse } from './general-schema-parser'
 export { validate, guard, assert } from './general-schema-validator'
-
-// FIXME: the method is deprecated
-export { x } from './x-closure'
+export { ERROR_CODE } from './error'
 
 export type {
   BaseSchema,
@@ -31,5 +29,5 @@ export type {
   SubjectType,
 } from './types/compound-schema-types'
 
-export type { InvalidSubject } from './error'
+export type { InvalidSubject, ErrorPath, ErrorCode } from './error'
 export type { EitherError } from './utils/fp'
