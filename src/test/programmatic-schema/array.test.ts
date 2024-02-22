@@ -32,8 +32,6 @@ describe('Array schema programmatic definition', () => {
     expect(parse(schemaX.__schema, subject).error).toBe(undefined)
     expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
     expect(parse(schemaX.__schema, undefined).data).toBe(undefined)
-    expect(parse(schemaX.__schema, null).error).toBe(undefined)
-    expect(parse(schemaX.__schema, null).data).toBe(undefined)
 
     expect(validate(schemaX.__schema, subject).data).toStrictEqual(subject)
     expect(validate(schemaX.__schema, subject).error).toBe(undefined)
@@ -52,8 +50,6 @@ describe('Array schema programmatic definition', () => {
     expect(parse(schemaX.__schema, subject).error).toBe(undefined)
     expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
     expect(parse(schemaX.__schema, undefined).data).toBe(undefined)
-    expect(parse(schemaX.__schema, null).error).toBe(undefined)
-    expect(parse(schemaX.__schema, null).data).toBe(undefined)
 
     expect(validate(schemaX.__schema, subject).data).toStrictEqual(subject)
     expect(validate(schemaX.__schema, subject).error).toBe(undefined)
@@ -75,8 +71,6 @@ describe('Array schema programmatic definition', () => {
     expect(parse(schemaX.__schema, subject).error).toBe(undefined)
     expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
     expect(parse(schemaX.__schema, undefined).data).toBe(undefined)
-    expect(parse(schemaX.__schema, null).error).toBe(undefined)
-    expect(parse(schemaX.__schema, null).data).toBe(undefined)
 
     expect(validate(schemaX.__schema, subject).data).toStrictEqual(subject)
     expect(validate(schemaX.__schema, subject).error).toBe(undefined)

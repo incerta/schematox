@@ -95,8 +95,6 @@ describe('Object schema programmatic definition', () => {
 
     expect(parse(schemaX.__schema, undefined).data).toBe(undefined)
     expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
-    expect(parse(schemaX.__schema, null).data).toBe(undefined)
-    expect(parse(schemaX.__schema, null).error).toBe(undefined)
 
     expect(validate(schemaX.__schema, undefined).data).toBe(undefined)
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
@@ -114,8 +112,6 @@ describe('Object schema programmatic definition', () => {
 
     expect(parse(schemaX.__schema, undefined).data).toBe(undefined)
     expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
-    expect(parse(schemaX.__schema, null).data).toBe(undefined)
-    expect(parse(schemaX.__schema, null).error).toBe(undefined)
 
     expect(validate(schemaX.__schema, undefined).data).toBe(undefined)
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
@@ -136,8 +132,6 @@ describe('Object schema programmatic definition', () => {
 
     expect(parse(schemaX.__schema, undefined).data).toBe(undefined)
     expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
-    expect(parse(schemaX.__schema, null).data).toBe(undefined)
-    expect(parse(schemaX.__schema, null).error).toBe(undefined)
 
     expect(validate(schemaX.__schema, undefined).data).toBe(undefined)
     expect(validate(schemaX.__schema, undefined).error).toBe(undefined)

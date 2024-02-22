@@ -3,15 +3,48 @@ import type {
   Con_BD_Schema_SubjT_V,
 } from './base-detailed-schema-types'
 
+import { ExtWith_SchemaParams_SubjT } from './extensions'
+
 export type BaseSchema = BD_Schema
-export type CompoundSchema = ObjectSchema | ArraySchema | UnionSchema
-export type Schema = BaseSchema | CompoundSchema
+
+type BaseObjectSchema<T> = {
+  type: 'object'
+  of: Record<string, T>
+
+  optional?: boolean
+  nullable?: boolean
+
+  description?: string
+}
+
+type BaseArraySchema<T> = {
+  type: 'array'
+  of: T
+
+  optional?: boolean
+  nullable?: boolean
+
+  description?: string
+  minLength?: number
+  maxLength?: number
+}
+
+// TODO: `discriminant` key as performance optimization measure
+type BaseUnionSchema<T> = {
+  type: 'union'
+  of: Readonly<Array<T>>
+
+  optional?: boolean
+  nullable?: boolean
+
+  description?: string
+}
 
 export type R<T> =
   | T
-  | ({ type: 'union'; of: Readonly<Array<T>> } & UniSchemaOptProps)
-  | ({ type: 'array'; of: T } & ArrSchemaOptProps)
-  | ({ type: 'object'; of: Record<string, T> } & ObjSchemaOptProps)
+  | BaseObjectSchema<T>
+  | BaseArraySchema<T>
+  | BaseUnionSchema<T>
 
 /* 7 layers of compound schema nesting is allowed */
 export type NestedSchema = R<R<R<R<R<R<BaseSchema>>>>>>
@@ -21,50 +54,26 @@ export type NestedSchema = R<R<R<R<R<R<BaseSchema>>>>>>
  * Required for programmatic compound struct definition.
  **/
 export type NestedStructSchema = R<R<R<R<R<BaseSchema>>>>>
+
+export type ArraySchema<T extends NestedSchema = NestedSchema> =
+  BaseArraySchema<T>
+
+export type ObjectSchema<T extends NestedSchema = NestedSchema> =
+  BaseObjectSchema<T>
+
+export type UnionSchema<T extends NestedSchema = NestedSchema> =
+  BaseUnionSchema<T>
+
+export type CompoundSchema = ObjectSchema | ArraySchema | UnionSchema
+export type Schema = BaseSchema | CompoundSchema
+
 export type StructSchema =
   | ArraySchema<NestedStructSchema>
   | ObjectSchema<NestedStructSchema>
   | UnionSchema<NestedStructSchema>
   | BaseSchema
 
-/* ArraySchema */
-
-export type ArrSchemaOptProps = {
-  optional?: boolean
-  description?: string
-  minLength?: number /* >= */
-  maxLength?: number /* <= */
-}
-
-export type ArraySchema<T extends Schema = NestedSchema> = ArrSchemaOptProps & {
-  type: 'array'
-  of: T
-}
-
-/* ObjectSchema */
-
-export type ObjSchemaOptProps = {
-  optional?: boolean
-  description?: string
-}
-
-export type ObjectSchema<T extends Schema = NestedSchema> =
-  ObjSchemaOptProps & {
-    type: 'object'
-    of: Record<string, T>
-  }
-
-/* Union schema */
-
-export type UniSchemaOptProps = {
-  optional?: boolean
-  description?: string
-}
-
-export type UnionSchema<T extends Schema = NestedSchema> = {
-  type: 'union'
-  of: Readonly<Array<T>>
-} & UniSchemaOptProps
+// TODO: move all constructors to `src/types/constructors.ts` file
 
 /* Construct BaseSchema subject type */
 
@@ -72,17 +81,10 @@ export type UnionSchema<T extends Schema = NestedSchema> = {
 export type Con_BaseSchema_SubjT_V<T extends BaseSchema> =
   Con_BD_Schema_SubjT_V<T>
 
-/* Compound schema utility types */
-
-export type ExtWith_CompoundSchemaOptionality<
-  T extends { optional?: boolean },
-  U,
-> = T extends { optional: true } ? U | undefined : U
-
 /* Construct ArraySchema subject type */
 
 export type Con_ArraySchema_SubjT_V<T extends ArraySchema> =
-  ExtWith_CompoundSchemaOptionality<
+  ExtWith_SchemaParams_SubjT<
     T,
     T extends { of: infer U }
       ? U extends BaseSchema
@@ -100,7 +102,7 @@ export type Con_ArraySchema_SubjT_V<T extends ArraySchema> =
 /* Construct ObjectSchema subject type */
 
 export type Con_ObjectSchema_SubjT_V<T extends ObjectSchema> =
-  ExtWith_CompoundSchemaOptionality<
+  ExtWith_SchemaParams_SubjT<
     T,
     T extends {
       of: infer U
@@ -122,7 +124,7 @@ export type Con_ObjectSchema_SubjT_V<T extends ObjectSchema> =
 /* Construct UnionSchema subject type */
 
 export type Con_UnionSchema_SubjT_V<T extends UnionSchema> =
-  ExtWith_CompoundSchemaOptionality<
+  ExtWith_SchemaParams_SubjT<
     T,
     T extends {
       type: 'union'
