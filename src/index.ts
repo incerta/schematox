@@ -17,10 +17,10 @@ export {
   object,
 } from './programmatic-schema'
 
-export { isError, isData, error, data } from './utils/fp'
+export { error, data } from './utils/fp'
 
 export { parse } from './general-schema-parser'
-export { validate, guard, assert } from './general-schema-validator'
+export { validate, guard } from './general-schema-validator'
 export { ERROR_CODE } from './error'
 
 export type {
@@ -30,4 +30,5 @@ export type {
 } from './types/compound-schema-types'
 
 export type { InvalidSubject, ErrorPath, ErrorCode } from './error'
-export type { EitherError } from './utils/fp'
+
+export type { EitherError, Error, Data } from './utils/fp'

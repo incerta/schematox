@@ -1,6 +1,6 @@
 import { error, data } from './utils/fp'
 import { ERROR_CODE } from './error'
-import { parseBaseSchemaSubject } from './base-schema-parser'
+import { verifyPrimitive } from './verify-primitive'
 
 import type { EitherError } from './utils/fp'
 import type { Schema, Con_Schema_SubjT_V } from './types/compound-schema-types'
@@ -18,13 +18,15 @@ export function parse(
 ): EitherError<InvalidSubject[], unknown> {
   const errors: InvalidSubject[] = []
 
-  if (schema.type === 'object') {
-    if (schema.optional) {
-      if (subject === null || subject === undefined) {
-        return data(undefined)
-      }
-    }
+  if (schema.optional === true && subject === undefined) {
+    return data(undefined)
+  }
 
+  if (schema.nullable === true && subject === null) {
+    return data(null)
+  }
+
+  if (schema.type === 'object') {
     if (
       typeof subject !== 'object' ||
       subject === null ||
@@ -68,12 +70,6 @@ export function parse(
 
   if (schema.type === 'array') {
     if (Array.isArray(subject) === false) {
-      if (schema.optional) {
-        if (subject === undefined || subject === null) {
-          return data(undefined)
-        }
-      }
-
       return error([
         {
           code: ERROR_CODE.invalidType,
@@ -136,12 +132,6 @@ export function parse(
   }
 
   if (schema.type === 'union') {
-    if (schema.optional) {
-      if (subject === null || subject === undefined) {
-        return data(undefined)
-      }
-    }
-
     for (const subSchema of schema.of) {
       const parsed = parse(subSchema, subject)
 
@@ -160,13 +150,18 @@ export function parse(
     ])
   }
 
-  // Base schema variants
+  const verified = verifyPrimitive(schema, subject)
 
-  const parsed = parseBaseSchemaSubject.bind(this)(schema, subject)
-
-  if (parsed.error) {
-    return error([parsed.error])
+  if (verified === true) {
+    return data(subject)
   }
 
-  return parsed
+  return error([
+    {
+      code: verified,
+      path: this || [],
+      subject,
+      schema,
+    },
+  ])
 }

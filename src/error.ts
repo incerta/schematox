@@ -13,6 +13,7 @@ export type ErrorPath = Array<
   string /* object key */ | number /* array index */
 >
 
+// TODO: transform to `const enum`
 export const ERROR_CODE = {
   invalidType: 'INVALID_TYPE',
   invalidRange: 'INVALID_RANGE',

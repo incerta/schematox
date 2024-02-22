@@ -79,15 +79,15 @@ describe('Parse OBJECT schema with VALID subject', () => {
       of: {
         a: { type: 'string' },
         b: { type: 'string', optional: true },
-        nullB: { type: 'string', optional: true },
+        nullB: { type: 'string', nullable: true },
         undefinedB: { type: 'string', optional: true },
         c: { type: 'number' },
         d: { type: 'number', optional: true },
-        nullD: { type: 'number', optional: true },
+        nullD: { type: 'number', nullable: true },
         undefinedD: { type: 'number', optional: true },
         e: { type: 'boolean' },
         f: { type: 'boolean', optional: true },
-        nullF: { type: 'boolean', optional: true },
+        nullF: { type: 'boolean', nullable: true },
         undefinedF: { type: 'boolean', optional: true },
       },
     } as const satisfies Schema
@@ -100,11 +100,11 @@ describe('Parse OBJECT schema with VALID subject', () => {
       e: true,
       f: false,
 
-      nullB: undefined,
+      nullB: null,
       undefinedB: undefined,
-      nullD: undefined,
+      nullD: null,
       undefinedD: undefined,
-      nullF: undefined,
+      nullF: null,
       undefinedF: undefined,
     }
 
@@ -129,19 +129,19 @@ describe('Parse OBJECT schema with VALID subject', () => {
       of: {
         a: { type: 'string' },
         b: { type: 'string', optional: true },
-        nullB: { type: 'string', optional: true },
+        nullB: { type: 'string', nullable: true },
         undefinedB: { type: 'string', optional: true },
         c: { type: 'number' },
         d: { type: 'number', optional: true },
-        nullD: { type: 'number', optional: true },
+        nullD: { type: 'number', nullable: true },
         undefinedD: { type: 'number', optional: true },
         e: { type: 'boolean' },
         f: { type: 'boolean', optional: true },
-        nullF: { type: 'boolean', optional: true },
+        nullF: { type: 'boolean', nullable: true },
         undefinedF: { type: 'boolean', optional: true },
         i: { type: 'literal', of: 'x' },
         j: { type: 'literal', of: 'x', optional: true },
-        nullJ: { type: 'literal', of: 'x', optional: true },
+        nullJ: { type: 'literal', of: 'x', nullable: true },
         undefinedJ: { type: 'literal', of: 'x', optional: true },
       },
     } as const satisfies Schema
@@ -156,13 +156,13 @@ describe('Parse OBJECT schema with VALID subject', () => {
       i: 'x',
       j: 'x',
 
-      nullB: undefined,
+      nullB: null,
       undefinedB: undefined,
-      nullD: undefined,
+      nullD: null,
       undefinedD: undefined,
-      nullF: undefined,
+      nullF: null,
       undefinedF: undefined,
-      nullJ: undefined,
+      nullJ: null,
       undefinedJ: undefined,
     }
 
@@ -201,7 +201,7 @@ describe('Parse OBJECT schema with VALID subject', () => {
 
     const subject = {
       strArrReq: ['x', 'y'],
-      strArrOpt: null,
+      strArrOpt: undefined,
     }
 
     expect(parse(schema, subject).data).toStrictEqual({
@@ -218,10 +218,19 @@ describe('Parse OBJECT schema with VALID subject', () => {
       optional: true,
     } as const satisfies Schema
 
-    expect(parse(schema, null).data).toBe(undefined)
-    expect(parse(schema, null).error).toBe(undefined)
     expect(parse(schema, undefined).data).toBe(undefined)
     expect(parse(schema, undefined).error).toBe(undefined)
+  })
+
+  it('parse: can be nullable by itself', () => {
+    const schema = {
+      type: 'object',
+      of: { x: { type: 'string' } },
+      nullable: true,
+    } as const satisfies Schema
+
+    expect(parse(schema, null).data).toBe(null)
+    expect(parse(schema, null).error).toBe(undefined)
   })
 })
 
@@ -481,9 +490,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
   })
 
   it('parse: optional base short schema subject', () => {
-    const nullArr = [null, null, undefined, null] as unknown
-    const nullArrExp = [undefined, undefined, undefined, undefined]
-
     const optStrSchema = {
       type: 'array',
       of: { type: 'string', optional: true },
@@ -493,8 +499,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     expect(parse(optStrSchema, strSubject).data).toStrictEqual(strSubject)
     expect(parse(optStrSchema, strSubject).error).toBe(undefined)
-    expect(parse(optStrSchema, nullArr).data).toStrictEqual(nullArrExp)
-    expect(parse(optStrSchema, nullArr).error).toBe(undefined)
 
     const optNumSchema = {
       type: 'array',
@@ -505,8 +509,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     expect(parse(optNumSchema, numSubject).data).toStrictEqual(numSubject)
     expect(parse(optNumSchema, numSubject).error).toBe(undefined)
-    expect(parse(optNumSchema, nullArr).data).toStrictEqual(nullArrExp)
-    expect(parse(optNumSchema, nullArr).error).toBe(undefined)
 
     const optBoolSchema = {
       type: 'array',
@@ -517,8 +519,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     expect(parse(optBoolSchema, boolSubject).data).toStrictEqual(boolSubject)
     expect(parse(optBoolSchema, boolSubject).error).toBe(undefined)
-    expect(parse(optBoolSchema, nullArr).data).toStrictEqual(nullArrExp)
-    expect(parse(optBoolSchema, nullArr).error).toBe(undefined)
   })
 
   it('parse: required base detailed schema subject', () => {
@@ -578,9 +578,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
   })
 
   it('parse: optional base detailed schema subject', () => {
-    const nullArr = [null, null, undefined, null] as unknown
-    const nullArrExp = [undefined, undefined, undefined, undefined]
-
     const strSchema = {
       type: 'array',
       of: { type: 'string', optional: true },
@@ -590,8 +587,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     expect(parse(strSchema, strSubj).data).toStrictEqual(strSubj)
     expect(parse(strSchema, strSubj).error).toBe(undefined)
-    expect(parse(strSchema, nullArr).data).toStrictEqual(nullArrExp)
-    expect(parse(strSchema, nullArr).error).toBe(undefined)
 
     const numSchema = {
       type: 'array',
@@ -602,8 +597,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     expect(parse(numSchema, numSubj).data).toStrictEqual(numSubj)
     expect(parse(numSchema, numSubj).error).toBe(undefined)
-    expect(parse(numSchema, nullArr).data).toStrictEqual(nullArrExp)
-    expect(parse(numSchema, nullArr).error).toBe(undefined)
 
     const boolSchema = {
       type: 'array',
@@ -614,8 +607,6 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     expect(parse(boolSchema, boolSubj).data).toStrictEqual(boolSubj)
     expect(parse(boolSchema, boolSubj).error).toBe(undefined)
-    expect(parse(boolSchema, nullArr).data).toStrictEqual(nullArrExp)
-    expect(parse(boolSchema, nullArr).error).toBe(undefined)
 
     const strLiteralSchema = {
       type: 'array',
@@ -666,10 +657,19 @@ describe('Parse ARRAY schema with VALID subject', () => {
       optional: true,
     } as const satisfies Schema
 
-    expect(parse(schema, null).data).toBe(undefined)
-    expect(parse(schema, null).error).toBe(undefined)
     expect(parse(schema, undefined).data).toBe(undefined)
     expect(parse(schema, undefined).error).toBe(undefined)
+  })
+
+  it('parse: can be nullable by itself', () => {
+    const schema = {
+      type: 'array',
+      of: { type: 'string' },
+      nullable: true,
+    } as const satisfies Schema
+
+    expect(parse(schema, null).data).toBe(null)
+    expect(parse(schema, null).error).toBeUndefined()
   })
 })
 
@@ -955,11 +955,6 @@ describe('Parse UNION schema with VALID subject', () => {
 
     expect(parse(schema, undefSubj).data).toBe(undefSubj)
     expect(parse(schema, undefSubj).error).toBeUndefined()
-
-    const nullSubj = null
-
-    expect(parse(schema, nullSubj).data).toBe(undefined)
-    expect(parse(schema, nullSubj).error).toBeUndefined()
   })
 
   it('parse: LiteralSchema union', () => {

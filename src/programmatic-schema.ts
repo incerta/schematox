@@ -22,45 +22,79 @@ type StructMethods<T extends Schema> = {
   guard: (subject: unknown) => subject is Con_Schema_SubjT_V<T>
 }
 
-type StructParams =
-  | 'optional'
-  | 'description'
-  | 'brand'
-  | 'min'
-  | 'max'
-  | 'minLength'
-  | 'maxLength'
+type SharedParams = 'optional' | 'nullable' | 'description'
 
-type Struct<T extends Schema, U extends StructParams> = Omit<
+type ParamsBySchemaType = {
+  string: SharedParams | 'minLength' | 'maxLength' | 'brand'
+  number: SharedParams | 'min' | 'max' | 'brand'
+  boolean: SharedParams | 'brand'
+  literal: SharedParams | 'brand'
+  object: SharedParams
+  union: SharedParams
+  array: SharedParams | 'minLength' | 'maxLength'
+}
+
+type StructParams = ParamsBySchemaType extends Record<string, infer U>
+  ? U
+  : never
+
+type Struct<T extends Schema> = Omit<
   Pick<
     {
-      optional: () => Struct<T & { optional: true }, U>
+      optional: () => Struct<T & { optional: true }>
+      nullable: () => Struct<T & { nullable: true }>
 
       brand: <V extends string, W extends string>(
         key: V,
         value: W
-      ) => Struct<T & { brand: Readonly<[V, W]> }, U>
+      ) => Struct<T & { brand: Readonly<[V, W]> }>
 
-      minLength: (minLength: number) => Struct<T & { minLength: number }, U>
-      maxLength: (maxLength: number) => Struct<T & { maxLength: number }, U>
+      minLength: (minLength: number) => Struct<T & { minLength: number }>
+      maxLength: (maxLength: number) => Struct<T & { maxLength: number }>
 
-      min: (min: number) => Struct<T & { min: number }, U>
-      max: (max: number) => Struct<T & { max: number }, U>
+      min: (min: number) => Struct<T & { min: number }>
+      max: (max: number) => Struct<T & { max: number }>
 
-      description: (
-        description: string
-      ) => Struct<T & { description: string }, U>
+      description: (description: string) => Struct<T & { description: string }>
     },
-    U
+    ParamsBySchemaType[T['type']]
   >,
   keyof T
-> & { __schema: T } & StructMethods<T>
+> & { __schema: Readonly<T> } & StructMethods<T>
 
-function makeStruct<T extends Schema, U extends StructParams>(
-  schema: T,
-  params: Set<U>
-): Struct<T, U>
-function makeStruct(schema: StructSchema, params: Set<StructParams>) {
+const PARAMS_BY_SCHEMA_TYPE = {
+  string: new Set([
+    'optional',
+    'nullable',
+    'brand',
+    'description',
+    'minLength',
+    'maxLength',
+  ] as const),
+  number: new Set([
+    'optional',
+    'nullable',
+    'brand',
+    'description',
+    'min',
+    'max',
+  ] as const),
+  boolean: new Set(['optional', 'nullable', 'brand', 'description'] as const),
+  literal: new Set(['optional', 'nullable', 'brand', 'description'] as const),
+  object: new Set(['optional', 'nullable', 'description'] as const),
+  array: new Set([
+    'optional',
+    'nullable',
+    'description',
+    'minLength',
+    'maxLength',
+  ] as const),
+  union: new Set(['optional', 'nullable', 'description']),
+} as const
+
+export function makeStruct<T extends Schema>(schema: T): Struct<T>
+export function makeStruct(schema: StructSchema) {
+  const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const result: Record<string, unknown> = {
     __schema: schema,
 
@@ -71,88 +105,59 @@ function makeStruct(schema: StructSchema, params: Set<StructParams>) {
   }
 
   if (params.has('optional')) {
-    result.optional = () => makeStruct({ ...schema, optional: true }, params)
+    result.optional = () => makeStruct({ ...schema, optional: true })
+  }
+
+  if (params.has('nullable')) {
+    result.nullable = () => makeStruct({ ...schema, nullable: true })
   }
 
   if (params.has('description')) {
     result.description = (description: string) =>
-      makeStruct({ ...schema, description }, params)
+      makeStruct({ ...schema, description })
   }
 
   if (params.has('brand')) {
     result.brand = (key: string, value: string) =>
-      makeStruct({ ...schema, brand: [key, value] }, params)
+      makeStruct({ ...schema, brand: [key, value] })
   }
 
   if (params.has('min')) {
-    result.min = (min: number) => makeStruct({ ...schema, min }, params)
+    result.min = (min: number) => makeStruct({ ...schema, min })
   }
 
   if (params.has('max')) {
-    result.max = (max: number) => makeStruct({ ...schema, max }, params)
+    result.max = (max: number) => makeStruct({ ...schema, max })
   }
 
   if (params.has('minLength')) {
     result.minLength = (minLength: number) =>
-      makeStruct({ ...schema, minLength }, params)
+      makeStruct({ ...schema, minLength })
   }
 
   if (params.has('maxLength')) {
     result.maxLength = (maxLength: number) =>
-      makeStruct({ ...schema, maxLength }, params)
+      makeStruct({ ...schema, maxLength })
   }
 
   return result
 }
 
-const STRING_PARAMS = new Set([
-  'optional',
-  'minLength',
-  'maxLength',
-  'brand',
-  'description',
-]) satisfies Set<StructParams>
-
 export function string() {
-  return makeStruct({ type: 'string' }, STRING_PARAMS)
+  return makeStruct({ type: 'string' })
 }
-
-const NUMBER_PARAMS = new Set([
-  'optional',
-  'min',
-  'max',
-  'brand',
-  'description',
-]) satisfies Set<StructParams>
 
 export function number() {
-  return makeStruct({ type: 'number' }, NUMBER_PARAMS)
+  return makeStruct({ type: 'number' })
 }
-
-const BOOLEAN_PARAMS = new Set([
-  'optional',
-  'brand',
-  'description',
-]) satisfies Set<StructParams>
 
 export function boolean() {
-  return makeStruct({ type: 'boolean' }, BOOLEAN_PARAMS)
+  return makeStruct({ type: 'boolean' })
 }
-
-const LITERAL_PARAMS = new Set([
-  'optional',
-  'brand',
-  'description',
-]) satisfies Set<StructParams>
 
 export function literal<T extends string | number>(of: T) {
-  return makeStruct({ type: 'literal', of }, LITERAL_PARAMS)
+  return makeStruct({ type: 'literal', of })
 }
-
-const OBJECT_PARAMS = new Set([
-  'optional',
-  'description',
-]) satisfies Set<StructParams>
 
 export function object<
   T extends StructSchema,
@@ -168,15 +173,8 @@ export function object<
     schema.of[key] = (of[key] as NonNullable<(typeof of)[typeof key]>).__schema
   }
 
-  return makeStruct(schema, OBJECT_PARAMS)
+  return makeStruct(schema)
 }
-
-const ARRAY_PARAMS = new Set([
-  'optional',
-  'minLength',
-  'maxLength',
-  'description',
-]) satisfies Set<StructParams>
 
 export function array<
   T extends StructSchema,
@@ -188,13 +186,8 @@ export function array<
 >(of: U) {
   const schema = { type: 'array', of: of.__schema } as V
 
-  return makeStruct(schema, ARRAY_PARAMS)
+  return makeStruct(schema)
 }
-
-const UNION_PARAMS = new Set([
-  'optional',
-  'description',
-]) satisfies Set<StructParams>
 
 export function union<
   T extends StructSchema,
@@ -210,5 +203,5 @@ export function union<
     schema.of.push(subSchema.__schema)
   }
 
-  return makeStruct(schema, UNION_PARAMS)
+  return makeStruct(schema)
 }

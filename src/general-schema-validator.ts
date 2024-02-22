@@ -1,6 +1,6 @@
 import { error, data } from './utils/fp'
 import { ERROR_CODE } from './error'
-import { validateBaseSchemaSubject } from './base-schema-validator'
+import { verifyPrimitive } from './verify-primitive'
 
 import type { EitherError } from './utils/fp'
 import type { Schema, Con_Schema_SubjT_V } from './types/compound-schema-types'
@@ -18,11 +18,15 @@ export function validate(
 ): EitherError<InvalidSubject[], unknown> {
   const errors: InvalidSubject[] = []
 
-  if (schema.type === 'object') {
-    if (schema.optional && subject === undefined) {
-      return data(undefined)
-    }
+  if (schema.optional === true && subject === undefined) {
+    return data(undefined)
+  }
 
+  if (schema.nullable === true && subject === null) {
+    return data(null)
+  }
+
+  if (schema.type === 'object') {
     if (
       typeof subject !== 'object' ||
       subject === null ||
@@ -63,10 +67,6 @@ export function validate(
 
   if (schema.type === 'array') {
     if (Array.isArray(subject) === false) {
-      if (schema.optional && subject === undefined) {
-        return data(undefined)
-      }
-
       return error([
         {
           code: ERROR_CODE.invalidType,
@@ -128,12 +128,6 @@ export function validate(
   }
 
   if (schema.type === 'union') {
-    if (schema.optional) {
-      if (subject === undefined) {
-        return data(undefined)
-      }
-    }
-
     for (const subSchema of schema.of) {
       if (validate(subSchema, subject).error === undefined) {
         return data(subject)
@@ -150,13 +144,20 @@ export function validate(
     ])
   }
 
-  const validated = validateBaseSchemaSubject.bind(this)(schema, subject)
+  const verified = verifyPrimitive(schema, subject)
 
-  if (validated.error) {
-    return error([validated.error])
+  if (verified === true) {
+    return data(subject)
   }
 
-  return data(subject)
+  return error([
+    {
+      code: verified,
+      path: this || [],
+      subject,
+      schema,
+    },
+  ])
 }
 
 export function guard<T extends Schema>(
@@ -164,15 +165,4 @@ export function guard<T extends Schema>(
   subject: unknown
 ): subject is Con_Schema_SubjT_V<T> {
   return validate(schema, subject).error === undefined
-}
-
-export function assert<T extends Schema>(
-  schema: T,
-  subject: unknown
-): asserts subject is Con_Schema_SubjT_V<T> {
-  const { error } = validate(schema, subject)
-
-  if (error !== undefined) {
-    throw error
-  }
 }

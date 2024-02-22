@@ -1,14 +1,11 @@
 import { check, unknownX } from '../test-utils'
 import type {
-  Con_BrandSchema_SubjT,
   Con_BD_Schema_TypeOnly_SubjT,
   Con_BD_Schema_SubjT_V,
-  ExtWith_BrandSchema_SubjT,
-  ExtWith_BD_OptionalSchema_SubjT_V,
   BD_Schema,
 } from '../../types/base-detailed-schema-types'
 
-it('Con_BD_Schema_TypeOnly_SubjT<T>: should construct schema base subject type', () => {
+it('Con_BD_Schema_TypeOnly_SubjT<T>: construct schema subject type', () => {
   check<string>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'string' }>)
   // @ts-expect-error 'number' is not assignable 'string'
   check<string>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'number' }>)
@@ -20,102 +17,18 @@ it('Con_BD_Schema_TypeOnly_SubjT<T>: should construct schema base subject type',
   check<boolean>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'boolean' }>)
   // @ts-expect-error 'string' is not assignable to parameter of type 'boolean'
   check<boolean>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'string' }>)
-})
 
-it('Con_BrandSchema_SubjT<T>: should construct schema subject brand type', () => {
-  check<{ __id: 'X' }>(unknownX as Con_BrandSchema_SubjT<['id', 'X']>)
-
-  check<{ __id: 'Y' }>(
-    // @ts-expect-error '{ __id: "X" }' is not assignable '{ __id: "Y" }'
-    unknownX as Con_BrandSchema_SubjT<['id', 'X']>
+  check<'x'>(
+    unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'literal'; of: 'x' }>
+  )
+  check<'y'>(
+    // @ts-expect-error '"x"' is not assignable to parameter of type '"y"'
+    unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'literal'; of: 'x' }>
   )
 
-  check<{ __idX: 'X' }>(
-    // @ts-expect-error '{ __idY: "X" }' is not assignable to '{ __idY: "X" }'
-    unknownX as Con_BrandSchema_SubjT<['idY', 'X']>
-  )
-})
-
-it('ExtWith_BrandSchema_SubjT<T, U>: should narrow U type with brand schema subject type', () => {
-  check<string & { __id: 'X' }>(
-    // @ts-expect-error 'string' is not assignable to 'string & { __id: "X" }'
-    unknownX as ExtWith_BrandSchema_SubjT<{ type: 'string' }, string>
-  )
-
-  check<string & { __id: 'X' }>(
-    unknownX as ExtWith_BrandSchema_SubjT<
-      { type: 'string'; brand: ['id', 'X'] },
-      string
-    >
-  )
-})
-
-it('ExtWith_BD_OptionalSchema_SubjT_V<T, U>: check `optional`', () => {
-  check<string>(
-    unknownX as ExtWith_BD_OptionalSchema_SubjT_V<{ type: 'string' }, string>
-  )
-
-  check<string>(
-    unknownX as ExtWith_BD_OptionalSchema_SubjT_V<
-      { type: 'string'; optional: false },
-      string
-    >
-  )
-
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as ExtWith_BD_OptionalSchema_SubjT_V<
-      { type: 'string'; optional: true },
-      string
-    >
-  )
-
-  check<string>(
-    unknownX as NonNullable<
-      ExtWith_BD_OptionalSchema_SubjT_V<
-        { type: 'string'; optional: true },
-        string
-      >
-    >
-  )
-})
-
-it('ExtWith_BD_OptionalSchema_SubjT_V<T, U>: should ignore `default`', () => {
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as ExtWith_BD_OptionalSchema_SubjT_V<
-      { type: 'string'; optional: true; default: 'x' },
-      string
-    >
-  )
-})
-
-it('Con_BD_Schema_SubjT_V<T>: check optionality extension', () => {
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable to 'string'
-    unknownX as Con_BD_Schema_SubjT_V<{
-      type: 'string'
-      optional: true
-    }>
-  )
-
-  check<string>(
-    unknownX as NonNullable<
-      Con_BD_Schema_SubjT_V<{
-        type: 'string'
-        optional: true
-      }>
-    >
-  )
-
-  check<string>(
-    // @ts-expect-error 'string | undefined' is not assignable to parameter of type 'string'
-    unknownX as Con_BD_Schema_SubjT_V<{
-      type: 'string'
-      optional: true
-      default: 'x'
-    }>
-  )
+  check<0>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'literal'; of: 0 }>)
+  // @ts-expect-error '0' is not assignable to parameter of type '1'
+  check<1>(unknownX as Con_BD_Schema_TypeOnly_SubjT<{ type: 'literal'; of: 0 }>)
 })
 
 it('Con_BD_Schema_SubjT_V<T>: check brand schema subject type extension', () => {
@@ -201,4 +114,84 @@ it('Con_BD_Schema_SubjT_V<T>: check branded schema', () => {
     // @ts-expect-error '{ __key: "value"; } & string' is not 'number & { __key: "value"; }'
     unknownX as Con_BD_Schema_SubjT_V<typeof schema>
   )
+})
+
+describe('PrimitiveSchema parameters', () => {
+  it('Con_BD_Schema_SubjT_V<T>: optional', () => {
+    type StrSubj = Con_BD_Schema_SubjT_V<{
+      type: 'string'
+      optional: true
+    }>
+
+    check<string | undefined>(unknownX as StrSubj)
+    // @ts-expect-error 'string | undefined' is not 'string'
+    check<string>(unknownX as StrSubj)
+
+    type NumSubj = Con_BD_Schema_SubjT_V<{
+      type: 'number'
+      optional: true
+    }>
+
+    check<number | undefined>(unknownX as NumSubj)
+    // @ts-expect-error 'number | undefined' is not 'number'
+    check<number>(unknownX as NumSubj)
+
+    type BoolSubj = Con_BD_Schema_SubjT_V<{
+      type: 'boolean'
+      optional: true
+    }>
+
+    check<boolean | undefined>(unknownX as BoolSubj)
+    // @ts-expect-error 'boolean | undefined' is not 'boolean'
+    check<boolean>(unknownX as BoolSubj)
+
+    type LitSubj = Con_BD_Schema_SubjT_V<{
+      type: 'literal'
+      of: 'x'
+      optional: true
+    }>
+
+    check<'x' | undefined>(unknownX as LitSubj)
+    // @ts-expect-error 'string | undefined' is not 'string'
+    check<'x'>(unknownX as LitSubj)
+  })
+
+  it('Con_BD_Schema_SubjT_V<T>: nullable', () => {
+    type StrSubj = Con_BD_Schema_SubjT_V<{
+      type: 'string'
+      nullable: true
+    }>
+
+    check<string | null>(unknownX as StrSubj)
+    // @ts-expect-error 'string | null' is not 'string'
+    check<string>(unknownX as StrSubj)
+
+    type NumSubj = Con_BD_Schema_SubjT_V<{
+      type: 'number'
+      nullable: true
+    }>
+
+    check<number | null>(unknownX as NumSubj)
+    // @ts-expect-error 'number | null' is not 'number'
+    check<number>(unknownX as NumSubj)
+
+    type BoolSubj = Con_BD_Schema_SubjT_V<{
+      type: 'boolean'
+      nullable: true
+    }>
+
+    check<boolean | null>(unknownX as BoolSubj)
+    // @ts-expect-error 'boolean | null' is not 'boolean'
+    check<boolean>(unknownX as BoolSubj)
+
+    type LitSubj = Con_BD_Schema_SubjT_V<{
+      type: 'literal'
+      of: 'x'
+      nullable: true
+    }>
+
+    check<'x' | null>(unknownX as LitSubj)
+    // @ts-expect-error 'string | null' is not 'string'
+    check<'x'>(unknownX as LitSubj)
+  })
 })

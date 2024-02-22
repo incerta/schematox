@@ -90,7 +90,7 @@ anotherSubject // type is narrowed: { id: string & { __idFor: 'User' }; name: st
 Same schema but defined programmatically:
 
 ```typescript
-import { object, string, assert } from 'schematox'
+import { object, string } from 'schematox'
 import type { SubjectType } from 'schematox'
 
 const userStruct = object({
@@ -128,16 +128,9 @@ if (guard) {
 if (userStruct.guard(subject)) {
   subject // type is narrowed: { id: string & { __idFor: 'User' }; name: string }
 }
-
-const anotherSubject = { ...subject } as unknown
-
-// Throws error if subject is not valid
-assert(userStruct.__schema, anotherSubject)
-
-anotherSubject // type is narrowed: { id: string & { __idFor: 'User' }; name: string }
 ```
 
-Unfortunately we can't currently integrate `assert` as struct method due to [typescript limitations](https://github.com/microsoft/TypeScript/issues/36931#issuecomment-1949131317). But all programmatically defined schemas are the same as static, one just needs to access it through `__schema`. We can mix static/programmatic schemas either accessing it through `__schema` or wrap it by `{ __schema: T }` if consumer is programmatic schema.
+All programmatically defined schemas are the same as static, one just needs to access it through `__schema`. We can mix static/programmatic schemas either accessing it through `__schema` or wrap it by `{ __schema: T }` if consumer is programmatic schema.
 
 ## All supported data types
 
