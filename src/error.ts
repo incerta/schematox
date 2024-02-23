@@ -1,4 +1,4 @@
-import type { Schema } from './types/compound-schema-types'
+import type { Schema } from './types/compounds'
 
 export type ErrorCode = (typeof ERROR_CODE)[keyof typeof ERROR_CODE]
 

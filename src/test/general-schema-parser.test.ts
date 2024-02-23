@@ -2,7 +2,7 @@ import { parse } from '../general-schema-parser'
 import { ERROR_CODE } from '../error'
 import { check, unknownX } from './test-utils'
 
-import type { Schema } from '../types/compound-schema-types'
+import type { Schema } from '../types/compounds'
 
 describe('Parse BASE schema with VALID subject', () => {
   it('parse: `{ type: "string" }` schema', () => {

@@ -7,31 +7,24 @@ import type {
   NestedSchema,
   StructSchema,
   Schema,
-} from './types/compound-schema-types'
+} from './types/compounds'
 import type { InvalidSubject } from './error'
 
 type StructMethods<T extends Schema> = {
-  parse: (
-    subject: unknown
-  ) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
-
-  validate: (
-    subject: unknown
-  ) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
-
+  parse: (s: unknown) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
+  validate: (s: unknown) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
   guard: (subject: unknown) => subject is Con_Schema_SubjT<T>
 }
 
-type SharedParams = 'optional' | 'nullable' | 'description'
-
+type Shared = 'optional' | 'nullable' | 'description'
 type ParamsBySchemaType = {
-  string: SharedParams | 'minLength' | 'maxLength' | 'brand'
-  number: SharedParams | 'min' | 'max' | 'brand'
-  boolean: SharedParams | 'brand'
-  literal: SharedParams | 'brand'
-  object: SharedParams
-  union: SharedParams
-  array: SharedParams | 'minLength' | 'maxLength'
+  string: Shared | 'minLength' | 'maxLength' | 'brand'
+  number: Shared | 'min' | 'max' | 'brand'
+  boolean: Shared | 'brand'
+  literal: Shared | 'brand'
+  object: Shared
+  union: Shared
+  array: Shared | 'minLength' | 'maxLength'
 }
 
 type StructParams = ParamsBySchemaType extends Record<string, infer U>

@@ -3,7 +3,7 @@ import { ERROR_CODE } from './error'
 import { verifyPrimitive } from './verify-primitive'
 
 import type { EitherError } from './utils/fp'
-import type { Schema, Con_Schema_SubjT } from './types/compound-schema-types'
+import type { Schema, Con_Schema_SubjT } from './types/compounds'
 import type { InvalidSubject, ErrorPath } from './error'
 
 export function validate<T extends Schema>(
