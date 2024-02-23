@@ -3,7 +3,7 @@ import type {
   Con_PrimitiveSchema_TypeOnly_SubjT,
   Con_PrimitiveSchema_SubjT,
   PrimitiveSchema,
-} from '../../types/base-detailed-schema-types'
+} from '../../types/primitives'
 
 it('Con_PrimitiveSchema_TypeOnly_SubjT<T>: construct schema subject type', () => {
   check<string>(

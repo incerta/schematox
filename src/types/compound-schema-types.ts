@@ -1,7 +1,4 @@
-import type {
-  PrimitiveSchema,
-  Con_PrimitiveSchema_SubjT,
-} from './base-detailed-schema-types'
+import type { PrimitiveSchema, Con_PrimitiveSchema_SubjT } from './primitives'
 
 import { ExtWith_SchemaParams_SubjT } from './extensions'
 
