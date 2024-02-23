@@ -4,7 +4,7 @@ import { validate } from '../../general-schema-validator'
 import { string, makeStruct } from '../../programmatic-schema'
 import { check } from '../test-utils'
 
-import { Schema } from '../../types/compound-schema-types'
+import { Schema } from '../../types/compounds'
 
 // Describe layer
 it.todo('Struct: no parameters')

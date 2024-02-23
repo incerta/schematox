@@ -2,7 +2,7 @@ import { validate, guard } from '../general-schema-validator'
 import { ERROR_CODE } from '../error'
 import { check, unknownX } from './test-utils'
 
-import type { Schema } from '../types/compound-schema-types'
+import type { Schema } from '../types/compounds'
 
 describe('Validate BASE schema with VALID subject', () => {
   it('validate: `{ type: "string" }` schema', () => {

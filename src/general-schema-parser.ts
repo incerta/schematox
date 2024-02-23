@@ -1,10 +1,10 @@
-import { error, data } from './utils/fp'
 import { ERROR_CODE } from './error'
+import { error, data } from './utils/fp'
 import { verifyPrimitive } from './verify-primitive'
 
-import type { EitherError } from './utils/fp'
-import type { Schema, Con_Schema_SubjT } from './types/compound-schema-types'
 import type { InvalidSubject, ErrorPath } from './error'
+import type { EitherError } from './utils/fp'
+import type { Schema, Con_Schema_SubjT } from './types/compounds'
 
 export function parse<T extends Schema>(
   schema: T,

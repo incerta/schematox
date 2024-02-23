@@ -1,7 +1,7 @@
 import { ERROR_CODE } from '../error'
 import { verifyPrimitive } from '../verify-primitive'
 
-import type { Schema } from '../types/compound-schema-types'
+import type { Schema } from '../types/compounds'
 
 describe('Verify valid/invalid subject of "string" schema', () => {
   it('verifyPrimitive: valid subject by required schema', () => {

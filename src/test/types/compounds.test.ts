@@ -6,7 +6,7 @@ import type {
   Con_UnionSchema_SubjT,
   Con_Schema_SubjT,
   Schema,
-} from '../../types/compound-schema-types'
+} from '../../types/compounds'
 
 describe('Construct BaseSchema subject type', () => {
   it('Con_PrimitiveSchema_SubjT<T>: check base detailed schema required/optional cases', () => {
