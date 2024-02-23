@@ -3,13 +3,13 @@ import { ERROR_CODE } from './error'
 import { verifyPrimitive } from './verify-primitive'
 
 import type { EitherError } from './utils/fp'
-import type { Schema, Con_Schema_SubjT_V } from './types/compound-schema-types'
+import type { Schema, Con_Schema_SubjT } from './types/compound-schema-types'
 import type { InvalidSubject, ErrorPath } from './error'
 
 export function validate<T extends Schema>(
   schema: T,
   subject: unknown
-): EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+): EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
 
 export function validate(
   this: ErrorPath | undefined,
@@ -163,6 +163,6 @@ export function validate(
 export function guard<T extends Schema>(
   schema: T,
   subject: unknown
-): subject is Con_Schema_SubjT_V<T> {
+): subject is Con_Schema_SubjT<T> {
   return validate(schema, subject).error === undefined
 }

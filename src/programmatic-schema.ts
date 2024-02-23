@@ -3,7 +3,7 @@ import { parse } from './general-schema-parser'
 
 import type { EitherError } from './utils/fp'
 import type {
-  Con_Schema_SubjT_V,
+  Con_Schema_SubjT,
   NestedSchema,
   StructSchema,
   Schema,
@@ -13,13 +13,13 @@ import type { InvalidSubject } from './error'
 type StructMethods<T extends Schema> = {
   parse: (
     subject: unknown
-  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
 
   validate: (
     subject: unknown
-  ) => EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+  ) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
 
-  guard: (subject: unknown) => subject is Con_Schema_SubjT_V<T>
+  guard: (subject: unknown) => subject is Con_Schema_SubjT<T>
 }
 
 type SharedParams = 'optional' | 'nullable' | 'description'

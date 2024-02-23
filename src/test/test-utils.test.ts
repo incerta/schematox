@@ -19,7 +19,7 @@ it('check: type compatibility', () => {
   check<C, D>
 })
 
-it('check: type of declared indentifier', () => {
+it('check: type of declared identifier', () => {
   const x = 'x'
 
   check<string>(x)

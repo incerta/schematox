@@ -3,9 +3,9 @@ import { ExtWith_SchemaParams_SubjT } from './extensions'
 /**
  * @example ['idFor', 'User'] -> T & { __idFor: 'User' }
  **/
-export type BrandSchema = Readonly<[__key: string, __keyFor: string]>
+export type BrandSchema = Readonly<[string, string]>
 
-export type BD_String = {
+export type StringSchema = {
   type: 'string'
 
   optional?: boolean
@@ -18,7 +18,7 @@ export type BD_String = {
   maxLength?: number /* <= */
 }
 
-export type BD_Number = {
+export type NumberSchema = {
   type: 'number'
 
   optional?: boolean
@@ -31,7 +31,7 @@ export type BD_Number = {
   max?: number /* <= */
 }
 
-export type BD_Boolean = {
+export type BooleanSchema = {
   type: 'boolean'
 
   optional?: boolean
@@ -41,7 +41,7 @@ export type BD_Boolean = {
   brand?: BrandSchema
 }
 
-export type BD_Literal<T extends string | number = string | number> = {
+export type LiteralSchema<T extends string | number = string | number> = {
   type: 'literal'
   of: T
 
@@ -52,21 +52,25 @@ export type BD_Literal<T extends string | number = string | number> = {
   brand?: BrandSchema
 }
 
-export type BD_Schema = BD_String | BD_Number | BD_Boolean | BD_Literal
+export type PrimitiveSchema =
+  | StringSchema
+  | NumberSchema
+  | BooleanSchema
+  | LiteralSchema
 
-export type Con_BD_Schema_TypeOnly_SubjT<T extends BD_Schema> =
-  T extends BD_String
+export type Con_PrimitiveSchema_TypeOnly_SubjT<T extends PrimitiveSchema> =
+  T extends StringSchema
     ? string
-    : T extends BD_Number
+    : T extends NumberSchema
       ? number
-      : T extends BD_Boolean
+      : T extends BooleanSchema
         ? boolean
-        : T extends BD_Literal<infer U>
+        : T extends LiteralSchema<infer U>
           ? U
           : never
 
-export type Con_BD_Schema_SubjT_V<
-  T extends BD_Schema,
-  U = Con_BD_Schema_TypeOnly_SubjT<T>,
+export type Con_PrimitiveSchema_SubjT<
+  T extends PrimitiveSchema,
+  U = Con_PrimitiveSchema_TypeOnly_SubjT<T>,
   V = ExtWith_SchemaParams_SubjT<T, U>,
 > = V
