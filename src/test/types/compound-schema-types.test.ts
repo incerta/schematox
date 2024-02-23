@@ -1,5 +1,5 @@
 import { check, unknownX } from '../test-utils'
-import { Con_PrimitiveSchema_SubjT } from '../../types/base-detailed-schema-types'
+import { Con_PrimitiveSchema_SubjT } from '../../types/primitives'
 import type {
   Con_ArraySchema_SubjT,
   Con_ObjectSchema_SubjT,

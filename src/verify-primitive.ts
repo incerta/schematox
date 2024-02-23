@@ -1,7 +1,7 @@
 import { ERROR_CODE } from './error'
 
 import { ErrorCode } from './error'
-import type { PrimitiveSchema } from './types/base-detailed-schema-types'
+import type { PrimitiveSchema } from './types/primitives'
 
 export function verifyPrimitive(
   schema: PrimitiveSchema,
