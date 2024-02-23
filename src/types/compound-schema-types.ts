@@ -1,11 +1,11 @@
 import type {
-  BD_Schema,
-  Con_BD_Schema_SubjT_V,
+  PrimitiveSchema,
+  Con_PrimitiveSchema_SubjT,
 } from './base-detailed-schema-types'
 
 import { ExtWith_SchemaParams_SubjT } from './extensions'
 
-export type BaseSchema = BD_Schema
+export type BaseSchema = PrimitiveSchema
 
 type BaseObjectSchema<T> = {
   type: 'object'
@@ -75,33 +75,27 @@ export type StructSchema =
 
 // TODO: move all constructors to `src/types/constructors.ts` file
 
-/* Construct BaseSchema subject type */
-
-// FIXME: should be removed before submitting current PR
-export type Con_BaseSchema_SubjT_V<T extends BaseSchema> =
-  Con_BD_Schema_SubjT_V<T>
-
 /* Construct ArraySchema subject type */
 
-export type Con_ArraySchema_SubjT_V<T extends ArraySchema> =
+export type Con_ArraySchema_SubjT<T extends ArraySchema> =
   ExtWith_SchemaParams_SubjT<
     T,
     T extends { of: infer U }
       ? U extends BaseSchema
-        ? Array<Con_BaseSchema_SubjT_V<U>>
+        ? Array<Con_PrimitiveSchema_SubjT<U>>
         : U extends ArraySchema
-          ? Array<Con_ArraySchema_SubjT_V<U>>
+          ? Array<Con_ArraySchema_SubjT<U>>
           : U extends ObjectSchema
-            ? Array<Con_ObjectSchema_SubjT_V<U>>
+            ? Array<Con_ObjectSchema_SubjT<U>>
             : U extends UnionSchema
-              ? Array<Con_UnionSchema_SubjT_V<U>>
+              ? Array<Con_UnionSchema_SubjT<U>>
               : never
       : never
   >
 
 /* Construct ObjectSchema subject type */
 
-export type Con_ObjectSchema_SubjT_V<T extends ObjectSchema> =
+export type Con_ObjectSchema_SubjT<T extends ObjectSchema> =
   ExtWith_SchemaParams_SubjT<
     T,
     T extends {
@@ -109,13 +103,13 @@ export type Con_ObjectSchema_SubjT_V<T extends ObjectSchema> =
     }
       ? {
           -readonly [k in keyof U]: U[k] extends BaseSchema
-            ? Con_BaseSchema_SubjT_V<U[k]>
+            ? Con_PrimitiveSchema_SubjT<U[k]>
             : U[k] extends ObjectSchema
-              ? Con_ObjectSchema_SubjT_V<U[k]>
+              ? Con_ObjectSchema_SubjT<U[k]>
               : U[k] extends ArraySchema
-                ? Con_ArraySchema_SubjT_V<U[k]>
+                ? Con_ArraySchema_SubjT<U[k]>
                 : U[k] extends UnionSchema
-                  ? Con_UnionSchema_SubjT_V<U[k]>
+                  ? Con_UnionSchema_SubjT<U[k]>
                   : never
         }
       : never
@@ -123,7 +117,7 @@ export type Con_ObjectSchema_SubjT_V<T extends ObjectSchema> =
 
 /* Construct UnionSchema subject type */
 
-export type Con_UnionSchema_SubjT_V<T extends UnionSchema> =
+export type Con_UnionSchema_SubjT<T extends UnionSchema> =
   ExtWith_SchemaParams_SubjT<
     T,
     T extends {
@@ -131,27 +125,27 @@ export type Con_UnionSchema_SubjT_V<T extends UnionSchema> =
       of: Array<infer U>
     }
       ? U extends BaseSchema
-        ? Con_BaseSchema_SubjT_V<U>
+        ? Con_PrimitiveSchema_SubjT<U>
         : U extends ArraySchema
-          ? Con_ArraySchema_SubjT_V<U>
+          ? Con_ArraySchema_SubjT<U>
           : U extends ObjectSchema
-            ? Con_ObjectSchema_SubjT_V<U>
+            ? Con_ObjectSchema_SubjT<U>
             : U extends UnionSchema
-              ? Con_UnionSchema_SubjT_V<U>
+              ? Con_UnionSchema_SubjT<U>
               : never
       : never
   >
 
 /* Construct Schema subject type */
 
-export type Con_Schema_SubjT_V<T extends Schema> = T extends BaseSchema
-  ? Con_BaseSchema_SubjT_V<T>
+export type Con_Schema_SubjT<T extends Schema> = T extends BaseSchema
+  ? Con_PrimitiveSchema_SubjT<T>
   : T extends ArraySchema
-    ? Con_ArraySchema_SubjT_V<T>
+    ? Con_ArraySchema_SubjT<T>
     : T extends ObjectSchema
-      ? Con_ObjectSchema_SubjT_V<T>
+      ? Con_ObjectSchema_SubjT<T>
       : T extends UnionSchema
-        ? Con_UnionSchema_SubjT_V<T>
+        ? Con_UnionSchema_SubjT<T>
         : never
 
 /* Construct Schema subject type from schema or schema struct */
@@ -159,7 +153,7 @@ export type Con_Schema_SubjT_V<T extends Schema> = T extends BaseSchema
 export type SubjectType<T extends { __schema: Schema } | Schema> = T extends {
   __schema: Schema
 }
-  ? Con_Schema_SubjT_V<T['__schema']>
+  ? Con_Schema_SubjT<T['__schema']>
   : T extends Schema
-    ? Con_Schema_SubjT_V<T>
+    ? Con_Schema_SubjT<T>
     : never

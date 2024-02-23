@@ -3,13 +3,13 @@ import { ERROR_CODE } from './error'
 import { verifyPrimitive } from './verify-primitive'
 
 import type { EitherError } from './utils/fp'
-import type { Schema, Con_Schema_SubjT_V } from './types/compound-schema-types'
+import type { Schema, Con_Schema_SubjT } from './types/compound-schema-types'
 import type { InvalidSubject, ErrorPath } from './error'
 
 export function parse<T extends Schema>(
   schema: T,
   subject: unknown
-): EitherError<InvalidSubject[], Con_Schema_SubjT_V<T>>
+): EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
 
 export function parse(
   this: ErrorPath | void,

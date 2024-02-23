@@ -1,39 +1,39 @@
 import { check, unknownX } from '../test-utils'
+import { Con_PrimitiveSchema_SubjT } from '../../types/base-detailed-schema-types'
 import type {
-  Con_BaseSchema_SubjT_V,
-  Con_ArraySchema_SubjT_V,
-  Con_ObjectSchema_SubjT_V,
-  Con_UnionSchema_SubjT_V,
-  Con_Schema_SubjT_V,
+  Con_ArraySchema_SubjT,
+  Con_ObjectSchema_SubjT,
+  Con_UnionSchema_SubjT,
+  Con_Schema_SubjT,
   Schema,
 } from '../../types/compound-schema-types'
 
 describe('Construct BaseSchema subject type', () => {
-  it('Con_BaseSchema_SubjT_V<T>: check base detailed schema required/optional cases', () => {
-    check<string>(unknownX as Con_BaseSchema_SubjT_V<{ type: 'string' }>)
+  it('Con_PrimitiveSchema_SubjT<T>: check base detailed schema required/optional cases', () => {
+    check<string>(unknownX as Con_PrimitiveSchema_SubjT<{ type: 'string' }>)
     check<string>(
       // @ts-expect-error 'number' is not assignable to 'string'
-      unknownX as Con_BaseSchema_SubjT_V<{ type: 'number' }>
+      unknownX as Con_PrimitiveSchema_SubjT<{ type: 'number' }>
     )
 
     check<string | undefined>(
-      unknownX as Con_BaseSchema_SubjT_V<{
+      unknownX as Con_PrimitiveSchema_SubjT<{
         type: 'string'
         optional: true
       }>
     )
     check<string>(
       // @ts-expect-error 'string | undefined' is not assignable to 'string'
-      unknownX as Con_BaseSchema_SubjT_V<{
+      unknownX as Con_PrimitiveSchema_SubjT<{
         type: 'string'
         optional: true
       }>
     )
   })
 
-  it('Con_BaseSchema_SubjT_V<T>: should ignore nestend schema default property', () => {
+  it('Con_PrimitiveSchema_SubjT<T>: should ignore nestend schema default property', () => {
     check<string | undefined>(
-      unknownX as Con_BaseSchema_SubjT_V<{
+      unknownX as Con_PrimitiveSchema_SubjT<{
         type: 'string'
         optional: true
         default: 'x'
@@ -41,7 +41,7 @@ describe('Construct BaseSchema subject type', () => {
     )
     check<string>(
       // @ts-expect-error 'string | undefined' is not assignable to parameter of type 'string'
-      unknownX as Con_BaseSchema_SubjT_V<{
+      unknownX as Con_PrimitiveSchema_SubjT<{
         type: 'string'
         optional: true
         default: 'x'
@@ -49,7 +49,7 @@ describe('Construct BaseSchema subject type', () => {
     )
     check<string | undefined>(
       // @ts-expect-error 'number | undefined' is not assignable to parameter of type 'string | undefined'
-      unknownX as Con_BaseSchema_SubjT_V<{
+      unknownX as Con_PrimitiveSchema_SubjT<{
         type: 'number'
         optional: true
         default: 0
@@ -59,78 +59,78 @@ describe('Construct BaseSchema subject type', () => {
 })
 
 describe('Construct ArraySchema subject type', () => {
-  it('Con_ArraySchema_SubjT_V<T>: check BaseSchema subject type construction', () => {
+  it('Con_ArraySchema_SubjT<T>: check BaseSchema subject type construction', () => {
     check<string[]>(
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'string' }
       }>
     )
     check<string[]>(
       // @ts-expect-error 'number[]' is not assignable to parameter of type 'string[]'
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'number' }
       }>
     )
 
     check<Array<string | undefined>>(
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'string'; optional: true }
       }>
     )
     check<Array<string | undefined>>(
       // @ts-expect-error 'number | undefined' is not assignable to type 'string | undefined'
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'number'; optional: true }
       }>
     )
     check<Array<string>>(
       // @ts-expect-error 'string | undefined' is not assignable to type 'string'
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'string'; optional: true; default: 'x' }
       }>
     )
   })
 
-  it('Con_ArraySchema_SubjT_V<T>: check nested ArraySchema subject type construction', () => {
+  it('Con_ArraySchema_SubjT<T>: check nested ArraySchema subject type construction', () => {
     check<string[][]>(
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'array'; of: { type: 'string' } }
       }>
     )
     check<string[][]>(
       // @ts-expect-error 'number[][]' is not assignable to parameter of type 'string[][]'
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'array'; of: { type: 'number' } }
       }>
     )
   })
 
-  it('Con_ArraySchema_SubjT_V<T>: check nested ObjectSchema subject type construction', () => {
+  it('Con_ArraySchema_SubjT<T>: check nested ObjectSchema subject type construction', () => {
     check<Array<{ x: string }>>(
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'object'; of: { x: { type: 'string' } } }
       }>
     )
     check<Array<{ x: string }>>(
       // @ts-expect-error 'number' is not assignable to type 'string'
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'object'; of: { x: { type: 'number' } } }
       }>
     )
   })
 
-  it('Con_ArraySchema_SubjT_V<T>: nested ObjectSchema nested BaseSchema should ignore default property', () => {
+  it('Con_ArraySchema_SubjT<T>: nested ObjectSchema nested BaseSchema should ignore default property', () => {
     check<Array<{ x: string | undefined }>>(
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: {
           type: 'object'
@@ -140,7 +140,7 @@ describe('Construct ArraySchema subject type', () => {
     )
     check<Array<{ x: string | undefined }>>(
       // @ts-expect-error 'number | undefined' is not assignable to type 'string | undefined'
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: {
           type: 'object'
@@ -151,7 +151,7 @@ describe('Construct ArraySchema subject type', () => {
 
     check<Array<{ x: string }>>(
       // @ts-expect-error 'string | undefined' is not assignable to type 'string'
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: {
           type: 'object'
@@ -161,7 +161,7 @@ describe('Construct ArraySchema subject type', () => {
     )
     check<Array<{ x: string }>>(
       // @ts-expect-error 'number | undefined' is not assignable to type 'string'
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: {
           type: 'object'
@@ -171,25 +171,25 @@ describe('Construct ArraySchema subject type', () => {
     )
   })
 
-  it('Con_ArraySchema_SubjT_V<T>: should ignore nested schema default property', () => {
+  it('Con_ArraySchema_SubjT<T>: should ignore nested schema default property', () => {
     check<Array<string | undefined>>(
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'string'; optional: true; default: 'x' }
       }>
     )
     check<string[]>(
       // @ts-expect-error '(string | undefined)[]' is not assignable to parameter of type 'string[]'
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'string'; optional: true; default: 'x' }
       }>
     )
   })
 
-  it('Con_ArraySchema_SubjT_V<T>: check ArraySchema can be optional by itself', () => {
+  it('Con_ArraySchema_SubjT<T>: check ArraySchema can be optional by itself', () => {
     check<Array<string> | undefined>(
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'string' }
         optional: true
@@ -197,7 +197,7 @@ describe('Construct ArraySchema subject type', () => {
     )
     check<Array<string> | undefined>(
       // @ts-expect-error 'number[] | undefined' is not 'string[] | undefined'
-      unknownX as Con_ArraySchema_SubjT_V<{
+      unknownX as Con_ArraySchema_SubjT<{
         type: 'array'
         of: { type: 'number' }
         optional: true
@@ -205,8 +205,8 @@ describe('Construct ArraySchema subject type', () => {
     )
   })
 
-  it('Con_ArraySchema_SubjT_V<T>: nested UnionSchema', () => {
-    type Subject = Con_ArraySchema_SubjT_V<{
+  it('Con_ArraySchema_SubjT<T>: nested UnionSchema', () => {
+    type Subject = Con_ArraySchema_SubjT<{
       type: 'array'
       of: { type: 'union'; of: Array<{ type: 'string' } | { type: 'number' }> }
     }>
@@ -218,8 +218,8 @@ describe('Construct ArraySchema subject type', () => {
 })
 
 describe('Construct UnionSchema subject type', () => {
-  it('Con_UnionSchema_SubjT_V<T>: base schema mix', () => {
-    type Subject = Con_UnionSchema_SubjT_V<{
+  it('Con_UnionSchema_SubjT<T>: base schema mix', () => {
+    type Subject = Con_UnionSchema_SubjT<{
       type: 'union'
       of: Array<{ type: 'string' } | { type: 'number' } | { type: 'boolean' }>
     }>
@@ -229,8 +229,8 @@ describe('Construct UnionSchema subject type', () => {
     check<string | number>(unknownX as Subject)
   })
 
-  it('Con_UnionSchema_SubjT_V<T>: literals', () => {
-    type Subject = Con_UnionSchema_SubjT_V<{
+  it('Con_UnionSchema_SubjT<T>: literals', () => {
+    type Subject = Con_UnionSchema_SubjT<{
       type: 'union'
       of: Array<{ type: 'literal'; of: 'x' } | { type: 'literal'; of: 0 }>
     }>
@@ -240,8 +240,8 @@ describe('Construct UnionSchema subject type', () => {
     check<'x'>(unknownX as Subject)
   })
 
-  it('Con_UnionSchema_SubjT_V<T>: literals', () => {
-    type Subject = Con_UnionSchema_SubjT_V<{
+  it('Con_UnionSchema_SubjT<T>: literals', () => {
+    type Subject = Con_UnionSchema_SubjT<{
       type: 'union'
       of: Array<{ type: 'literal'; of: 'x' } | { type: 'literal'; of: 0 }>
     }>
@@ -251,8 +251,8 @@ describe('Construct UnionSchema subject type', () => {
     check<'x'>(unknownX as Subject)
   })
 
-  it('Con_UnionSchema_SubjT_V<T>: objects', () => {
-    type Subject = Con_UnionSchema_SubjT_V<{
+  it('Con_UnionSchema_SubjT<T>: objects', () => {
+    type Subject = Con_UnionSchema_SubjT<{
       type: 'union'
       of: Array<
         | { type: 'object'; of: { x: { type: 'string' } } }
@@ -266,8 +266,8 @@ describe('Construct UnionSchema subject type', () => {
     check<{ x: string } | { z: boolean }>(unknownX as Subject)
   })
 
-  it('Con_UnionSchema_SubjT_V<T>: objects', () => {
-    type Subject = Con_UnionSchema_SubjT_V<{
+  it('Con_UnionSchema_SubjT<T>: objects', () => {
+    type Subject = Con_UnionSchema_SubjT<{
       type: 'union'
       of: Array<
         | { type: 'object'; of: { x: { type: 'string' } } }
@@ -281,8 +281,8 @@ describe('Construct UnionSchema subject type', () => {
     check<{ x: string } | { z: boolean }>(unknownX as Subject)
   })
 
-  it('Con_UnionSchema_SubjT_V<T>: objects', () => {
-    type Subject = Con_UnionSchema_SubjT_V<{
+  it('Con_UnionSchema_SubjT<T>: objects', () => {
+    type Subject = Con_UnionSchema_SubjT<{
       type: 'union'
       of: Array<
         | { type: 'string'; optional: true }
@@ -304,8 +304,8 @@ describe('Construct UnionSchema subject type', () => {
     )
   })
 
-  it('Con_UnionSchema_SubjT_V<T>: optional by itself', () => {
-    type Subject = Con_UnionSchema_SubjT_V<{
+  it('Con_UnionSchema_SubjT<T>: optional by itself', () => {
+    type Subject = Con_UnionSchema_SubjT<{
       type: 'union'
       of: Array<{ type: 'string' }>
       optional: true
@@ -318,53 +318,53 @@ describe('Construct UnionSchema subject type', () => {
 })
 
 describe('Construct ObjectSchema subject type', () => {
-  it('Con_ObjectSchema_SubjT_V<T>: check BaseSchema subject type construction', () => {
+  it('Con_ObjectSchema_SubjT<T>: check BaseSchema subject type construction', () => {
     check<{ x: string; y: number }>(
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: { x: { type: 'string' }; y: { type: 'number' } }
       }>
     )
     check<{ x: string; y: number }>(
       // @ts-expect-error 'number' is not assignable to type 'string'
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: { x: { type: 'number' }; y: { type: 'number' } }
       }>
     )
 
     check<{ x: string; y: number }>(
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: { x: { type: 'string' }; y: { type: 'number' } }
       }>
     )
     check<{ x: string; y: number }>(
       // @ts-expect-error 'number' is not assignable to type 'string'
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: { x: { type: 'number' }; y: { type: 'number' } }
       }>
     )
 
     check<{ x: string; y: number | undefined }>(
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: { x: { type: 'string' }; y: { type: 'number'; optional: true } }
       }>
     )
     check<{ x: string; y: number | undefined }>(
       // @ts-expect-error 'string' is not assignable to type 'number'
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: { x: { type: 'string' }; y: { type: 'string'; optional: true } }
       }>
     )
   })
 
-  it('Con_ObjectSchema_SubjT_V<T>: check nested ArraySchema subject type construction', () => {
+  it('Con_ObjectSchema_SubjT<T>: check nested ArraySchema subject type construction', () => {
     check<{ x: string[]; y: number[] }>(
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: {
           x: { type: 'array'; of: { type: 'string' } }
@@ -375,7 +375,7 @@ describe('Construct ObjectSchema subject type', () => {
 
     check<{ x: string[]; y: number[] }>(
       // @ts-expect-error 'string[]' is not assignable to type 'number[]'
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: {
           x: { type: 'array'; of: { type: 'string' } }
@@ -385,9 +385,9 @@ describe('Construct ObjectSchema subject type', () => {
     )
   })
 
-  it('Con_ObjectSchema_SubjT_V<T>: nested ArraySchema should NOT ignore its nested schema optionality', () => {
+  it('Con_ObjectSchema_SubjT<T>: nested ArraySchema should NOT ignore its nested schema optionality', () => {
     check<{ x: Array<string | undefined>; y: Array<number | undefined> }>(
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: {
           x: { type: 'array'; of: { type: 'string'; optional: true } }
@@ -397,7 +397,7 @@ describe('Construct ObjectSchema subject type', () => {
     )
     check<{ x: Array<string | undefined>; y: Array<number | undefined> }>(
       // @ts-expect-error '(number | undefined)[]' is not assignable to type '(string | undefined)[]'
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: {
           x: { type: 'array'; of: { type: 'number'; optional: true } }
@@ -407,9 +407,9 @@ describe('Construct ObjectSchema subject type', () => {
     )
   })
 
-  it('Con_ObjectSchema_SubjT_V<T>: check nested ObjectSchema subject type construction', () => {
+  it('Con_ObjectSchema_SubjT<T>: check nested ObjectSchema subject type construction', () => {
     check<{ x: { a: string; b: number }; y: { c: boolean; d: string } }>(
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: {
           x: {
@@ -426,7 +426,7 @@ describe('Construct ObjectSchema subject type', () => {
 
     check<{ x: { a: string; b: number }; y: { c: boolean; d: number } }>(
       // @ts-expect-error 'y.d' are incompatible; 'string' is not 'number'
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: {
           x: {
@@ -442,9 +442,9 @@ describe('Construct ObjectSchema subject type', () => {
     )
   })
 
-  it('Con_ObjectSchema_SubjT_V<T>: nested ObjectSchema nested BaseSchema should ignore default property', () => {
+  it('Con_ObjectSchema_SubjT<T>: nested ObjectSchema nested BaseSchema should ignore default property', () => {
     check<{ x: { y: string | undefined } }>(
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: {
           x: {
@@ -456,7 +456,7 @@ describe('Construct ObjectSchema subject type', () => {
     )
     check<{ x: { y: string | undefined } }>(
       // @ts-expect-error 'number | undefined' is not assignable to type 'string | undefined'
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: {
           x: {
@@ -468,7 +468,7 @@ describe('Construct ObjectSchema subject type', () => {
     )
 
     check<{ x: { y: string | undefined } }>(
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: {
           x: {
@@ -480,7 +480,7 @@ describe('Construct ObjectSchema subject type', () => {
     )
     check<{ x: { y: string | undefined } }>(
       // @ts-expect-error type 'number | undefined' is not assignable to type 'string | undefined'
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: {
           x: {
@@ -492,9 +492,9 @@ describe('Construct ObjectSchema subject type', () => {
     )
   })
 
-  it('Con_ObjectSchema_SubjT_V<T>: check ObjectSchema can be optional by itself', () => {
+  it('Con_ObjectSchema_SubjT<T>: check ObjectSchema can be optional by itself', () => {
     check<{ x: string } | undefined>(
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: { x: { type: 'string' } }
         optional: true
@@ -502,7 +502,7 @@ describe('Construct ObjectSchema subject type', () => {
     )
     check<{ x: string }>(
       // @ts-expect-error '{ x: string; } | undefined' is not assignable to parameter of type '{ x: string; }'
-      unknownX as Con_ObjectSchema_SubjT_V<{
+      unknownX as Con_ObjectSchema_SubjT<{
         type: 'object'
         of: { x: { type: 'string' } }
         optional: true
@@ -510,7 +510,7 @@ describe('Construct ObjectSchema subject type', () => {
     )
   })
 
-  it('Con_ObjectSchema_SubjT_V<T>: nested branded types', () => {
+  it('Con_ObjectSchema_SubjT<T>: nested branded types', () => {
     const schema = {
       type: 'object',
       of: {
@@ -519,16 +519,16 @@ describe('Construct ObjectSchema subject type', () => {
     } as const satisfies Schema
 
     check<{ x: string & { __key: 'value' } }>(
-      unknownX as Con_ObjectSchema_SubjT_V<typeof schema>
+      unknownX as Con_ObjectSchema_SubjT<typeof schema>
     )
     check<{ x: number & { __key: 'value' } }>(
       // @ts-expect-error '{ __key: "value"; } & string' is not assignable to type 'number'
-      unknownX as Con_ObjectSchema_SubjT_V<typeof schema>
+      unknownX as Con_ObjectSchema_SubjT<typeof schema>
     )
   })
 
-  it('Con_ObjectSchema_SubjT_V<T>: nested UnionSchema', () => {
-    type Subject = Con_ObjectSchema_SubjT_V<{
+  it('Con_ObjectSchema_SubjT<T>: nested UnionSchema', () => {
+    type Subject = Con_ObjectSchema_SubjT<{
       type: 'object'
       of: {
         x: { type: 'union'; of: Array<{ type: 'string' } | { type: 'number' }> }
@@ -573,7 +573,7 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
       },
     } as const satisfies Schema
 
-    type ParsedSubjectType = Con_Schema_SubjT_V<typeof array7DepthLevelSchema>
+    type ParsedSubjectType = Con_Schema_SubjT<typeof array7DepthLevelSchema>
 
     check<Array<Array<Array<Array<Array<Array<Array<string>>>>>>>>(
       unknownX as ParsedSubjectType
@@ -583,9 +583,7 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
       unknownX as ParsedSubjectType
     )
 
-    type ValidatedSubjectType = Con_Schema_SubjT_V<
-      typeof array7DepthLevelSchema
-    >
+    type ValidatedSubjectType = Con_Schema_SubjT<typeof array7DepthLevelSchema>
 
     check<Array<Array<Array<Array<Array<Array<Array<string>>>>>>>>(
       unknownX as ValidatedSubjectType
@@ -641,7 +639,7 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
       },
     } as const satisfies Schema
 
-    type ParsedSubjectType = Con_Schema_SubjT_V<typeof object7DepthLevelSchema>
+    type ParsedSubjectType = Con_Schema_SubjT<typeof object7DepthLevelSchema>
 
     check<{ x: { x: { x: { x: { x: { x: { x: string } } } } } } }>(
       unknownX as ParsedSubjectType
@@ -651,9 +649,7 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
       unknownX as ParsedSubjectType
     )
 
-    type ValidatedSubjectType = Con_Schema_SubjT_V<
-      typeof object7DepthLevelSchema
-    >
+    type ValidatedSubjectType = Con_Schema_SubjT<typeof object7DepthLevelSchema>
 
     check<{ x: { x: { x: { x: { x: { x: { x: string } } } } } } }>(
       unknownX as ValidatedSubjectType
@@ -728,7 +724,7 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
           },
         },
 
-        /* Base detailed required/optional/default/branded string schema (BD_String) */
+        /* Base detailed required/optional/default/branded string schema (StringSchema) */
 
         baseSchemaDetailedString: {
           type: 'object',
@@ -840,7 +836,7 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
       },
     } as const satisfies Schema
 
-    type ValidatedSubjectType = Con_Schema_SubjT_V<typeof schema>
+    type ValidatedSubjectType = Con_Schema_SubjT<typeof schema>
     type ExpectedValidatedSubjectType = {
       baseSchemaShortString: {
         objectSchema: {
@@ -912,7 +908,7 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
       unknownX as ValidatedSubjectType
     )
 
-    type ParsedSubjectType = Con_Schema_SubjT_V<typeof schema>
+    type ParsedSubjectType = Con_Schema_SubjT<typeof schema>
     type ExpectedParsedSubjectType = {
       baseSchemaShortString: {
         objectSchema: {
@@ -977,8 +973,8 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
     )
   })
 
-  it('Con_Schema_SubjT_V<T>: check UnionSchema', () => {
-    type Subject = Con_Schema_SubjT_V<{
+  it('Con_Schema_SubjT<T>: check UnionSchema', () => {
+    type Subject = Con_Schema_SubjT<{
       type: 'union'
       of: Array<{ type: 'string' } | { type: 'number' }>
     }>

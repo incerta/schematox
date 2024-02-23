@@ -1,10 +1,10 @@
 import { ERROR_CODE } from './error'
 
 import { ErrorCode } from './error'
-import type { BD_Schema } from './types/base-detailed-schema-types'
+import type { PrimitiveSchema } from './types/base-detailed-schema-types'
 
 export function verifyPrimitive(
-  schema: BD_Schema,
+  schema: PrimitiveSchema,
   subject: unknown
 ): true | ErrorCode {
   if (schema.optional === true && subject === undefined) {

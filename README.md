@@ -1,29 +1,28 @@
 # SchematoX
 
-SchmatoX is a lightweight library for creating JSON compatible schemas. The subject of the schema can be parsed or validated by the library in a type-safe manner. Instead of focusing on supporting all possible JS/TS data structures, we provide a set of constraints that help reduce the complexity of communication between different JS tools and runtimes.
+Schematox is a lightweight library for creating JSON compatible schemas. The subject of the schema can be parsed, validated or guarded by the library in a type-safe manner. Instead of focusing on supporting all possible JS/TS data structures, we provide a set of constraints that help reduce the complexity of communication between different JS tools and runtimes.
 
 ## Pros
 
 - The statically defined JSON compatible schema
 - Check defined schema correctness using non generic type `Schema`
-- Programmatically defined schemas supported as mean of creation statically defined schema
-- Clear separation of concerns for `validator` and `parser`:
-  - Parse: constructs new object based on the given schema and subject
-  - Validate: checks and returns reference to the original schema subject with narrowed type
+- Programmatically defined schemas (structs) supported as mean of creation statically defined schema
+- Multiple schema subject verification methods:
+  - parse: constructs new object based on the given schema and subject
+  - validate: checks and returns reference to the original schema subject
+  - guard: narrows subject type base on schema without returning new subject reference
 - Schematox uses an Ether-style error handling (no unexpected throws) with an exception of `assert` function
-- We offer first-class support for branded base schema primitive types
-- We have zero dependencies and our runtime code logic is small and easy to grasp, consisting of just a couple of functions
-- Our schemas are just JSON compatible objects, which can be completely independent from our library
+- First-class support for branded base schema primitive types
+- Zero dependencies and our runtime code logic is small and easy to grasp, consisting of just a couple of functions
+- Schemas are just JSON compatible objects, which can be completely independent from our library
 
-Essentially, to define a schema, one doesn't need to import any functions from our library, only the `Schema` type. This approach does come with compound schema depth limitation. Currently, we support 7 layers of depth. It's easy to increase this number, so most likely it's going to change soon.
+Essentially, to define a schema, one doesn't need to import any functions from the library, only the `Schema` type. This approach does come with compound schema depth limitation. Currently, we support 7 layers of depth.
 
 ## Cons
 
 - The library is not ready for production yet, the version is 0 and public API might be changed
 - Currently we support only 7 layers of compound structure depth but most likely it will be higher soon
 - We are not planning to support intersection schema any time soon
-- Null value is acceptable by the parser but will be treated as undefined and transformed to undefined
-- Null value is not acceptable by the validator
 
 Check out [github issues](https://github.com/incerta/schematox/issues) of the project to know what we are planning to support soon.
 
