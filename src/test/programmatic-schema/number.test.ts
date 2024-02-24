@@ -1,4 +1,4 @@
-import { parse } from '../../general-schema-parser'
+import { parse } from '../../parse'
 import { validate } from '../../validate'
 import { number } from '../../programmatic-schema'
 import { check, unknownX } from '../test-utils'

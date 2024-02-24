@@ -1,4 +1,4 @@
-import { parse } from '../general-schema-parser'
+import { parse } from '../parse'
 import { ERROR_CODE } from '../error'
 import { check, unknownX } from './test-utils'
 

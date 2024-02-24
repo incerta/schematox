@@ -1,5 +1,5 @@
 import { validate } from './validate'
-import { parse } from './general-schema-parser'
+import { parse } from './parse'
 
 import type { EitherError } from './utils/fp'
 import type {
