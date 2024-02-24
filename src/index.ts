@@ -11,7 +11,7 @@ export {
 } from './programmatic-schema'
 
 export { error, data } from './utils/fp'
-export { parse } from './general-schema-parser'
+export { parse } from './parse'
 export { validate, guard } from './validate'
 
 export type { Schema, SubjectType } from './types/compounds'

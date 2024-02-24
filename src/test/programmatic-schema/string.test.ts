@@ -1,5 +1,5 @@
 import { ERROR_CODE } from '../../error'
-import { parse } from '../../general-schema-parser'
+import { parse } from '../../parse'
 import { validate } from '../../validate'
 import { string, makeStruct } from '../../programmatic-schema'
 import { check } from '../test-utils'

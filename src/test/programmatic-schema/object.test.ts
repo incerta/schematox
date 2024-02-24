@@ -1,6 +1,6 @@
 import { check } from '../test-utils'
 
-import { parse } from '../../general-schema-parser'
+import { parse } from '../../parse'
 import { validate } from '../../validate'
 
 import {
