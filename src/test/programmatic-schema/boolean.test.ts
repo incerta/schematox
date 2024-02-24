@@ -1,5 +1,5 @@
 import { parse } from '../../general-schema-parser'
-import { validate } from '../../general-schema-validator'
+import { validate } from '../../validate'
 import { boolean } from '../../programmatic-schema'
 import { check, unknownX } from '../test-utils'
 

@@ -1,4 +1,4 @@
-import { validate, guard } from '../general-schema-validator'
+import { validate, guard } from '../validate'
 import { ERROR_CODE } from '../error'
 import { check, unknownX } from './test-utils'
 

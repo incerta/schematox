@@ -1,7 +1,7 @@
 import { check } from '../test-utils'
 
 import { parse } from '../../general-schema-parser'
-import { validate } from '../../general-schema-validator'
+import { validate } from '../../validate'
 
 import {
   array,

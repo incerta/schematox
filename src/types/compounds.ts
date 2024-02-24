@@ -1,8 +1,5 @@
 import type { PrimitiveSchema, Con_PrimitiveSchema_SubjT } from './primitives'
-
-import { ExtWith_SchemaParams_SubjT } from './extensions'
-
-export type BaseSchema = PrimitiveSchema
+import type { ExtWith_SchemaParams_SubjT } from './extensions'
 
 type BaseObjectSchema<T> = {
   type: 'object'
@@ -44,13 +41,13 @@ export type R<T> =
   | BaseUnionSchema<T>
 
 /* 7 layers of compound schema nesting is allowed */
-export type NestedSchema = R<R<R<R<R<R<BaseSchema>>>>>>
+export type NestedSchema = R<R<R<R<R<R<PrimitiveSchema>>>>>>
 
 /*
  * Schema without one layer or recursion.
  * Required for programmatic compound struct definition.
  **/
-export type NestedStructSchema = R<R<R<R<R<BaseSchema>>>>>
+export type NestedStructSchema = R<R<R<R<R<PrimitiveSchema>>>>>
 
 export type ArraySchema<T extends NestedSchema = NestedSchema> =
   BaseArraySchema<T>
@@ -62,13 +59,13 @@ export type UnionSchema<T extends NestedSchema = NestedSchema> =
   BaseUnionSchema<T>
 
 export type CompoundSchema = ObjectSchema | ArraySchema | UnionSchema
-export type Schema = BaseSchema | CompoundSchema
+export type Schema = PrimitiveSchema | CompoundSchema
 
 export type StructSchema =
   | ArraySchema<NestedStructSchema>
   | ObjectSchema<NestedStructSchema>
   | UnionSchema<NestedStructSchema>
-  | BaseSchema
+  | PrimitiveSchema
 
 // TODO: move all constructors to `src/types/constructors.ts` file
 
@@ -78,7 +75,7 @@ export type Con_ArraySchema_SubjT<T extends ArraySchema> =
   ExtWith_SchemaParams_SubjT<
     T,
     T extends { of: infer U }
-      ? U extends BaseSchema
+      ? U extends PrimitiveSchema
         ? Array<Con_PrimitiveSchema_SubjT<U>>
         : U extends ArraySchema
           ? Array<Con_ArraySchema_SubjT<U>>
@@ -99,7 +96,7 @@ export type Con_ObjectSchema_SubjT<T extends ObjectSchema> =
       of: infer U
     }
       ? {
-          -readonly [k in keyof U]: U[k] extends BaseSchema
+          -readonly [k in keyof U]: U[k] extends PrimitiveSchema
             ? Con_PrimitiveSchema_SubjT<U[k]>
             : U[k] extends ObjectSchema
               ? Con_ObjectSchema_SubjT<U[k]>
@@ -121,7 +118,7 @@ export type Con_UnionSchema_SubjT<T extends UnionSchema> =
       type: 'union'
       of: Array<infer U>
     }
-      ? U extends BaseSchema
+      ? U extends PrimitiveSchema
         ? Con_PrimitiveSchema_SubjT<U>
         : U extends ArraySchema
           ? Con_ArraySchema_SubjT<U>
@@ -135,7 +132,7 @@ export type Con_UnionSchema_SubjT<T extends UnionSchema> =
 
 /* Construct Schema subject type */
 
-export type Con_Schema_SubjT<T extends Schema> = T extends BaseSchema
+export type Con_Schema_SubjT<T extends Schema> = T extends PrimitiveSchema
   ? Con_PrimitiveSchema_SubjT<T>
   : T extends ArraySchema
     ? Con_ArraySchema_SubjT<T>
