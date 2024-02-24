@@ -1,5 +1,3 @@
-import { ExtWith_SchemaParams_SubjT } from './extensions'
-
 /**
  * @example ['idFor', 'User'] -> T & { __idFor: 'User' }
  **/
@@ -57,20 +55,3 @@ export type PrimitiveSchema =
   | NumberSchema
   | BooleanSchema
   | LiteralSchema
-
-export type Con_PrimitiveSchema_TypeOnly_SubjT<T extends PrimitiveSchema> =
-  T extends StringSchema
-    ? string
-    : T extends NumberSchema
-      ? number
-      : T extends BooleanSchema
-        ? boolean
-        : T extends LiteralSchema<infer U>
-          ? U
-          : never
-
-export type Con_PrimitiveSchema_SubjT<
-  T extends PrimitiveSchema,
-  U = Con_PrimitiveSchema_TypeOnly_SubjT<T>,
-  V = ExtWith_SchemaParams_SubjT<T, U>,
-> = V
