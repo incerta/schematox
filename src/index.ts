@@ -14,7 +14,8 @@ export { error, data } from './utils/fp'
 export { parse } from './parse'
 export { validate, guard } from './validate'
 
-export type { Schema, SubjectType } from './types/compounds'
+export type { Schema } from './types/compounds'
+export type { SubjectType } from './types/constructors'
 
 export type { InvalidSubject, ErrorPath, ErrorCode } from './error'
 export type { EitherError, Error, Data } from './utils/fp'

@@ -2,12 +2,8 @@ import { validate } from './validate'
 import { parse } from './parse'
 
 import type { EitherError } from './utils/fp'
-import type {
-  Con_Schema_SubjT,
-  NestedSchema,
-  StructSchema,
-  Schema,
-} from './types/compounds'
+import type { NestedSchema, StructSchema, Schema } from './types/compounds'
+import type { Con_Schema_SubjT } from './types/constructors'
 import type { InvalidSubject } from './error'
 
 type StructMethods<T extends Schema> = {
