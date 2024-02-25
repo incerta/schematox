@@ -1,92 +1,9 @@
+import { PARAMS_BY_SCHEMA_TYPE } from './constants'
 import { validate } from './validate'
 import { parse } from './parse'
 
-import type { EitherError } from './utils/fp'
 import type { NestedSchema, StructSchema, Schema } from './types/compounds'
-import type { Con_Schema_SubjT } from './types/constructors'
-import type { InvalidSubject } from './error'
-
-// TODO: move types to "stc/types/programmatic.ts"
-
-type StructMethods<T extends Schema> = {
-  parse: (s: unknown) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
-  validate: (s: unknown) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
-  guard: (subject: unknown) => subject is Con_Schema_SubjT<T>
-}
-
-// TODO: value types should be directly inferred from
-//       the corresponding schema type
-type Shared = 'optional' | 'nullable' | 'description'
-type ParamsBySchemaType = {
-  string: Shared | 'minLength' | 'maxLength' | 'brand'
-  number: Shared | 'min' | 'max' | 'brand'
-  boolean: Shared | 'brand'
-  literal: Shared | 'brand'
-  object: Shared
-  union: Shared
-  array: Shared | 'minLength' | 'maxLength'
-}
-
-type StructParams = ParamsBySchemaType extends Record<string, infer U>
-  ? U
-  : never
-
-type Struct<T extends Schema> = Omit<
-  Pick<
-    {
-      optional: () => Struct<T & { optional: true }>
-      nullable: () => Struct<T & { nullable: true }>
-
-      brand: <V extends string, W extends string>(
-        key: V,
-        value: W
-      ) => Struct<T & { brand: Readonly<[V, W]> }>
-
-      minLength: (minLength: number) => Struct<T & { minLength: number }>
-      maxLength: (maxLength: number) => Struct<T & { maxLength: number }>
-
-      min: (min: number) => Struct<T & { min: number }>
-      max: (max: number) => Struct<T & { max: number }>
-
-      description: (description: string) => Struct<T & { description: string }>
-    },
-    ParamsBySchemaType[T['type']]
-  >,
-  keyof T
-> & { __schema: Readonly<T> } & StructMethods<T>
-
-// TODO: move to `src/constants.ts`
-//       add `src/constants.test.ts` and check
-//       compatibility with ParamsBySchemaType
-const PARAMS_BY_SCHEMA_TYPE = {
-  string: new Set([
-    'optional',
-    'nullable',
-    'brand',
-    'description',
-    'minLength',
-    'maxLength',
-  ] as const),
-  number: new Set([
-    'optional',
-    'nullable',
-    'brand',
-    'description',
-    'min',
-    'max',
-  ] as const),
-  boolean: new Set(['optional', 'nullable', 'brand', 'description'] as const),
-  literal: new Set(['optional', 'nullable', 'brand', 'description'] as const),
-  object: new Set(['optional', 'nullable', 'description'] as const),
-  array: new Set([
-    'optional',
-    'nullable',
-    'description',
-    'minLength',
-    'maxLength',
-  ] as const),
-  union: new Set(['optional', 'nullable', 'description']),
-} as const
+import type { Struct, StructParams } from './types/struct'
 
 export function makeStruct<T extends Schema>(schema: T): Struct<T>
 export function makeStruct(schema: StructSchema) {
