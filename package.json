@@ -1,7 +1,7 @@
 {
   "name": "schematox",
   "version": "0.0.6",
-  "description": "Define JSON compatible schema statically/programmatically and parse/validate its subject with typesafety",
+  "description": "Define JSON compatible static/programmatic schema and parse/guard/validate its subject with typesafety",
   "author": "Konstantin Mazur",
   "license": "MIT",
   "keywords": [
@@ -9,10 +9,12 @@
     "schema",
     "parser",
     "validator",
-    "either style error handling",
+    "typeguard",
     "static schema definition",
     "programmatic schema definition",
-    "typescript branding technique",
+    "branded primitives",
+    "nominal types",
+    "either style error handling",
     "lightweight"
   ],
   "repository": "git://github.com/incerta/schematox.git",
