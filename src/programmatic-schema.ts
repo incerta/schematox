@@ -6,12 +6,16 @@ import type { NestedSchema, StructSchema, Schema } from './types/compounds'
 import type { Con_Schema_SubjT } from './types/constructors'
 import type { InvalidSubject } from './error'
 
+// TODO: move types to "stc/types/programmatic.ts"
+
 type StructMethods<T extends Schema> = {
   parse: (s: unknown) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
   validate: (s: unknown) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
   guard: (subject: unknown) => subject is Con_Schema_SubjT<T>
 }
 
+// TODO: value types should be directly inferred from
+//       the corresponding schema type
 type Shared = 'optional' | 'nullable' | 'description'
 type ParamsBySchemaType = {
   string: Shared | 'minLength' | 'maxLength' | 'brand'
@@ -51,6 +55,9 @@ type Struct<T extends Schema> = Omit<
   keyof T
 > & { __schema: Readonly<T> } & StructMethods<T>
 
+// TODO: move to `src/constants.ts`
+//       add `src/constants.test.ts` and check
+//       compatibility with ParamsBySchemaType
 const PARAMS_BY_SCHEMA_TYPE = {
   string: new Set([
     'optional',

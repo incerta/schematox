@@ -1,43 +1,68 @@
-# SchematoX
+# Schematox
 
-Schematox is a lightweight library for creating JSON compatible schemas. The subject of the schema can be parsed, validated or guarded by the library in a type-safe manner. Instead of focusing on supporting all possible JS/TS data structures, we provide a set of constraints that help reduce the complexity of communication between different JS tools and runtimes.
+Schematox is a lightweight typesafe schema defined parser/validator. All schemas are JSON compatible.
 
-## Pros
+Instead of supporting all possible JS/TS data structures, the library is focusing on fixed set of schema types: string, number, boolean, literal, object, array, union. Each schema can have parameters: optional, nullable, description. Each primitive schema has "brand" parameter as mean of making its subject type [nominal](https://github.com/Microsoft/TypeScript/wiki/FAQ#can-i-make-a-type-alias-nominal). The rest parameters is schema specific range limiters.
 
-- The statically defined JSON compatible schema
-- Check defined schema correctness using non generic type `Schema`
-- Programmatically defined schemas (structs) supported as mean of creation statically defined schema
-- Multiple schema subject verification methods:
+Library supports static schema definition which means your schemas could be completely independent from schematox. One could use such schemas as source for generation other structures like DB models.
+
+Features:
+
+- Statically defined JSON compatible schema
+- Check defined schema correctness using non generic type "Schema"
+- Programmatically defined schema (struct)
+- Schema subject verification methods:
   - parse: constructs new object based on the given schema and subject
   - validate: checks and returns reference to the original schema subject
-  - guard: narrows subject type base on schema without returning new subject reference
-- Schematox uses an Ether-style error handling (no unexpected throws) with an exception of `assert` function
-- First-class support for branded base schema primitive types
-- Zero dependencies and our runtime code logic is small and easy to grasp, consisting of just a couple of functions
-- Schemas are just JSON compatible objects, which can be completely independent from our library
+  - guard: validates and narrows schema subject type in the current scope
+- Ether-style error handling (no unexpected throws)
+- First-class support for branded primitives (primitive nominal types alias)
 
-Essentially, to define a schema, one doesn't need to import any functions from the library, only the `Schema` type. This approach does come with compound schema depth limitation. Currently, we support 7 layers of depth.
+Check out [github issues](https://github.com/incerta/schematox/issues) to know what we are planning to support soon.
 
-## Cons
+Currently we on version 0. The public API is mostly defined however few thing left before the first major release:
 
-- The library is not ready for production yet, the version is 0 and public API might be changed
-- Currently we support only 7 layers of compound structure depth but most likely it will be higher soon
-- We are not planning to support intersection schema any time soon
+- Record and tuple schema support
+- Allow parser to replace value before it's validated (similar to [coercing](https://docs.superstructjs.org/guides/03-coercing-data) concept)
+- Clearly defined supported versions of typescript/node
+- Support "deno" runtime and publish package on "deno.land"
+- Have a benchmark that compares library performance with other parsers
 
-Check out [github issues](https://github.com/incerta/schematox/issues) of the project to know what we are planning to support soon.
+The library is small so exploring README.md is enough for understanding its API, checkout limitations/examples and you good to go:
 
-## Installation
+- [Install](#install)
+- [Limitations](#limitations)
+- [Static schema example](#static-schema-example)
+- [Programmatic schema example](#programmatic-schema-example)
+- [Example for all supported schema types](#example-for-all-supported-schema-types)
+  - [String](#string)
+  - [Number](#number)
+  - [Boolean](#boolean)
+  - [Literal](#literal)
+  - [Object](#object)
+  - [Array](#array)
+  - [Union](#union)
+- [Schema parameters](#schema-parameters)
+- [Error shape](#error-shape)
+
+## Install
 
 ```sh
 npm install schematox
 ```
+
+## Limitations
+
+Currently we support max 7 layers of depth for compound schema type: object, array, union.
+
+Because of this we can check structural correctness of the statically defined schema using non generic type `Schema`. Important detail is that `union` schema type is also compound type so each nested definition counts as +1 layer of depth.
 
 ## Static schema example
 
 Statically defined schema:
 
 ```typescript
-import { parse, validate, guard, assert } from 'schematox'
+import { parse, validate, guard } from 'schematox'
 import type { Schema } from 'schematox'
 
 export const userSchema = {
@@ -73,15 +98,9 @@ if (validated.error) {
 console.log(validated.data) // { id: '1', name: 'John' }
 
 if (guard(userSchema, subject)) {
-  subject // type is narrowed: { id: string & { __idFor: 'User' }; name: string }
+  // { id: string & { __idFor: 'User' }; name: string }
+  subject
 }
-
-const anotherSubject = { ...subject } as unknown
-
-// Throws error if subject is not valid
-assert(userSchema, anotherSubject)
-
-anotherSubject // type is narrowed: { id: string & { __idFor: 'User' }; name: string }
 ```
 
 ## Programmatic schema example
@@ -92,17 +111,14 @@ Same schema but defined programmatically:
 import { object, string } from 'schematox'
 import type { SubjectType } from 'schematox'
 
-const userStruct = object({
+const struct = object({
   id: string().brand('idFor', 'User'),
   name: string(),
 })
 
-const subject = {
-  id: '1' as SubjectType<typeof userSchema.id>,
-  name: 'John',
-} as unknown
+const subject = { id: '1', name: 'John' } as unknown
 
-const parsed = userStruct.parse(subject)
+const parsed = struct.parse(subject)
 
 if (parsed.error) {
   throw Error('Not expected')
@@ -110,7 +126,7 @@ if (parsed.error) {
 
 console.log(parsed.data) // { id: '1', name: 'John' }
 
-const validated = userStruct.validate(subject)
+const validated = struct.validate(subject)
 
 if (validated.error) {
   throw Error('Not expected')
@@ -118,172 +134,221 @@ if (validated.error) {
 
 console.log(validated.data) // { id: '1', name: 'John' }
 
-const guard = userStruct.guard(subject)
-
-if (guard) {
-  subject // { id: string & { __idFor: 'User' }; name: string }
-}
-
-if (userStruct.guard(subject)) {
-  subject // type is narrowed: { id: string & { __idFor: 'User' }; name: string }
+if (struct.guard(subject)) {
+  // { id: string & { __idFor: 'User' }; name: string }
+  subject
 }
 ```
 
-All programmatically defined schemas are the same as static, one just needs to access it through `__schema`. We can mix static/programmatic schemas either accessing it through `__schema` or wrap it by `{ __schema: T }` if consumer is programmatic schema.
+All programmatically defined schemas are the same as static, one just needs to access it through `__schema` key. We can mix static/programmatic schemas either accessing it through `__schema` or wrap it by `{ __schema: T }` if consumer is programmatic schema.
 
-## All supported data types
+## Example for all supported schema types
+
+We distinguish two main categories of schema units:
+
+- primitive: string, number, boolean, literal
+- compound: object, array, union
+
+Any schema share optional/nullable/description parameters. Any compound schema could have any other schema type as its member including itself. Any primitive schema can have "brand" parameter.
+
+### String
 
 ```typescript
-import {
-  union,
-  array,
-  object,
-  string,
-  number,
-  boolean,
-  literal,
-} from 'schematox'
-
-import type { Schema } from 'schematox'
-
-/* Base types */
-
-// string
-
-const staticString = {
+const schema = {
   type: 'string',
   optional: true,
+  nullable: true,
   brand: ['x', 'y'],
   minLength: 1,
-  maxLength: 1,
+  maxLength: 2,
   description: 'x',
 } as const satisfies Schema
 
-const programmaticString = string()
+const struct = string()
   .optional()
-  .minLength(1)
-  .maxLength(1)
+  .nullable()
   .brand('x', 'y')
-  .description('y')
+  .minLength(1)
+  .maxLength(2)
+  .description('x')
 
-// number
+// (string & { __x: 'y' }) | undefined | null
+type FromSchema = SubjectType<typeof schema>
+type FromStruct = SubjectType<typeof struct>
+```
 
-const staticNumber = {
+### Number
+
+```typescript
+const schema = {
   type: 'number',
   optional: true,
+  nullable: true,
   brand: ['x', 'y'],
   min: 1,
-  max: 1,
+  max: 2,
   description: 'x',
 } as const satisfies Schema
 
-const programmaticNumber = number()
+const struct = number()
   .optional()
-  .min(1)
-  .max(1)
+  .nullable()
   .brand('x', 'y')
-  .description('y')
+  .min(1)
+  .max(2)
+  .description('x')
 
-// boolean
+// (number & { __x: 'y' }) | undefined | null
+type FromSchema = SubjectType<typeof schema>
+type FromStruct = SubjectType<typeof struct>
+//
+```
 
-const staticBoolean = {
+### Boolean
+
+```typescript
+const schema = {
   type: 'boolean',
   optional: true,
+  nullable: true,
   brand: ['x', 'y'],
   description: 'x',
 } as const satisfies Schema
 
-const programmaticBoolean = boolean()
+const struct = boolean() //
   .optional()
+  .nullable()
   .brand('x', 'y')
-  .description('y')
+  .description('x')
 
-// literal
+// (boolean & { __x: 'y' }) | undefined | null
+type FromSchema = SubjectType<typeof schema>
+type FromStruct = SubjectType<typeof struct>
+```
 
-const staticLiteral = {
+### Literal
+
+Could be string/number/boolean literal
+
+```typescript
+const schema = {
   type: 'literal',
   of: 'x',
   optional: true,
+  nullable: true,
   brand: ['x', 'y'],
-} as const satisfies Schema
-
-const programmaticLiteral = literal()
-  .optional()
-  .brand('x', 'y')
-  .description('y')
-
-/* Compound schema */
-
-// object
-
-const staticObject = {
-  type: 'object',
-  of: {
-    x: 'string',
-    y: 'number?',
-  },
-  optional: true,
   description: 'x',
 } as const satisfies Schema
 
-const programmaticObject = object({
-  x: string(),
-  y: number().optional(),
-})
+const struct = literal('x') //
   .optional()
+  .nullable()
+  .brand('x', 'y')
   .description('x')
 
-// array
+// ('x' & { __x: 'y' }) | undefined | null
+type FromSchema = SubjectType<typeof schema>
+type FromStruct = SubjectType<typeof struct>
+```
 
-const staticArray = {
+### Object
+
+```typescript
+const schema = {
+  type: 'object',
+  of: {
+    x: { type: 'string' },
+    y: { type: 'number' },
+  },
+  optional: true,
+  nullable: true,
+  description: 'x',
+} as const satisfies Schema
+
+const struct = object({
+  x: string(),
+  y: number(),
+})
+  .optional()
+  .nullable()
+  .description('x')
+
+// { x: string; y: number } | undefined | null
+type FromSchema = SubjectType<typeof schema>
+type FromStruct = SubjectType<typeof struct>
+```
+
+### Array
+
+```typescript
+const schema = {
   type: 'array',
-  of: 'string',
+  of: { type: 'string' },
   optional: true,
   minLength: 1,
   maxLength: 1000,
   description: 'x',
 } as const satisfies Schema
 
-const programmaticArray = array(string())
+const struct = array(string())
   .optional()
+  .nullable()
   .minLength(1)
   .maxLength(1000)
   .description('x')
 
-// union
+// string[] | undefined | null
+type FromSchema = SubjectType<typeof schema>
+type FromStruct = SubjectType<typeof struct>
+```
 
-const staticUnion = {
+### Union
+
+```typescript
+const schema = {
   type: 'union',
   of: [{ type: 'string' }, { type: 'number' }],
   optional: true,
+  nullable: true,
   description: 'x',
 } as const satisfies Schema
 
-const programmaticUnion = union([string(), number()])
+const struct = union([string(), number()])
   .optional()
+  .nullable()
   .description('x')
+
+// string | number | undefined | null
+type FromSchema = SubjectType<typeof schema>
+type FromStruct = SubjectType<typeof struct>
 ```
+
+## Schema parameters
+
+- `optional?: boolean` – does `undefined` is valid value
+- `nullable?: boolean` – does `null` is valid value
+- `brand?: [string, string]` – make primitive type nominal "['idFor', 'User'] -> T & { \_\_idFor: 'User' }"
+- `minLength/maxLength/min/max` – schema type dependent limiting characteristics
+- `description?: string` – description of the particular schema property which can be used to provide more detailed information for the user/developer on validation/parse error
 
 ## Error shape
 
 Nested schema example. Subject `0` is invalid, should be a `string`:
 
 ```typescript
-import { x, object, array, string } from 'schematox'
+import { object, array, string } from 'schematox'
 
-const schemaX = x(
-  object({
-    x: object({
-      y: array(
-        object({
-          z: string(),
-        })
-      ),
-    }),
-  })
-)
+const struct = object({
+  x: object({
+    y: array(
+      object({
+        z: string(),
+      })
+    ),
+  }),
+})
 
-const result = schemaX.parse({ x: { y: [{ z: 0 }] } })
+const result = struct.parse({ x: { y: [{ z: 0 }] } })
 ```
 
 The `result.error` shape is:
@@ -305,9 +370,3 @@ It's always an array with at least one entry. Each entry includes:
 - `schema`: The specific section of `schema` where the invalid value is found.
 - `subject`: The specific part of the validated subject where the invalid value exists.
 - `path`: Traces the route from the root to the error subject, with strings as keys and numbers as array indexes.
-
-## Parse and validate differences
-
-The `parser` returns `data` as new object without references to the parsed subject. Parser manages the `null` value as `undefined` and subsequently replaces it with `undefined`.
-
-The `validator` returns the evaluated subject itself and not applying any mutation/transformation to it. The validator should be used in exceptional cases when we known subject type but not sure that it actually correct.

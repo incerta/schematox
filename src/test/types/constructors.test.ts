@@ -1,827 +1,1101 @@
-import { check, unknownX } from '../test-utils'
+import { check } from '../test-utils'
 
 import type { Schema } from '../../types/compounds'
-
-import type {
-  Con_PrimitiveSchema_TypeOnly_SubjT,
-  Con_PrimitiveSchema_SubjT,
-  Con_ArraySchema_SubjT,
-  Con_ObjectSchema_SubjT,
-  Con_UnionSchema_SubjT,
-  Con_Schema_SubjT,
-} from '../../types/constructors'
+import type { SubjectType } from '../../types/constructors'
 
 describe('Construct PrimitiveSchema subject type', () => {
-  it('Con_PrimitiveSchema_TypeOnly_SubjT<T>: required string/number/boolean/literal', () => {
-    const stringS = { type: 'string' } as const satisfies Schema
+  describe('String schema', () => {
+    it('Required', () => {
+      const schema = { type: 'string' } as const satisfies Schema
 
-    type StringSubj = Con_PrimitiveSchema_TypeOnly_SubjT<typeof stringS>
+      type Expected = string
+      type Actual = SubjectType<typeof schema>
 
-    check<string, StringSubj>()
-    // @ts-expect-error always
-    check<never, StringSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const numberS = { type: 'number' } as const satisfies Schema
+    it('Optional', () => {
+      const schema = {
+        type: 'string',
+        optional: true,
+      } as const satisfies Schema
 
-    type NumberSubj = Con_PrimitiveSchema_TypeOnly_SubjT<typeof numberS>
+      type Expected = string | undefined
+      type Actual = SubjectType<typeof schema>
 
-    check<number, NumberSubj>()
-    // @ts-expect-error always
-    check<never, NumberSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const booleanS = { type: 'boolean' } as const satisfies Schema
+    it('Nullable', () => {
+      const schema = {
+        type: 'string',
+        nullable: true,
+      } as const satisfies Schema
 
-    type BooleanSubj = Con_PrimitiveSchema_TypeOnly_SubjT<typeof booleanS>
+      type Expected = string | null
+      type Actual = SubjectType<typeof schema>
 
-    check<boolean, BooleanSubj>()
-    // @ts-expect-error always
-    check<never, BooleanSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const literalStrS = { type: 'literal', of: 'x' } as const satisfies Schema
+    it('Branded', () => {
+      const schema = {
+        type: 'string',
+        brand: ['x', 'y'],
+      } as const satisfies Schema
 
-    type LiteralStrSubj = Con_PrimitiveSchema_TypeOnly_SubjT<typeof literalStrS>
+      type Expected = string & { __x: 'y' }
+      type Actual = SubjectType<typeof schema>
 
-    check<'x', LiteralStrSubj>()
-    // @ts-expect-error '"x"' is not assignable to parameter of type '"y"'
-    check<'y', LiteralStrSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const literalNumS = { type: 'literal', of: 0 } as const satisfies Schema
+    it('Optional + nullable + branded', () => {
+      const schema = {
+        type: 'string',
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
 
-    type LiteralNumSubj = Con_PrimitiveSchema_TypeOnly_SubjT<typeof literalNumS>
+      type Expected = (string & { __x: 'y' }) | null | undefined
+      type Actual = SubjectType<typeof schema>
 
-    check<0, LiteralNumSubj>()
-    // @ts-expect-error '0' is not assignable to parameter of type '1'
-    check<1, LiteralNumSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
   })
 
-  it('Con_PrimitiveSchema_SubjT<T>: required string/number/boolean/literal', () => {
-    const stringS = { type: 'string' } as const satisfies Schema
+  describe('Number schema', () => {
+    it('Required', () => {
+      const schema = { type: 'number' } as const satisfies Schema
 
-    type StringSubj = Con_PrimitiveSchema_SubjT<typeof stringS>
+      type Expected = number
+      type Actual = SubjectType<typeof schema>
 
-    check<string, StringSubj>()
-    // @ts-expect-error always
-    check<never, StringSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const numberS = { type: 'number' } as const satisfies Schema
+    it('Optional', () => {
+      const schema = {
+        type: 'number',
+        optional: true,
+      } as const satisfies Schema
 
-    type NumberSubj = Con_PrimitiveSchema_SubjT<typeof numberS>
+      type Expected = number | undefined
+      type Actual = SubjectType<typeof schema>
 
-    check<number, NumberSubj>()
-    // @ts-expect-error always
-    check<never, NumberSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const booleanS = { type: 'boolean' } as const satisfies Schema
+    it('Nullable', () => {
+      const schema = {
+        type: 'number',
+        nullable: true,
+      } as const satisfies Schema
 
-    type BooleanSubj = Con_PrimitiveSchema_SubjT<typeof booleanS>
+      type Expected = number | null
+      type Actual = SubjectType<typeof schema>
 
-    check<boolean, BooleanSubj>()
-    // @ts-expect-error always
-    check<never, BooleanSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const literalStrS = { type: 'literal', of: 'x' } as const satisfies Schema
+    it('Branded', () => {
+      const schema = {
+        type: 'number',
+        brand: ['x', 'y'],
+      } as const satisfies Schema
 
-    type LiteralStrSubj = Con_PrimitiveSchema_SubjT<typeof literalStrS>
+      type Expected = number & { __x: 'y' }
+      type Actual = SubjectType<typeof schema>
 
-    check<'x', LiteralStrSubj>()
-    // @ts-expect-error '"x"' is not assignable to parameter of type '"y"'
-    check<'y', LiteralStrSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const literalNumS = { type: 'literal', of: 0 } as const satisfies Schema
+    it('Optional + nullable + branded', () => {
+      const schema = {
+        type: 'number',
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
 
-    type LiteralNumSubj = Con_PrimitiveSchema_SubjT<typeof literalNumS>
+      type Expected = (number & { __x: 'y' }) | null | undefined
+      type Actual = SubjectType<typeof schema>
 
-    check<0, LiteralNumSubj>()
-    // @ts-expect-error '0' is not assignable to parameter of type '1'
-    check<1, LiteralNumSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
   })
 
-  it('Con_PrimitiveSchema_SubjT<T>: optional string/number/boolean/literal', () => {
-    const stringS = { type: 'string', optional: true } as const satisfies Schema
+  describe('Boolean schema', () => {
+    it('Required', () => {
+      const schema = { type: 'boolean' } as const satisfies Schema
 
-    type StringSubj = Con_PrimitiveSchema_SubjT<typeof stringS>
+      type Expected = boolean
+      type Actual = SubjectType<typeof schema>
 
-    check<string | undefined, StringSubj>()
-    // @ts-expect-error always
-    check<never, StringSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const numberS = { type: 'number', optional: true } as const satisfies Schema
+    it('Optional', () => {
+      const schema = {
+        type: 'boolean',
+        optional: true,
+      } as const satisfies Schema
 
-    type NumberSubj = Con_PrimitiveSchema_SubjT<typeof numberS>
+      type Expected = boolean | undefined
+      type Actual = SubjectType<typeof schema>
 
-    check<number | undefined, NumberSubj>()
-    // @ts-expect-error always
-    check<never, NumberSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const booleanS = {
-      type: 'boolean',
-      optional: true,
-    } as const satisfies Schema
+    it('Nullable', () => {
+      const schema = {
+        type: 'boolean',
+        nullable: true,
+      } as const satisfies Schema
 
-    type BooleanSubj = Con_PrimitiveSchema_SubjT<typeof booleanS>
+      type Expected = boolean | null
+      type Actual = SubjectType<typeof schema>
 
-    check<boolean | undefined, BooleanSubj>()
-    // @ts-expect-error always
-    check<never, BooleanSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const literalStrS = {
-      type: 'literal',
-      of: 'x',
-      optional: true,
-    } as const satisfies Schema
+    it('Branded', () => {
+      const schema = {
+        type: 'boolean',
+        brand: ['x', 'y'],
+      } as const satisfies Schema
 
-    type LiteralStrSubj = Con_PrimitiveSchema_SubjT<typeof literalStrS>
+      type Expected = boolean & { __x: 'y' }
+      type Actual = SubjectType<typeof schema>
 
-    check<'x' | undefined, LiteralStrSubj>()
-    // @ts-expect-error always
-    check<never, LiteralStrSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const literalNumS = {
-      type: 'literal',
-      of: 0,
-      optional: true,
-    } as const satisfies Schema
+    it('Optional + nullable + branded', () => {
+      const schema = {
+        type: 'boolean',
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
 
-    type LiteralNumSubj = Con_PrimitiveSchema_SubjT<typeof literalNumS>
+      type Expected = (boolean & { __x: 'y' }) | null | undefined
+      type Actual = SubjectType<typeof schema>
 
-    check<0 | undefined, LiteralNumSubj>()
-    // @ts-expect-error always
-    check<never, LiteralNumSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
   })
 
-  it('Con_PrimitiveSchema_SubjT<T>: nullable string/number/boolean/literal', () => {
-    const stringS = {
-      type: 'string',
-      nullable: true,
-    } as const satisfies Schema
+  describe('Literal string schema', () => {
+    it('Required', () => {
+      const subject = 'x'
+      const schema = { type: 'literal', of: subject } as const satisfies Schema
 
-    type StringSubj = Con_PrimitiveSchema_SubjT<typeof stringS>
+      type Expected = typeof subject
+      type Actual = SubjectType<typeof schema>
 
-    check<string | null, StringSubj>()
-    // @ts-expect-error always
-    check<never, StringSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const numberS = {
-      type: 'number',
-      nullable: true,
-    } as const satisfies Schema
+    it('Optional', () => {
+      const subject = 'x'
+      const schema = {
+        type: 'literal',
+        of: subject,
+        optional: true,
+      } as const satisfies Schema
 
-    type NumberSubj = Con_PrimitiveSchema_SubjT<typeof numberS>
+      type Expected = typeof subject | undefined
+      type Actual = SubjectType<typeof schema>
 
-    check<number | null, NumberSubj>()
-    // @ts-expect-error always
-    check<never, NumberSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const booleanS = {
-      type: 'boolean',
-      nullable: true,
-    } as const satisfies Schema
+    it('Nullable', () => {
+      const subject = 'x'
+      const schema = {
+        type: 'literal',
+        of: subject,
+        nullable: true,
+      } as const satisfies Schema
 
-    type BooleanSubj = Con_PrimitiveSchema_SubjT<typeof booleanS>
+      type Expected = typeof subject | null
+      type Actual = SubjectType<typeof schema>
 
-    check<boolean | null, BooleanSubj>()
-    // @ts-expect-error always
-    check<never, BooleanSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const literalStrS = {
-      type: 'literal',
-      of: 'x',
-      nullable: true,
-    } as const satisfies Schema
+    it('Branded', () => {
+      const subject = 'x'
+      const schema = {
+        type: 'literal',
+        of: subject,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
 
-    type LiteralStrSubj = Con_PrimitiveSchema_SubjT<typeof literalStrS>
+      type Expected = typeof subject & { __x: 'y' }
+      type Actual = SubjectType<typeof schema>
 
-    check<'x' | null, LiteralStrSubj>()
-    // @ts-expect-error always
-    check<never, LiteralStrSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const literalNumS = {
-      type: 'literal',
-      of: 0,
-      nullable: true,
-    } as const satisfies Schema
+    it('Optional + nullable + branded', () => {
+      const subject = 'x'
+      const schema = {
+        type: 'literal',
+        of: subject,
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
 
-    type LiteralNumSubj = Con_PrimitiveSchema_SubjT<typeof literalNumS>
+      type Expected = (typeof subject & { __x: 'y' }) | null | undefined
+      type Actual = SubjectType<typeof schema>
 
-    check<0 | null, LiteralNumSubj>()
-    // @ts-expect-error always
-    check<never, LiteralNumSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
   })
 
-  it('Con_PrimitiveSchema_SubjT<T>: branded string/number/boolean/literal', () => {
-    const stringS = {
-      type: 'string',
-      brand: ['x', 'y'],
-    } as const satisfies Schema
+  describe('Literal number schema', () => {
+    it('Required', () => {
+      const subject = 0
+      const schema = { type: 'literal', of: subject } as const satisfies Schema
 
-    type StringSubj = Con_PrimitiveSchema_SubjT<typeof stringS>
+      type Expected = typeof subject
+      type Actual = SubjectType<typeof schema>
 
-    check<string & { __x: 'y' }, StringSubj>()
-    // @ts-expect-error always
-    check<never, StringSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const numberS = {
-      type: 'number',
-      brand: ['x', 'y'],
-    } as const satisfies Schema
+    it('Optional', () => {
+      const subject = 0
+      const schema = {
+        type: 'literal',
+        of: subject,
+        optional: true,
+      } as const satisfies Schema
 
-    type NumberSubj = Con_PrimitiveSchema_SubjT<typeof numberS>
+      type Expected = typeof subject | undefined
+      type Actual = SubjectType<typeof schema>
 
-    check<number & { __x: 'y' }, NumberSubj>()
-    // @ts-expect-error always
-    check<never, NumberSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const booleanS = {
-      type: 'boolean',
-      brand: ['x', 'y'],
-    } as const satisfies Schema
+    it('Nullable', () => {
+      const subject = 0
+      const schema = {
+        type: 'literal',
+        of: subject,
+        nullable: true,
+      } as const satisfies Schema
 
-    type BooleanSubj = Con_PrimitiveSchema_SubjT<typeof booleanS>
+      type Expected = typeof subject | null
+      type Actual = SubjectType<typeof schema>
 
-    check<boolean & { __x: 'y' }, BooleanSubj>()
-    // @ts-expect-error always
-    check<never, BooleanSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const literalStrS = {
-      type: 'literal',
-      of: 'x',
-      brand: ['x', 'y'],
-    } as const satisfies Schema
+    it('Branded', () => {
+      const subject = 0
+      const schema = {
+        type: 'literal',
+        of: subject,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
 
-    type LiteralStrSubj = Con_PrimitiveSchema_SubjT<typeof literalStrS>
+      type Expected = typeof subject & { __x: 'y' }
+      type Actual = SubjectType<typeof schema>
 
-    check<'x' & { __x: 'y' }, LiteralStrSubj>()
-    // @ts-expect-error always
-    check<never, LiteralStrSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    const literalNumS = {
-      type: 'literal',
-      of: 0,
-      brand: ['x', 'y'],
-    } as const satisfies Schema
+    it('Optional + nullable + branded', () => {
+      const subject = 0
+      const schema = {
+        type: 'literal',
+        of: subject,
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
 
-    type LiteralNumSubj = Con_PrimitiveSchema_SubjT<typeof literalNumS>
+      type Expected = (typeof subject & { __x: 'y' }) | null | undefined
+      type Actual = SubjectType<typeof schema>
 
-    check<0 & { __x: 'y' }, LiteralNumSubj>()
-    // @ts-expect-error always
-    check<never, LiteralNumSubj>()
-  })
-
-  it('Con_PrimitiveSchema_SubjT<T>: optional + nullable + branded string/number/boolean/literal', () => {
-    const stringS = {
-      type: 'string',
-      brand: ['x', 'y'],
-      optional: true,
-      nullable: true,
-    } as const satisfies Schema
-
-    type StringSubj = Con_PrimitiveSchema_SubjT<typeof stringS>
-
-    check<(string & { __x: 'y' }) | null | undefined, StringSubj>()
-    // @ts-expect-error always
-    check<never, StringSubj>()
-
-    const numberS = {
-      type: 'number',
-      brand: ['x', 'y'],
-      optional: true,
-      nullable: true,
-    } as const satisfies Schema
-
-    type NumberSubj = Con_PrimitiveSchema_SubjT<typeof numberS>
-
-    check<(number & { __x: 'y' }) | null | undefined, NumberSubj>()
-    // @ts-expect-error always
-    check<never, NumberSubj>()
-
-    const booleanS = {
-      type: 'boolean',
-      brand: ['x', 'y'],
-      optional: true,
-      nullable: true,
-    } as const satisfies Schema
-
-    type BooleanSubj = Con_PrimitiveSchema_SubjT<typeof booleanS>
-
-    check<(boolean & { __x: 'y' }) | null | undefined, BooleanSubj>()
-    // @ts-expect-error always
-    check<never, BooleanSubj>()
-
-    const literalStrS = {
-      type: 'literal',
-      of: 'x',
-      brand: ['x', 'y'],
-      optional: true,
-      nullable: true,
-    } as const satisfies Schema
-
-    type LiteralStrSubj = Con_PrimitiveSchema_SubjT<typeof literalStrS>
-
-    check<('x' & { __x: 'y' }) | null | undefined, LiteralStrSubj>()
-    // @ts-expect-error always
-    check<never, LiteralStrSubj>()
-
-    const literalNumS = {
-      type: 'literal',
-      of: 0,
-      brand: ['x', 'y'],
-      optional: true,
-      nullable: true,
-    } as const satisfies Schema
-
-    type LiteralNumSubj = Con_PrimitiveSchema_SubjT<typeof literalNumS>
-
-    check<(0 & { __x: 'y' }) | null | undefined, LiteralNumSubj>()
-    // @ts-expect-error always
-    check<never, LiteralNumSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
   })
 })
 
 describe('Construct ArraySchema subject type', () => {
-  describe('Check different nested schema types', () => {
-    it('Con_ArraySchema_SubjT<T>: array of string/number/boolean/literal', () => {
-      const stringS = {
-        type: 'array',
-        of: { type: 'string' },
-      } as const satisfies Schema
+  describe('Parent schema type related parameters', () => {
+    const nested = { type: 'string' } as const satisfies Schema
+    type T = SubjectType<typeof nested>
 
-      type StringArrSubj = Con_ArraySchema_SubjT<typeof stringS>
+    it('Required', () => {
+      const schema = { type: 'array', of: nested } as const satisfies Schema
 
-      check<string[], StringArrSubj>()
-      // @ts-expect-error always
-      check<never, StringArrSubj>()
+      type Expected = T[]
+      type Actual = SubjectType<typeof schema>
 
-      const numberS = {
-        type: 'array',
-        of: { type: 'number' },
-      } as const satisfies Schema
-
-      type NumberArrSubj = Con_ArraySchema_SubjT<typeof numberS>
-
-      check<number[], NumberArrSubj>()
-      // @ts-expect-error 'number[]' does not satisfy the constraint 'string[]'
-      check<string[], NumberArrSubj>()
-      // @ts-expect-error always
-      check<never, NumberArrSubj>()
-
-      const booleanS = {
-        type: 'array',
-        of: { type: 'boolean' },
-      } as const satisfies Schema
-
-      type BooleanArrSubj = Con_ArraySchema_SubjT<typeof booleanS>
-
-      check<boolean[], BooleanArrSubj>()
-      // @ts-expect-error 'number[]' does not satisfy the constraint 'string[]'
-      check<string[], BooleanArrSubj>()
-      // @ts-expect-error always
-      check<never, BooleanArrSubj>()
-
-      const literalStrS = {
-        type: 'array',
-        of: { type: 'literal', of: 'x' },
-      } as const satisfies Schema
-
-      type LiteralStrArrSubj = Con_ArraySchema_SubjT<typeof literalStrS>
-
-      check<Array<'x'>, LiteralStrArrSubj>()
-      // @ts-expect-error always
-      check<never, LiteralStrArrSubj>()
-
-      const literalNumS = {
-        type: 'array',
-        of: { type: 'literal', of: 0 },
-      } as const satisfies Schema
-
-      type LiteralNumArrSubj = Con_ArraySchema_SubjT<typeof literalNumS>
-
-      check<Array<0>, LiteralNumArrSubj>()
-      // @ts-expect-error always
-      check<never, LiteralNumArrSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
     })
 
-    it('Con_ArraySchema_SubjT<T>: array of array/object/union', () => {
-      const nestedArrSchema = {
+    it('Optional', () => {
+      const schema = {
         type: 'array',
-        of: { type: 'array', of: { type: 'string' } },
+        of: nested,
+        optional: true,
       } as const satisfies Schema
 
-      type NestedArrSubj = Con_ArraySchema_SubjT<typeof nestedArrSchema>
+      type Expected = T[] | undefined
+      type Actual = SubjectType<typeof schema>
 
-      check<Array<string[]>, NestedArrSubj>()
-      // @ts-expect-error always
-      check<never, NestedArrSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-      const nestedObjSchema = {
+    it('Nullable', () => {
+      const schema = {
         type: 'array',
-        of: { type: 'object', of: { x: { type: 'string' } } },
+        of: nested,
+        nullable: true,
       } as const satisfies Schema
 
-      type NestedObjSubj = Con_ArraySchema_SubjT<typeof nestedObjSchema>
+      type Expected = T[] | null
+      type Actual = SubjectType<typeof schema>
 
-      check<Array<{ x: string }>, NestedObjSubj>()
-      // @ts-expect-error always
-      check<never, NestedObjSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-      const nestedUnionSchema = {
+    it('Optional + nullable', () => {
+      const schema = {
         type: 'array',
-        of: { type: 'union', of: [{ type: 'string' }, { type: 'number' }] },
+        of: nested,
+        optional: true,
+        nullable: true,
       } as const satisfies Schema
 
-      type NestedUnionSubj = Con_ArraySchema_SubjT<typeof nestedUnionSchema>
+      type Expected = T[] | null | undefined
+      type Actual = SubjectType<typeof schema>
 
-      check<Array<string | number>, NestedUnionSubj>()
-      // @ts-expect-error always
-      check<never | never[], NestedUnionSubj>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
     })
   })
 
-  describe('ArraySchema parameters', () => {
-    it('Con_ArraySchema_SubjT<T>: required array', () => {
-      const schema = {
-        type: 'array',
-        of: { type: 'string' },
-      } as const satisfies Schema
+  describe('Nested PrimitiveSchema with no/all type related parameters set', () => {
+    it('String required', () => {
+      const nested = { type: 'string' } as const satisfies Schema
+      const schema = { type: 'array', of: nested } as const satisfies Schema
 
-      type Subject = Con_ArraySchema_SubjT<typeof schema>
+      type Expected = string[]
+      type Actual = SubjectType<typeof schema>
 
-      check<string[], Subject>()
-      // @ts-expect-error always
-      check<never, Subject>()
+      check<Actual, Expected>()
+      check<Expected, Actual>()
     })
 
-    it('Con_ArraySchema_SubjT<T>: optional array', () => {
-      const schema = {
-        type: 'array',
-        of: { type: 'string' },
+    it('String optional + nullable + branded', () => {
+      const nested = {
+        type: 'string',
         optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
       } as const satisfies Schema
 
-      type Subject = Con_ArraySchema_SubjT<typeof schema>
-
-      check<string[] | undefined, Subject>()
-      // @ts-expect-error always
-      check<never, Subject>()
-    })
-
-    it('Con_ArraySchema_SubjT<T>: nullable array', () => {
       const schema = {
         type: 'array',
-        of: { type: 'string' },
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Array<(string & { __x: 'y' }) | null | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Number required', () => {
+      const nested = { type: 'string' } as const satisfies Schema
+      const schema = { type: 'array', of: nested } as const satisfies Schema
+
+      type Expected = string[]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Number optional + nullable + branded', () => {
+      const nested = {
+        type: 'string',
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'array',
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Array<(string & { __x: 'y' }) | null | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Boolean required', () => {
+      const nested = { type: 'boolean' } as const satisfies Schema
+      const schema = { type: 'array', of: nested } as const satisfies Schema
+
+      type Expected = boolean[]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Boolean optional + nullable + branded', () => {
+      const nested = {
+        type: 'boolean',
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'array',
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Array<(boolean & { __x: 'y' }) | null | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Literal string required', () => {
+      const subject = 'x'
+      const nested = {
+        type: 'literal',
+        of: subject,
+      } as const satisfies Schema
+      const schema = { type: 'array', of: nested } as const satisfies Schema
+
+      type Expected = Array<typeof subject>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Literal string optional + nullable + branded', () => {
+      const subject = 'x'
+      const nested = {
+        type: 'literal',
+        of: subject,
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'array',
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Array<(typeof subject & { __x: 'y' }) | null | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Literal string required', () => {
+      const subject = 0
+      const nested = {
+        type: 'literal',
+        of: subject,
+      } as const satisfies Schema
+      const schema = { type: 'array', of: nested } as const satisfies Schema
+
+      type Expected = Array<typeof subject>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Literal string optional + nullable + branded', () => {
+      const subject = 0
+      const nested = {
+        type: 'literal',
+        of: subject,
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'array',
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Array<(typeof subject & { __x: 'y' }) | null | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+  })
+
+  describe('Nested CompoundSchema with no/all type related parameters set', () => {
+    const deeplyNested = { type: 'string' } as const satisfies Schema
+    type T = SubjectType<typeof deeplyNested>
+
+    it('ArraySchema required', () => {
+      const nested = {
+        type: 'array',
+        of: deeplyNested,
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'array',
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Array<T[]>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('ArraySchema optional + nullable', () => {
+      const nested = {
+        type: 'array',
+        of: deeplyNested,
+        optional: true,
         nullable: true,
       } as const satisfies Schema
 
-      type Subject = Con_ArraySchema_SubjT<typeof schema>
-
-      check<string[] | null, Subject>()
-      // @ts-expect-error always
-      check<never, Subject>()
-    })
-
-    it('Con_ArraySchema_SubjT<T>: optional + nullable array', () => {
       const schema = {
         type: 'array',
-        of: { type: 'string' },
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Array<T[] | null | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('ObjectSchema required', () => {
+      const nested = {
+        type: 'object',
+        of: { x: deeplyNested },
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'array',
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Array<{ x: T }>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('ObjectSchema optional + nullable', () => {
+      const nested = {
+        type: 'object',
+        of: { x: deeplyNested },
         optional: true,
         nullable: true,
       } as const satisfies Schema
 
-      type Subject = Con_ArraySchema_SubjT<typeof schema>
+      const schema = {
+        type: 'array',
+        of: nested,
+      } as const satisfies Schema
 
-      check<string[] | null | undefined, Subject>()
-      // @ts-expect-error always
-      check<never, Subject>()
+      type Expected = Array<{ x: T } | null | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('UnionSchema required', () => {
+      const subjX = 'x'
+      const subjY = 'y'
+
+      type T = typeof subjX | typeof subjY
+
+      const nested = {
+        type: 'union',
+        of: [
+          { type: 'literal', of: subjX },
+          { type: 'literal', of: subjY },
+        ],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'array',
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = T[]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('UnionSchema optional + nullable', () => {
+      const subjX = 'x'
+      const subjY = 'y'
+
+      type T = typeof subjX | typeof subjY
+
+      const nested = {
+        type: 'union',
+        of: [
+          { type: 'literal', of: subjX },
+          { type: 'literal', of: subjY },
+        ],
+        optional: true,
+        nullable: true,
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'array',
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Array<T | null | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
     })
   })
 })
 
 describe('Construct UnionSchema subject type', () => {
-  it('Con_UnionSchema_SubjT<T>: base schema mix', () => {
-    type Subject = Con_UnionSchema_SubjT<{
-      type: 'union'
-      of: Array<{ type: 'string' } | { type: 'number' } | { type: 'boolean' }>
-    }>
+  describe('Parent schema type related parameters', () => {
+    const nested = { type: 'string' } as const satisfies Schema
+    type T = SubjectType<typeof nested>
 
-    check<string | number | boolean>(unknownX as Subject)
-    // @ts-expect-error 'string | number | boolean' is not 'string | number'
-    check<string | number>(unknownX as Subject)
+    it('Required', () => {
+      const schema = { type: 'union', of: [nested] } as const satisfies Schema
+
+      type Expected = T
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional', () => {
+      const schema = {
+        type: 'union',
+        of: [nested],
+        optional: true,
+      } as const satisfies Schema
+
+      type Expected = T | undefined
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Nullable', () => {
+      const schema = {
+        type: 'union',
+        of: [nested],
+        nullable: true,
+      } as const satisfies Schema
+
+      type Expected = T | null
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional + nullable', () => {
+      const schema = {
+        type: 'union',
+        of: [nested],
+        optional: true,
+        nullable: true,
+      } as const satisfies Schema
+
+      type Expected = T | null | undefined
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
   })
 
-  it('Con_UnionSchema_SubjT<T>: literals', () => {
-    type Subject = Con_UnionSchema_SubjT<{
-      type: 'union'
-      of: Array<{ type: 'literal'; of: 'x' } | { type: 'literal'; of: 0 }>
-    }>
+  describe('Nested PrimitiveSchema with no/all type related parameters', () => {
+    it('string/number/boolean required', () => {
+      const schema = {
+        type: 'union',
+        of: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+      } as const satisfies Schema
 
-    check<'x' | 0>(unknownX as Subject)
-    // @ts-expect-error '0 | "x"' is not assignable to parameter of type '"x"'
-    check<'x'>(unknownX as Subject)
-  })
+      type Expected = string | number | boolean
+      type Actual = SubjectType<typeof schema>
 
-  it('Con_UnionSchema_SubjT<T>: literals', () => {
-    type Subject = Con_UnionSchema_SubjT<{
-      type: 'union'
-      of: Array<{ type: 'literal'; of: 'x' } | { type: 'literal'; of: 0 }>
-    }>
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    check<'x' | 0>(unknownX as Subject)
-    // @ts-expect-error '0 | "x"' is not assignable to parameter of type '"x"'
-    check<'x'>(unknownX as Subject)
-  })
+    it('string/number/boolean all optional + nullable + branded', () => {
+      const schema = {
+        type: 'union',
+        of: [
+          { type: 'string', optional: true, nullable: true, brand: ['x', 'y'] },
+          { type: 'number', optional: true, nullable: true, brand: ['y', 'y'] },
+          {
+            type: 'boolean',
+            optional: true,
+            nullable: true,
+            brand: ['z', 'y'],
+          },
+        ],
+      } as const satisfies Schema
 
-  it('Con_UnionSchema_SubjT<T>: objects', () => {
-    type Subject = Con_UnionSchema_SubjT<{
-      type: 'union'
-      of: Array<
-        | { type: 'object'; of: { x: { type: 'string' } } }
-        | { type: 'object'; of: { y: { type: 'number' } } }
-        | { type: 'object'; of: { z: { type: 'boolean' } } }
-      >
-    }>
+      type Expected =
+        | (string & { __x: 'y' })
+        | (number & { __y: 'y' })
+        | (boolean & { __z: 'y' })
+        | null
+        | undefined
 
-    check<{ x: string } | { y: number } | { z: boolean }>(unknownX as Subject)
-    // @ts-expect-error '{ x: string; } | { y: number; } | { z: boolean; }' is not '{ x: string; } | { z: boolean; }'
-    check<{ x: string } | { z: boolean }>(unknownX as Subject)
-  })
+      type Actual = SubjectType<typeof schema>
 
-  it('Con_UnionSchema_SubjT<T>: objects', () => {
-    type Subject = Con_UnionSchema_SubjT<{
-      type: 'union'
-      of: Array<
-        | { type: 'object'; of: { x: { type: 'string' } } }
-        | { type: 'object'; of: { y: { type: 'number' } } }
-        | { type: 'object'; of: { z: { type: 'boolean' } } }
-      >
-    }>
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-    check<{ x: string } | { y: number } | { z: boolean }>(unknownX as Subject)
-    // @ts-expect-error '{ x: string; } | { y: number; } | { z: boolean; }' is not '{ x: string; } | { z: boolean; }'
-    check<{ x: string } | { z: boolean }>(unknownX as Subject)
-  })
+    it('literal required', () => {
+      const schema = {
+        type: 'union',
+        of: [
+          { type: 'literal', of: 'x' },
+          { type: 'literal', of: 0 },
+        ],
+      } as const satisfies Schema
 
-  it('Con_UnionSchema_SubjT<T>: objects', () => {
-    type Subject = Con_UnionSchema_SubjT<{
-      type: 'union'
-      of: Array<
-        | { type: 'string'; optional: true }
-        | { type: 'number' }
-        | { type: 'boolean' }
-        | { type: 'literal'; of: 'z' }
-        | { type: 'literal'; of: 2 }
-        | { type: 'object'; of: { x: { type: 'string' } } }
-        | { type: 'array'; of: { type: 'number' } }
-      >
-    }>
+      type Expected = 'x' | 0
+      type Actual = SubjectType<typeof schema>
 
-    check<string | number | boolean | undefined | { x: string } | number[]>(
-      unknownX as Subject
-    )
-    check<string | number | boolean | { x: string } | number[]>(
-      // @ts-expect-error 'string | number | boolean | { x: string; } | number[] | undefined' is not 'string | number | boolean | number[] | { x: string; }'
-      unknownX as Subject
-    )
-  })
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
 
-  it('Con_UnionSchema_SubjT<T>: optional by itself', () => {
-    type Subject = Con_UnionSchema_SubjT<{
-      type: 'union'
-      of: Array<{ type: 'string' }>
-      optional: true
-    }>
+    it('literal optional + nullable + branded', () => {
+      const schema = {
+        type: 'union',
+        of: [
+          {
+            type: 'literal',
+            of: 'x',
+            optional: true,
+            nullable: true,
+            brand: ['x', 'y'],
+          },
+          {
+            type: 'literal',
+            of: 0,
+            optional: true,
+            nullable: true,
+            brand: ['y', 'y'],
+          },
+        ],
+      } as const satisfies Schema
 
-    check<string | undefined>(unknownX as Subject)
-    // @ts-expect-error 'string | undefined' is not 'string'
-    check<string>(unknownX as Subject)
+      type Expected =
+        | ('x' & { __x: 'y' })
+        | (0 & { __y: 'y' })
+        | undefined
+        | null
+
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
   })
 })
 
 describe('Construct ObjectSchema subject type', () => {
-  it('Con_ObjectSchema_SubjT<T>: check BaseSchema subject type construction', () => {
-    check<{ x: string; y: number }>(
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: { x: { type: 'string' }; y: { type: 'number' } }
-      }>
-    )
-    check<{ x: string; y: number }>(
-      // @ts-expect-error 'number' is not assignable to type 'string'
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: { x: { type: 'number' }; y: { type: 'number' } }
-      }>
-    )
+  describe('Parent schema type related parameters', () => {
+    const nested = { type: 'string' } as const satisfies Schema
+    type T = SubjectType<typeof nested>
 
-    check<{ x: string; y: number }>(
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: { x: { type: 'string' }; y: { type: 'number' } }
-      }>
-    )
-    check<{ x: string; y: number }>(
-      // @ts-expect-error 'number' is not assignable to type 'string'
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: { x: { type: 'number' }; y: { type: 'number' } }
-      }>
-    )
+    it('Required', () => {
+      const schema = {
+        type: 'object',
+        of: { x: nested },
+      } as const satisfies Schema
 
-    check<{ x: string; y: number | undefined }>(
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: { x: { type: 'string' }; y: { type: 'number'; optional: true } }
-      }>
-    )
-    check<{ x: string; y: number | undefined }>(
-      // @ts-expect-error 'string' is not assignable to type 'number'
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: { x: { type: 'string' }; y: { type: 'string'; optional: true } }
-      }>
-    )
+      type Expected = { x: T }
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional', () => {
+      const schema = {
+        type: 'object',
+        of: { x: nested },
+        optional: true,
+      } as const satisfies Schema
+
+      type Expected = { x: T } | undefined
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Nullable', () => {
+      const schema = {
+        type: 'object',
+        of: { x: nested },
+        nullable: true,
+      } as const satisfies Schema
+
+      type Expected = { x: T } | null
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional + nullable', () => {
+      const schema = {
+        type: 'object',
+        of: { x: nested },
+        optional: true,
+        nullable: true,
+      } as const satisfies Schema
+
+      type Expected = { x: T } | null | undefined
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
   })
 
-  it('Con_ObjectSchema_SubjT<T>: check nested ArraySchema subject type construction', () => {
-    check<{ x: string[]; y: number[] }>(
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
+  describe('Nested PrimitiveSchema with no/all type related parameters', () => {
+    it('Required', () => {
+      const schema = {
+        type: 'object',
         of: {
-          x: { type: 'array'; of: { type: 'string' } }
-          y: { type: 'array'; of: { type: 'number' } }
-        }
-      }>
-    )
+          string: { type: 'string' },
+          number: { type: 'number' },
+          boolean: { type: 'boolean' },
+          literalString: { type: 'literal', of: 'x' },
+          literalNumber: { type: 'literal', of: 0 },
+        },
+      } as const satisfies Schema
 
-    check<{ x: string[]; y: number[] }>(
-      // @ts-expect-error 'string[]' is not assignable to type 'number[]'
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: {
-          x: { type: 'array'; of: { type: 'string' } }
-          y: { type: 'array'; of: { type: 'string' } }
-        }
-      }>
-    )
-  })
-
-  it('Con_ObjectSchema_SubjT<T>: nested ArraySchema should NOT ignore its nested schema optionality', () => {
-    check<{ x: Array<string | undefined>; y: Array<number | undefined> }>(
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: {
-          x: { type: 'array'; of: { type: 'string'; optional: true } }
-          y: { type: 'array'; of: { type: 'number'; optional: true } }
-        }
-      }>
-    )
-    check<{ x: Array<string | undefined>; y: Array<number | undefined> }>(
-      // @ts-expect-error '(number | undefined)[]' is not assignable to type '(string | undefined)[]'
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: {
-          x: { type: 'array'; of: { type: 'number'; optional: true } }
-          y: { type: 'array'; of: { type: 'number'; optional: true } }
-        }
-      }>
-    )
-  })
-
-  it('Con_ObjectSchema_SubjT<T>: check nested ObjectSchema subject type construction', () => {
-    check<{ x: { a: string; b: number }; y: { c: boolean; d: string } }>(
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: {
-          x: {
-            type: 'object'
-            of: { a: { type: 'string' }; b: { type: 'number' } }
-          }
-          y: {
-            type: 'object'
-            of: { c: { type: 'boolean' }; d: { type: 'string' } }
-          }
-        }
-      }>
-    )
-
-    check<{ x: { a: string; b: number }; y: { c: boolean; d: number } }>(
-      // @ts-expect-error 'y.d' are incompatible; 'string' is not 'number'
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: {
-          x: {
-            type: 'object'
-            of: { a: { type: 'string' }; b: { type: 'number' } }
-          }
-          y: {
-            type: 'object'
-            of: { c: { type: 'boolean' }; d: { type: 'string' } }
-          }
-        }
-      }>
-    )
-  })
-
-  it('Con_ObjectSchema_SubjT<T>: nested ObjectSchema nested BaseSchema should ignore default property', () => {
-    check<{ x: { y: string | undefined } }>(
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: {
-          x: {
-            type: 'object'
-            of: { y: { type: 'string'; optional: true; default: 'x' } }
-          }
-        }
-      }>
-    )
-    check<{ x: { y: string | undefined } }>(
-      // @ts-expect-error 'number | undefined' is not assignable to type 'string | undefined'
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: {
-          x: {
-            type: 'object'
-            of: { y: { type: 'number'; optional: true; default: 0 } }
-          }
-        }
-      }>
-    )
-
-    check<{ x: { y: string | undefined } }>(
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: {
-          x: {
-            type: 'object'
-            of: { y: { type: 'string'; optional: true; default: 'x' } }
-          }
-        }
-      }>
-    )
-    check<{ x: { y: string | undefined } }>(
-      // @ts-expect-error type 'number | undefined' is not assignable to type 'string | undefined'
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: {
-          x: {
-            type: 'object'
-            of: { y: { type: 'number'; optional: true; default: 0 } }
-          }
-        }
-      }>
-    )
-  })
-
-  it('Con_ObjectSchema_SubjT<T>: check ObjectSchema can be optional by itself', () => {
-    check<{ x: string } | undefined>(
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: { x: { type: 'string' } }
-        optional: true
-      }>
-    )
-    check<{ x: string }>(
-      // @ts-expect-error '{ x: string; } | undefined' is not assignable to parameter of type '{ x: string; }'
-      unknownX as Con_ObjectSchema_SubjT<{
-        type: 'object'
-        of: { x: { type: 'string' } }
-        optional: true
-      }>
-    )
-  })
-
-  it('Con_ObjectSchema_SubjT<T>: nested branded types', () => {
-    const schema = {
-      type: 'object',
-      of: {
-        x: { type: 'string', brand: ['key', 'value'] },
-      },
-    } as const satisfies Schema
-
-    check<{ x: string & { __key: 'value' } }>(
-      unknownX as Con_ObjectSchema_SubjT<typeof schema>
-    )
-    check<{ x: number & { __key: 'value' } }>(
-      // @ts-expect-error '{ __key: "value"; } & string' is not assignable to type 'number'
-      unknownX as Con_ObjectSchema_SubjT<typeof schema>
-    )
-  })
-
-  it('Con_ObjectSchema_SubjT<T>: nested UnionSchema', () => {
-    type Subject = Con_ObjectSchema_SubjT<{
-      type: 'object'
-      of: {
-        x: { type: 'union'; of: Array<{ type: 'string' } | { type: 'number' }> }
+      type Expected = {
+        string: string
+        number: number
+        boolean: boolean
+        literalString: 'x'
+        literalNumber: 0
       }
-    }>
 
-    check<{ x: string | number }>(unknownX as Subject)
-    // @ts-expect-error '{ x: string | number; }' is not '{ x: string; }'
-    check<{ x: string }>(unknownX as Subject)
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional + nullable + branded', () => {
+      const schema = {
+        type: 'object',
+        of: {
+          string: {
+            type: 'string',
+            optional: true,
+            nullable: true,
+            brand: ['x', 'string'],
+          },
+          number: {
+            type: 'number',
+            optional: true,
+            nullable: true,
+            brand: ['x', 'number'],
+          },
+          boolean: {
+            type: 'boolean',
+            optional: true,
+            nullable: true,
+            brand: ['x', 'boolean'],
+          },
+          literalString: {
+            type: 'literal',
+            of: 'x',
+            optional: true,
+            nullable: true,
+            brand: ['x', 'literalString'],
+          },
+          literalNumber: {
+            type: 'literal',
+            of: 0,
+            optional: true,
+            nullable: true,
+            brand: ['x', 'literalNumber'],
+          },
+        },
+      } as const satisfies Schema
+
+      type Expected = {
+        string: (string & { __x: 'string' }) | undefined | null
+        number: (number & { __x: 'number' }) | undefined | null
+        boolean: (boolean & { __x: 'boolean' }) | undefined | null
+        literalString: ('x' & { __x: 'literalString' }) | undefined | null
+        literalNumber: (0 & { __x: 'literalNumber' }) | undefined | null
+      }
+
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+  })
+
+  describe('Nested CompoundSchema with no/all type related parameters', () => {
+    const deeplyNested = { type: 'string' } as const satisfies Schema
+    type T = SubjectType<typeof deeplyNested>
+
+    it('Required', () => {
+      const schema = {
+        type: 'object',
+        of: {
+          object: {
+            type: 'object',
+            of: {
+              x: deeplyNested,
+            },
+          },
+          array: {
+            type: 'array',
+            of: deeplyNested,
+          },
+          union: {
+            type: 'union',
+            of: [deeplyNested],
+          },
+        },
+      } as const satisfies Schema
+
+      type Expected = {
+        object: { x: T }
+        array: T[]
+        union: T
+      }
+
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional + nullable', () => {
+      const schema = {
+        type: 'object',
+        of: {
+          object: {
+            type: 'object',
+            of: {
+              x: deeplyNested,
+            },
+            optional: true,
+            nullable: true,
+          },
+          array: {
+            type: 'array',
+            of: deeplyNested,
+            optional: true,
+            nullable: true,
+          },
+          union: {
+            type: 'union',
+            of: [deeplyNested],
+            optional: true,
+            nullable: true,
+          },
+        },
+      } as const satisfies Schema
+
+      type Expected = {
+        object: { x: T } | null | undefined
+        array: T[] | null | undefined
+        union: string | null | undefined
+      }
+
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
   })
 })
 
 describe('Construct Schema subject type in the context of deeply nested schemas', () => {
+  const deeplyNested = { type: 'string' } as const satisfies Schema
+  type T = SubjectType<typeof deeplyNested>
+
   it('ArraySchema should allow 7 depth levels', () => {
-    const array7DepthLevelSchema = {
+    const schema = {
       // Depth 1
       type: 'array',
       of: {
@@ -842,7 +1116,7 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
                 of: {
                   // Depth 7
                   type: 'array',
-                  of: { type: 'string' },
+                  of: deeplyNested,
                 },
               },
             },
@@ -851,29 +1125,15 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
       },
     } as const satisfies Schema
 
-    type ParsedSubjectType = Con_Schema_SubjT<typeof array7DepthLevelSchema>
+    type Expected = Array<Array<Array<Array<Array<Array<Array<T>>>>>>>
+    type Actual = SubjectType<typeof schema>
 
-    check<Array<Array<Array<Array<Array<Array<Array<string>>>>>>>>(
-      unknownX as ParsedSubjectType
-    )
-    check<Array<Array<Array<Array<Array<Array<Array<number>>>>>>>>(
-      // @ts-expect-error 'string[]' is not assignable to type 'number[]'
-      unknownX as ParsedSubjectType
-    )
-
-    type ValidatedSubjectType = Con_Schema_SubjT<typeof array7DepthLevelSchema>
-
-    check<Array<Array<Array<Array<Array<Array<Array<string>>>>>>>>(
-      unknownX as ValidatedSubjectType
-    )
-    check<Array<Array<Array<Array<Array<Array<Array<number>>>>>>>>(
-      // @ts-expect-error 'string[]' is not assignable to type 'number[]'
-      unknownX as ValidatedSubjectType
-    )
+    check<Actual, Expected>()
+    check<Expected, Actual>()
   })
 
   it('ObjectSchema should allow 7 depth levels', () => {
-    const object7DepthLevelSchema = {
+    const schema = {
       // Depth 1
       type: 'object',
       of: {
@@ -901,7 +1161,7 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
                               // Depth 7
                               type: 'object',
                               of: {
-                                x: { type: 'string' },
+                                x: deeplyNested,
                               },
                             },
                           },
@@ -917,348 +1177,10 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
       },
     } as const satisfies Schema
 
-    type ParsedSubjectType = Con_Schema_SubjT<typeof object7DepthLevelSchema>
+    type Expected = { x: { x: { x: { x: { x: { x: { x: T } } } } } } }
+    type Actual = SubjectType<typeof schema>
 
-    check<{ x: { x: { x: { x: { x: { x: { x: string } } } } } } }>(
-      unknownX as ParsedSubjectType
-    )
-    check<{ x: { x: { x: { x: { x: { x: { x: number } } } } } } }>(
-      // @ts-expect-error 'string' is not assignable to type 'number'
-      unknownX as ParsedSubjectType
-    )
-
-    type ValidatedSubjectType = Con_Schema_SubjT<typeof object7DepthLevelSchema>
-
-    check<{ x: { x: { x: { x: { x: { x: { x: string } } } } } } }>(
-      unknownX as ValidatedSubjectType
-    )
-    check<{ x: { x: { x: { x: { x: { x: { x: number } } } } } } }>(
-      // @ts-expect-error 'string' is not assignable to type 'number'
-      unknownX as ValidatedSubjectType
-    )
-  })
-
-  it('Multilevel Schema with all possible string variations', () => {
-    const schema = {
-      type: 'object',
-      of: {
-        /* Base short required/optional string schema (BS_String_Req/BS_String_Opt) */
-
-        baseSchemaShortString: {
-          type: 'object',
-          of: {
-            objectSchema: {
-              type: 'object',
-              of: {
-                required: {
-                  type: 'object',
-                  of: {
-                    requiredString: { type: 'string' },
-                    optionalString: { type: 'string', optional: true },
-                  },
-                },
-                optional: {
-                  type: 'object',
-                  optional: true,
-                  of: {
-                    requiredString: { type: 'string' },
-                    optionalString: { type: 'string', optional: true },
-                  },
-                },
-              },
-            },
-
-            arraySchema: {
-              type: 'object',
-              of: {
-                required: {
-                  type: 'object',
-                  of: {
-                    requiredString: { type: 'array', of: { type: 'string' } },
-                    optionalString: {
-                      type: 'array',
-                      of: { type: 'string', optional: true },
-                    },
-                  },
-                },
-
-                optional: {
-                  type: 'object',
-                  of: {
-                    requiredString: {
-                      type: 'array',
-                      optional: true,
-                      of: { type: 'string' },
-                    },
-                    optionalString: {
-                      type: 'array',
-                      optional: true,
-                      of: { type: 'string', optional: true },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-
-        /* Base detailed required/optional/default/branded string schema (StringSchema) */
-
-        baseSchemaDetailedString: {
-          type: 'object',
-          of: {
-            objectSchema: {
-              type: 'object',
-              of: {
-                required: {
-                  type: 'object',
-                  of: {
-                    requiredString: { type: 'string' },
-                    requiredStringBranded: {
-                      type: 'string',
-                      brand: ['K', 'V'],
-                    },
-                    optionalString: { type: 'string', optional: true },
-                    optionalStringBranded: {
-                      type: 'string',
-                      optional: true,
-                      brand: ['K', 'V'],
-                    },
-                  },
-                },
-                optional: {
-                  type: 'object',
-                  optional: true,
-                  of: {
-                    requiredString: { type: 'string' },
-                    requiredStringBranded: {
-                      type: 'string',
-                      brand: ['K', 'V'],
-                    },
-                    optionalString: { type: 'string', optional: true },
-                    optionalStringBranded: {
-                      type: 'string',
-                      optional: true,
-                      brand: ['K', 'V'],
-                    },
-                  },
-                },
-              },
-            },
-
-            arraySchema: {
-              type: 'object',
-              of: {
-                required: {
-                  type: 'object',
-                  of: {
-                    requiredString: { type: 'array', of: { type: 'string' } },
-                    requiredStringBranded: {
-                      type: 'array',
-                      of: {
-                        type: 'string',
-                        brand: ['K', 'V'],
-                      },
-                    },
-                    optionalString: {
-                      type: 'array',
-                      of: { type: 'string', optional: true },
-                    },
-                    optionalStringBranded: {
-                      type: 'array',
-                      of: {
-                        type: 'string',
-                        optional: true,
-                        brand: ['K', 'V'],
-                      },
-                    },
-                  },
-                },
-                optional: {
-                  type: 'object',
-                  optional: true,
-                  of: {
-                    requiredString: {
-                      type: 'array',
-                      optional: true,
-                      of: { type: 'string' },
-                    },
-                    requiredStringBranded: {
-                      type: 'array',
-                      optional: true,
-                      of: {
-                        type: 'string',
-                        brand: ['K', 'V'],
-                      },
-                    },
-                    optionalString: {
-                      type: 'array',
-                      optional: true,
-                      of: { type: 'string', optional: true },
-                    },
-                    optionalStringBranded: {
-                      type: 'array',
-                      optional: true,
-                      of: {
-                        type: 'string',
-                        optional: true,
-                        brand: ['K', 'V'],
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    } as const satisfies Schema
-
-    type ValidatedSubjectType = Con_Schema_SubjT<typeof schema>
-    type ExpectedValidatedSubjectType = {
-      baseSchemaShortString: {
-        objectSchema: {
-          required: {
-            requiredString: string
-            optionalString?: string
-          }
-          optional?: {
-            requiredString: string
-            optionalString?: string
-          }
-        }
-        arraySchema: {
-          required: {
-            requiredString: string[]
-            optionalString: (string | undefined)[]
-          }
-          optional: {
-            requiredString?: string[]
-            optionalString?: (string | undefined)[]
-          }
-        }
-      }
-
-      baseSchemaDetailedString: {
-        objectSchema: {
-          required: {
-            requiredString: string
-            requiredStringBranded: string & { __K: 'V' }
-            optionalString?: string
-            optionalStringBranded?: string & { __K: 'V' }
-            optionalStringDefault?: string
-            optionalStringDefaultBranded?: string & {
-              __K: 'V'
-            }
-          }
-          optional?: {
-            requiredString: string
-            requiredStringBranded: string & { __K: 'V' }
-            optionalString?: string
-            optionalStringBranded?: string & { __K: 'V' }
-            optionalStringDefault?: string
-            optionalStringDefaultBranded?: string & {
-              __K: 'V'
-            }
-          }
-        }
-
-        arraySchema: {
-          required: {
-            requiredString: string[]
-            requiredStringBranded: Array<string & { __K: 'V' }>
-            optionalString: (string | undefined)[]
-            optionalStringBranded: Array<(string & { __K: 'V' }) | undefined>
-          }
-          optional?: {
-            requiredString?: string[]
-            requiredStringBranded?: Array<string & { __K: 'V' }>
-            optionalString?: (string | undefined)[]
-            optionalStringBranded?: Array<(string & { __K: 'V' }) | undefined>
-          }
-        }
-      }
-    }
-
-    check<ExpectedValidatedSubjectType>(unknownX as ValidatedSubjectType)
-    check<ExpectedValidatedSubjectType & { x: number }>(
-      // @ts-expect-error but required in type '{ x: number; }'
-      unknownX as ValidatedSubjectType
-    )
-
-    type ParsedSubjectType = Con_Schema_SubjT<typeof schema>
-    type ExpectedParsedSubjectType = {
-      baseSchemaShortString: {
-        objectSchema: {
-          required: {
-            requiredString: string
-            optionalString?: string
-          }
-          optional?: {
-            requiredString: string
-            optionalString?: string
-          }
-        }
-        arraySchema: {
-          required: {
-            requiredString: string[]
-            optionalString: (string | undefined)[]
-          }
-          optional: {
-            requiredString?: string[]
-            optionalString?: (string | undefined)[]
-          }
-        }
-      }
-
-      baseSchemaDetailedString: {
-        objectSchema: {
-          required: {
-            requiredString: string
-            requiredStringBranded: string & { __K: 'V' }
-            optionalString?: string
-            optionalStringBranded?: string & { __K: 'V' }
-          }
-          optional?: {
-            requiredString: string
-            requiredStringBranded: string & { __K: 'V' }
-            optionalString?: string
-            optionalStringBranded?: string & { __K: 'V' }
-          }
-        }
-
-        arraySchema: {
-          required: {
-            requiredString: string[]
-            requiredStringBranded: Array<string & { __K: 'V' }>
-            optionalString: (undefined | string)[]
-            optionalStringBranded: Array<(string & { __K: 'V' }) | undefined>
-          }
-          optional?: {
-            requiredString?: string[]
-            requiredStringBranded?: Array<string & { __K: 'V' }>
-            optionalString?: (string | undefined)[]
-            optionalStringBranded?: Array<(string & { __K: 'V' }) | undefined>
-          }
-        }
-      }
-    }
-
-    check<ExpectedParsedSubjectType>(unknownX as ParsedSubjectType)
-    check<ExpectedParsedSubjectType & { x: number }>(
-      // @ts-expect-error but required in type '{ x: number; }'
-      unknownX as ParsedSubjectType
-    )
-  })
-
-  it('Con_Schema_SubjT<T>: check UnionSchema', () => {
-    type Subject = Con_Schema_SubjT<{
-      type: 'union'
-      of: Array<{ type: 'string' } | { type: 'number' }>
-    }>
-
-    check<string | number>(unknownX as Subject)
-    // @ts-expect-error 'string | number' is not 'string'
-    check<string>(unknownX as Subject)
+    check<Actual, Expected>()
+    check<Expected, Actual>()
   })
 })

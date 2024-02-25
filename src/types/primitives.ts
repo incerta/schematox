@@ -39,7 +39,9 @@ export type BooleanSchema = {
   brand?: BrandSchema
 }
 
-export type LiteralSchema<T extends string | number = string | number> = {
+export type LiteralSchema<
+  T extends string | number | boolean = string | number | boolean,
+> = {
   type: 'literal'
   of: T
 
