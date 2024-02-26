@@ -1,7 +1,7 @@
-import { parse } from '../../parse'
-import { validate } from '../../validate'
-import { boolean } from '../../programmatic-schema'
-import { check, unknownX } from '../test-utils'
+import { parse } from '../parse'
+import { validate } from '../validate'
+import { boolean } from '../struct'
+import { check, unknownX } from './test-utils'
 
 describe('Boolean schema programmatic definition', () => {
   it('boolean: required boolean', () => {

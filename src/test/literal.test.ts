@@ -1,8 +1,8 @@
-import { check } from '../test-utils'
-import { literal } from '../../programmatic-schema'
-import { ERROR_CODE } from '../../error'
+import { check } from './test-utils'
+import { literal } from '../struct'
+import { ERROR_CODE } from '../error'
 
-import type { InvalidSubject } from '../../error'
+import type { InvalidSubject } from '../error'
 
 describe('Required string literal', () => {
   it('literal: parse valid', () => {
