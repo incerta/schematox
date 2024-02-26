@@ -99,7 +99,6 @@ describe('Validate OBJECT schema with VALID subject', () => {
       undefinedB: undefined,
       undefinedD: undefined,
       undefinedF: undefined,
-      extraKeyThatShouldBeKept: 'x',
     }
 
     expect(validate(schema, subject).data).toStrictEqual(subject)
@@ -121,6 +120,7 @@ describe('Validate OBJECT schema with VALID subject', () => {
         undefinedF: { type: 'boolean', optional: true },
         i: { type: 'literal', of: 'x' },
         j: { type: 'literal', of: 'x', optional: true },
+        undefinedJ: { type: 'literal', of: 'x', optional: true },
       },
     } as const satisfies Schema
 
@@ -137,7 +137,6 @@ describe('Validate OBJECT schema with VALID subject', () => {
       undefinedD: undefined,
       undefinedF: undefined,
       undefinedJ: undefined,
-      extraKeyWhichShouldBeKept: 'x',
     } as const
 
     expect(validate(schema, subject).data).toStrictEqual(subject)
@@ -393,6 +392,40 @@ describe('Validate OBJECT schema with INVALID subject', () => {
         path: ['x', 1],
       },
     ])
+  })
+
+  it('validate: subject with keys that are not specified in schema', () => {
+    const schema = {
+      type: 'object',
+      of: {
+        x: {
+          type: 'object',
+          of: {
+            a: { type: 'string' },
+          },
+        },
+      },
+    } as const satisfies Schema
+
+    const subject = {
+      x: {
+        a: 'string',
+        b: 'unexpectedKey',
+      },
+    }
+
+    const expected = [
+      {
+        code: ERROR_CODE.invalidType,
+        schema: schema.of.x,
+        subject: subject.x,
+        path: ['x'],
+      },
+    ]
+
+    const actual = validate(schema, subject).error
+
+    expect(actual).toStrictEqual(expected)
   })
 })
 
