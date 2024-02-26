@@ -1,4 +1,4 @@
-import { check } from '../test-utils'
+import { check } from './test-utils'
 import {
   literal,
   union,
@@ -7,10 +7,10 @@ import {
   boolean,
   object,
   array,
-} from '../../programmatic-schema'
-import { ERROR_CODE } from '../../error'
+} from '../struct'
+import { ERROR_CODE } from '../error'
 
-import type { InvalidSubject } from '../../error'
+import type { InvalidSubject } from '../error'
 
 describe('Union nested structures', () => {
   it('union: union of all types', () => {

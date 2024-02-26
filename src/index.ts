@@ -8,7 +8,7 @@ export {
   union,
   array,
   object,
-} from './programmatic-schema'
+} from './struct'
 
 export { error, data } from './utils/fp'
 export { parse } from './parse'

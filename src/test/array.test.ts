@@ -1,16 +1,8 @@
-import { check } from '../test-utils'
+import { check } from './test-utils'
 
-import { parse } from '../../parse'
-import { validate } from '../../validate'
-
-import {
-  array,
-  object,
-  string,
-  number,
-  boolean,
-  literal,
-} from '../../programmatic-schema'
+import { parse } from '../parse'
+import { validate } from '../validate'
+import { array, object, string, number, boolean, literal } from '../struct'
 
 describe('Array schema programmatic definition', () => {
   it('array: required array', () => {

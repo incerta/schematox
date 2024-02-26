@@ -50,13 +50,19 @@ export type Struct<T extends Schema> = Omit<
         value: W
       ) => Struct<T & { brand: Readonly<[V, W]> }>
 
-      minLength: (minLength: number) => Struct<T & { minLength: number }>
-      maxLength: (maxLength: number) => Struct<T & { maxLength: number }>
+      minLength: <U extends number>(
+        minLength: U
+      ) => Struct<T & { minLength: U }>
+      maxLength: <U extends number>(
+        maxLength: U
+      ) => Struct<T & { maxLength: U }>
 
-      min: (min: number) => Struct<T & { min: number }>
-      max: (max: number) => Struct<T & { max: number }>
+      min: <U extends number>(min: U) => Struct<T & { min: U }>
+      max: <U extends number>(max: U) => Struct<T & { max: U }>
 
-      description: (description: string) => Struct<T & { description: string }>
+      description: <U extends string>(
+        description: U
+      ) => Struct<T & { description: U }>
     },
     ParamsBySchemaType[T['type']]
   >,

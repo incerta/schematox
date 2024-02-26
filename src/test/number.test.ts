@@ -1,7 +1,7 @@
-import { parse } from '../../parse'
-import { validate } from '../../validate'
-import { number } from '../../programmatic-schema'
-import { check, unknownX } from '../test-utils'
+import { parse } from '../parse'
+import { validate } from '../validate'
+import { number } from '../struct'
+import { check, unknownX } from './test-utils'
 
 describe('Number schema programmatic definition', () => {
   it('number: required number', () => {
