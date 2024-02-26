@@ -936,9 +936,9 @@ describe('minLength', () => {
   const schema = { type: 'string', minLength } as const satisfies Schema
   const struct = string().minLength(minLength)
 
-  const validRangeSubjects = ['xxx', 'xxxx', 'xxxxx']
-  const invalidTypeSubjects = INVALID_TYPE_SUBJECTS
-  const invalidRangeSubjects = ['', 'x', 'xx']
+  const validRangeSubjects: unknown[] = ['xxx', 'xxxx', 'xxxxx']
+  const invalidTypeSubjects: unknown[] = INVALID_TYPE_SUBJECTS
+  const invalidRangeSubjects: unknown[] = ['', 'x', 'xx']
 
   type Expected = string
 
@@ -1260,9 +1260,9 @@ describe('maxLength', () => {
   const schema = { type: 'string', maxLength } as const satisfies Schema
   const struct = string().maxLength(maxLength)
 
-  const validRangeSubjects = ['', 'x', 'xx']
-  const invalidTypeSubjects = INVALID_TYPE_SUBJECTS
-  const invalidRangeSubjects = ['xxx', 'xxxx', 'xxxx']
+  const validRangeSubjects: unknown[] = ['', 'x', 'xx']
+  const invalidTypeSubjects: unknown[] = INVALID_TYPE_SUBJECTS
+  const invalidRangeSubjects: unknown[] = ['xxx', 'xxxx', 'xxxx']
 
   type Expected = string
 
@@ -1618,10 +1618,10 @@ describe('optional + nullable + brand + minLength + maxLength + description', ()
     .maxLength(maxLength)
     .description(description)
 
-  const validRangeSubjects = ['xx', 'xxx'] as unknown[]
-  const invalidRangeSubjects = ['', 'x', 'xxxx', 'xxxx'] as unknown[]
+  const validRangeSubjects: unknown[] = ['xx', 'xxx']
+  const invalidRangeSubjects: unknown[] = ['', 'x', 'xxxx', 'xxxx']
 
-  const invalidTypeSubjects = INVALID_TYPE_SUBJECTS.filter((x) => {
+  const invalidTypeSubjects: unknown[] = INVALID_TYPE_SUBJECTS.filter((x) => {
     if (x === undefined) return false
     if (x === null) return false
     return true
