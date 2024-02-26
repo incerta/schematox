@@ -43,9 +43,12 @@ export function validate(
       ])
     }
 
+    const subjectKeySet = new Set(Object.keys(subject))
+
     for (const key in schema.of) {
-      // @ts-expect-error typescript is not smart enough here, or am I?
-      const nestedValue = subject[key]
+      subjectKeySet.delete(key)
+
+      const nestedValue = (subject as Record<string, unknown>)[key]
       const nestedSchema = schema.of[key] as Schema
 
       const validated = validate.bind([...(this || []), key])(
@@ -60,6 +63,17 @@ export function validate(
     }
 
     if (errors.length) {
+      return error(errors)
+    }
+
+    if (subjectKeySet.size !== 0) {
+      errors.push({
+        code: ERROR_CODE.invalidType,
+        subject,
+        schema,
+        path: this || [],
+      })
+
       return error(errors)
     }
 
