@@ -534,3 +534,114 @@ describe('Verify valid/invalid subject of number "literal" schema', () => {
     expect(verifyPrimitive(schema, Object)).toBe(ERROR_CODE.invalidType)
   })
 })
+
+describe('Verify valid/invalid subject of boolean "literal" schema', () => {
+  it('verifyPrimitive: valid subject by required schema', () => {
+    const subject = true
+    const schema = { type: 'literal', of: subject } as const satisfies Schema
+
+    expect(verifyPrimitive(schema, subject)).toBe(true)
+  })
+
+  it('verifyPrimitive: valid subject by optional schema', () => {
+    const subject = false
+    const schema = {
+      type: 'literal',
+      of: subject,
+      optional: true,
+    } as const satisfies Schema
+
+    expect(verifyPrimitive(schema, undefined)).toBe(true)
+    expect(verifyPrimitive(schema, subject)).toBe(true)
+  })
+
+  it('verifyPrimitive: valid subject by nullable schema', () => {
+    const subject = true
+    const schema = {
+      type: 'literal',
+      of: subject,
+      nullable: true,
+    } as const satisfies Schema
+
+    expect(verifyPrimitive(schema, null)).toBe(true)
+    expect(verifyPrimitive(schema, subject)).toBe(true)
+  })
+
+  it('verifyPrimitive: valid subject by optional & nullable schema', () => {
+    const subject = false
+    const schema = {
+      type: 'literal',
+      of: subject,
+      nullable: true,
+      optional: true,
+    } as const satisfies Schema
+
+    expect(verifyPrimitive(schema, undefined)).toBe(true)
+    expect(verifyPrimitive(schema, null)).toBe(true)
+    expect(verifyPrimitive(schema, subject)).toBe(true)
+  })
+
+  it('verifyPrimitive: invalid subject required', () => {
+    const schema = { type: 'literal', of: true } as const satisfies Schema
+
+    expect(verifyPrimitive(schema, null)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, undefined)).toBe(ERROR_CODE.invalidType)
+
+    expect(verifyPrimitive(schema, 'y')).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, 1)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, false)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, /^x/)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, {})).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, Object)).toBe(ERROR_CODE.invalidType)
+  })
+
+  it('verifyPrimitive: invalid subject optional', () => {
+    const schema = {
+      type: 'literal',
+      of: false,
+      optional: true,
+    } as const satisfies Schema
+
+    expect(verifyPrimitive(schema, null)).toBe(ERROR_CODE.invalidType)
+
+    expect(verifyPrimitive(schema, 'y')).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, 1)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, true)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, /^x/)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, {})).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, Object)).toBe(ERROR_CODE.invalidType)
+  })
+
+  it('verifyPrimitive: invalid subject nullable', () => {
+    const schema = {
+      type: 'literal',
+      of: true,
+      nullable: true,
+    } as const satisfies Schema
+
+    expect(verifyPrimitive(schema, undefined)).toBe(ERROR_CODE.invalidType)
+
+    expect(verifyPrimitive(schema, 'y')).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, 1)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, false)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, /^x/)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, {})).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, Object)).toBe(ERROR_CODE.invalidType)
+  })
+
+  it('verifyPrimitive: invalid subject optional & nullable', () => {
+    const schema = {
+      type: 'literal',
+      of: false,
+      optional: true,
+      nullable: true,
+    } as const satisfies Schema
+
+    expect(verifyPrimitive(schema, 1)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, 'y')).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, true)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, /^x/)).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, {})).toBe(ERROR_CODE.invalidType)
+    expect(verifyPrimitive(schema, Object)).toBe(ERROR_CODE.invalidType)
+  })
+})

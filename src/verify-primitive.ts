@@ -70,7 +70,9 @@ export function verifyPrimitive(
 
     case 'literal': {
       if (
-        (typeof subject !== 'string' && typeof subject !== 'number') ||
+        (typeof subject !== 'string' &&
+          typeof subject !== 'number' &&
+          typeof subject !== 'boolean') ||
         subject !== schema.of
       ) {
         return ERROR_CODE.invalidType
