@@ -68,7 +68,7 @@ export function boolean() {
   return makeStruct({ type: 'boolean' })
 }
 
-export function literal<T extends string | number>(of: T) {
+export function literal<T extends string | number | boolean>(of: T) {
   return makeStruct({ type: 'literal', of })
 }
 

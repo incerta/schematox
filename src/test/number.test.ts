@@ -146,7 +146,7 @@ describe('No schema parameters', () => {
 
   describe('Struct method parse/validate/guard', () => {
     it('Parse valid subjects', () => {
-      for (const subject of VALID_TYPE_SUBJECTS) {
+      for (const subject of validSubjects) {
         const actual = struct.parse(subject)
 
         if (actual.error) {
@@ -164,7 +164,7 @@ describe('No schema parameters', () => {
     })
 
     it('Parse INVALID_TYPE subjects', () => {
-      for (const subject of INVALID_TYPE_SUBJECTS) {
+      for (const subject of invalidSubjects) {
         const actual = struct.parse(subject)
 
         if (actual.error === undefined) {
@@ -184,7 +184,7 @@ describe('No schema parameters', () => {
     })
 
     it('Validate valid subjects', () => {
-      for (const subject of VALID_TYPE_SUBJECTS) {
+      for (const subject of validSubjects) {
         const actual = struct.validate(subject)
 
         if (actual.error) {
@@ -202,7 +202,7 @@ describe('No schema parameters', () => {
     })
 
     it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of INVALID_TYPE_SUBJECTS) {
+      for (const subject of invalidSubjects) {
         const actual = struct.validate(subject)
 
         if (actual.error === undefined) {
@@ -222,7 +222,7 @@ describe('No schema parameters', () => {
     })
 
     it('Guard valid subjects', () => {
-      for (const subject of VALID_TYPE_SUBJECTS) {
+      for (const subject of validSubjects) {
         const actual = struct.guard(subject)
 
         if (actual === false) {
@@ -237,7 +237,7 @@ describe('No schema parameters', () => {
     })
 
     it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of INVALID_TYPE_SUBJECTS) {
+      for (const subject of invalidSubjects) {
         const expected = false
         const actual = struct.guard(subject)
 
@@ -372,7 +372,7 @@ describe('optional', () => {
 
   describe('Struct method parse/validate/guard', () => {
     it('Parse valid subjects', () => {
-      for (const subject of VALID_TYPE_SUBJECTS) {
+      for (const subject of validSubjects) {
         const actual = struct.parse(subject)
 
         if (actual.error) {
@@ -1618,7 +1618,7 @@ describe('optional + nullable + brand + minLength + maxLength + description', ()
     .max(max)
     .description(description)
 
-  const validRangeSubjects: unknown[] = [-1, 0, 1]
+  const validRangeSubjects: unknown[] = [-1, 0, 1, undefined, null]
   const invalidRangeSubjects: unknown[] = [-3, -2, 2, 3]
 
   const invalidTypeSubjects = INVALID_TYPE_SUBJECTS.filter((x) => {
