@@ -14,7 +14,7 @@ export function makeStruct(schema: StructSchema) {
     parse: (subj: unknown) => parse(schema, subj),
     validate: (subj: unknown) => validate(schema, subj),
     guard: (subj: unknown): subj is string | undefined =>
-      validate(schema, subj).error === undefined,
+      validate(schema, subj).left === undefined,
   }
 
   if (params.has('optional')) {

@@ -53,16 +53,16 @@ describe('Union methods', () => {
     const struct = union([literal('x'), literal('y')])
     const parsed = struct.parse('x')
 
-    if (parsed.error) {
+    if (parsed.left) {
       throw Error('Not expected')
     }
 
-    check<'x' | 'y'>(parsed.data)
+    check<'x' | 'y'>(parsed.right)
     // @ts-expect-error '"x" | "y"' is not assignable to parameter of type '"x"'
-    check<'x'>(parsed.data)
+    check<'x'>(parsed.right)
 
-    expect(parsed.data).toBe('x')
-    expect(parsed.error).toBeUndefined()
+    expect(parsed.right).toBe('x')
+    expect(parsed.left).toBeUndefined()
   })
 
   it('union: parse invalid', () => {
@@ -70,12 +70,12 @@ describe('Union methods', () => {
     const subject = 'z'
     const parsed = struct.parse(subject)
 
-    if (parsed.error) {
-      check<InvalidSubject[]>(parsed.error)
+    if (parsed.left) {
+      check<InvalidSubject[]>(parsed.left)
       // @ts-expect-error 'InvalidSubject[]' is not 'string[]'
-      check<string[]>(parsed.error)
+      check<string[]>(parsed.left)
 
-      expect(parsed.error).toStrictEqual([
+      expect(parsed.left).toStrictEqual([
         {
           code: ERROR_CODE.invalidType,
           schema: struct.__schema,
@@ -94,15 +94,15 @@ describe('Union methods', () => {
     const struct = union([literal('x'), literal('y')])
     const validated = struct.validate('x')
 
-    if (validated.error) {
+    if (validated.left) {
       throw Error('Not expected')
     }
 
-    check<'x' | 'y'>(validated.data)
+    check<'x' | 'y'>(validated.right)
     // @ts-expect-error '"x" | "y"' is not assignable to parameter of type '"x"'
-    check<'x'>(validated.data)
+    check<'x'>(validated.right)
 
-    expect(validated.data).toBe('x')
+    expect(validated.right).toBe('x')
   })
 
   it('union: validate invalid', () => {
@@ -110,12 +110,12 @@ describe('Union methods', () => {
     const subject = 'z'
     const validated = struct.validate(subject)
 
-    if (validated.error) {
-      check<InvalidSubject[]>(validated.error)
+    if (validated.left) {
+      check<InvalidSubject[]>(validated.left)
       // @ts-expect-error 'InvalidSubject[]' is not 'string[]'
-      check<string[]>(validated.error)
+      check<string[]>(validated.left)
 
-      expect(validated.error).toStrictEqual([
+      expect(validated.left).toStrictEqual([
         {
           code: ERROR_CODE.invalidType,
           schema: struct.__schema,
@@ -174,15 +174,15 @@ describe('Check params', () => {
 
     const parsed = struct.parse('x')
 
-    if (parsed.error) {
+    if (parsed.left) {
       throw Error('Not expected')
     }
 
-    check<'x' | 'y' | undefined>(parsed.data)
+    check<'x' | 'y' | undefined>(parsed.right)
     // @ts-expect-error '"x" | "y" | undefined' is not '"x" | "y"'
-    check<'x' | 'y'>(parsed.data)
+    check<'x' | 'y'>(parsed.right)
 
-    expect(parsed.data).toBe('x')
+    expect(parsed.right).toBe('x')
 
     // @ts-expect-error 'optional' does not exist
     expect(() => struct.optional()).not.toThrow()
@@ -207,15 +207,15 @@ describe('Check params', () => {
 
     const parsed = struct.parse('x')
 
-    if (parsed.error) {
+    if (parsed.left) {
       throw Error('Not expected')
     }
 
-    check<'x' | 'y' | undefined>(parsed.data)
+    check<'x' | 'y' | undefined>(parsed.right)
     // @ts-expect-error '"x" | "y" | undefined' is not '"x" | "y"'
-    check<'x' | 'y'>(parsed.data)
+    check<'x' | 'y'>(parsed.right)
 
-    expect(parsed.data).toBe('x')
+    expect(parsed.right).toBe('x')
 
     // @ts-expect-error 'optional' does not exist
     expect(() => struct.optional()).not.toThrow()

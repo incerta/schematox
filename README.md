@@ -83,19 +83,19 @@ const subject = {
 
 const parsed = parse(userSchema, subject)
 
-if (parsed.error) {
+if (parsed.left) {
   throw Error('Not expected')
 }
 
-console.log(parsed.data) // { id: '1', name: 'John' }
+console.log(parsed.right) // { id: '1', name: 'John' }
 
 const validated = validate(userSchema, subject)
 
-if (validated.error) {
+if (validated.left) {
   throw Error('Not expected')
 }
 
-console.log(validated.data) // { id: '1', name: 'John' }
+console.log(validated.right) // { id: '1', name: 'John' }
 
 if (guard(userSchema, subject)) {
   // { id: string & { __idFor: 'User' }; name: string }
@@ -120,19 +120,19 @@ const subject = { id: '1', name: 'John' } as unknown
 
 const parsed = struct.parse(subject)
 
-if (parsed.error) {
+if (parsed.left) {
   throw Error('Not expected')
 }
 
-console.log(parsed.data) // { id: '1', name: 'John' }
+console.log(parsed.right) // { id: '1', name: 'John' }
 
 const validated = struct.validate(subject)
 
-if (validated.error) {
+if (validated.left) {
   throw Error('Not expected')
 }
 
-console.log(validated.data) // { id: '1', name: 'John' }
+console.log(validated.right) // { id: '1', name: 'John' }
 
 if (struct.guard(subject)) {
   // { id: string & { __idFor: 'User' }; name: string }
@@ -351,7 +351,7 @@ const struct = object({
 const result = struct.parse({ x: { y: [{ z: 0 }] } })
 ```
 
-The `result.error` shape is:
+The `result.left` shape is:
 
 ```json
 [

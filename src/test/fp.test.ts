@@ -1,9 +1,9 @@
-import { error, data } from '../utils/fp'
+import { left, right } from '../utils/fp'
 
 it('error: creates error object', () => {
-  expect(error('x')).toEqual({ error: 'x' })
+  expect(left('x')).toEqual({ left: 'x' })
 })
 
 it('data: creates data object', () => {
-  expect(data('x')).toEqual({ data: 'x' })
+  expect(right('x')).toEqual({ right: 'x' })
 })

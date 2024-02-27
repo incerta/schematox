@@ -1,6 +1,6 @@
 import type { PrimitiveSchema } from './primitives'
 
-type BaseObjectSchema<T> = {
+export type BaseObjectSchema<T> = {
   type: 'object'
   of: Record<string, T>
 
@@ -10,7 +10,7 @@ type BaseObjectSchema<T> = {
   description?: string
 }
 
-type BaseArraySchema<T> = {
+export type BaseArraySchema<T> = {
   type: 'array'
   of: T
 
@@ -23,7 +23,7 @@ type BaseArraySchema<T> = {
 }
 
 // TODO: `discriminant` key as performance optimization measure
-type BaseUnionSchema<T> = {
+export type BaseUnionSchema<T> = {
   type: 'union'
   of: Readonly<Array<T>>
 

@@ -9,32 +9,32 @@ describe('Parse BASE schema with VALID subject', () => {
     const schema = { type: 'string' } satisfies Schema
     const subject = 'x'
 
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
+    expect(parse(schema, subject).right).toBe(subject)
+    expect(parse(schema, subject).left).toBe(undefined)
   })
 
   it('parse: `{ type: "number" }` schema', () => {
     const schema = { type: 'number' } satisfies Schema
     const subject = 0
 
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
+    expect(parse(schema, subject).right).toBe(subject)
+    expect(parse(schema, subject).left).toBe(undefined)
   })
 
   it('parse: `{ type: "boolean" }` schema', () => {
     const schema = { type: 'boolean' } satisfies Schema
     const subject = false
 
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
+    expect(parse(schema, subject).right).toBe(subject)
+    expect(parse(schema, subject).left).toBe(undefined)
   })
 
   it('parse: `{ type: "literal" }` schema', () => {
     const schema = { type: 'literal', of: 'x' } satisfies Schema
     const subject = 'x'
 
-    expect(parse(schema, subject).data).toBe(subject)
-    expect(parse(schema, subject).error).toBe(undefined)
+    expect(parse(schema, subject).right).toBe(subject)
+    expect(parse(schema, subject).left).toBe(undefined)
   })
 })
 
@@ -43,8 +43,8 @@ describe('Parse BASE schema with INVALID subject', () => {
     const detailedReqStrSchema = { type: 'string' } satisfies Schema
     const undefinedSubj = undefined
 
-    expect(parse(detailedReqStrSchema, undefinedSubj).data).toBe(undefined)
-    expect(parse(detailedReqStrSchema, undefinedSubj).error).toStrictEqual([
+    expect(parse(detailedReqStrSchema, undefinedSubj).right).toBe(undefined)
+    expect(parse(detailedReqStrSchema, undefinedSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
@@ -60,8 +60,8 @@ describe('Parse BASE schema with INVALID subject', () => {
 
     const numberSubj = 0
 
-    expect(parse(detailedOptStrSchema, numberSubj).data).toBe(undefined)
-    expect(parse(detailedOptStrSchema, numberSubj).error).toStrictEqual([
+    expect(parse(detailedOptStrSchema, numberSubj).right).toBe(undefined)
+    expect(parse(detailedOptStrSchema, numberSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: numberSubj,
@@ -119,8 +119,8 @@ describe('Parse OBJECT schema with VALID subject', () => {
       extraKeyWhichShouldBeIgnored: 'x',
     }
 
-    expect(parse(schema, subject).data).toStrictEqual(expectedSubject)
-    expect(parse(schema, subject).error).toStrictEqual(undefined)
+    expect(parse(schema, subject).right).toStrictEqual(expectedSubject)
+    expect(parse(schema, subject).left).toStrictEqual(undefined)
   })
 
   it('parse: nested base deailed schema subject', () => {
@@ -186,8 +186,8 @@ describe('Parse OBJECT schema with VALID subject', () => {
       extraKeyWhichShouldBeIgnored: 'x',
     }
 
-    expect(parse(schema, subject).data).toStrictEqual(expectedSubject)
-    expect(parse(schema, subject).error).toStrictEqual(undefined)
+    expect(parse(schema, subject).right).toStrictEqual(expectedSubject)
+    expect(parse(schema, subject).left).toStrictEqual(undefined)
   })
 
   it('parse: nested array schema subject', () => {
@@ -204,11 +204,11 @@ describe('Parse OBJECT schema with VALID subject', () => {
       strArrOpt: undefined,
     }
 
-    expect(parse(schema, subject).data).toStrictEqual({
+    expect(parse(schema, subject).right).toStrictEqual({
       strArrReq: subject.strArrReq,
       strArrOpt: undefined,
     })
-    expect(parse(schema, subject).error).toStrictEqual(undefined)
+    expect(parse(schema, subject).left).toStrictEqual(undefined)
   })
 
   it('parse: can be optional by itself', () => {
@@ -218,8 +218,8 @@ describe('Parse OBJECT schema with VALID subject', () => {
       optional: true,
     } as const satisfies Schema
 
-    expect(parse(schema, undefined).data).toBe(undefined)
-    expect(parse(schema, undefined).error).toBe(undefined)
+    expect(parse(schema, undefined).right).toBe(undefined)
+    expect(parse(schema, undefined).left).toBe(undefined)
   })
 
   it('parse: can be nullable by itself', () => {
@@ -229,8 +229,8 @@ describe('Parse OBJECT schema with VALID subject', () => {
       nullable: true,
     } as const satisfies Schema
 
-    expect(parse(schema, null).data).toBe(null)
-    expect(parse(schema, null).error).toBe(undefined)
+    expect(parse(schema, null).right).toBe(null)
+    expect(parse(schema, null).left).toBe(undefined)
   })
 })
 
@@ -243,8 +243,8 @@ describe('Parse OBJECT schema with INVALID subject', () => {
 
     const undefinedSubj = undefined
 
-    expect(parse(schema, undefinedSubj).data).toBe(undefined)
-    expect(parse(schema, undefinedSubj).error).toStrictEqual([
+    expect(parse(schema, undefinedSubj).right).toBe(undefined)
+    expect(parse(schema, undefinedSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
@@ -255,8 +255,8 @@ describe('Parse OBJECT schema with INVALID subject', () => {
 
     const nullSubj = null
 
-    expect(parse(schema, nullSubj).data).toBe(undefined)
-    expect(parse(schema, nullSubj).error).toStrictEqual([
+    expect(parse(schema, nullSubj).right).toBe(undefined)
+    expect(parse(schema, nullSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: nullSubj,
@@ -267,8 +267,8 @@ describe('Parse OBJECT schema with INVALID subject', () => {
 
     const regExpSubj = /^x/
 
-    expect(parse(schema, regExpSubj).data).toBe(undefined)
-    expect(parse(schema, regExpSubj).error).toStrictEqual([
+    expect(parse(schema, regExpSubj).right).toBe(undefined)
+    expect(parse(schema, regExpSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: regExpSubj,
@@ -279,8 +279,8 @@ describe('Parse OBJECT schema with INVALID subject', () => {
 
     const arraySubj = [] as unknown
 
-    expect(parse(schema, arraySubj).data).toBe(undefined)
-    expect(parse(schema, arraySubj).error).toStrictEqual([
+    expect(parse(schema, arraySubj).right).toBe(undefined)
+    expect(parse(schema, arraySubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: arraySubj,
@@ -291,8 +291,8 @@ describe('Parse OBJECT schema with INVALID subject', () => {
 
     const mapSubj = new Map()
 
-    expect(parse(schema, mapSubj).data).toBe(undefined)
-    expect(parse(schema, mapSubj).error).toStrictEqual([
+    expect(parse(schema, mapSubj).right).toBe(undefined)
+    expect(parse(schema, mapSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: mapSubj,
@@ -303,8 +303,8 @@ describe('Parse OBJECT schema with INVALID subject', () => {
 
     const setSubj = new Set()
 
-    expect(parse(schema, setSubj).data).toBe(undefined)
-    expect(parse(schema, setSubj).error).toStrictEqual([
+    expect(parse(schema, setSubj).right).toBe(undefined)
+    expect(parse(schema, setSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: setSubj,
@@ -333,8 +333,8 @@ describe('Parse OBJECT schema with INVALID subject', () => {
       [secondInvalidSubjKey]: undefined,
     }
 
-    expect(parse(schema, subject).data).toBe(undefined)
-    expect(parse(schema, subject).error).toStrictEqual([
+    expect(parse(schema, subject).right).toBe(undefined)
+    expect(parse(schema, subject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: subject[firstInvalidSubjKey],
@@ -411,8 +411,8 @@ describe('Parse OBJECT schema with INVALID subject', () => {
       },
     }
 
-    expect(parse(schema, subject).data).toBe(undefined)
-    expect(parse(schema, subject).error).toStrictEqual([
+    expect(parse(schema, subject).right).toBe(undefined)
+    expect(parse(schema, subject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
@@ -444,8 +444,8 @@ describe('Parse OBJECT schema with INVALID subject', () => {
       x: ['valid', invalidSubject],
     }
 
-    expect(parse(schema, subject).data).toBe(undefined)
-    expect(parse(schema, subject).error).toStrictEqual([
+    expect(parse(schema, subject).right).toBe(undefined)
+    expect(parse(schema, subject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
@@ -465,8 +465,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const stringSubj = ['x', 'y']
 
-    expect(parse(stringArrSchema, stringSubj).data).toStrictEqual(stringSubj)
-    expect(parse(stringArrSchema, stringSubj).error).toBe(undefined)
+    expect(parse(stringArrSchema, stringSubj).right).toStrictEqual(stringSubj)
+    expect(parse(stringArrSchema, stringSubj).left).toBe(undefined)
 
     const numberArrSchema = {
       type: 'array',
@@ -475,8 +475,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const numberSubj = [0, 1]
 
-    expect(parse(numberArrSchema, numberSubj).data).toStrictEqual(numberSubj)
-    expect(parse(numberArrSchema, numberSubj).error).toBe(undefined)
+    expect(parse(numberArrSchema, numberSubj).right).toStrictEqual(numberSubj)
+    expect(parse(numberArrSchema, numberSubj).left).toBe(undefined)
 
     const booleanArrSchema = {
       type: 'array',
@@ -485,8 +485,10 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const booleanSubj = [true, false]
 
-    expect(parse(booleanArrSchema, booleanSubj).data).toStrictEqual(booleanSubj)
-    expect(parse(booleanArrSchema, booleanSubj).error).toBe(undefined)
+    expect(parse(booleanArrSchema, booleanSubj).right).toStrictEqual(
+      booleanSubj
+    )
+    expect(parse(booleanArrSchema, booleanSubj).left).toBe(undefined)
   })
 
   it('parse: optional base short schema subject', () => {
@@ -497,8 +499,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const strSubject = ['x', 'y']
 
-    expect(parse(optStrSchema, strSubject).data).toStrictEqual(strSubject)
-    expect(parse(optStrSchema, strSubject).error).toBe(undefined)
+    expect(parse(optStrSchema, strSubject).right).toStrictEqual(strSubject)
+    expect(parse(optStrSchema, strSubject).left).toBe(undefined)
 
     const optNumSchema = {
       type: 'array',
@@ -507,8 +509,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const numSubject = [0, 1, 2, 3, 4]
 
-    expect(parse(optNumSchema, numSubject).data).toStrictEqual(numSubject)
-    expect(parse(optNumSchema, numSubject).error).toBe(undefined)
+    expect(parse(optNumSchema, numSubject).right).toStrictEqual(numSubject)
+    expect(parse(optNumSchema, numSubject).left).toBe(undefined)
 
     const optBoolSchema = {
       type: 'array',
@@ -517,8 +519,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const boolSubject = [true, true, false, true]
 
-    expect(parse(optBoolSchema, boolSubject).data).toStrictEqual(boolSubject)
-    expect(parse(optBoolSchema, boolSubject).error).toBe(undefined)
+    expect(parse(optBoolSchema, boolSubject).right).toStrictEqual(boolSubject)
+    expect(parse(optBoolSchema, boolSubject).left).toBe(undefined)
   })
 
   it('parse: required base detailed schema subject', () => {
@@ -529,8 +531,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const strSubj = ['x', 'y', 'x', 'y']
 
-    expect(parse(strSchema, strSubj).data).toStrictEqual(strSubj)
-    expect(parse(strSchema, strSubj).error).toBe(undefined)
+    expect(parse(strSchema, strSubj).right).toStrictEqual(strSubj)
+    expect(parse(strSchema, strSubj).left).toBe(undefined)
 
     const numSchema = {
       type: 'array',
@@ -539,8 +541,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const numSubj = [0, 1, 2, 3, 4]
 
-    expect(parse(numSchema, numSubj).data).toStrictEqual(numSubj)
-    expect(parse(numSchema, numSubj).error).toBe(undefined)
+    expect(parse(numSchema, numSubj).right).toStrictEqual(numSubj)
+    expect(parse(numSchema, numSubj).left).toBe(undefined)
 
     const boolSchema = {
       type: 'array',
@@ -549,8 +551,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const boolSubj = [true, true, false, true]
 
-    expect(parse(boolSchema, boolSubj).data).toStrictEqual(boolSubj)
-    expect(parse(boolSchema, boolSubj).error).toBe(undefined)
+    expect(parse(boolSchema, boolSubj).right).toStrictEqual(boolSubj)
+    expect(parse(boolSchema, boolSubj).left).toBe(undefined)
 
     const strLiteralSchema = {
       type: 'array',
@@ -559,10 +561,10 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const strLiteralSubj = ['x', 'x']
 
-    expect(parse(strLiteralSchema, strLiteralSubj).data).toStrictEqual(
+    expect(parse(strLiteralSchema, strLiteralSubj).right).toStrictEqual(
       strLiteralSubj
     )
-    expect(parse(strLiteralSchema, strLiteralSubj).error).toBe(undefined)
+    expect(parse(strLiteralSchema, strLiteralSubj).left).toBe(undefined)
 
     const numLiteralSchema = {
       type: 'array',
@@ -571,10 +573,10 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const numLiteralSubj = [0, 0]
 
-    expect(parse(numLiteralSchema, numLiteralSubj).data).toStrictEqual(
+    expect(parse(numLiteralSchema, numLiteralSubj).right).toStrictEqual(
       numLiteralSubj
     )
-    expect(parse(numLiteralSchema, numLiteralSubj).error).toBe(undefined)
+    expect(parse(numLiteralSchema, numLiteralSubj).left).toBe(undefined)
   })
 
   it('parse: optional base detailed schema subject', () => {
@@ -585,8 +587,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const strSubj = ['x', 'y', 'x', 'y']
 
-    expect(parse(strSchema, strSubj).data).toStrictEqual(strSubj)
-    expect(parse(strSchema, strSubj).error).toBe(undefined)
+    expect(parse(strSchema, strSubj).right).toStrictEqual(strSubj)
+    expect(parse(strSchema, strSubj).left).toBe(undefined)
 
     const numSchema = {
       type: 'array',
@@ -595,8 +597,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const numSubj = [0, 1, 2, 3, 4]
 
-    expect(parse(numSchema, numSubj).data).toStrictEqual(numSubj)
-    expect(parse(numSchema, numSubj).error).toBe(undefined)
+    expect(parse(numSchema, numSubj).right).toStrictEqual(numSubj)
+    expect(parse(numSchema, numSubj).left).toBe(undefined)
 
     const boolSchema = {
       type: 'array',
@@ -605,8 +607,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const boolSubj = [true, true, false, true]
 
-    expect(parse(boolSchema, boolSubj).data).toStrictEqual(boolSubj)
-    expect(parse(boolSchema, boolSubj).error).toBe(undefined)
+    expect(parse(boolSchema, boolSubj).right).toStrictEqual(boolSubj)
+    expect(parse(boolSchema, boolSubj).left).toBe(undefined)
 
     const strLiteralSchema = {
       type: 'array',
@@ -620,14 +622,14 @@ describe('Parse ARRAY schema with VALID subject', () => {
     const strLiteralSubj = ['x', 'x']
     const arrWithUndef = [undefined, undefined, undefined]
 
-    expect(parse(strLiteralSchema, strLiteralSubj).data).toStrictEqual(
+    expect(parse(strLiteralSchema, strLiteralSubj).right).toStrictEqual(
       strLiteralSubj
     )
-    expect(parse(strLiteralSchema, strLiteralSubj).error).toBe(undefined)
-    expect(parse(strLiteralSchema, arrWithUndef).data).toStrictEqual(
+    expect(parse(strLiteralSchema, strLiteralSubj).left).toBe(undefined)
+    expect(parse(strLiteralSchema, arrWithUndef).right).toStrictEqual(
       arrWithUndef
     )
-    expect(parse(strLiteralSchema, arrWithUndef).error).toBe(undefined)
+    expect(parse(strLiteralSchema, arrWithUndef).left).toBe(undefined)
 
     const numLiteralSchema = {
       type: 'array',
@@ -640,14 +642,14 @@ describe('Parse ARRAY schema with VALID subject', () => {
 
     const numLiteralSubj = [0, 0]
 
-    expect(parse(numLiteralSchema, numLiteralSubj).data).toStrictEqual(
+    expect(parse(numLiteralSchema, numLiteralSubj).right).toStrictEqual(
       numLiteralSubj
     )
-    expect(parse(numLiteralSchema, numLiteralSubj).error).toBe(undefined)
-    expect(parse(numLiteralSchema, arrWithUndef).data).toStrictEqual(
+    expect(parse(numLiteralSchema, numLiteralSubj).left).toBe(undefined)
+    expect(parse(numLiteralSchema, arrWithUndef).right).toStrictEqual(
       arrWithUndef
     )
-    expect(parse(numLiteralSchema, arrWithUndef).error).toBe(undefined)
+    expect(parse(numLiteralSchema, arrWithUndef).left).toBe(undefined)
   })
 
   it('parse: can be optional by itself', () => {
@@ -657,8 +659,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
       optional: true,
     } as const satisfies Schema
 
-    expect(parse(schema, undefined).data).toBe(undefined)
-    expect(parse(schema, undefined).error).toBe(undefined)
+    expect(parse(schema, undefined).right).toBe(undefined)
+    expect(parse(schema, undefined).left).toBe(undefined)
   })
 
   it('parse: can be nullable by itself', () => {
@@ -668,8 +670,8 @@ describe('Parse ARRAY schema with VALID subject', () => {
       nullable: true,
     } as const satisfies Schema
 
-    expect(parse(schema, null).data).toBe(null)
-    expect(parse(schema, null).error).toBeUndefined()
+    expect(parse(schema, null).right).toBe(null)
+    expect(parse(schema, null).left).toBeUndefined()
   })
 })
 
@@ -682,8 +684,8 @@ describe('Parse ARRAY schema with INVALID subject', () => {
 
     const undefinedSubj = undefined
 
-    expect(parse(schema, undefinedSubj).data).toBe(undefined)
-    expect(parse(schema, undefinedSubj).error).toStrictEqual([
+    expect(parse(schema, undefinedSubj).right).toBe(undefined)
+    expect(parse(schema, undefinedSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
@@ -694,8 +696,8 @@ describe('Parse ARRAY schema with INVALID subject', () => {
 
     const nullSubj = null
 
-    expect(parse(schema, nullSubj).data).toBe(undefined)
-    expect(parse(schema, nullSubj).error).toStrictEqual([
+    expect(parse(schema, nullSubj).right).toBe(undefined)
+    expect(parse(schema, nullSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: nullSubj,
@@ -706,8 +708,8 @@ describe('Parse ARRAY schema with INVALID subject', () => {
 
     const stringSubj = 'x'
 
-    expect(parse(schema, stringSubj).data).toBe(undefined)
-    expect(parse(schema, stringSubj).error).toStrictEqual([
+    expect(parse(schema, stringSubj).right).toBe(undefined)
+    expect(parse(schema, stringSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: stringSubj,
@@ -728,8 +730,8 @@ describe('Parse ARRAY schema with INVALID subject', () => {
 
     const parsed = parse(schema, subject)
 
-    expect(parsed.data).toBe(undefined)
-    expect(parsed.error).toStrictEqual([
+    expect(parsed.right).toBe(undefined)
+    expect(parsed.left).toStrictEqual([
       {
         code: ERROR_CODE.invalidRange,
         path: [],
@@ -750,8 +752,8 @@ describe('Parse ARRAY schema with INVALID subject', () => {
 
     const parsed = parse(schema, subject)
 
-    expect(parsed.data).toBe(undefined)
-    expect(parsed.error).toStrictEqual([
+    expect(parsed.right).toBe(undefined)
+    expect(parsed.left).toStrictEqual([
       {
         code: ERROR_CODE.invalidRange,
         path: [],
@@ -770,8 +772,8 @@ describe('Parse ARRAY schema with INVALID subject', () => {
 
     const strSubject = 'x'
 
-    expect(parse(schema, strSubject).data).toBe(undefined)
-    expect(parse(schema, strSubject).error).toStrictEqual([
+    expect(parse(schema, strSubject).right).toBe(undefined)
+    expect(parse(schema, strSubject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: strSubject,
@@ -802,8 +804,8 @@ describe('Parse ARRAY schema with INVALID subject', () => {
     subject[firstInvalidIndex] = invalidSubject
     subject[secondInvalidIndex] = invalidSubject
 
-    expect(parse(schema, subject).data).toBe(undefined)
-    expect(parse(schema, subject).error).toStrictEqual([
+    expect(parse(schema, subject).right).toBe(undefined)
+    expect(parse(schema, subject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
@@ -876,8 +878,8 @@ describe('Parse ARRAY schema with INVALID subject', () => {
       ],
     ]
 
-    expect(parse(schema, subject).data).toBe(undefined)
-    expect(parse(schema, subject).error).toStrictEqual([
+    expect(parse(schema, subject).right).toBe(undefined)
+    expect(parse(schema, subject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubjForStr,
@@ -915,18 +917,18 @@ describe('Parse UNION schema with VALID subject', () => {
 
     const strSubj = 'x'
 
-    expect(parse(schema, strSubj).data).toBe(strSubj)
-    expect(parse(schema, strSubj).error).toBeUndefined()
+    expect(parse(schema, strSubj).right).toBe(strSubj)
+    expect(parse(schema, strSubj).left).toBeUndefined()
 
     const numSubj = 0
 
-    expect(parse(schema, numSubj).data).toBe(numSubj)
-    expect(parse(schema, numSubj).error).toBeUndefined()
+    expect(parse(schema, numSubj).right).toBe(numSubj)
+    expect(parse(schema, numSubj).left).toBeUndefined()
 
     const boolSubj = false
 
-    expect(parse(schema, boolSubj).data).toBe(boolSubj)
-    expect(parse(schema, boolSubj).error).toBeUndefined()
+    expect(parse(schema, boolSubj).right).toBe(boolSubj)
+    expect(parse(schema, boolSubj).left).toBeUndefined()
   })
 
   it('parse: optional mixed base schema union', () => {
@@ -938,23 +940,23 @@ describe('Parse UNION schema with VALID subject', () => {
 
     const strSubj = 'x'
 
-    expect(parse(schema, strSubj).data).toBe(strSubj)
-    expect(parse(schema, strSubj).error).toBeUndefined()
+    expect(parse(schema, strSubj).right).toBe(strSubj)
+    expect(parse(schema, strSubj).left).toBeUndefined()
 
     const numSubj = 0
 
-    expect(parse(schema, numSubj).data).toBe(numSubj)
-    expect(parse(schema, numSubj).error).toBeUndefined()
+    expect(parse(schema, numSubj).right).toBe(numSubj)
+    expect(parse(schema, numSubj).left).toBeUndefined()
 
     const boolSubj = false
 
-    expect(parse(schema, boolSubj).data).toBe(boolSubj)
-    expect(parse(schema, boolSubj).error).toBeUndefined()
+    expect(parse(schema, boolSubj).right).toBe(boolSubj)
+    expect(parse(schema, boolSubj).left).toBeUndefined()
 
     const undefSubj = undefined
 
-    expect(parse(schema, undefSubj).data).toBe(undefSubj)
-    expect(parse(schema, undefSubj).error).toBeUndefined()
+    expect(parse(schema, undefSubj).right).toBe(undefSubj)
+    expect(parse(schema, undefSubj).left).toBeUndefined()
   })
 
   it('parse: LiteralSchema union', () => {
@@ -970,23 +972,23 @@ describe('Parse UNION schema with VALID subject', () => {
 
     const subj0 = 0
 
-    expect(parse(schema, subj0).data).toStrictEqual(subj0)
-    expect(parse(schema, subj0).error).toBeUndefined()
+    expect(parse(schema, subj0).right).toStrictEqual(subj0)
+    expect(parse(schema, subj0).left).toBeUndefined()
 
     const subj1 = 0
 
-    expect(parse(schema, subj1).data).toStrictEqual(subj1)
-    expect(parse(schema, subj1).error).toBeUndefined()
+    expect(parse(schema, subj1).right).toStrictEqual(subj1)
+    expect(parse(schema, subj1).left).toBeUndefined()
 
     const subjX = 'x'
 
-    expect(parse(schema, subjX).data).toStrictEqual(subjX)
-    expect(parse(schema, subjX).error).toBeUndefined()
+    expect(parse(schema, subjX).right).toStrictEqual(subjX)
+    expect(parse(schema, subjX).left).toBeUndefined()
 
     const subjY = 'y'
 
-    expect(parse(schema, subjY).data).toStrictEqual(subjY)
-    expect(parse(schema, subjY).error).toBeUndefined()
+    expect(parse(schema, subjY).right).toStrictEqual(subjY)
+    expect(parse(schema, subjY).left).toBeUndefined()
   })
 
   it('parse: ObjectSchema union', () => {
@@ -1001,18 +1003,18 @@ describe('Parse UNION schema with VALID subject', () => {
 
     const xSubj = { x: 'x' }
 
-    expect(parse(schema, xSubj).data).toStrictEqual(xSubj)
-    expect(parse(schema, xSubj).error).toBeUndefined()
+    expect(parse(schema, xSubj).right).toStrictEqual(xSubj)
+    expect(parse(schema, xSubj).left).toBeUndefined()
 
     const ySubj = { y: 0 }
 
-    expect(parse(schema, ySubj).data).toStrictEqual(ySubj)
-    expect(parse(schema, ySubj).error).toBeUndefined()
+    expect(parse(schema, ySubj).right).toStrictEqual(ySubj)
+    expect(parse(schema, ySubj).left).toBeUndefined()
 
     const zSubj = { z: false }
 
-    expect(parse(schema, zSubj).data).toStrictEqual(zSubj)
-    expect(parse(schema, zSubj).error).toBeUndefined()
+    expect(parse(schema, zSubj).right).toStrictEqual(zSubj)
+    expect(parse(schema, zSubj).left).toBeUndefined()
   })
 
   it('parse: ArraySchema union', () => {
@@ -1027,18 +1029,18 @@ describe('Parse UNION schema with VALID subject', () => {
 
     const xSubj = ['x', 'y']
 
-    expect(parse(schema, xSubj).data).toStrictEqual(xSubj)
-    expect(parse(schema, xSubj).error).toBeUndefined()
+    expect(parse(schema, xSubj).right).toStrictEqual(xSubj)
+    expect(parse(schema, xSubj).left).toBeUndefined()
 
     const ySubj = [0, 1]
 
-    expect(parse(schema, ySubj).data).toStrictEqual(ySubj)
-    expect(parse(schema, ySubj).error).toBeUndefined()
+    expect(parse(schema, ySubj).right).toStrictEqual(ySubj)
+    expect(parse(schema, ySubj).left).toBeUndefined()
 
     const zSubj = [true, false]
 
-    expect(parse(schema, zSubj).data).toStrictEqual(zSubj)
-    expect(parse(schema, zSubj).error).toBeUndefined()
+    expect(parse(schema, zSubj).right).toStrictEqual(zSubj)
+    expect(parse(schema, zSubj).left).toBeUndefined()
   })
 
   it('parse: union of all types', () => {
@@ -1057,38 +1059,38 @@ describe('Parse UNION schema with VALID subject', () => {
 
     const strSubj = 'xxx'
 
-    expect(parse(schema, strSubj).data).toStrictEqual(strSubj)
-    expect(parse(schema, strSubj).error).toBeUndefined()
+    expect(parse(schema, strSubj).right).toStrictEqual(strSubj)
+    expect(parse(schema, strSubj).left).toBeUndefined()
 
     const numSubj = 3
 
-    expect(parse(schema, numSubj).data).toStrictEqual(numSubj)
-    expect(parse(schema, numSubj).error).toBeUndefined()
+    expect(parse(schema, numSubj).right).toStrictEqual(numSubj)
+    expect(parse(schema, numSubj).left).toBeUndefined()
 
     const boolSubj = false
 
-    expect(parse(schema, boolSubj).data).toStrictEqual(boolSubj)
-    expect(parse(schema, boolSubj).error).toBeUndefined()
+    expect(parse(schema, boolSubj).right).toStrictEqual(boolSubj)
+    expect(parse(schema, boolSubj).left).toBeUndefined()
 
     const litZ = 'z'
 
-    expect(parse(schema, litZ).data).toStrictEqual(litZ)
-    expect(parse(schema, litZ).error).toBeUndefined()
+    expect(parse(schema, litZ).right).toStrictEqual(litZ)
+    expect(parse(schema, litZ).left).toBeUndefined()
 
     const lit2 = 2
 
-    expect(parse(schema, lit2).data).toStrictEqual(lit2)
-    expect(parse(schema, lit2).error).toBeUndefined()
+    expect(parse(schema, lit2).right).toStrictEqual(lit2)
+    expect(parse(schema, lit2).left).toBeUndefined()
 
     const objSubj = { x: 'x' }
 
-    expect(parse(schema, objSubj).data).toStrictEqual(objSubj)
-    expect(parse(schema, objSubj).error).toBeUndefined()
+    expect(parse(schema, objSubj).right).toStrictEqual(objSubj)
+    expect(parse(schema, objSubj).left).toBeUndefined()
 
     const arrSubj = [0, 1]
 
-    expect(parse(schema, arrSubj).data).toStrictEqual(arrSubj)
-    expect(parse(schema, arrSubj).error).toBeUndefined()
+    expect(parse(schema, arrSubj).right).toStrictEqual(arrSubj)
+    expect(parse(schema, arrSubj).left).toBeUndefined()
   })
 })
 
@@ -1101,8 +1103,8 @@ describe('Parse UNION schema with INVALID subject', () => {
 
     const undefSubj = undefined
 
-    expect(parse(schema, undefSubj).data).toBeUndefined()
-    expect(parse(schema, undefSubj).error).toStrictEqual([
+    expect(parse(schema, undefSubj).right).toBeUndefined()
+    expect(parse(schema, undefSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: undefSubj,
@@ -1113,8 +1115,8 @@ describe('Parse UNION schema with INVALID subject', () => {
 
     const nullSubj = null
 
-    expect(parse(schema, nullSubj).data).toBeUndefined()
-    expect(parse(schema, nullSubj).error).toStrictEqual([
+    expect(parse(schema, nullSubj).right).toBeUndefined()
+    expect(parse(schema, nullSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: nullSubj,
@@ -1125,8 +1127,8 @@ describe('Parse UNION schema with INVALID subject', () => {
 
     const objSubj = {}
 
-    expect(parse(schema, objSubj).data).toBeUndefined()
-    expect(parse(schema, objSubj).error).toStrictEqual([
+    expect(parse(schema, objSubj).right).toBeUndefined()
+    expect(parse(schema, objSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: objSubj,
@@ -1145,8 +1147,8 @@ describe('Parse UNION schema with INVALID subject', () => {
 
     const objSubj = {}
 
-    expect(parse(schema, objSubj).data).toBeUndefined()
-    expect(parse(schema, objSubj).error).toStrictEqual([
+    expect(parse(schema, objSubj).right).toBeUndefined()
+    expect(parse(schema, objSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: objSubj,
@@ -1169,8 +1171,8 @@ describe('Parse UNION schema with INVALID subject', () => {
 
     const subjY = 'y'
 
-    expect(parse(schema, subjY).data).toStrictEqual(subjY)
-    expect(parse(schema, subjY).error).toBeUndefined()
+    expect(parse(schema, subjY).right).toStrictEqual(subjY)
+    expect(parse(schema, subjY).left).toBeUndefined()
   })
 
   it('parse: ObjectSchema union', () => {
@@ -1185,8 +1187,8 @@ describe('Parse UNION schema with INVALID subject', () => {
 
     const subjZ = { z: 'x' }
 
-    expect(parse(schema, subjZ).data).toBeUndefined()
-    expect(parse(schema, subjZ).error).toStrictEqual([
+    expect(parse(schema, subjZ).right).toBeUndefined()
+    expect(parse(schema, subjZ).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: subjZ,
@@ -1208,8 +1210,8 @@ describe('Parse UNION schema with INVALID subject', () => {
 
     const subjZ = { z: 'x' }
 
-    expect(parse(schema, subjZ).data).toBeUndefined()
-    expect(parse(schema, subjZ).error).toStrictEqual([
+    expect(parse(schema, subjZ).right).toBeUndefined()
+    expect(parse(schema, subjZ).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: subjZ,
@@ -1235,8 +1237,8 @@ describe('Parse UNION schema with INVALID subject', () => {
 
     const subjZ = { z: 'x' }
 
-    expect(parse(schema, subjZ).data).toBeUndefined()
-    expect(parse(schema, subjZ).error).toStrictEqual([
+    expect(parse(schema, subjZ).right).toBeUndefined()
+    expect(parse(schema, subjZ).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: subjZ,
@@ -1258,10 +1260,10 @@ describe('Subject type inference check', () => {
 
     const parsed = parse(schema, { x: 'y' })
 
-    if (parsed.error) {
+    if (parsed.left) {
       throw Error('Not expected')
     }
 
-    check<string & { __key: 'value' }>(unknownX as typeof parsed.data.x)
+    check<string & { __key: 'value' }>(unknownX as typeof parsed.right.x)
   })
 })

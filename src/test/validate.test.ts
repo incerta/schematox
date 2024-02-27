@@ -9,32 +9,32 @@ describe('Validate BASE schema with VALID subject', () => {
     const schema = { type: 'string' } satisfies Schema
     const subject = 'x'
 
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
+    expect(validate(schema, subject).right).toBe(subject)
+    expect(validate(schema, subject).left).toBe(undefined)
   })
 
   it('validate: `{ type: "number" }` schema', () => {
     const schema = { type: 'number' } satisfies Schema
     const subject = 0
 
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
+    expect(validate(schema, subject).right).toBe(subject)
+    expect(validate(schema, subject).left).toBe(undefined)
   })
 
   it('validate: `{ type: "boolean" }` schema', () => {
     const schema = { type: 'boolean' } satisfies Schema
     const subject = false
 
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
+    expect(validate(schema, subject).right).toBe(subject)
+    expect(validate(schema, subject).left).toBe(undefined)
   })
 
   it('validate: `{ type: "literal" }` schema', () => {
     const schema = { type: 'literal', of: 'x' } as const satisfies Schema
     const subject = 'x'
 
-    expect(validate(schema, subject).data).toBe(subject)
-    expect(validate(schema, subject).error).toBe(undefined)
+    expect(validate(schema, subject).right).toBe(subject)
+    expect(validate(schema, subject).left).toBe(undefined)
   })
 })
 
@@ -43,8 +43,8 @@ describe('Validate BASE schema with INVALID subject', () => {
     const detailedReqStrSchema = { type: 'string' } satisfies Schema
     const undefinedSubj = undefined
 
-    expect(validate(detailedReqStrSchema, undefinedSubj).data).toBe(undefined)
-    expect(validate(detailedReqStrSchema, undefinedSubj).error).toStrictEqual([
+    expect(validate(detailedReqStrSchema, undefinedSubj).right).toBe(undefined)
+    expect(validate(detailedReqStrSchema, undefinedSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
@@ -60,8 +60,8 @@ describe('Validate BASE schema with INVALID subject', () => {
 
     const numberSubj = 0
 
-    expect(validate(detailedOptStrSchema, numberSubj).data).toBe(undefined)
-    expect(validate(detailedOptStrSchema, numberSubj).error).toStrictEqual([
+    expect(validate(detailedOptStrSchema, numberSubj).right).toBe(undefined)
+    expect(validate(detailedOptStrSchema, numberSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: numberSubj,
@@ -101,8 +101,8 @@ describe('Validate OBJECT schema with VALID subject', () => {
       undefinedF: undefined,
     }
 
-    expect(validate(schema, subject).data).toStrictEqual(subject)
-    expect(validate(schema, subject).error).toStrictEqual(undefined)
+    expect(validate(schema, subject).right).toStrictEqual(subject)
+    expect(validate(schema, subject).left).toStrictEqual(undefined)
   })
 
   it('validate: nested base deailed schema subject', () => {
@@ -139,8 +139,8 @@ describe('Validate OBJECT schema with VALID subject', () => {
       undefinedJ: undefined,
     } as const
 
-    expect(validate(schema, subject).data).toStrictEqual(subject)
-    expect(validate(schema, subject).error).toStrictEqual(undefined)
+    expect(validate(schema, subject).right).toStrictEqual(subject)
+    expect(validate(schema, subject).left).toStrictEqual(undefined)
   })
 
   it('validate: nested array schema subject', () => {
@@ -157,8 +157,8 @@ describe('Validate OBJECT schema with VALID subject', () => {
       strArrOpt: undefined,
     }
 
-    expect(validate(schema, subject).data).toStrictEqual(subject)
-    expect(validate(schema, subject).error).toStrictEqual(undefined)
+    expect(validate(schema, subject).right).toStrictEqual(subject)
+    expect(validate(schema, subject).left).toStrictEqual(undefined)
   })
 
   it('validate: can be optional by itself', () => {
@@ -168,8 +168,8 @@ describe('Validate OBJECT schema with VALID subject', () => {
       optional: true,
     } as const satisfies Schema
 
-    expect(validate(schema, undefined).data).toBe(undefined)
-    expect(validate(schema, undefined).error).toBe(undefined)
+    expect(validate(schema, undefined).right).toBe(undefined)
+    expect(validate(schema, undefined).left).toBe(undefined)
   })
 })
 
@@ -182,8 +182,8 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const undefinedSubj = undefined
 
-    expect(validate(schema, undefinedSubj).data).toBe(undefined)
-    expect(validate(schema, undefinedSubj).error).toStrictEqual([
+    expect(validate(schema, undefinedSubj).right).toBe(undefined)
+    expect(validate(schema, undefinedSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
@@ -194,8 +194,8 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const nullSubj = null
 
-    expect(validate(schema, nullSubj).data).toBe(undefined)
-    expect(validate(schema, nullSubj).error).toStrictEqual([
+    expect(validate(schema, nullSubj).right).toBe(undefined)
+    expect(validate(schema, nullSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: nullSubj,
@@ -206,8 +206,8 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const regExpSubj = /^x/
 
-    expect(validate(schema, regExpSubj).data).toBe(undefined)
-    expect(validate(schema, regExpSubj).error).toStrictEqual([
+    expect(validate(schema, regExpSubj).right).toBe(undefined)
+    expect(validate(schema, regExpSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: regExpSubj,
@@ -218,8 +218,8 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const arraySubj = [] as unknown
 
-    expect(validate(schema, arraySubj).data).toBe(undefined)
-    expect(validate(schema, arraySubj).error).toStrictEqual([
+    expect(validate(schema, arraySubj).right).toBe(undefined)
+    expect(validate(schema, arraySubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: arraySubj,
@@ -230,8 +230,8 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const mapSubj = new Map()
 
-    expect(validate(schema, mapSubj).data).toBe(undefined)
-    expect(validate(schema, mapSubj).error).toStrictEqual([
+    expect(validate(schema, mapSubj).right).toBe(undefined)
+    expect(validate(schema, mapSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: mapSubj,
@@ -242,8 +242,8 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const setSubj = new Set()
 
-    expect(validate(schema, setSubj).data).toBe(undefined)
-    expect(validate(schema, setSubj).error).toStrictEqual([
+    expect(validate(schema, setSubj).right).toBe(undefined)
+    expect(validate(schema, setSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: setSubj,
@@ -272,8 +272,8 @@ describe('Validate OBJECT schema with INVALID subject', () => {
       [secondInvalidSubjKey]: undefined,
     }
 
-    expect(validate(schema, subject).data).toBe(undefined)
-    expect(validate(schema, subject).error).toStrictEqual([
+    expect(validate(schema, subject).right).toBe(undefined)
+    expect(validate(schema, subject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: subject[firstInvalidSubjKey],
@@ -350,8 +350,8 @@ describe('Validate OBJECT schema with INVALID subject', () => {
       },
     } as const
 
-    expect(validate(schema, subject).data).toBe(undefined)
-    expect(validate(schema, subject).error).toStrictEqual([
+    expect(validate(schema, subject).right).toBe(undefined)
+    expect(validate(schema, subject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
@@ -383,8 +383,8 @@ describe('Validate OBJECT schema with INVALID subject', () => {
       x: ['valid', invalidSubject],
     }
 
-    expect(validate(schema, subject).data).toBe(undefined)
-    expect(validate(schema, subject).error).toStrictEqual([
+    expect(validate(schema, subject).right).toBe(undefined)
+    expect(validate(schema, subject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
@@ -423,7 +423,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
       },
     ]
 
-    const actual = validate(schema, subject).error
+    const actual = validate(schema, subject).left
 
     expect(actual).toStrictEqual(expected)
   })
@@ -438,8 +438,10 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const stringSubj = ['x', 'y']
 
-    expect(validate(stringArrSchema, stringSubj).data).toStrictEqual(stringSubj)
-    expect(validate(stringArrSchema, stringSubj).error).toBe(undefined)
+    expect(validate(stringArrSchema, stringSubj).right).toStrictEqual(
+      stringSubj
+    )
+    expect(validate(stringArrSchema, stringSubj).left).toBe(undefined)
 
     const numberArrSchema = {
       type: 'array',
@@ -448,8 +450,10 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const numberSubj = [0, 1]
 
-    expect(validate(numberArrSchema, numberSubj).data).toStrictEqual(numberSubj)
-    expect(validate(numberArrSchema, numberSubj).error).toBe(undefined)
+    expect(validate(numberArrSchema, numberSubj).right).toStrictEqual(
+      numberSubj
+    )
+    expect(validate(numberArrSchema, numberSubj).left).toBe(undefined)
 
     const booleanArrSchema = {
       type: 'array',
@@ -458,10 +462,10 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const booleanSubj = [true, false]
 
-    expect(validate(booleanArrSchema, booleanSubj).data).toStrictEqual(
+    expect(validate(booleanArrSchema, booleanSubj).right).toStrictEqual(
       booleanSubj
     )
-    expect(validate(booleanArrSchema, booleanSubj).error).toBe(undefined)
+    expect(validate(booleanArrSchema, booleanSubj).left).toBe(undefined)
   })
 
   it('validate: optional base short schema subject', () => {
@@ -474,10 +478,10 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const strSubject = ['x', 'y']
 
-    expect(validate(optStrSchema, strSubject).data).toStrictEqual(strSubject)
-    expect(validate(optStrSchema, strSubject).error).toBe(undefined)
-    expect(validate(optStrSchema, arrWithUnd).data).toStrictEqual(arrWithUnd)
-    expect(validate(optStrSchema, arrWithUnd).error).toBe(undefined)
+    expect(validate(optStrSchema, strSubject).right).toStrictEqual(strSubject)
+    expect(validate(optStrSchema, strSubject).left).toBe(undefined)
+    expect(validate(optStrSchema, arrWithUnd).right).toStrictEqual(arrWithUnd)
+    expect(validate(optStrSchema, arrWithUnd).left).toBe(undefined)
 
     const optNumSchema = {
       type: 'array',
@@ -486,10 +490,10 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const numSubject = [0, 1, 2, 3, 4]
 
-    expect(validate(optNumSchema, numSubject).data).toStrictEqual(numSubject)
-    expect(validate(optNumSchema, numSubject).error).toBe(undefined)
-    expect(validate(optNumSchema, arrWithUnd).data).toStrictEqual(arrWithUnd)
-    expect(validate(optNumSchema, arrWithUnd).error).toBe(undefined)
+    expect(validate(optNumSchema, numSubject).right).toStrictEqual(numSubject)
+    expect(validate(optNumSchema, numSubject).left).toBe(undefined)
+    expect(validate(optNumSchema, arrWithUnd).right).toStrictEqual(arrWithUnd)
+    expect(validate(optNumSchema, arrWithUnd).left).toBe(undefined)
 
     const optBoolSchema = {
       type: 'array',
@@ -498,10 +502,12 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const boolSubject = [true, true, false, true]
 
-    expect(validate(optBoolSchema, boolSubject).data).toStrictEqual(boolSubject)
-    expect(validate(optBoolSchema, boolSubject).error).toBe(undefined)
-    expect(validate(optBoolSchema, arrWithUnd).data).toStrictEqual(arrWithUnd)
-    expect(validate(optBoolSchema, arrWithUnd).error).toBe(undefined)
+    expect(validate(optBoolSchema, boolSubject).right).toStrictEqual(
+      boolSubject
+    )
+    expect(validate(optBoolSchema, boolSubject).left).toBe(undefined)
+    expect(validate(optBoolSchema, arrWithUnd).right).toStrictEqual(arrWithUnd)
+    expect(validate(optBoolSchema, arrWithUnd).left).toBe(undefined)
   })
 
   it('validate: required base detailed schema subject', () => {
@@ -512,8 +518,8 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const strSubj = ['x', 'y', 'x', 'y']
 
-    expect(validate(strSchema, strSubj).data).toStrictEqual(strSubj)
-    expect(validate(strSchema, strSubj).error).toBe(undefined)
+    expect(validate(strSchema, strSubj).right).toStrictEqual(strSubj)
+    expect(validate(strSchema, strSubj).left).toBe(undefined)
 
     const numSchema = {
       type: 'array',
@@ -522,8 +528,8 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const numSubj = [0, 1, 2, 3, 4]
 
-    expect(validate(numSchema, numSubj).data).toStrictEqual(numSubj)
-    expect(validate(numSchema, numSubj).error).toBe(undefined)
+    expect(validate(numSchema, numSubj).right).toStrictEqual(numSubj)
+    expect(validate(numSchema, numSubj).left).toBe(undefined)
 
     const boolSchema = {
       type: 'array',
@@ -532,8 +538,8 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const boolSubj = [true, true, false, true]
 
-    expect(validate(boolSchema, boolSubj).data).toStrictEqual(boolSubj)
-    expect(validate(boolSchema, boolSubj).error).toBe(undefined)
+    expect(validate(boolSchema, boolSubj).right).toStrictEqual(boolSubj)
+    expect(validate(boolSchema, boolSubj).left).toBe(undefined)
 
     const strLiteralSchema = {
       type: 'array',
@@ -542,10 +548,10 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const strLiteralSubj = ['x', 'x']
 
-    expect(validate(strLiteralSchema, strLiteralSubj).data).toStrictEqual(
+    expect(validate(strLiteralSchema, strLiteralSubj).right).toStrictEqual(
       strLiteralSubj
     )
-    expect(validate(strLiteralSchema, strLiteralSubj).error).toBe(undefined)
+    expect(validate(strLiteralSchema, strLiteralSubj).left).toBe(undefined)
 
     const numLiteralSchema = {
       type: 'array',
@@ -554,10 +560,10 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const numLiteralSubj = [0, 0]
 
-    expect(validate(numLiteralSchema, numLiteralSubj).data).toStrictEqual(
+    expect(validate(numLiteralSchema, numLiteralSubj).right).toStrictEqual(
       numLiteralSubj
     )
-    expect(validate(numLiteralSchema, numLiteralSubj).error).toBe(undefined)
+    expect(validate(numLiteralSchema, numLiteralSubj).left).toBe(undefined)
   })
 
   it('validate: optional base detailed schema subject', () => {
@@ -570,10 +576,10 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const strSubj = ['x', 'y', 'x', 'y']
 
-    expect(validate(strSchema, strSubj).data).toStrictEqual(strSubj)
-    expect(validate(strSchema, strSubj).error).toBe(undefined)
-    expect(validate(strSchema, arrWithUndef).data).toStrictEqual(arrWithUndef)
-    expect(validate(strSchema, arrWithUndef).error).toBe(undefined)
+    expect(validate(strSchema, strSubj).right).toStrictEqual(strSubj)
+    expect(validate(strSchema, strSubj).left).toBe(undefined)
+    expect(validate(strSchema, arrWithUndef).right).toStrictEqual(arrWithUndef)
+    expect(validate(strSchema, arrWithUndef).left).toBe(undefined)
 
     const numSchema = {
       type: 'array',
@@ -582,10 +588,10 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const numSubj = [0, 1, 2, 3, 4]
 
-    expect(validate(numSchema, numSubj).data).toStrictEqual(numSubj)
-    expect(validate(numSchema, numSubj).error).toBe(undefined)
-    expect(validate(numSchema, arrWithUndef).data).toStrictEqual(arrWithUndef)
-    expect(validate(numSchema, arrWithUndef).error).toBe(undefined)
+    expect(validate(numSchema, numSubj).right).toStrictEqual(numSubj)
+    expect(validate(numSchema, numSubj).left).toBe(undefined)
+    expect(validate(numSchema, arrWithUndef).right).toStrictEqual(arrWithUndef)
+    expect(validate(numSchema, arrWithUndef).left).toBe(undefined)
 
     const boolSchema = {
       type: 'array',
@@ -594,10 +600,10 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const boolSubj = [true, true, false, true]
 
-    expect(validate(boolSchema, boolSubj).data).toStrictEqual(boolSubj)
-    expect(validate(boolSchema, boolSubj).error).toBe(undefined)
-    expect(validate(boolSchema, arrWithUndef).data).toStrictEqual(arrWithUndef)
-    expect(validate(boolSchema, arrWithUndef).error).toBe(undefined)
+    expect(validate(boolSchema, boolSubj).right).toStrictEqual(boolSubj)
+    expect(validate(boolSchema, boolSubj).left).toBe(undefined)
+    expect(validate(boolSchema, arrWithUndef).right).toStrictEqual(arrWithUndef)
+    expect(validate(boolSchema, arrWithUndef).left).toBe(undefined)
 
     const strLiteralSchema = {
       type: 'array',
@@ -610,14 +616,14 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const strLiteralSubj = ['x', 'x']
 
-    expect(validate(strLiteralSchema, strLiteralSubj).data).toStrictEqual(
+    expect(validate(strLiteralSchema, strLiteralSubj).right).toStrictEqual(
       strLiteralSubj
     )
-    expect(validate(strLiteralSchema, strLiteralSubj).error).toBe(undefined)
-    expect(validate(strLiteralSchema, arrWithUndef).data).toStrictEqual(
+    expect(validate(strLiteralSchema, strLiteralSubj).left).toBe(undefined)
+    expect(validate(strLiteralSchema, arrWithUndef).right).toStrictEqual(
       arrWithUndef
     )
-    expect(validate(strLiteralSchema, arrWithUndef).error).toBe(undefined)
+    expect(validate(strLiteralSchema, arrWithUndef).left).toBe(undefined)
 
     const numLiteralSchema = {
       type: 'array',
@@ -630,14 +636,14 @@ describe('Validate ARRAY schema with VALID subject', () => {
 
     const numLiteralSubj = [0, 0]
 
-    expect(validate(numLiteralSchema, numLiteralSubj).data).toStrictEqual(
+    expect(validate(numLiteralSchema, numLiteralSubj).right).toStrictEqual(
       numLiteralSubj
     )
-    expect(validate(numLiteralSchema, numLiteralSubj).error).toBe(undefined)
-    expect(validate(numLiteralSchema, arrWithUndef).data).toStrictEqual(
+    expect(validate(numLiteralSchema, numLiteralSubj).left).toBe(undefined)
+    expect(validate(numLiteralSchema, arrWithUndef).right).toStrictEqual(
       arrWithUndef
     )
-    expect(validate(numLiteralSchema, arrWithUndef).error).toBe(undefined)
+    expect(validate(numLiteralSchema, arrWithUndef).left).toBe(undefined)
   })
 
   it('validate: can be optional by itself', () => {
@@ -647,8 +653,8 @@ describe('Validate ARRAY schema with VALID subject', () => {
       optional: true,
     } as const satisfies Schema
 
-    expect(validate(schema, undefined).data).toBe(undefined)
-    expect(validate(schema, undefined).error).toBe(undefined)
+    expect(validate(schema, undefined).right).toBe(undefined)
+    expect(validate(schema, undefined).left).toBe(undefined)
   })
 })
 
@@ -661,8 +667,8 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 
     const undefinedSubj = undefined
 
-    expect(validate(schema, undefinedSubj).data).toBe(undefined)
-    expect(validate(schema, undefinedSubj).error).toStrictEqual([
+    expect(validate(schema, undefinedSubj).right).toBe(undefined)
+    expect(validate(schema, undefinedSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: undefinedSubj,
@@ -673,8 +679,8 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 
     const nullSubj = null
 
-    expect(validate(schema, nullSubj).data).toBe(undefined)
-    expect(validate(schema, nullSubj).error).toStrictEqual([
+    expect(validate(schema, nullSubj).right).toBe(undefined)
+    expect(validate(schema, nullSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: nullSubj,
@@ -685,8 +691,8 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 
     const stringSubj = 'x'
 
-    expect(validate(schema, stringSubj).data).toBe(undefined)
-    expect(validate(schema, stringSubj).error).toStrictEqual([
+    expect(validate(schema, stringSubj).right).toBe(undefined)
+    expect(validate(schema, stringSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: stringSubj,
@@ -705,8 +711,8 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 
     const strSubject = 'x'
 
-    expect(validate(schema, strSubject).data).toBe(undefined)
-    expect(validate(schema, strSubject).error).toStrictEqual([
+    expect(validate(schema, strSubject).right).toBe(undefined)
+    expect(validate(schema, strSubject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: strSubject,
@@ -727,8 +733,8 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 
     const validated = validate(schema, subject)
 
-    expect(validated.data).toBe(undefined)
-    expect(validated.error).toStrictEqual([
+    expect(validated.right).toBe(undefined)
+    expect(validated.left).toStrictEqual([
       {
         code: ERROR_CODE.invalidRange,
         path: [],
@@ -749,8 +755,8 @@ describe('Validate ARRAY schema with INVALID subject', () => {
 
     const validated = validate(schema, subject)
 
-    expect(validated.data).toBe(undefined)
-    expect(validated.error).toStrictEqual([
+    expect(validated.right).toBe(undefined)
+    expect(validated.left).toStrictEqual([
       {
         code: ERROR_CODE.invalidRange,
         path: [],
@@ -781,8 +787,8 @@ describe('Validate ARRAY schema with INVALID subject', () => {
     subject[firstInvalidIndex] = invalidSubject
     subject[secondInvalidIndex] = invalidSubject
 
-    expect(validate(schema, subject).data).toBe(undefined)
-    expect(validate(schema, subject).error).toStrictEqual([
+    expect(validate(schema, subject).right).toBe(undefined)
+    expect(validate(schema, subject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
@@ -855,8 +861,8 @@ describe('Validate ARRAY schema with INVALID subject', () => {
       ],
     ]
 
-    expect(validate(schema, subject).data).toBe(undefined)
-    expect(validate(schema, subject).error).toStrictEqual([
+    expect(validate(schema, subject).right).toBe(undefined)
+    expect(validate(schema, subject).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: invalidSubjForStr,
@@ -912,16 +918,16 @@ describe('VALIDATE flow returns schema subject reference', () => {
       ],
     }
 
-    const { data } = validate(schema, subject)
+    const { right } = validate(schema, subject)
 
-    if (!data) {
+    if (!right) {
       throw Error('Not expected')
     }
 
-    expect(data.x === subject.x).toBe(true)
-    expect(data.x[0] === subject.x[0]).toBe(true)
-    expect(data.x[0]?.x === subject.x[0]?.x).toBe(true)
-    expect(data.x[0]?.y === subject.x[0]?.y).toBe(true)
+    expect(right.x === subject.x).toBe(true)
+    expect(right.x[0] === subject.x[0]).toBe(true)
+    expect(right.x[0]?.x === subject.x[0]?.x).toBe(true)
+    expect(right.x[0]?.y === subject.x[0]?.y).toBe(true)
   })
 
   it('validate: array -> object -> number', () => {
@@ -943,15 +949,15 @@ describe('VALIDATE flow returns schema subject reference', () => {
       },
     ]
 
-    const { data } = validate(schema, subject)
+    const { right } = validate(schema, subject)
 
-    if (!data) {
+    if (!right) {
       throw Error('Not expected')
     }
 
-    expect(data[0] === subject[0]).toBe(true)
-    expect(data[0]?.x === subject[0]?.x).toBe(true)
-    expect(data[0]?.y === subject[0]?.y).toBe(true)
+    expect(right[0] === subject[0]).toBe(true)
+    expect(right[0]?.x === subject[0]?.x).toBe(true)
+    expect(right[0]?.y === subject[0]?.y).toBe(true)
   })
 })
 
@@ -964,18 +970,18 @@ describe('Validate UNION schema with VALID subject', () => {
 
     const strSubj = 'x'
 
-    expect(validate(schema, strSubj).data).toBe(strSubj)
-    expect(validate(schema, strSubj).error).toBeUndefined()
+    expect(validate(schema, strSubj).right).toBe(strSubj)
+    expect(validate(schema, strSubj).left).toBeUndefined()
 
     const numSubj = 0
 
-    expect(validate(schema, numSubj).data).toBe(numSubj)
-    expect(validate(schema, numSubj).error).toBeUndefined()
+    expect(validate(schema, numSubj).right).toBe(numSubj)
+    expect(validate(schema, numSubj).left).toBeUndefined()
 
     const boolSubj = false
 
-    expect(validate(schema, boolSubj).data).toBe(boolSubj)
-    expect(validate(schema, boolSubj).error).toBeUndefined()
+    expect(validate(schema, boolSubj).right).toBe(boolSubj)
+    expect(validate(schema, boolSubj).left).toBeUndefined()
   })
 
   it('validate: optional mixed base schema union', () => {
@@ -987,23 +993,23 @@ describe('Validate UNION schema with VALID subject', () => {
 
     const strSubj = 'x'
 
-    expect(validate(schema, strSubj).data).toBe(strSubj)
-    expect(validate(schema, strSubj).error).toBeUndefined()
+    expect(validate(schema, strSubj).right).toBe(strSubj)
+    expect(validate(schema, strSubj).left).toBeUndefined()
 
     const numSubj = 0
 
-    expect(validate(schema, numSubj).data).toBe(numSubj)
-    expect(validate(schema, numSubj).error).toBeUndefined()
+    expect(validate(schema, numSubj).right).toBe(numSubj)
+    expect(validate(schema, numSubj).left).toBeUndefined()
 
     const boolSubj = false
 
-    expect(validate(schema, boolSubj).data).toBe(boolSubj)
-    expect(validate(schema, boolSubj).error).toBeUndefined()
+    expect(validate(schema, boolSubj).right).toBe(boolSubj)
+    expect(validate(schema, boolSubj).left).toBeUndefined()
 
     const undefSubj = undefined
 
-    expect(validate(schema, undefSubj).data).toBe(undefSubj)
-    expect(validate(schema, undefSubj).error).toBeUndefined()
+    expect(validate(schema, undefSubj).right).toBe(undefSubj)
+    expect(validate(schema, undefSubj).left).toBeUndefined()
   })
 
   it('validate: LiteralSchema union', () => {
@@ -1019,23 +1025,23 @@ describe('Validate UNION schema with VALID subject', () => {
 
     const subj0 = 0
 
-    expect(validate(schema, subj0).data).toStrictEqual(subj0)
-    expect(validate(schema, subj0).error).toBeUndefined()
+    expect(validate(schema, subj0).right).toStrictEqual(subj0)
+    expect(validate(schema, subj0).left).toBeUndefined()
 
     const subj1 = 0
 
-    expect(validate(schema, subj1).data).toStrictEqual(subj1)
-    expect(validate(schema, subj1).error).toBeUndefined()
+    expect(validate(schema, subj1).right).toStrictEqual(subj1)
+    expect(validate(schema, subj1).left).toBeUndefined()
 
     const subjX = 'x'
 
-    expect(validate(schema, subjX).data).toStrictEqual(subjX)
-    expect(validate(schema, subjX).error).toBeUndefined()
+    expect(validate(schema, subjX).right).toStrictEqual(subjX)
+    expect(validate(schema, subjX).left).toBeUndefined()
 
     const subjY = 'y'
 
-    expect(validate(schema, subjY).data).toStrictEqual(subjY)
-    expect(validate(schema, subjY).error).toBeUndefined()
+    expect(validate(schema, subjY).right).toStrictEqual(subjY)
+    expect(validate(schema, subjY).left).toBeUndefined()
   })
 
   it('validate: ObjectSchema union', () => {
@@ -1050,18 +1056,18 @@ describe('Validate UNION schema with VALID subject', () => {
 
     const xSubj = { x: 'x' }
 
-    expect(validate(schema, xSubj).data).toStrictEqual(xSubj)
-    expect(validate(schema, xSubj).error).toBeUndefined()
+    expect(validate(schema, xSubj).right).toStrictEqual(xSubj)
+    expect(validate(schema, xSubj).left).toBeUndefined()
 
     const ySubj = { y: 0 }
 
-    expect(validate(schema, ySubj).data).toStrictEqual(ySubj)
-    expect(validate(schema, ySubj).error).toBeUndefined()
+    expect(validate(schema, ySubj).right).toStrictEqual(ySubj)
+    expect(validate(schema, ySubj).left).toBeUndefined()
 
     const zSubj = { z: false }
 
-    expect(validate(schema, zSubj).data).toStrictEqual(zSubj)
-    expect(validate(schema, zSubj).error).toBeUndefined()
+    expect(validate(schema, zSubj).right).toStrictEqual(zSubj)
+    expect(validate(schema, zSubj).left).toBeUndefined()
   })
 
   it('validate: ArraySchema union', () => {
@@ -1076,18 +1082,18 @@ describe('Validate UNION schema with VALID subject', () => {
 
     const xSubj = ['x', 'y']
 
-    expect(validate(schema, xSubj).data).toStrictEqual(xSubj)
-    expect(validate(schema, xSubj).error).toBeUndefined()
+    expect(validate(schema, xSubj).right).toStrictEqual(xSubj)
+    expect(validate(schema, xSubj).left).toBeUndefined()
 
     const ySubj = [0, 1]
 
-    expect(validate(schema, ySubj).data).toStrictEqual(ySubj)
-    expect(validate(schema, ySubj).error).toBeUndefined()
+    expect(validate(schema, ySubj).right).toStrictEqual(ySubj)
+    expect(validate(schema, ySubj).left).toBeUndefined()
 
     const zSubj = [true, false]
 
-    expect(validate(schema, zSubj).data).toStrictEqual(zSubj)
-    expect(validate(schema, zSubj).error).toBeUndefined()
+    expect(validate(schema, zSubj).right).toStrictEqual(zSubj)
+    expect(validate(schema, zSubj).left).toBeUndefined()
   })
 
   it('validate: union of all types', () => {
@@ -1106,38 +1112,38 @@ describe('Validate UNION schema with VALID subject', () => {
 
     const strSubj = 'xxx'
 
-    expect(validate(schema, strSubj).data).toStrictEqual(strSubj)
-    expect(validate(schema, strSubj).error).toBeUndefined()
+    expect(validate(schema, strSubj).right).toStrictEqual(strSubj)
+    expect(validate(schema, strSubj).left).toBeUndefined()
 
     const numSubj = 3
 
-    expect(validate(schema, numSubj).data).toStrictEqual(numSubj)
-    expect(validate(schema, numSubj).error).toBeUndefined()
+    expect(validate(schema, numSubj).right).toStrictEqual(numSubj)
+    expect(validate(schema, numSubj).left).toBeUndefined()
 
     const boolSubj = false
 
-    expect(validate(schema, boolSubj).data).toStrictEqual(boolSubj)
-    expect(validate(schema, boolSubj).error).toBeUndefined()
+    expect(validate(schema, boolSubj).right).toStrictEqual(boolSubj)
+    expect(validate(schema, boolSubj).left).toBeUndefined()
 
     const litZ = 'z'
 
-    expect(validate(schema, litZ).data).toStrictEqual(litZ)
-    expect(validate(schema, litZ).error).toBeUndefined()
+    expect(validate(schema, litZ).right).toStrictEqual(litZ)
+    expect(validate(schema, litZ).left).toBeUndefined()
 
     const lit2 = 2
 
-    expect(validate(schema, lit2).data).toStrictEqual(lit2)
-    expect(validate(schema, lit2).error).toBeUndefined()
+    expect(validate(schema, lit2).right).toStrictEqual(lit2)
+    expect(validate(schema, lit2).left).toBeUndefined()
 
     const objSubj = { x: 'x' }
 
-    expect(validate(schema, objSubj).data).toStrictEqual(objSubj)
-    expect(validate(schema, objSubj).error).toBeUndefined()
+    expect(validate(schema, objSubj).right).toStrictEqual(objSubj)
+    expect(validate(schema, objSubj).left).toBeUndefined()
 
     const arrSubj = [0, 1]
 
-    expect(validate(schema, arrSubj).data).toStrictEqual(arrSubj)
-    expect(validate(schema, arrSubj).error).toBeUndefined()
+    expect(validate(schema, arrSubj).right).toStrictEqual(arrSubj)
+    expect(validate(schema, arrSubj).left).toBeUndefined()
   })
 })
 
@@ -1150,8 +1156,8 @@ describe('Validate UNION schema with INVALID subject', () => {
 
     const undefSubj = undefined
 
-    expect(validate(schema, undefSubj).data).toBeUndefined()
-    expect(validate(schema, undefSubj).error).toStrictEqual([
+    expect(validate(schema, undefSubj).right).toBeUndefined()
+    expect(validate(schema, undefSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: undefSubj,
@@ -1162,8 +1168,8 @@ describe('Validate UNION schema with INVALID subject', () => {
 
     const nullSubj = null
 
-    expect(validate(schema, nullSubj).data).toBeUndefined()
-    expect(validate(schema, nullSubj).error).toStrictEqual([
+    expect(validate(schema, nullSubj).right).toBeUndefined()
+    expect(validate(schema, nullSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: nullSubj,
@@ -1174,8 +1180,8 @@ describe('Validate UNION schema with INVALID subject', () => {
 
     const objSubj = {}
 
-    expect(validate(schema, objSubj).data).toBeUndefined()
-    expect(validate(schema, objSubj).error).toStrictEqual([
+    expect(validate(schema, objSubj).right).toBeUndefined()
+    expect(validate(schema, objSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: objSubj,
@@ -1194,8 +1200,8 @@ describe('Validate UNION schema with INVALID subject', () => {
 
     const objSubj = {}
 
-    expect(validate(schema, objSubj).data).toBeUndefined()
-    expect(validate(schema, objSubj).error).toStrictEqual([
+    expect(validate(schema, objSubj).right).toBeUndefined()
+    expect(validate(schema, objSubj).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: objSubj,
@@ -1218,8 +1224,8 @@ describe('Validate UNION schema with INVALID subject', () => {
 
     const subjY = 'y'
 
-    expect(validate(schema, subjY).data).toStrictEqual(subjY)
-    expect(validate(schema, subjY).error).toBeUndefined()
+    expect(validate(schema, subjY).right).toStrictEqual(subjY)
+    expect(validate(schema, subjY).left).toBeUndefined()
   })
 
   it('validate: ObjectSchema union', () => {
@@ -1234,8 +1240,8 @@ describe('Validate UNION schema with INVALID subject', () => {
 
     const subjZ = { z: 'x' }
 
-    expect(validate(schema, subjZ).data).toBeUndefined()
-    expect(validate(schema, subjZ).error).toStrictEqual([
+    expect(validate(schema, subjZ).right).toBeUndefined()
+    expect(validate(schema, subjZ).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: subjZ,
@@ -1257,8 +1263,8 @@ describe('Validate UNION schema with INVALID subject', () => {
 
     const subjZ = { z: 'x' }
 
-    expect(validate(schema, subjZ).data).toBeUndefined()
-    expect(validate(schema, subjZ).error).toStrictEqual([
+    expect(validate(schema, subjZ).right).toBeUndefined()
+    expect(validate(schema, subjZ).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: subjZ,
@@ -1284,8 +1290,8 @@ describe('Validate UNION schema with INVALID subject', () => {
 
     const subjZ = { z: 'x' }
 
-    expect(validate(schema, subjZ).data).toBeUndefined()
-    expect(validate(schema, subjZ).error).toStrictEqual([
+    expect(validate(schema, subjZ).right).toBeUndefined()
+    expect(validate(schema, subjZ).left).toStrictEqual([
       {
         code: ERROR_CODE.invalidType,
         subject: subjZ,
@@ -1372,11 +1378,11 @@ describe('Check validate subject type constraints', () => {
 
     const parsed = validate(schema, { x: 'y' as string & { __key: 'value' } })
 
-    if (parsed.error) {
+    if (parsed.left) {
       throw Error('Not expected')
     }
 
-    check<string & { __key: 'value' }>(unknownX as typeof parsed.data.x)
+    check<string & { __key: 'value' }>(unknownX as typeof parsed.right.x)
   })
 })
 

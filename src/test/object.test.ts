@@ -61,7 +61,7 @@ describe('Object schema programmatic definition', () => {
       },
     }
 
-    expect(parse(schemaX.__schema, subject).data).toStrictEqual({
+    expect(parse(schemaX.__schema, subject).right).toStrictEqual({
       x: 'xValue',
       y: undefined,
       z: {
@@ -75,10 +75,10 @@ describe('Object schema programmatic definition', () => {
       },
     })
 
-    expect(parse(schemaX.__schema, subject).error).toBe(undefined)
+    expect(parse(schemaX.__schema, subject).left).toBe(undefined)
 
-    expect(validate(schemaX.__schema, subject).data).toStrictEqual(subject)
-    expect(validate(schemaX.__schema, subject).error).toStrictEqual(undefined)
+    expect(validate(schemaX.__schema, subject).right).toStrictEqual(subject)
+    expect(validate(schemaX.__schema, subject).left).toStrictEqual(undefined)
   })
 
   it('object: optional object', () => {
@@ -86,11 +86,11 @@ describe('Object schema programmatic definition', () => {
       x: string(),
     }).optional()
 
-    expect(parse(schemaX.__schema, undefined).data).toBe(undefined)
-    expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
+    expect(parse(schemaX.__schema, undefined).right).toBe(undefined)
+    expect(parse(schemaX.__schema, undefined).left).toBe(undefined)
 
-    expect(validate(schemaX.__schema, undefined).data).toBe(undefined)
-    expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
+    expect(validate(schemaX.__schema, undefined).right).toBe(undefined)
+    expect(validate(schemaX.__schema, undefined).left).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
     expect(() => schemaX.optional()).not.toThrow()
@@ -103,11 +103,11 @@ describe('Object schema programmatic definition', () => {
       .optional()
       .description('x')
 
-    expect(parse(schemaX.__schema, undefined).data).toBe(undefined)
-    expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
+    expect(parse(schemaX.__schema, undefined).right).toBe(undefined)
+    expect(parse(schemaX.__schema, undefined).left).toBe(undefined)
 
-    expect(validate(schemaX.__schema, undefined).data).toBe(undefined)
-    expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
+    expect(validate(schemaX.__schema, undefined).right).toBe(undefined)
+    expect(validate(schemaX.__schema, undefined).left).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
     expect(() => schemaX.optional()).not.toThrow()
@@ -123,11 +123,11 @@ describe('Object schema programmatic definition', () => {
       .description('x')
       .optional()
 
-    expect(parse(schemaX.__schema, undefined).data).toBe(undefined)
-    expect(parse(schemaX.__schema, undefined).error).toBe(undefined)
+    expect(parse(schemaX.__schema, undefined).right).toBe(undefined)
+    expect(parse(schemaX.__schema, undefined).left).toBe(undefined)
 
-    expect(validate(schemaX.__schema, undefined).data).toBe(undefined)
-    expect(validate(schemaX.__schema, undefined).error).toBe(undefined)
+    expect(validate(schemaX.__schema, undefined).right).toBe(undefined)
+    expect(validate(schemaX.__schema, undefined).left).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
     expect(() => schemaX.optional()).not.toThrow()
@@ -169,11 +169,11 @@ describe('Object schema programmatic definition', () => {
 
     const subject = { x: [nestedSubject, nestedSubject, nestedSubject] }
 
-    expect(parse(schemaX.__schema, subject).data).toStrictEqual(subject)
-    expect(parse(schemaX.__schema, subject).error).toBe(undefined)
+    expect(parse(schemaX.__schema, subject).right).toStrictEqual(subject)
+    expect(parse(schemaX.__schema, subject).left).toBe(undefined)
 
-    expect(validate(schemaX.__schema, subject).data).toStrictEqual(subject)
-    expect(validate(schemaX.__schema, subject).error).toBe(undefined)
+    expect(validate(schemaX.__schema, subject).right).toStrictEqual(subject)
+    expect(validate(schemaX.__schema, subject).left).toBe(undefined)
   })
 })
 
@@ -184,27 +184,27 @@ describe('Check type inference and parse/validate/guard struct method', () => {
   it('object: parse', () => {
     const result = struct.parse(subject)
 
-    if (!result.error) {
-      check<{ x: string; y: number }>(result.data)
+    if (!result.left) {
+      check<{ x: string; y: number }>(result.right)
       // @ts-expect-error '{ x: string; y: number; }' is not '{ x: string; y: number; z: boolean; }'
-      check<{ x: string; y: number; z: boolean }>(result.data)
+      check<{ x: string; y: number; z: boolean }>(result.right)
     }
 
-    expect(result.data).toStrictEqual(subject)
-    expect(result.error).toBeUndefined()
+    expect(result.right).toStrictEqual(subject)
+    expect(result.left).toBeUndefined()
   })
 
   it('object: validate', () => {
     const result = struct.validate(subject)
 
-    if (!result.error) {
-      check<{ x: string; y: number }>(result.data)
+    if (!result.left) {
+      check<{ x: string; y: number }>(result.right)
       // @ts-expect-error '{ x: string; y: number; }' is not '{ x: string; y: number; z: boolean; }'
-      check<{ x: string; y: number; z: boolean }>(result.data)
+      check<{ x: string; y: number; z: boolean }>(result.right)
     }
 
-    expect(result.data).toStrictEqual(subject)
-    expect(result.error).toBeUndefined()
+    expect(result.right).toStrictEqual(subject)
+    expect(result.left).toBeUndefined()
   })
 
   it('object: guard', () => {

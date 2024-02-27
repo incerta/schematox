@@ -49,17 +49,17 @@ describe('No schema parameters (string literal)', () => {
       for (const subject of validSubjects) {
         const actual = parse(schema, subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -67,12 +67,12 @@ describe('No schema parameters (string literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = parse(schema, subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: schema,
@@ -87,17 +87,17 @@ describe('No schema parameters (string literal)', () => {
       for (const subject of validSubjects) {
         const actual = validate(schema, subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -105,12 +105,12 @@ describe('No schema parameters (string literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = validate(schema, subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: schema,
@@ -151,17 +151,17 @@ describe('No schema parameters (string literal)', () => {
       for (const subject of validSubjects) {
         const actual = struct.parse(subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -169,12 +169,12 @@ describe('No schema parameters (string literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = struct.parse(subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: struct.__schema,
@@ -189,17 +189,17 @@ describe('No schema parameters (string literal)', () => {
       for (const subject of validSubjects) {
         const actual = struct.validate(subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -207,12 +207,12 @@ describe('No schema parameters (string literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = struct.validate(subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: struct.__schema,
@@ -280,17 +280,17 @@ describe('optional (number literal)', () => {
       for (const subject of validSubjects) {
         const actual = parse(schema, subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -298,12 +298,12 @@ describe('optional (number literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = parse(schema, subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: schema,
@@ -318,17 +318,17 @@ describe('optional (number literal)', () => {
       for (const subject of validSubjects) {
         const actual = validate(schema, subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -336,12 +336,12 @@ describe('optional (number literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = validate(schema, subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: schema,
@@ -382,17 +382,17 @@ describe('optional (number literal)', () => {
       for (const subject of validSubjects) {
         const actual = struct.parse(subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -400,12 +400,12 @@ describe('optional (number literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = struct.parse(subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: struct.__schema,
@@ -420,17 +420,17 @@ describe('optional (number literal)', () => {
       for (const subject of validSubjects) {
         const actual = struct.validate(subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -438,12 +438,12 @@ describe('optional (number literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = struct.validate(subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: struct.__schema,
@@ -511,17 +511,17 @@ describe('nullable (boolean literal)', () => {
       for (const subject of validSubjects) {
         const actual = parse(schema, subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -529,12 +529,12 @@ describe('nullable (boolean literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = parse(schema, subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: schema,
@@ -549,17 +549,17 @@ describe('nullable (boolean literal)', () => {
       for (const subject of validSubjects) {
         const actual = validate(schema, subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -567,12 +567,12 @@ describe('nullable (boolean literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = validate(schema, subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: schema,
@@ -613,17 +613,17 @@ describe('nullable (boolean literal)', () => {
       for (const subject of validSubjects) {
         const actual = struct.parse(subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -631,12 +631,12 @@ describe('nullable (boolean literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = struct.parse(subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: struct.__schema,
@@ -651,17 +651,17 @@ describe('nullable (boolean literal)', () => {
       for (const subject of validSubjects) {
         const actual = struct.validate(subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -669,12 +669,12 @@ describe('nullable (boolean literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = struct.validate(subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: struct.__schema,
@@ -745,17 +745,17 @@ describe('brand (boolean literal)', () => {
       for (const subject of validSubjects) {
         const actual = parse(schema, subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -763,12 +763,12 @@ describe('brand (boolean literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = parse(schema, subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: schema,
@@ -783,17 +783,17 @@ describe('brand (boolean literal)', () => {
       for (const subject of validSubjects) {
         const actual = validate(schema, subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -801,12 +801,12 @@ describe('brand (boolean literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = validate(schema, subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: schema,
@@ -847,17 +847,17 @@ describe('brand (boolean literal)', () => {
       for (const subject of validSubjects) {
         const actual = struct.parse(subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -865,12 +865,12 @@ describe('brand (boolean literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = struct.parse(subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: struct.__schema,
@@ -885,17 +885,17 @@ describe('brand (boolean literal)', () => {
       for (const subject of validSubjects) {
         const actual = struct.validate(subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -903,12 +903,12 @@ describe('brand (boolean literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = struct.validate(subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: struct.__schema,
@@ -1009,17 +1009,17 @@ describe('optional + nullable + brand + description (number literal)', () => {
       for (const subject of validSubjects) {
         const actual = parse(schema, subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -1027,12 +1027,12 @@ describe('optional + nullable + brand + description (number literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = parse(schema, subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: schema,
@@ -1047,17 +1047,17 @@ describe('optional + nullable + brand + description (number literal)', () => {
       for (const subject of validSubjects) {
         const actual = validate(schema, subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -1065,12 +1065,12 @@ describe('optional + nullable + brand + description (number literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = validate(schema, subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: schema,
@@ -1111,17 +1111,17 @@ describe('optional + nullable + brand + description (number literal)', () => {
       for (const subject of validSubjects) {
         const actual = struct.parse(subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -1129,12 +1129,12 @@ describe('optional + nullable + brand + description (number literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = struct.parse(subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: struct.__schema,
@@ -1149,17 +1149,17 @@ describe('optional + nullable + brand + description (number literal)', () => {
       for (const subject of validSubjects) {
         const actual = struct.validate(subject)
 
-        if (actual.error) {
+        if (actual.left) {
           throw Error('Not expected')
         }
 
-        type Actual = typeof actual.data
+        type Actual = typeof actual.right
 
         check<Actual, Expected>()
         check<Expected, Actual>()
 
-        expect(actual.data).toBe(subject)
-        expect(actual.error).toBeUndefined()
+        expect(actual.right).toBe(subject)
+        expect(actual.left).toBeUndefined()
       }
     })
 
@@ -1167,12 +1167,12 @@ describe('optional + nullable + brand + description (number literal)', () => {
       for (const subject of invalidSubjects) {
         const actual = struct.validate(subject)
 
-        if (actual.error === undefined) {
+        if (actual.left === undefined) {
           throw Error('Not expected')
         }
 
-        expect(actual.data).toBeUndefined()
-        expect(actual.error).toStrictEqual([
+        expect(actual.right).toBeUndefined()
+        expect(actual.left).toStrictEqual([
           {
             code: ERROR_CODE.invalidType,
             schema: struct.__schema,
