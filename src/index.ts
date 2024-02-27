@@ -1,6 +1,7 @@
 export { ERROR_CODE } from './error'
 
 export {
+  makeStruct,
   string,
   number,
   boolean,
@@ -10,11 +11,25 @@ export {
   object,
 } from './struct'
 
-export { error, data } from './utils/fp'
+export { left, right } from './utils/fp'
 export { parse } from './parse'
 export { validate, guard } from './validate'
 
-export type { Schema } from './types/compounds'
+export type {
+  StringSchema,
+  NumberSchema,
+  BooleanSchema,
+  LiteralSchema,
+  PrimitiveSchema,
+} from './types/primitives'
+
+export type {
+  Schema,
+  BaseArraySchema,
+  BaseObjectSchema,
+  BaseUnionSchema,
+} from './types/compounds'
+
 export type { SubjectType } from './types/constructors'
 
 export type { InvalidSubject, ErrorPath, ErrorCode } from './error'

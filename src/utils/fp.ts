@@ -1,14 +1,14 @@
 export type Error<T> = {
-  error: T
-  data?: never
+  left: T
+  right?: never
 }
 
 export type Data<U> = {
-  error?: never
-  data: U
+  left?: never
+  right: U
 }
 
 export type EitherError<T, U> = NonNullable<Error<T> | Data<U>>
 
-export const error = <T>(value: T): Error<T> => ({ error: value })
-export const data = <U>(value: U): Data<U> => ({ data: value })
+export const left = <T>(value: T): Error<T> => ({ left: value })
+export const right = <U>(value: U): Data<U> => ({ right: value })

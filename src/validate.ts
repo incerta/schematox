@@ -1,4 +1,4 @@
-import { error, data } from './utils/fp'
+import { left, right } from './utils/fp'
 import { ERROR_CODE } from './error'
 import { verifyPrimitive } from './verify-primitive'
 
@@ -20,11 +20,11 @@ export function validate(
   const errors: InvalidSubject[] = []
 
   if (schema.optional === true && subject === undefined) {
-    return data(undefined)
+    return right(undefined)
   }
 
   if (schema.nullable === true && subject === null) {
-    return data(null)
+    return right(null)
   }
 
   if (schema.type === 'object') {
@@ -33,7 +33,7 @@ export function validate(
       subject === null ||
       subject.constructor !== Object
     ) {
-      return error([
+      return left([
         {
           code: ERROR_CODE.invalidType,
           path: this || [],
@@ -56,14 +56,14 @@ export function validate(
         nestedValue
       )
 
-      if (validated.error) {
-        validated.error.forEach((err) => errors.push(err))
+      if (validated.left) {
+        validated.left.forEach((err) => errors.push(err))
         continue
       }
     }
 
     if (errors.length) {
-      return error(errors)
+      return left(errors)
     }
 
     if (subjectKeySet.size !== 0) {
@@ -74,15 +74,15 @@ export function validate(
         path: this || [],
       })
 
-      return error(errors)
+      return left(errors)
     }
 
-    return data(subject)
+    return right(subject)
   }
 
   if (schema.type === 'array') {
     if (Array.isArray(subject) === false) {
-      return error([
+      return left([
         {
           code: ERROR_CODE.invalidType,
           path: this || [],
@@ -101,21 +101,21 @@ export function validate(
         nestedValue
       )
 
-      if (validated.error) {
-        validated.error.forEach((err) => errors.push(err))
+      if (validated.left) {
+        validated.left.forEach((err) => errors.push(err))
         continue
       }
     }
 
     if (errors.length) {
-      return error(errors)
+      return left(errors)
     }
 
     if (
       typeof schema.minLength === 'number' &&
       subject.length < schema.minLength
     ) {
-      return error([
+      return left([
         {
           code: ERROR_CODE.invalidRange,
           path: this || [],
@@ -129,7 +129,7 @@ export function validate(
       typeof schema.maxLength === 'number' &&
       subject.length > schema.maxLength
     ) {
-      return error([
+      return left([
         {
           code: ERROR_CODE.invalidRange,
           path: this || [],
@@ -139,17 +139,17 @@ export function validate(
       ])
     }
 
-    return data(subject)
+    return right(subject)
   }
 
   if (schema.type === 'union') {
     for (const subSchema of schema.of) {
-      if (validate(subSchema, subject).error === undefined) {
-        return data(subject)
+      if (validate(subSchema, subject).left === undefined) {
+        return right(subject)
       }
     }
 
-    return error([
+    return left([
       {
         code: ERROR_CODE.invalidType,
         path: this || [],
@@ -162,10 +162,10 @@ export function validate(
   const verified = verifyPrimitive(schema, subject)
 
   if (verified === true) {
-    return data(subject)
+    return right(subject)
   }
 
-  return error([
+  return left([
     {
       code: verified,
       path: this || [],
@@ -179,5 +179,5 @@ export function guard<T extends Schema>(
   schema: T,
   subject: unknown
 ): subject is Con_Schema_SubjT<T> {
-  return validate(schema, subject).error === undefined
+  return validate(schema, subject).left === undefined
 }
