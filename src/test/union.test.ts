@@ -222,4 +222,42 @@ describe('Check params', () => {
     // @ts-expect-error 'description' does not exist
     expect(() => struct.description()).not.toThrow()
   })
+
+  it('union: of branded strings', () => {
+    const struct = union([string().brand('x', 'y'), string().brand('x', 'z')])
+    const parsed = struct.parse('')
+
+    if (parsed.left) {
+      throw new Error('Not expected')
+    }
+
+    const result = parsed.right
+
+    type Expected = (string & { __x: 'y' }) | (string & { __x: 'z' })
+    type Actual = typeof result
+
+    check<Expected, Actual>()
+    check<Actual, Expected>()
+  })
+
+  it('union: of branded strings inside object', () => {
+    const struct = object({
+      x: union([string().brand('x', 'y'), string().brand('x', 'z')]),
+    })
+    const parsed = struct.parse({ x: '' })
+
+    if (parsed.left) {
+      throw new Error('Not expected')
+    }
+
+    const result = parsed.right
+
+    type ExpectedUnion = (string & { __x: 'y' }) | (string & { __x: 'z' })
+    type Expected = { x: ExpectedUnion }
+
+    type Actual = typeof result
+
+    check<Expected, Actual>()
+    check<Actual, Expected>()
+  })
 })
