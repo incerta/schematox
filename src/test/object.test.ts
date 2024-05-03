@@ -221,4 +221,17 @@ describe('Check type inference and parse/validate/guard struct method', () => {
 
     throw Error('Not expected')
   })
+
+  it('object: nested optionality', () => {
+    const struct = object({ x: string(), y: string().optional() })
+    const result = struct.parse({ x: '' })
+
+    if (result.right) {
+      type Expected = { x: string; y?: string | undefined }
+      type Actual = typeof result.right
+
+      check<Expected, Actual>()
+      check<Actual, Expected>()
+    }
+  })
 })

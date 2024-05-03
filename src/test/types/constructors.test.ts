@@ -998,11 +998,11 @@ describe('Construct ObjectSchema subject type', () => {
       } as const satisfies Schema
 
       type Expected = {
-        string: (string & { __x: 'string' }) | undefined | null
-        number: (number & { __x: 'number' }) | undefined | null
-        boolean: (boolean & { __x: 'boolean' }) | undefined | null
-        literalString: ('x' & { __x: 'literalString' }) | undefined | null
-        literalNumber: (0 & { __x: 'literalNumber' }) | undefined | null
+        string?: (string & { __x: 'string' }) | null
+        number?: (number & { __x: 'number' }) | null
+        boolean?: (boolean & { __x: 'boolean' }) | null
+        literalString?: ('x' & { __x: 'literalString' }) | null
+        literalNumber?: (0 & { __x: 'literalNumber' }) | null
       }
 
       type Actual = SubjectType<typeof schema>
@@ -1077,9 +1077,9 @@ describe('Construct ObjectSchema subject type', () => {
       } as const satisfies Schema
 
       type Expected = {
-        object: { x: T } | null | undefined
-        array: T[] | null | undefined
-        union: string | null | undefined
+        object?: { x: T } | null | undefined
+        array?: T[] | null | undefined
+        union?: string | null | undefined
       }
 
       type Actual = SubjectType<typeof schema>

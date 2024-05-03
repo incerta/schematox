@@ -32,14 +32,35 @@ type Con_ArraySchema_SubjT<T extends ArraySchema> = T extends { of: infer U }
     : never
   : never
 
+type Prettify<T extends Record<string, unknown>> = {
+  [K in keyof T]: T[K]
+} & {}
+
+/**
+ * ```MakeOptional{ x: T | undefined, y: T }```
+ *
+ * will make:
+ *
+ * ```{ x?: T | undefined, y: T }```
+ *
+ * NOTE: `Exclude<T[K], undefined> will not work
+ *       so we have technical constraint here
+ **/
+type MakeOptional<T> = Prettify<
+  {
+    [K in keyof T as undefined extends T[K] ? K : never]?: T[K]
+  } & {
+    [K in keyof T as undefined extends T[K] ? never : K]: T[K]
+  }
+>
 type Con_ObjectSchema_SubjT<T extends ObjectSchema> = T extends {
   of: infer U
 }
-  ? {
+  ? MakeOptional<{
       -readonly [k in keyof U]: U[k] extends Schema
         ? Con_Schema_SubjT<U[k]>
         : never
-    }
+    }>
   : never
 
 type Con_UnionSchema_SubjT<T extends UnionSchema> = T extends {

@@ -325,8 +325,19 @@ type FromStruct = SubjectType<typeof struct>
 
 ## Schema parameters
 
-- `optional?: boolean` – does `undefined` is valid value
-- `nullable?: boolean` – does `null` is valid value
+- `optional?: boolean` –  unionize with `undefined`: `{ type: 'string', optinoal: true }` result in `string | undefined`
+
+In the context of the object, optional values will be treated as optional properties:
+
+```typescript
+const struct = object({ x: string().optional() })
+
+type ExpectedSubjectType = {
+  x?: string | undefined
+}
+```
+
+- `nullable?: boolean` – unionize with `null`: `{ type: 'string', nullable: true }` result in `string | null`
 - `brand?: [string, string]` – make primitive type nominal "['idFor', 'User'] -> T & { \_\_idFor: 'User' }"
 - `minLength/maxLength/min/max` – schema type dependent limiting characteristics
 - `description?: string` – description of the particular schema property which can be used to provide more detailed information for the user/developer on validation/parse error
