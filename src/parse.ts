@@ -46,8 +46,25 @@ export function parse(
     const result: Record<string, unknown> = {}
 
     for (const key in schema.of) {
+      const narrowedSubj = subject as Record<string, unknown>
       const nestedSchema = schema.of[key] as Schema
-      const nestedValue = (subject as Record<string, unknown>)[key]
+
+      if (Object.prototype.hasOwnProperty.call(narrowedSubj, key) === false) {
+        if (nestedSchema.optional !== true) {
+          return left([
+            {
+              code: ERROR_CODE.invalidType,
+              path: [...(this || []), key],
+              schema,
+              subject,
+            },
+          ])
+        }
+
+        continue
+      }
+
+      const nestedValue = narrowedSubj[key]
 
       const parsed = parse.bind([...(this || []), key])(
         nestedSchema,
