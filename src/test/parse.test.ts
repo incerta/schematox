@@ -232,6 +232,35 @@ describe('Parse OBJECT schema with VALID subject', () => {
     expect(parse(schema, null).right).toBe(null)
     expect(parse(schema, null).left).toBe(undefined)
   })
+
+  it('parse: should preserve specified undefined keys while parsing', () => {
+    const schema = {
+      type: 'object',
+      of: {
+        a: { type: 'string', optional: true },
+        b: { type: 'string', optional: true },
+        c: { type: 'string' },
+      },
+    } as const satisfies Schema
+
+    const sample = {
+      b: undefined,
+      c: 'cValue',
+    }
+
+    const expected = {
+      b: undefined,
+      c: 'cValue',
+    }
+
+    const either = parse(schema, sample)
+
+    if (either.left) {
+      throw Error('Not expected')
+    }
+
+    expect(either.right).toStrictEqual(expected)
+  })
 })
 
 describe('Parse OBJECT schema with INVALID subject', () => {
