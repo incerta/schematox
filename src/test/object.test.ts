@@ -81,6 +81,72 @@ describe('Object schema programmatic definition', () => {
     expect(validate(schemaX.__schema, subject).left).toStrictEqual(undefined)
   })
 
+  it('object: max depth', () => {
+    const schema = object({
+      1: object({
+        2: object({
+          3: object({
+            4: object({
+              5: object({
+                6: object({
+                  7: object({
+                    8: object({
+                      9: object({
+                        10: object({
+                          11: object({ 12: object({ x: string() }) }),
+                        }),
+                      }),
+                    }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      }),
+    })
+
+    const valid = {
+      1: {
+        2: {
+          3: {
+            4: {
+              5: { 6: { 7: { 8: { 9: { 10: { 11: { 12: { x: 'x' } } } } } } } },
+            },
+          },
+        },
+      },
+    }
+
+    const validParsedEither = schema.parse(valid)
+
+    if (validParsedEither.left) {
+      throw Error('Not expected parsing error')
+    }
+
+    expect(validParsedEither.right).toStrictEqual(valid)
+
+    const invalid = {
+      0: {
+        1: {
+          2: {
+            3: {
+              4: { 5: { 6: { 7: { 8: { 9: { 10: {} } } } } } },
+            },
+          },
+        },
+      },
+    }
+
+    const invalidParsedEither = schema.parse(invalid)
+
+    if (invalidParsedEither.right) {
+      throw Error('Success result is not expected')
+    }
+
+    expect(invalidParsedEither.left).toBeTruthy()
+  })
+
   it('object: optional object', () => {
     const schemaX = object({
       x: string(),

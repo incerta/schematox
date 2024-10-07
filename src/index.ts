@@ -28,6 +28,9 @@ export type {
   BaseArraySchema,
   BaseObjectSchema,
   BaseUnionSchema,
+  ObjectSchema,
+  ArraySchema,
+  UnionSchema,
 } from './types/compounds'
 
 export type { SubjectType } from './types/constructors'

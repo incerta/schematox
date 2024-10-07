@@ -39,14 +39,42 @@ export type R<T> =
   | BaseArraySchema<T>
   | BaseUnionSchema<T>
 
-/* 7 layers of compound schema nesting is allowed */
-export type NestedSchema = R<R<R<R<R<R<PrimitiveSchema>>>>>>
+/* 12 layers of compound schema nesting is allowed */
+export type NestedSchema = R/*0*/ <
+  R/*1*/ <
+    R/*2*/ <
+      R/*3*/ <
+        R/*4*/ <
+          R/*5*/ <
+            R/*6*/ <
+              R/*7*/ <
+                R/*8*/ <R/*9*/ <R/*10*/ <R/*11*/ <R/*12*/ <PrimitiveSchema>>>>>
+              >
+            >
+          >
+        >
+      >
+    >
+  >
+>
 
 /*
  * Schema without one layer or recursion.
  * Required for programmatic compound struct definition.
  **/
-export type NestedStructSchema = R<R<R<R<R<PrimitiveSchema>>>>>
+export type NestedStructSchema = R/*1*/ <
+  R/*2*/ <
+    R/*3*/ <
+      R/*4*/ <
+        R/*5*/ <
+          R/*6*/ <
+            R/*7*/ <R/*8*/ <R/*9*/ <R/*10*/ <R/*11*/ <PrimitiveSchema>>>>>
+          >
+        >
+      >
+    >
+  >
+>
 
 export type ArraySchema<T extends NestedSchema = NestedSchema> =
   BaseArraySchema<T>

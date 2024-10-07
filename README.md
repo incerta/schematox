@@ -53,9 +53,35 @@ npm install schematox
 
 ## Limitations
 
-Currently we support max 7 layers of depth for compound schema type: object, array, union.
+Currently we support max 12 layers of depth for compound schema type: object, array, union:
 
-Because of this we can check structural correctness of the statically defined schema using non generic type `Schema`. Important detail is that `union` schema type is also compound type so each nested definition counts as +1 layer of depth.
+```typescript
+const schema = object({
+  1: object({
+    2: object({
+      3: object({
+        4: object({
+          5: object({
+            6: object({
+              7: object({
+                8: object({
+                  9: object({
+                    10: object({
+                      11: object({ 12: object({ x: string() }) }),
+                    }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      }),
+    }),
+  }),
+})
+```
+
+Cryptic typescript type error will be raised if the limit is exceeded.
 
 ## Static schema example
 
