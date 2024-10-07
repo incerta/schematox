@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.0](https://github.com/incerta/schematox/compare/v0.3.1...v0.4.0)
+
+- [`aa0d95e`](https://github.com/incerta/schematox/commit/aa0d95e30b7784c0ce29317ae808e4ba7950abab) Extend compound structure nesting limit to 12 layers of depth
+
 ## [0.3.1](https://github.com/incerta/schematox/compare/v0.3.0...v0.3.1)
 
 ### Bugfix
