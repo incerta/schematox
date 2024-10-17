@@ -2,3 +2,6 @@
 /tmp
 /dist
 /coverage
+/benchmark/node_modules
+/benchmark/dist
+

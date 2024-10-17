@@ -2,7 +2,7 @@
   "name": "schematox",
   "version": "0.4.0",
   "description": "Define JSON compatible schema statically/programmatically and parse/validate its subject with typesafety",
-  "author": "Konstantin Mazur",
+  "author": "Kanstantsin Mazur",
   "license": "MIT",
   "keywords": [
     "typescript",
