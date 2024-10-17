@@ -1,5 +1,5 @@
-import type { EitherError } from '../utils/fp'
-import type { InvalidSubject } from '../error'
+import type { Either } from '../utils/fp'
+import type { ParsingError } from '../error'
 
 import type {
   StringSchema,
@@ -18,8 +18,8 @@ import type {
 import type { Con_Schema_SubjT } from './constructors'
 
 type StructMethods<T extends Schema> = {
-  parse: (s: unknown) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
-  validate: (s: unknown) => EitherError<InvalidSubject[], Con_Schema_SubjT<T>>
+  parse: (s: unknown) => Either<ParsingError, Con_Schema_SubjT<T>>
+  validate: (s: unknown) => Either<ParsingError, Con_Schema_SubjT<T>>
   guard: (subject: unknown) => subject is Con_Schema_SubjT<T>
 }
 

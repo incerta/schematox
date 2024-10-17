@@ -35,5 +35,11 @@ export type {
 
 export type { SubjectType } from './types/constructors'
 
-export type { InvalidSubject, ErrorPath, ErrorCode } from './error'
-export type { EitherError, Error, Data } from './utils/fp'
+export type {
+  ParsingError,
+  InvalidSubject,
+  ErrorPath,
+  ErrorCode,
+} from './error'
+
+export type { Either, Left, Right } from './utils/fp'

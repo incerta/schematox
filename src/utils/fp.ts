@@ -1,14 +1,14 @@
-export type Error<T> = {
+export type Left<T> = {
   left: T
   right?: never
 }
 
-export type Data<U> = {
+export type Right<U> = {
   left?: never
   right: U
 }
 
-export type EitherError<T, U> = NonNullable<Error<T> | Data<U>>
+export type Either<T, U> = NonNullable<Left<T> | Right<U>>
 
-export const left = <T>(value: T): Error<T> => ({ left: value })
-export const right = <U>(value: U): Data<U> => ({ right: value })
+export const left = <T>(value: T): Left<T> => ({ left: value })
+export const right = <U>(value: U): Right<U> => ({ right: value })

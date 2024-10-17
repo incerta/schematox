@@ -9,6 +9,8 @@ export type InvalidSubject = {
   path: ErrorPath
 }
 
+export type ParsingError = InvalidSubject[]
+
 export type ErrorPath = Array<
   string /* object key */ | number /* array index */
 >
