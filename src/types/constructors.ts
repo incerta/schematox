@@ -15,7 +15,7 @@ import type {
 
 import type { ExtWith_SchemaParams_SubjT } from './extensions'
 
-type Con_PrimitiveSchema_SubjT<T extends PrimitiveSchema> =
+export type Con_PrimitiveSchema_SubjT<T extends PrimitiveSchema> =
   T extends StringSchema
     ? string
     : T extends NumberSchema
@@ -26,13 +26,15 @@ type Con_PrimitiveSchema_SubjT<T extends PrimitiveSchema> =
           ? U
           : never
 
-type Con_ArraySchema_SubjT<T extends ArraySchema> = T extends { of: infer U }
+export type Con_ArraySchema_SubjT<T extends ArraySchema> = T extends {
+  of: infer U
+}
   ? U extends Schema
     ? Array<Con_Schema_SubjT<U>>
     : never
   : never
 
-type Prettify<T extends Record<string, unknown>> = {
+export type Prettify<T extends Record<string, unknown>> = {
   [K in keyof T]: T[K]
 } & {}
 
@@ -46,14 +48,15 @@ type Prettify<T extends Record<string, unknown>> = {
  * NOTE: `Exclude<T[K], undefined> will not work
  *       so we have technical constraint here
  **/
-type MakeOptional<T> = Prettify<
+export type MakeOptional<T> = Prettify<
   {
     [K in keyof T as undefined extends T[K] ? K : never]?: T[K]
   } & {
     [K in keyof T as undefined extends T[K] ? never : K]: T[K]
   }
 >
-type Con_ObjectSchema_SubjT<T extends ObjectSchema> = T extends {
+
+export type Con_ObjectSchema_SubjT<T extends ObjectSchema> = T extends {
   of: infer U
 }
   ? MakeOptional<{
@@ -63,7 +66,7 @@ type Con_ObjectSchema_SubjT<T extends ObjectSchema> = T extends {
     }>
   : never
 
-type Con_UnionSchema_SubjT<T extends UnionSchema> = T extends {
+export type Con_UnionSchema_SubjT<T extends UnionSchema> = T extends {
   type: 'union'
   of: Readonly<Array<infer U>>
 }

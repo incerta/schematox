@@ -1,4 +1,4 @@
-# Schematox
+# schematox
 
 Schematox is a lightweight typesafe schema defined parser/validator. All schemas are JSON compatible.
 
@@ -6,31 +6,11 @@ Instead of supporting all possible JS/TS data structures, the library is focusin
 
 Library supports static schema definition which means your schemas could be completely independent from schematox. One could use such schemas as source for generation other structures like DB models.
 
-Features:
-
-- Statically defined JSON compatible schema
-- Check defined schema correctness using non generic type "Schema"
-- Programmatically defined schema (struct)
-- Schema subject verification methods:
-  - parse: constructs new object based on the given schema and subject
-  - validate: checks and returns reference to the original schema subject
-  - guard: validates and narrows schema subject type in the current scope
-- Ether-style error handling (no unexpected throws)
-- First-class support for branded primitives (primitive nominal types alias)
-
-Check out [github issues](https://github.com/incerta/schematox/issues) to know what we are planning to support soon.
-
-Currently we on version 0. The public API is mostly defined however few thing left before the first major release:
-
-- Record and tuple schema support
-- Allow parser to replace value before it's validated (similar to [coercing](https://docs.superstructjs.org/guides/03-coercing-data) concept)
-- Clearly defined supported versions of typescript/node
-- Support "deno" runtime and publish package on "deno.land"
-- Have a benchmark that compares library performance with other parsers
-
 The library is small so exploring README.md is enough for understanding its API, checkout limitations/examples and you good to go:
 
 - [Install](#install)
+- [Minimal requirements](#minimal-requirements)
+- [Features](#features)
 - [Limitations](#limitations)
 - [Static schema example](#static-schema-example)
 - [Programmatic schema example](#programmatic-schema-example)
@@ -45,6 +25,7 @@ The library is small so exploring README.md is enough for understanding its API,
 - [Difference between parse and validate](#difference-between-parse-and-validate)
 - [Schema parameters](#schema-parameters)
 - [Error shape](#error-shape)
+- [Use schematox schema as dependency with narrowed type](#use-schematox-schema-as-dependency-with-narrowed-type)
 
 ## Install
 
@@ -52,9 +33,27 @@ The library is small so exploring README.md is enough for understanding its API,
 npm install schematox
 ```
 
+## Minimal requirements
+
+- ECMAScript version: `2018`
+- TypeScript version: `5.3.2`
+
+## Features
+
+- Statically defined JSON compatible schema
+- Check defined schema correctness using non generic type "Schema"
+- Programmatically defined schema (struct)
+- Schema subject verification methods:
+  - parse: constructs new object based on the given schema and subject
+  - validate: checks and returns reference to the original schema subject
+  - guard: validates and narrows schema subject type in the current scope
+- Ether-style error handling (no unexpected throws)
+- First-class support for branded primitives (primitive nominal types alias)
+- Use schematox schema as dependency with narrowed type
+
 ## Limitations
 
-Currently we support max 12 layers of depth for compound schema type: object, array, union:
+Currently we support max 12 layers of depth for compound schema type: `object`, `array`, `union`:
 
 ```typescript
 const schema = object({
@@ -81,8 +80,6 @@ const schema = object({
   }),
 })
 ```
-
-Cryptic typescript type error will be raised if the limit is exceeded.
 
 ## Static schema example
 
@@ -416,3 +413,155 @@ It's always an array with at least one entry. Each entry includes:
 - `schema`: The specific section of `schema` where the invalid value is found.
 - `subject`: The specific part of the validated subject where the invalid value exists.
 - `path`: Traces the route from the root to the error subject, with strings as keys and numbers as array indexes.
+
+## Use schematox schema as dependency with narrowed type
+
+Most of the library is type inference generics. All of them are exposed for external usage.
+This allows you to form type requirements for the schema itself or write schema extensions.
+
+The following is an example of a real working project which uses `schematox` schemas as a
+source for `MongoDB` native driver models generation and well-typed data repository initialization.
+
+```typescript
+...
+import type {
+  PrimitiveSchema,
+  BaseObjectSchema,
+  BaseUnionSchema,
+  StringSchema,
+  NumberSchema,
+  LiteralSchema,
+  BaseArraySchema,
+  SubjectType,
+} from 'schematox'
+
+// Restricting model schema to one dimensional object
+type BaseRepoModelSchema = BaseObjectSchema<
+  | PrimitiveSchema
+  | BaseUnionSchema<LiteralSchema<string> | StringSchema>
+  | BaseArraySchema<
+      | StringSchema
+      | NumberSchema
+      | BaseUnionSchema<StringSchema>
+    >
+>
+
+// Allow model schema to be discriminated union
+type UnionRepoModelSchema = BaseUnionSchema<BaseRepoModelSchema>
+type RepoModelSchema = BaseRepoModelSchema | UnionRepoModelSchema
+
+// We expect that such schema be programmatically defined
+export type RepoTox = {
+  __schema: RepoModelSchema
+  parse: (x: unknown) => EitherError<unknown, unknown>
+  validate: (x: unknown) => EitherError<unknown, unknown>
+}
+
+// How repo model
+export type RepoModel<
+  T extends RepoTox = RepoTox,
+  U extends Record<string, unknown> = SubjectType<T>,
+> = {
+  tox: T
+  relations: FieldRelation[]
+
+  get: (filter?: MongoFilter<U>, session?: ClientSession) => Promise<U[]>
+
+  // ... the rest is ommited for simplification
+}
+
+export type InitRepo<T extends Record<string, RepoTox>> = {
+  [k in keyof T]: RepoModel<T[k]>
+} & {
+/**
+ * Stub each repo model method with predefined `session` and `userId`
+ **/
+  _wrap: (session?: ClientSession, userId?: string) => InitRepo<T>
+}
+
+// Function which initialized repository
+export function initRepo<T extends Record<string, RepoTox>>(
+  mongoClient: MongoClient,
+  dbName: string,
+  models: T
+): Promise<InitRepo<T>>
+```
+
+Sooner or later, this logic will be abstracted as a separate module, we put it there so you have a broad understanding of `schematox` potential.
+
+Using the following approach, we could define models using only `schematox` schemas and have branded identifiers.
+
+- Define a brand which signifies the model's primary key and other brands
+- Define which schema logic can be shared between different models (or abstract as you go)
+- Define the required model schematox `object`
+- Add the defined schema in a special `models` object, the validity of which is checked by (`as const satisfies Record<ModelBrand, RepoTox>`)
+
+```typescript
+import * as t from 'schematox'
+
+export const brand = {
+  idFor: <T extends I.ModelBrand>(x: T) => [MODEL_BRAND_TYPE, x] as const,
+  format: <T extends I.FormatBrand>(x: T) => [FORMAT_BRAND_TYPE, x] as const,
+} as const
+
+export const getResourceIdTox = <T extends I.ModelBrand>(x: T) =>
+  string()
+    .maxLength(254)
+    .brand(...brand.idFor(x))
+
+export const timestamp = t
+  .number()
+  .brand(...brand.format(FORMAT_BRAND.timestamp))
+
+export const userId = getResourceIdTox(MODEL_BRAND_BY_KEY.user)
+
+/**
+ * Each model schema must share `modelShared` fields
+ **/
+export const modelShared = {
+  createdAt: timestamp,
+  createdBy: userId.description(IGNORE_RELATION),
+}
+
+export const user = t.object({
+  ...modelShared,
+  id: userId,
+  email: t.string(),
+})
+```
+
+Such schema into `models.ts` file:
+
+```typescript
+import { user } from './schema'
+
+export type ModelToxByBrand = typeof models
+
+export const models = {
+  user,
+} as const satisfies Record<ModelBrand, RepoTox>
+```
+
+Server will init those schemas like this:
+
+```typescript
+import { models } from './models'
+
+async function init() {
+  const db = await dbConnect()
+  const repo = await initRepo(db, config.db.name, models)
+    ...
+}
+```
+
+And now developer can access/manage `user` model without specifying any model specific types. Example:
+
+```typescript
+const users = await repo.user.get()
+```
+
+The `users` in this case will contain all `user` records from the DB and the type will correspond to the schema we initially defined.
+One could notice that we put the `IGNORE_RELATION` flag into `description`, which looks weird.
+
+Because of this, we are going to support a special [`x` property on each schema](https://github.com/incerta/schematox/issues/28)
+so developers could arbitrarily extend the schema without breaking the built-in semantics of the `description` key.

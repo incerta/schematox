@@ -2,40 +2,40 @@
 
 Currently, it's a small, not well-known project so we don't need any strict contribution policy. Simply make a fork and create a PR if you think that something is off. Alternatively, create an [issue](https://github.com/incerta/schematox/issues) if you find a bug or have an idea/question.
 
-# General glossary
+# Glossary
 
-- `schema` – JSON-compatible representation of JS runtime `primitive/object` entities
-- `struct` – programmatically defined schema with extra API
-- `primitive schema` – the most basic unit of a schema `string/number/boolean/literal`
-- `compound schema` – higher-order structure that contains any other schema as its child
-- `subject` – the JS runtime primitive or object that is intended to be tested against the schema
-- `subject type` – the TypeScript type of the schema subject
-- `brand` – intersection which makes primitive type nominal
-- `schema depth` – the number of nested levels a compound schema carries
-- `schema range parameter` – schema type dependent parameter used as value size restriction
+- `schema` - JSON-compatible representation of JS runtime `primitive/object` entities
+- `struct` - programmatically defined schema with extra API
+- `primitive schema` - the most basic unit of a schema `string/number/boolean/literal`
+- `compound schema` - higher-order structure that contains any other schema as its child
+- `subject` - the JS runtime primitive or object that is intended to be tested against the schema
+- `subject type` - the TypeScript type of the schema subject
+- `brand` - intersection which makes primitive type nominal
+- `schema depth` - the number of nested levels a compound schema carries
+- `schema range parameter` - schema type dependent parameter used as value size restriction
 
 ## Primitive Schema
 
 Primitive schema represented by js object that always has a required `type`, `of` (for `literal`) property and some [optional properties](#detailed-schemas-optional-properties). Complete list of the base detailed schema types:
 
-- `StringSchema` – result in `string` subject type. Has range parameters:
-  - `minLength?: number` – schema subject `.length` should be >= specified value to pass validate/parse successfully
-  - `maxLength?: number` – schema subject `.length` should be <= specified value to pass validate/parse successfully
-- `NumberSchema` – result in `number` or `number | undefined` schema subject type. Has extra properties:
-  - `min?: number` – schema subject value should be >= specified value to pass validate/parse successfully
-  - `max?: number` – schema subject value should be <= specified value to pass validate/parse successfully
-- `BooleanSchema` – result in `boolean` or `boolean | undefined` schema subject type
-- `LiteralSchema` – result in either `string` or `number` schema subject literal type
+- `StringSchema` - result in `string` subject type. Has range parameters:
+  - `minLength?: number` - schema subject `.length` should be >= specified value to pass validate/parse successfully
+  - `maxLength?: number` - schema subject `.length` should be <= specified value to pass validate/parse successfully
+- `NumberSchema` - result in `number` or `number | undefined` schema subject type. Has extra properties:
+  - `min?: number` - schema subject value should be >= specified value to pass validate/parse successfully
+  - `max?: number` - schema subject value should be <= specified value to pass validate/parse successfully
+- `BooleanSchema` - result in `boolean` or `boolean | undefined` schema subject type
+- `LiteralSchema` - result in either `string` or `number` schema subject literal type
 
 All those types is gathered under `PrimitiveSchema` union
 
 ## Compound schema
 
 - `ObjectSchema` - result in object subject type with defined keys and value types
-- `ArraySchema` – result in `Array<T>` subject type. Has range parameters:
-  - `minLength?: number` – schema subject `.length` should be >= specified value to pass validate/parse successfully
-  - `maxLength?: number` – schema subject `.length` should be <= specified value to pass validate/parse successfully
-- `UnionSchema` – result in any available schema type union
+- `ArraySchema` - result in `Array<T>` subject type. Has range parameters:
+  - `minLength?: number` - schema subject `.length` should be >= specified value to pass validate/parse successfully
+  - `maxLength?: number` - schema subject `.length` should be <= specified value to pass validate/parse successfully
+- `UnionSchema` - result in any available schema type union
 
 All those types is gathered under `CompooundSchema` union
 
@@ -64,3 +64,29 @@ it('check: type compatibility', () => {
 ```
 
 The `check` function will raise static type error if the second generic argument type is not extends the first one. In order to make sure that types are structurally identical we must always have two casts: `<Actual, Expected>` and `<Expected, Actual>`.
+
+# Development routine
+
+- Create an issue (optional)
+- Create feature branch
+- Make a PR against `main` branch
+- Review diff
+- Rebase PR commits into `main` branch
+- Update `CHANGELOG.md` with `chore: release $VERSION` commit
+- Patch version by semver
+  - `npm run version:patch`
+  - `npm run version:minor`
+  - `npm run version:major`
+- Run `npm publish` to release
+
+## Checks before publish
+
+We using `package.json` > `prepublishOnly` script to ensure that following conditions are satisfied.
+
+- No formatting errors
+- No type errors
+- No lint errors
+- No unit test errors
+- Test coverage: branches 100%, functions 100%, lines 100%, statements 100%
+- Current branch is `main` branch
+- The `main` branch is in sync with github remote repo
