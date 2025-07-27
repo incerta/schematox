@@ -68,7 +68,7 @@ export function validate(
 
     if (subjectKeySet.size !== 0) {
       errors.push({
-        code: ERROR_CODE.invalidType,
+        code: ERROR_CODE.extraKey,
         subject,
         schema,
         path: this || [],
