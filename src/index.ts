@@ -16,24 +16,45 @@ export { parse } from './parse'
 export { validate, guard } from './validate'
 
 export type {
-  StringSchema,
-  NumberSchema,
   BooleanSchema,
+  BrandSchema,
   LiteralSchema,
+  NumberSchema,
   PrimitiveSchema,
+  StringSchema,
 } from './types/primitives'
 
 export type {
-  Schema,
+  ArraySchema,
   BaseArraySchema,
   BaseObjectSchema,
   BaseUnionSchema,
+  CompoundSchema,
+  NestedSchema,
+  NestedStructSchema,
   ObjectSchema,
-  ArraySchema,
+  Schema,
+  StructSchema,
   UnionSchema,
 } from './types/compounds'
 
-export type { SubjectType } from './types/constructors'
+export type {
+  Con_ArraySchema_SubjT,
+  Con_ObjectSchema_SubjT,
+  Con_PrimitiveSchema_SubjT,
+  Con_Schema_SubjT,
+  Con_UnionSchema_SubjT,
+  MakeOptional,
+  Prettify,
+  SubjectType,
+} from './types/constructors'
+
+export type {
+  ExtWith_Undefined_SubjT,
+  ExtWith_Null_SubjT,
+  ExtWith_Brand_SubjT,
+  ExtWith_SchemaParams_SubjT,
+} from './types/extensions'
 
 export type {
   ParsingError,

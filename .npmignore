@@ -1,5 +1,5 @@
 /node_modules
-/src
+/src/test
 /benchmark
 /.husky
 /.git
@@ -11,3 +11,4 @@
 /jest.config.js
 /.prettierrc.json
 /.prettierignore
+/release-check.sh

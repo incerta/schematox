@@ -35,9 +35,8 @@ type ParamsBySchemaType = {
   array: ExtractParams<ArraySchema>
 }
 
-export type StructParams = ParamsBySchemaType extends Record<string, infer U>
-  ? U
-  : never
+export type StructParams =
+  ParamsBySchemaType extends Record<string, infer U> ? U : never
 
 export type Struct<T extends Schema> = Omit<
   Pick<

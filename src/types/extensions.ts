@@ -1,14 +1,14 @@
-type ExtWith_Undefined_SubjT<T, U> = T extends { optional: true }
+export type ExtWith_Undefined_SubjT<T, U> = T extends { optional: true }
   ? U | undefined
   : U
 
-type ExtWith_Null_SubjT<T, U> = T extends {
+export type ExtWith_Null_SubjT<T, U> = T extends {
   nullable: true
 }
   ? U | null
   : U
 
-type ExtWith_Brand_SubjT<T, U> = T extends {
+export type ExtWith_Brand_SubjT<T, U> = T extends {
   brand: Readonly<[infer V, infer W]>
 }
   ? V extends string
