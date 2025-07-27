@@ -416,7 +416,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
 
     const expected = [
       {
-        code: ERROR_CODE.invalidType,
+        code: ERROR_CODE.extraKey,
         schema: schema.of.x,
         subject: subject.x,
         path: ['x'],
@@ -424,6 +424,19 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     ]
 
     const actual = validate(schema, subject).left
+
+    expect(actual).toStrictEqual(expected)
+  })
+
+  it('validate: ensure one dimensional object extra key error path is empty arr', () => {
+    const schema = {
+      type: 'object',
+      of: { x: { type: 'string' } },
+    } as const satisfies Schema
+
+    const subject = { y: 'sample', x: 'sample' } as unknown
+    const actual = validate(schema, subject).left?.[0]?.path
+    const expected = [] as const
 
     expect(actual).toStrictEqual(expected)
   })
@@ -1376,13 +1389,15 @@ describe('Check validate subject type constraints', () => {
       },
     } as const satisfies Schema
 
-    const parsed = validate(schema, { x: 'y' as string & { __key: 'value' } })
+    const validated = validate(schema, {
+      x: 'y' as string & { __key: 'value' },
+    })
 
-    if (parsed.left) {
+    if (validated.left) {
       throw Error('Not expected')
     }
 
-    check<string & { __key: 'value' }>(unknownX as typeof parsed.right.x)
+    check<string & { __key: 'value' }>(unknownX as typeof validated.right.x)
   })
 })
 

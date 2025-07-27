@@ -42,6 +42,7 @@ The library is small so exploring README.md is enough for understanding its API,
   - [Object](#object)
   - [Array](#array)
   - [Union](#union)
+- [Difference between parse and validate](#difference-between-parse-and-validate)
 - [Schema parameters](#schema-parameters)
 - [Error shape](#error-shape)
 
@@ -368,6 +369,11 @@ type ExpectedSubjectType = {
 - `minLength/maxLength/min/max` – schema type dependent limiting characteristics
 - `description?: string` – description of the particular schema property which can be used to provide more detailed information for the user/developer on validation/parse error
 
+## Difference between parse and validate
+
+Parsing creates a new object. Validation/guard checks if an existing object satisfies the defined schema.
+When you parse something, extra keys are allowed; if you validate/guard, extra keys will cause an `EXTRA_KEY` error.
+
 ## Error shape
 
 Nested schema example. Subject `0` is invalid, should be a `string`:
@@ -403,7 +409,10 @@ The `result.left` shape is:
 
 It's always an array with at least one entry. Each entry includes:
 
-- `code`: Specifies either `INVALID_TYPE` (when schema subject or default value don't meet schema type specifications), or `INVALID_RANGE` (when `min/max` or `minLength/maxLength` schema requirements aren't met).
+- `code`: we support the following errors:
+  - `INVALID_TYPE`: schema subject or default value don't meet schema type specifications
+  - `INVALID_RANGE`: `min/max` or `minLength/maxLength` schema requirements aren't met
+  - `EXTRA_KEY`: `object` type validation subject has a key which is not specified in schema
 - `schema`: The specific section of `schema` where the invalid value is found.
 - `subject`: The specific part of the validated subject where the invalid value exists.
 - `path`: Traces the route from the root to the error subject, with strings as keys and numbers as array indexes.
