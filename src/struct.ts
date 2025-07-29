@@ -2,6 +2,7 @@ import { PARAMS_BY_SCHEMA_TYPE } from './constants'
 import { validate } from './validate'
 import { parse } from './parse'
 
+import type { StringSchema } from './types/primitives'
 import type { NestedSchema, StructSchema, Schema } from './types/compounds'
 import type { Struct, StructParams } from './types/struct'
 
@@ -85,6 +86,16 @@ export function object<
   for (const key in of) {
     schema.of[key] = (of[key] as NonNullable<(typeof of)[typeof key]>).__schema
   }
+
+  return makeStruct(schema)
+}
+
+export function record<
+  T extends { __schema: StructSchema },
+  U extends { __schema: StringSchema },
+  V extends { type: 'record'; of: T['__schema']; key: U['__schema'] },
+>(of: T, key: U = { __schema: { type: 'string' } } as U) {
+  const schema = { type: 'record', of: of.__schema, key: key.__schema } as V
 
   return makeStruct(schema)
 }

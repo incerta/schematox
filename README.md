@@ -2,7 +2,7 @@
 
 Schematox is a lightweight typesafe schema defined parser/validator. All schemas are JSON compatible.
 
-Instead of supporting all possible JS/TS data structures, the library is focusing on fixed set of schema types: string, number, boolean, literal, object, array, union. Each schema can have parameters: optional, nullable, description. Each primitive schema has "brand" parameter as mean of making its subject type [nominal](https://github.com/Microsoft/TypeScript/wiki/FAQ#can-i-make-a-type-alias-nominal). The rest parameters is schema specific range limiters.
+Instead of supporting all possible JS/TS data structures, the library is focusing on fixed set of schema types: string, number, boolean, literal, object, record, array, union. Each schema can have parameters: optional, nullable, description. Each primitive schema has "brand" parameter as mean of making its subject type [nominal](https://github.com/Microsoft/TypeScript/wiki/FAQ#can-i-make-a-type-alias-nominal). The rest parameters is schema specific range limiters.
 
 Library supports static schema definition which means your schemas could be completely independent from schematox. One could use such schemas as source for generation other structures like DB models.
 
@@ -20,6 +20,7 @@ The library is small so exploring README.md is enough for understanding its API,
   - [Boolean](#boolean)
   - [Literal](#literal)
   - [Object](#object)
+  - [Record](#record)
   - [Array](#array)
   - [Union](#union)
 - [Difference between parse and validate](#difference-between-parse-and-validate)
@@ -298,6 +299,29 @@ const struct = object({
   .description('x')
 
 // { x: string; y: number } | undefined | null
+type FromSchema = SubjectType<typeof schema>
+type FromStruct = SubjectType<typeof struct>
+```
+
+### Record
+
+```typescript
+const schema = {
+  type: 'record',
+  // key property is optional
+  key: { type: 'string', brand: ['idFor', 'user'] },
+  of: { type: 'number' },
+  optional: true,
+  nullable: true,
+  description: 'x',
+} as const satisfies Schema
+
+const userId = string().brand('idFor', 'user')
+
+// second argument is optional
+const struct = object(number(), userId).optional().nullable().description('x')
+
+// Record<string & { __brand: ['idFor', 'user'] }, number | undefined>  | null | undefined
 type FromSchema = SubjectType<typeof schema>
 type FromStruct = SubjectType<typeof struct>
 ```

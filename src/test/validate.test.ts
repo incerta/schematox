@@ -4,7 +4,7 @@ import { check, unknownX } from './test-utils'
 
 import type { Schema } from '../types/compounds'
 
-describe('Validate BASE schema with VALID subject', () => {
+describe('Validate PRIMITIVE schema with VALID subject', () => {
   it('validate: `{ type: "string" }` schema', () => {
     const schema = { type: 'string' } satisfies Schema
     const subject = 'x'
@@ -38,7 +38,7 @@ describe('Validate BASE schema with VALID subject', () => {
   })
 })
 
-describe('Validate BASE schema with INVALID subject', () => {
+describe('Validate PRIMITIVE schema with INVALID subject', () => {
   it('validate: base detailed schema', () => {
     const detailedReqStrSchema = { type: 'string' } satisfies Schema
     const undefinedSubj = undefined
@@ -439,6 +439,202 @@ describe('Validate OBJECT schema with INVALID subject', () => {
     const expected = [] as const
 
     expect(actual).toStrictEqual(expected)
+  })
+})
+
+describe('Validate RECORD schema with VALID subject', () => {
+  it('validate: nested primitive schema', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'string' },
+    } as const satisfies Schema
+
+    const subject = {
+      x: 'x',
+      y: 'y',
+      z: 'z',
+    }
+
+    expect(validate(schema, subject).right).toStrictEqual(subject)
+    expect(validate(schema, subject).left).toStrictEqual(undefined)
+  })
+
+  it('validate: nested optional primitve schema', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'string', optional: true },
+    } as const satisfies Schema
+
+    const subject = {
+      x: 'x',
+      y: 'y',
+      z: undefined,
+    } as const
+
+    expect(validate(schema, subject).right).toStrictEqual(subject)
+    expect(validate(schema, subject).left).toStrictEqual(undefined)
+  })
+
+  it('validate: nested array', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'array', of: { type: 'string' }, optional: true },
+    } as const satisfies Schema
+
+    const subject = {
+      x: ['x'],
+      y: undefined,
+      z: ['x', 'z'],
+    }
+
+    expect(validate(schema, subject).right).toStrictEqual(subject)
+    expect(validate(schema, subject).left).toStrictEqual(undefined)
+  })
+
+  it('validate: can be optional by itself', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'string' },
+      optional: true,
+    } as const satisfies Schema
+
+    expect(validate(schema, undefined).right).toBe(undefined)
+    expect(validate(schema, undefined).left).toBe(undefined)
+  })
+})
+
+describe('Validate RECORD schema with INVALID subject', () => {
+  it('validate: record with invalid direct subject', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'string' },
+    } as const satisfies Schema
+
+    const undefinedSubj = undefined
+
+    expect(validate(schema, undefinedSubj).right).toBe(undefined)
+    expect(validate(schema, undefinedSubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: undefinedSubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const nullSubj = null
+
+    expect(validate(schema, nullSubj).right).toBe(undefined)
+    expect(validate(schema, nullSubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: nullSubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const regExpSubj = /^x/
+
+    expect(validate(schema, regExpSubj).right).toBe(undefined)
+    expect(validate(schema, regExpSubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: regExpSubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const arraySubj = [] as unknown
+
+    expect(validate(schema, arraySubj).right).toBe(undefined)
+    expect(validate(schema, arraySubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: arraySubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const mapSubj = new Map()
+
+    expect(validate(schema, mapSubj).right).toBe(undefined)
+    expect(validate(schema, mapSubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: mapSubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const setSubj = new Set()
+
+    expect(validate(schema, setSubj).right).toBe(undefined)
+    expect(validate(schema, setSubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: setSubj,
+        schema,
+        path: [],
+      },
+    ])
+  })
+
+  it('validate: record with two invalid subjects', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'boolean' },
+    } as const satisfies Schema
+
+    const invalidKeyA = 'y'
+    const invalidKeyB = 'z'
+
+    const subject = {
+      x: true,
+      [invalidKeyA]: undefined,
+      [invalidKeyB]: undefined,
+    }
+
+    expect(validate(schema, subject).right).toBe(undefined)
+    expect(validate(schema, subject).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: subject[invalidKeyA],
+        schema: schema.of,
+        path: [invalidKeyA],
+      },
+      {
+        code: ERROR_CODE.invalidType,
+        subject: subject[invalidKeyB],
+        schema: schema.of,
+        path: [invalidKeyB],
+      },
+    ])
+  })
+
+  it('validate: nested array invalid subject', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'array', of: { type: 'string' } },
+    } as const satisfies Schema
+
+    const invalidSubject = 0
+    const subject = {
+      x: ['valid', invalidSubject],
+    }
+
+    expect(validate(schema, subject).right).toBe(undefined)
+    expect(validate(schema, subject).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: invalidSubject,
+        schema: schema.of.of,
+        path: ['x', 1],
+      },
+    ])
   })
 })
 

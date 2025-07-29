@@ -1,8 +1,19 @@
-import type { PrimitiveSchema } from './primitives'
+import type { PrimitiveSchema, StringSchema } from './primitives'
 
 export type BaseObjectSchema<T> = {
   type: 'object'
   of: Record<string, T>
+
+  optional?: boolean
+  nullable?: boolean
+
+  description?: string
+}
+
+export type BaseRecordSchema<T> = {
+  type: 'record'
+  of: T
+  key?: StringSchema
 
   optional?: boolean
   nullable?: boolean
@@ -36,6 +47,7 @@ export type BaseUnionSchema<T> = {
 export type R<T> =
   | T
   | BaseObjectSchema<T>
+  | BaseRecordSchema<T>
   | BaseArraySchema<T>
   | BaseUnionSchema<T>
 
@@ -82,14 +94,23 @@ export type ArraySchema<T extends NestedSchema = NestedSchema> =
 export type ObjectSchema<T extends NestedSchema = NestedSchema> =
   BaseObjectSchema<T>
 
+export type RecordSchema<T extends NestedSchema = NestedSchema> =
+  BaseRecordSchema<T>
+
 export type UnionSchema<T extends NestedSchema = NestedSchema> =
   BaseUnionSchema<T>
 
-export type CompoundSchema = ObjectSchema | ArraySchema | UnionSchema
+export type CompoundSchema =
+  | ObjectSchema
+  | RecordSchema
+  | ArraySchema
+  | UnionSchema
+
 export type Schema = PrimitiveSchema | CompoundSchema
 
 export type StructSchema =
   | ArraySchema<NestedStructSchema>
   | ObjectSchema<NestedStructSchema>
+  | RecordSchema<NestedStructSchema>
   | UnionSchema<NestedStructSchema>
   | PrimitiveSchema

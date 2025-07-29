@@ -1090,6 +1090,173 @@ describe('Construct ObjectSchema subject type', () => {
   })
 })
 
+describe('Construct RECORD subject type', () => {
+  describe('Parent schema type related parameters', () => {
+    const nested = { type: 'string' } as const satisfies Schema
+
+    it('Required', () => {
+      const schema = {
+        type: 'record',
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Record<string, string | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional', () => {
+      const schema = {
+        type: 'record',
+        of: nested,
+        optional: true,
+      } as const satisfies Schema
+
+      type Expected = Record<string, string | undefined> | undefined
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Nullable', () => {
+      const schema = {
+        type: 'record',
+        of: nested,
+        nullable: true,
+      } as const satisfies Schema
+
+      type Expected = Record<string, string | undefined> | null
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional + nullable', () => {
+      const schema = {
+        type: 'record',
+        of: nested,
+        optional: true,
+        nullable: true,
+      } as const satisfies Schema
+
+      type Expected = Record<string, string | undefined> | null | undefined
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('With branded key', () => {
+      const schema = {
+        key: { type: 'string', brand: ['x', 'y'] },
+        type: 'record',
+        of: nested,
+      } as const satisfies Schema
+
+      type Expected = Record<string & { __x: 'y' }, string | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<keyof Actual, keyof Expected>()
+      check<keyof Expected, keyof Actual>()
+    })
+  })
+
+  describe('Nested CompoundSchema with no/all type related parameters', () => {
+    const deeplyNested = { type: 'string' } as const satisfies Schema
+    type T = SubjectType<typeof deeplyNested>
+
+    it('Required', () => {
+      const schema = {
+        type: 'record',
+        of: {
+          type: 'object',
+          of: {
+            object: {
+              type: 'object',
+              of: {
+                x: deeplyNested,
+              },
+            },
+            array: {
+              type: 'array',
+              of: deeplyNested,
+            },
+            union: {
+              type: 'union',
+              of: [deeplyNested],
+            },
+          },
+        },
+      } as const satisfies Schema
+
+      type Expected = Record<
+        string,
+        | {
+            object: { x: T }
+            array: T[]
+            union: T
+          }
+        | undefined
+      >
+
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional + nullable', () => {
+      const schema = {
+        type: 'record',
+        of: {
+          type: 'object',
+          of: {
+            object: {
+              type: 'object',
+              of: {
+                x: deeplyNested,
+              },
+              optional: true,
+              nullable: true,
+            },
+            array: {
+              type: 'array',
+              of: deeplyNested,
+              optional: true,
+              nullable: true,
+            },
+            union: {
+              type: 'union',
+              of: [deeplyNested],
+              optional: true,
+              nullable: true,
+            },
+          },
+        },
+      } as const satisfies Schema
+
+      type Expected = Record<
+        string,
+        | {
+            object?: { x: T } | null | undefined
+            array?: T[] | null | undefined
+            union?: string | null | undefined
+          }
+        | undefined
+      >
+
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+  })
+})
+
 describe('Construct Schema subject type in the context of deeply nested schemas', () => {
   const deeplyNested = { type: 'string' } as const satisfies Schema
   type T = SubjectType<typeof deeplyNested>

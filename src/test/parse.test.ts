@@ -4,7 +4,7 @@ import { check, unknownX } from './test-utils'
 
 import type { Schema } from '../types/compounds'
 
-describe('Parse BASE schema with VALID subject', () => {
+describe('Parse PRIMITIVE schema with VALID subject', () => {
   it('parse: `{ type: "string" }` schema', () => {
     const schema = { type: 'string' } satisfies Schema
     const subject = 'x'
@@ -38,7 +38,7 @@ describe('Parse BASE schema with VALID subject', () => {
   })
 })
 
-describe('Parse BASE schema with INVALID subject', () => {
+describe('Parse PRIMITIVE schema with INVALID subject', () => {
   it('parse: base detailed schema', () => {
     const detailedReqStrSchema = { type: 'string' } satisfies Schema
     const undefinedSubj = undefined
@@ -479,6 +479,272 @@ describe('Parse OBJECT schema with INVALID subject', () => {
         code: ERROR_CODE.invalidType,
         subject: invalidSubject,
         schema: schema.of.x.of,
+        path: ['x', 1],
+      },
+    ])
+  })
+})
+
+describe('Parse RECORD schema with VALID subject', () => {
+  it('parse: nested primitive', () => {
+    const schema = {
+      type: 'record',
+      key: { type: 'string' },
+      of: { type: 'string' },
+    } as const satisfies Schema
+
+    const subject = {
+      x: 'a',
+      y: 'c',
+      z: undefined,
+    }
+
+    const expectedSubject = {
+      x: 'a',
+      y: 'c',
+    }
+
+    const parsed = parse(schema, subject)
+
+    expect(parsed.right).toStrictEqual(expectedSubject)
+    expect(parsed.left).toStrictEqual(undefined)
+    expect(parsed.right === subject).toBe(false)
+  })
+
+  it('parse: nested nullable and optional primitive', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'number', optional: true, nullable: true },
+    } as const satisfies Schema
+
+    const subject = {
+      x: 1,
+      y: null,
+      z: undefined,
+    }
+
+    const expectedSubject = {
+      x: 1,
+      y: null,
+    }
+
+    const parsed = parse(schema, subject)
+
+    expect(parsed.right).toStrictEqual(expectedSubject)
+    expect(parsed.left).toStrictEqual(undefined)
+    expect(parsed.right === subject).toBe(false)
+  })
+
+  it('parse: nested array', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'array', of: { type: 'string' } },
+    } as const satisfies Schema
+
+    const subject = {
+      x: [],
+      y: ['y'],
+      z: ['y', 'z'],
+    }
+
+    const parsed = parse(schema, subject)
+
+    expect(parsed.right).toStrictEqual(subject)
+    expect(parsed.left).toStrictEqual(undefined)
+    expect(parsed.right === subject).toBe(false)
+
+    if (parsed.right) {
+      expect(parsed.right.x === subject.x).toBe(false)
+      expect(parsed.right.y === subject.y).toBe(false)
+      expect(parsed.right.z === subject.z).toBe(false)
+    }
+  })
+
+  it('parse: can be optional by itself', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'boolean' },
+      optional: true,
+    } as const satisfies Schema
+
+    const parsed = parse(schema, undefined)
+
+    expect(parsed.right).toBe(undefined)
+    expect(parsed.left).toBe(undefined)
+  })
+
+  it('parse: can be nullable by itself', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'boolean' },
+      nullable: true,
+    } as const satisfies Schema
+
+    const parsed = parse(schema, null)
+
+    expect(parsed.right).toBe(null)
+    expect(parsed.left).toBe(undefined)
+  })
+
+  it('parse: should NOT preserve keys with undefined values', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'boolean' },
+    } as const satisfies Schema
+
+    const subject = {
+      x: true,
+      y: undefined,
+      z: false,
+    }
+
+    const expectedSubject = {
+      x: true,
+      z: false,
+    }
+
+    const either = parse(schema, subject)
+
+    if (either.left) {
+      throw Error('Not expected')
+    }
+
+    expect(either.right).toStrictEqual(expectedSubject)
+  })
+})
+
+describe('Parse RECORD schema with INVALID subject', () => {
+  it('parse: required object with invalid direct subject', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'string' },
+    } as const satisfies Schema
+
+    const undefinedSubj = undefined
+
+    expect(parse(schema, undefinedSubj).right).toBe(undefined)
+    expect(parse(schema, undefinedSubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: undefinedSubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const nullSubj = null
+
+    expect(parse(schema, nullSubj).right).toBe(undefined)
+    expect(parse(schema, nullSubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: nullSubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const regExpSubj = /^x/
+
+    expect(parse(schema, regExpSubj).right).toBe(undefined)
+    expect(parse(schema, regExpSubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: regExpSubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const arraySubj = [] as unknown
+
+    expect(parse(schema, arraySubj).right).toBe(undefined)
+    expect(parse(schema, arraySubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: arraySubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const mapSubj = new Map()
+
+    expect(parse(schema, mapSubj).right).toBe(undefined)
+    expect(parse(schema, mapSubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: mapSubj,
+        schema,
+        path: [],
+      },
+    ])
+
+    const setSubj = new Set()
+
+    expect(parse(schema, setSubj).right).toBe(undefined)
+    expect(parse(schema, setSubj).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: setSubj,
+        schema,
+        path: [],
+      },
+    ])
+  })
+
+  it('parse: required record with two invalid subjects', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'string' },
+    } as const satisfies Schema
+
+    const invalidKeyA = 'y'
+    const invalidKeyB = 'z'
+
+    const subject = {
+      x: 'x',
+      [invalidKeyA]: true,
+      [invalidKeyB]: 0,
+    }
+
+    expect(parse(schema, subject).right).toBe(undefined)
+    expect(parse(schema, subject).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: subject[invalidKeyA],
+        schema: schema.of,
+        path: [invalidKeyA],
+      },
+      {
+        code: ERROR_CODE.invalidType,
+        subject: subject[invalidKeyB],
+        schema: schema.of,
+        path: [invalidKeyB],
+      },
+    ])
+  })
+
+  it('parse: required record with nested array invalid subject', () => {
+    const schema = {
+      type: 'record',
+      of: {
+        type: 'array',
+        of: { type: 'string' },
+      },
+    } as const satisfies Schema
+
+    const invalidSubject = 0
+    const subject = {
+      x: ['valid', invalidSubject],
+    }
+
+    expect(parse(schema, subject).right).toBe(undefined)
+    expect(parse(schema, subject).left).toStrictEqual([
+      {
+        code: ERROR_CODE.invalidType,
+        subject: invalidSubject,
+        schema: schema.of.of,
         path: ['x', 1],
       },
     ])
