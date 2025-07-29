@@ -86,6 +86,48 @@ export function parse(
     return right(result)
   }
 
+  if (schema.type === 'record') {
+    if (
+      typeof subject !== 'object' ||
+      subject === null ||
+      subject.constructor !== Object
+    ) {
+      return left([
+        {
+          code: ERROR_CODE.invalidType,
+          path: this || [],
+          schema,
+          subject,
+        },
+      ])
+    }
+
+    const result: Record<string, unknown> = {}
+
+    for (const key in subject) {
+      const nestedValue = (subject as Record<string, unknown>)[key]
+
+      if (nestedValue === undefined) {
+        continue
+      }
+
+      const parsed = parse.bind([...(this || []), key])(schema.of, nestedValue)
+
+      if (parsed.left) {
+        parsed.left.forEach((err) => errors.push(err))
+        continue
+      }
+
+      result[key] = parsed.right
+    }
+
+    if (errors.length) {
+      return left(errors)
+    }
+
+    return right(result)
+  }
+
   if (schema.type === 'array') {
     if (Array.isArray(subject) === false) {
       return left([

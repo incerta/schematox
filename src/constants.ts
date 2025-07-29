@@ -18,6 +18,7 @@ export const PARAMS_BY_SCHEMA_TYPE = {
   boolean: new Set(['optional', 'nullable', 'brand', 'description'] as const),
   literal: new Set(['optional', 'nullable', 'brand', 'description'] as const),
   object: new Set(['optional', 'nullable', 'description'] as const),
+  record: new Set(['optional', 'nullable', 'description'] as const),
   array: new Set([
     'optional',
     'nullable',

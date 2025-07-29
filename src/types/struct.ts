@@ -13,6 +13,7 @@ import type {
   ObjectSchema,
   ArraySchema,
   UnionSchema,
+  RecordSchema,
 } from './compounds'
 
 import type { Con_Schema_SubjT } from './constructors'
@@ -31,6 +32,7 @@ type ParamsBySchemaType = {
   boolean: ExtractParams<BooleanSchema>
   literal: ExtractParams<LiteralSchema>
   object: ExtractParams<ObjectSchema>
+  record: Exclude<ExtractParams<RecordSchema>, 'key'>
   union: ExtractParams<UnionSchema>
   array: ExtractParams<ArraySchema>
 }

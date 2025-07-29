@@ -9,11 +9,15 @@ import type {
 import type {
   ArraySchema,
   ObjectSchema,
+  RecordSchema,
   UnionSchema,
   Schema,
 } from './compounds'
 
-import type { ExtWith_SchemaParams_SubjT } from './extensions'
+import type {
+  ExtWith_SchemaParams_SubjT,
+  ExtWith_Brand_SubjT,
+} from './extensions'
 
 export type Con_PrimitiveSchema_SubjT<T extends PrimitiveSchema> =
   T extends StringSchema
@@ -66,6 +70,18 @@ export type Con_ObjectSchema_SubjT<T extends ObjectSchema> = T extends {
     }>
   : never
 
+export type Con_RecordSchema_SubjT<T extends RecordSchema> = T extends {
+  key?: infer U
+  of: infer V
+}
+  ? Record<
+      U extends StringSchema
+        ? ExtWith_Brand_SubjT<U, Con_PrimitiveSchema_SubjT<U>>
+        : string,
+      V extends Schema ? Con_Schema_SubjT<V> | undefined : never
+    >
+  : never
+
 export type Con_UnionSchema_SubjT<T extends UnionSchema> = T extends {
   type: 'union'
   of: Readonly<Array<infer U>>
@@ -83,9 +99,11 @@ export type Con_Schema_SubjT<T extends Schema> = ExtWith_SchemaParams_SubjT<
       ? Con_ArraySchema_SubjT<T>
       : T extends ObjectSchema
         ? Con_ObjectSchema_SubjT<T>
-        : T extends UnionSchema
-          ? Con_UnionSchema_SubjT<T>
-          : never
+        : T extends RecordSchema
+          ? Con_RecordSchema_SubjT<T>
+          : T extends UnionSchema
+            ? Con_UnionSchema_SubjT<T>
+            : never
 >
 
 export type SubjectType<T extends { __schema: Schema } | Schema> = T extends {
