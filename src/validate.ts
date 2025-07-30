@@ -198,6 +198,18 @@ export function validate(
     ])
   }
 
+  if (schema.type === 'tuple') {
+    // FIXME: implement
+    return left([
+      {
+        code: ERROR_CODE.invalidType,
+        path: this || [],
+        subject,
+        schema,
+      },
+    ])
+  }
+
   const verified = verifyPrimitive(schema, subject)
 
   if (verified === true) {

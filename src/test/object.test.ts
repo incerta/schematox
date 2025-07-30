@@ -3,7 +3,22 @@ import { check } from './test-utils'
 import { parse } from '../parse'
 import { validate } from '../validate'
 
-import { array, object, string, number, boolean, literal } from '../struct'
+import {
+  array,
+  object,
+  string,
+  number,
+  boolean,
+  literal,
+  tuple,
+} from '../struct'
+
+it('tuple: check', () => {
+  const struct = tuple([{ type: 'string' }])
+
+  const parsed = struct.parse(['x'])
+  parsed.right!
+})
 
 describe('Object schema programmatic definition', () => {
   it('object: required object with nested structure', () => {

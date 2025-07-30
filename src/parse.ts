@@ -191,6 +191,18 @@ export function parse(
     return right(result)
   }
 
+  if (schema.type === 'tuple') {
+    // FIXME: implement
+    return left([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: this || [],
+        subject,
+        schema,
+      },
+    ])
+  }
+
   if (schema.type === 'union') {
     for (const subSchema of schema.of) {
       const parsed = parse(subSchema, subject)

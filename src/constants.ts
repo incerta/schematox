@@ -27,4 +27,5 @@ export const PARAMS_BY_SCHEMA_TYPE = {
     'maxLength',
   ] as const),
   union: new Set(['optional', 'nullable', 'description']),
+  tuple: new Set(['optional', 'nullable', 'description']),
 } as const

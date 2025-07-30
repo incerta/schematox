@@ -1,5 +1,17 @@
 import type { PrimitiveSchema, StringSchema } from './primitives'
 
+export type TupleGeneric<T> =
+  | [T] /* 1 */
+  | [T, T] /* 2 */
+  | [T, T, T] /* 3 */
+  | [T, T, T, T] /* 4 */
+  | [T, T, T, T, T] /* 5 */
+// | [T, T, T, T, T, T] /* 6 */
+// | [T, T, T, T, T, T, T] /* 7 */
+// | [T, T, T, T, T, T, T, T] /* 8 */
+// | [T, T, T, T, T, T, T, T, T] /* 9 */
+// | [T, T, T, T, T, T, T, T, T, T] /* 10 */
+
 export type BaseObjectSchema<T> = {
   type: 'object'
   of: Record<string, T>
@@ -33,6 +45,16 @@ export type BaseArraySchema<T> = {
   maxLength?: number
 }
 
+export type BaseTupleSchema<T> = {
+  type: 'tuple'
+  of: TupleGeneric<T>
+
+  optional?: boolean
+  nullable?: boolean
+
+  description?: string
+}
+
 // TODO: `discriminant` key as performance optimization measure
 export type BaseUnionSchema<T> = {
   type: 'union'
@@ -49,6 +71,7 @@ export type R<T> =
   | BaseObjectSchema<T>
   | BaseRecordSchema<T>
   | BaseArraySchema<T>
+  | BaseTupleSchema<T>
   | BaseUnionSchema<T>
 
 /* 12 layers of compound schema nesting is allowed */
@@ -91,6 +114,9 @@ export type NestedStructSchema = R/*1*/ <
 export type ArraySchema<T extends NestedSchema = NestedSchema> =
   BaseArraySchema<T>
 
+export type TupleSchema<T extends NestedSchema = NestedSchema> =
+  BaseTupleSchema<T>
+
 export type ObjectSchema<T extends NestedSchema = NestedSchema> =
   BaseObjectSchema<T>
 
@@ -104,6 +130,7 @@ export type CompoundSchema =
   | ObjectSchema
   | RecordSchema
   | ArraySchema
+  | TupleSchema
   | UnionSchema
 
 export type Schema = PrimitiveSchema | CompoundSchema
@@ -113,4 +140,5 @@ export type StructSchema =
   | ObjectSchema<NestedStructSchema>
   | RecordSchema<NestedStructSchema>
   | UnionSchema<NestedStructSchema>
+  | TupleSchema<NestedStructSchema>
   | PrimitiveSchema

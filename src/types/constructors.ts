@@ -11,6 +11,8 @@ import type {
   ObjectSchema,
   RecordSchema,
   UnionSchema,
+  TupleSchema,
+  TupleGeneric,
   Schema,
 } from './compounds'
 
@@ -91,7 +93,113 @@ export type Con_UnionSchema_SubjT<T extends UnionSchema> = T extends {
     : never
   : never
 
-export type Con_Schema_SubjT<T extends Schema> = ExtWith_SchemaParams_SubjT<
+type ST<T> = Con_Schema_SubjT<T>
+
+export type Con_TupleSchema_SubjT<T extends TupleSchema> = T extends {
+  type: 'tuple'
+  of: infer U
+}
+  ? U extends TupleGeneric<Schema>
+    ? U extends [infer T0]
+      ? [ST<T0>]
+      : U extends [infer T0, infer T1]
+        ? [ST<T0>, ST<T1>]
+        : U extends [infer T0, infer T1, infer T2]
+          ? [ST<T0>, ST<T1>, ST<T2>]
+          : U extends [infer T0, infer T1, infer T2, infer T3]
+            ? [ST<T0>, ST<T1>, ST<T2>, ST<T3>]
+            : U extends [infer T0, infer T1, infer T2, infer T3, infer T4]
+              ? [ST<T0>, ST<T1>, ST<T2>, ST<T3>, ST<T4>]
+              : // : U extends [
+                //       infer T0,
+                //       infer T1,
+                //       infer T2,
+                //       infer T3,
+                //       infer T4,
+                //       infer T5,
+                //     ]
+                //   ? [ST<T0>, ST<T1>, ST<T2>, ST<T3>, ST<T4>, ST<T5>]
+                //   : U extends [
+                //         infer T0,
+                //         infer T1,
+                //         infer T2,
+                //         infer T3,
+                //         infer T4,
+                //         infer T5,
+                //         infer T6,
+                //       ]
+                //     ? [ST<T0>, ST<T1>, ST<T2>, ST<T3>, ST<T4>, ST<T5>, ST<T6>]
+                //     : U extends [
+                //           infer T0,
+                //           infer T1,
+                //           infer T2,
+                //           infer T3,
+                //           infer T4,
+                //           infer T5,
+                //           infer T6,
+                //           infer T7,
+                //         ]
+                //       ? [
+                //           ST<T0>,
+                //           ST<T1>,
+                //           ST<T2>,
+                //           ST<T3>,
+                //           ST<T4>,
+                //           ST<T5>,
+                //           ST<T6>,
+                //           ST<T7>,
+                //         ]
+                //       : U extends [
+                //             infer T0,
+                //             infer T1,
+                //             infer T2,
+                //             infer T3,
+                //             infer T4,
+                //             infer T5,
+                //             infer T6,
+                //             infer T7,
+                //             infer T8,
+                //           ]
+                //         ? [
+                //             ST<T0>,
+                //             ST<T1>,
+                //             ST<T2>,
+                //             ST<T3>,
+                //             ST<T4>,
+                //             ST<T5>,
+                //             ST<T6>,
+                //             ST<T7>,
+                //             ST<T8>,
+                //           ]
+                //         : U extends [
+                //               infer T0,
+                //               infer T1,
+                //               infer T2,
+                //               infer T3,
+                //               infer T4,
+                //               infer T5,
+                //               infer T6,
+                //               infer T7,
+                //               infer T8,
+                //               infer T9,
+                //             ]
+                //           ? [
+                //               ST<T0>,
+                //               ST<T1>,
+                //               ST<T2>,
+                //               ST<T3>,
+                //               ST<T4>,
+                //               ST<T5>,
+                //               ST<T6>,
+                //               ST<T7>,
+                //               ST<T8>,
+                //               ST<T9>,
+                //             ]
+                never
+    : never
+  : never
+
+export type Con_Schema_SubjT<T> = ExtWith_SchemaParams_SubjT<
   T,
   T extends PrimitiveSchema
     ? Con_PrimitiveSchema_SubjT<T>
@@ -103,7 +211,9 @@ export type Con_Schema_SubjT<T extends Schema> = ExtWith_SchemaParams_SubjT<
           ? Con_RecordSchema_SubjT<T>
           : T extends UnionSchema
             ? Con_UnionSchema_SubjT<T>
-            : never
+            : T extends TupleSchema
+              ? Con_TupleSchema_SubjT<T>
+              : never
 >
 
 export type SubjectType<T extends { __schema: Schema } | Schema> = T extends {

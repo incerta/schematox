@@ -33,8 +33,11 @@ export type {
   NestedSchema,
   NestedStructSchema,
   ObjectSchema,
+  RecordSchema,
   Schema,
   StructSchema,
+  TupleGeneric,
+  TupleSchema,
   UnionSchema,
 } from './types/compounds'
 
@@ -42,7 +45,9 @@ export type {
   Con_ArraySchema_SubjT,
   Con_ObjectSchema_SubjT,
   Con_PrimitiveSchema_SubjT,
+  Con_RecordSchema_SubjT,
   Con_Schema_SubjT,
+  Con_TupleSchema_SubjT,
   Con_UnionSchema_SubjT,
   MakeOptional,
   Prettify,

@@ -14,6 +14,7 @@ import type {
   ArraySchema,
   UnionSchema,
   RecordSchema,
+  TupleSchema,
 } from './compounds'
 
 import type { Con_Schema_SubjT } from './constructors'
@@ -35,6 +36,7 @@ type ParamsBySchemaType = {
   record: Exclude<ExtractParams<RecordSchema>, 'key'>
   union: ExtractParams<UnionSchema>
   array: ExtractParams<ArraySchema>
+  tuple: ExtractParams<TupleSchema>
 }
 
 export type StructParams =

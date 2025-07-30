@@ -1351,3 +1351,227 @@ describe('Construct Schema subject type in the context of deeply nested schemas'
     check<Expected, Actual>()
   })
 })
+
+it('Tuple schema with 1 member', () => {
+  const schema = {
+    type: 'tuple',
+    of: [{ type: 'string' }],
+  } as const satisfies Schema
+
+  type Expected = [string]
+  type Actual = SubjectType<typeof schema>
+
+  check<Actual, Expected>()
+  check<Expected, Actual>()
+})
+
+it('Tuple schema with 2 members', () => {
+  const schema = {
+    type: 'tuple',
+    of: [{ type: 'string' }, { type: 'number' }],
+  } as const satisfies Schema
+
+  type Expected = [string, number]
+  type Actual = SubjectType<typeof schema>
+
+  check<Actual, Expected>()
+  check<Expected, Actual>()
+})
+
+it('Tuple schema with 3 members', () => {
+  const schema = {
+    type: 'tuple',
+    of: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+  } as const satisfies Schema
+
+  type Expected = [string, number, boolean]
+  type Actual = SubjectType<typeof schema>
+
+  check<Actual, Expected>()
+  check<Expected, Actual>()
+})
+
+it('Tuple schema with 4 members', () => {
+  const schema = {
+    type: 'tuple',
+    of: [
+      { type: 'string' },
+      { type: 'number' },
+      { type: 'boolean' },
+      { type: 'literal', of: 'x' },
+    ],
+  } as const satisfies Schema
+
+  type Expected = [string, number, boolean, 'x']
+  type Actual = SubjectType<typeof schema>
+
+  check<Actual, Expected>()
+  check<Expected, Actual>()
+})
+
+it('Tuple schema with 5 members', () => {
+  const schema = {
+    type: 'tuple',
+    of: [
+      { type: 'string' },
+      { type: 'number' },
+      { type: 'boolean' },
+      { type: 'literal', of: 'x' },
+      { type: 'array', of: { type: 'string' } },
+    ],
+  } as const satisfies Schema
+
+  type Expected = [string, number, boolean, 'x', string[]]
+  type Actual = SubjectType<typeof schema>
+
+  check<Actual, Expected>()
+  check<Expected, Actual>()
+})
+
+// it('Tuple schema with 6 members', () => {
+//   const schema = {
+//     type: 'tuple',
+//     of: [
+//       { type: 'string' },
+//       { type: 'number' },
+//       { type: 'boolean' },
+//       { type: 'literal', of: 'x' },
+//       { type: 'array', of: { type: 'string' } },
+//       { type: 'object', of: { x: { type: 'string' } } },
+//     ],
+//   } as const satisfies Schema
+
+//   type Expected = [string, number, boolean, 'x', string[], { x: string }]
+//   type Actual = SubjectType<typeof schema>
+
+//   check<Actual, Expected>()
+//   check<Expected, Actual>()
+// })
+
+// it('Tuple schema with 7 members', () => {
+//   const schema = {
+//     type: 'tuple',
+//     of: [
+//       { type: 'string' },
+//       { type: 'number' },
+//       { type: 'boolean' },
+//       { type: 'literal', of: 'x' },
+//       { type: 'array', of: { type: 'string' } },
+//       { type: 'object', of: { x: { type: 'string' } } },
+//       { type: 'union', of: [{ type: 'string' }, { type: 'number' }] },
+//     ],
+//   } as const satisfies Schema
+
+//   type Expected = [
+//     string,
+//     number,
+//     boolean,
+//     'x',
+//     string[],
+//     { x: string },
+//     string | number,
+//   ]
+//   type Actual = SubjectType<typeof schema>
+
+//   check<Actual, Expected>()
+//   check<Expected, Actual>()
+// })
+
+// it('Tuple schema with 8 members', () => {
+//   const schema = {
+//     type: 'tuple',
+//     of: [
+//       { type: 'string' },
+//       { type: 'number' },
+//       { type: 'boolean' },
+//       { type: 'literal', of: 'x' },
+//       { type: 'array', of: { type: 'string' } },
+//       { type: 'object', of: { x: { type: 'string' } } },
+//       { type: 'union', of: [{ type: 'string' }, { type: 'number' }] },
+//       { type: 'record', of: { type: 'string' } },
+//     ],
+//   } as const satisfies Schema
+
+//   type Expected = [
+//     string,
+//     number,
+//     boolean,
+//     'x',
+//     string[],
+//     { x: string },
+//     string | number,
+//     Record<string, string | undefined>,
+//   ]
+//   type Actual = SubjectType<typeof schema>
+
+//   check<Actual, Expected>()
+//   check<Expected, Actual>()
+// })
+
+// it('Tuple schema with 9 members', () => {
+//   const schema = {
+//     type: 'tuple',
+//     of: [
+//       { type: 'string' },
+//       { type: 'number' },
+//       { type: 'boolean' },
+//       { type: 'literal', of: 'x' },
+//       { type: 'array', of: { type: 'string' } },
+//       { type: 'object', of: { x: { type: 'string' } } },
+//       { type: 'union', of: [{ type: 'string' }, { type: 'number' }] },
+//       { type: 'record', of: { type: 'string' } },
+//       { type: 'tuple', of: [{ type: 'string' }] },
+//     ],
+//   } as const satisfies Schema
+
+//   type Expected = [
+//     string,
+//     number,
+//     boolean,
+//     'x',
+//     string[],
+//     { x: string },
+//     string | number,
+//     Record<string, string | undefined>,
+//     [string],
+//   ]
+//   type Actual = SubjectType<typeof schema>
+
+//   check<Actual, Expected>()
+//   check<Expected, Actual>()
+// })
+
+// it('Tuple schema with 10 members', () => {
+//   const schema = {
+//     type: 'tuple',
+//     of: [
+//       { type: 'string' },
+//       { type: 'number' },
+//       { type: 'boolean' },
+//       { type: 'literal', of: 'x' },
+//       { type: 'array', of: { type: 'string' } },
+//       { type: 'object', of: { x: { type: 'string' } } },
+//       { type: 'union', of: [{ type: 'string' }, { type: 'number' }] },
+//       { type: 'record', of: { type: 'string' } },
+//       { type: 'tuple', of: [{ type: 'string' }] },
+//       { type: 'string' },
+//     ],
+//   } as const satisfies Schema
+
+//   type Expected = [
+//     string,
+//     number,
+//     boolean,
+//     'x',
+//     string[],
+//     { x: string },
+//     string | number,
+//     Record<string, string | undefined>,
+//     [string],
+//     string,
+//   ]
+//   type Actual = SubjectType<typeof schema>
+
+//   check<Actual, Expected>()
+//   check<Expected, Actual>()
+// })
