@@ -33,7 +33,16 @@ export type BaseArraySchema<T> = {
   maxLength?: number
 }
 
-// TODO: `discriminant` key as performance optimization measure
+export type BaseTupleSchema<T> = {
+  type: 'tuple'
+  of: [T, ...Readonly<Array<T>>]
+
+  optional?: boolean
+  nullable?: boolean
+
+  description?: string
+}
+
 export type BaseUnionSchema<T> = {
   type: 'union'
   of: Readonly<Array<T>>
@@ -49,6 +58,7 @@ export type R<T> =
   | BaseObjectSchema<T>
   | BaseRecordSchema<T>
   | BaseArraySchema<T>
+  | BaseTupleSchema<T>
   | BaseUnionSchema<T>
 
 /* 12 layers of compound schema nesting is allowed */
@@ -91,6 +101,9 @@ export type NestedStructSchema = R/*1*/ <
 export type ArraySchema<T extends NestedSchema = NestedSchema> =
   BaseArraySchema<T>
 
+export type TupleSchema<T extends NestedSchema = NestedSchema> =
+  BaseTupleSchema<T>
+
 export type ObjectSchema<T extends NestedSchema = NestedSchema> =
   BaseObjectSchema<T>
 
@@ -104,6 +117,7 @@ export type CompoundSchema =
   | ObjectSchema
   | RecordSchema
   | ArraySchema
+  | TupleSchema
   | UnionSchema
 
 export type Schema = PrimitiveSchema | CompoundSchema
@@ -113,4 +127,5 @@ export type StructSchema =
   | ObjectSchema<NestedStructSchema>
   | RecordSchema<NestedStructSchema>
   | UnionSchema<NestedStructSchema>
+  | TupleSchema<NestedStructSchema>
   | PrimitiveSchema

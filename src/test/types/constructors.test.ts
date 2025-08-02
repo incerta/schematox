@@ -445,10 +445,10 @@ describe('Construct ArraySchema subject type', () => {
     })
 
     it('Number required', () => {
-      const nested = { type: 'string' } as const satisfies Schema
+      const nested = { type: 'number' } as const satisfies Schema
       const schema = { type: 'array', of: nested } as const satisfies Schema
 
-      type Expected = string[]
+      type Expected = number[]
       type Actual = SubjectType<typeof schema>
 
       check<Actual, Expected>()
@@ -709,6 +709,407 @@ describe('Construct ArraySchema subject type', () => {
       } as const satisfies Schema
 
       type Expected = Array<T | null | undefined>
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+  })
+})
+
+describe('Construct TupleSchema subject type', () => {
+  describe('Schema with different members', () => {
+    it('9 members of different type', () => {
+      const schema = {
+        type: 'tuple',
+        of: [
+          { type: 'string' },
+          { type: 'number' },
+          { type: 'boolean' },
+          { type: 'literal', of: 'x' },
+          { type: 'array', of: { type: 'string' } },
+          { type: 'object', of: { x: { type: 'string' } } },
+          { type: 'union', of: [{ type: 'string' }, { type: 'number' }] },
+          { type: 'record', of: { type: 'string' } },
+          { type: 'tuple', of: [{ type: 'string' }] },
+        ],
+      } as const satisfies Schema
+
+      type Expected = [
+        string,
+        number,
+        boolean,
+        'x',
+        string[],
+        { x: string },
+        string | number,
+        Record<string, string | undefined>,
+        [string],
+      ]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+  })
+
+  describe('Parent schema type related parameters', () => {
+    const nested = { type: 'string' } as const satisfies Schema
+    type T = SubjectType<typeof nested>
+
+    it('Required', () => {
+      const schema = { type: 'tuple', of: [nested] } as const satisfies Schema
+
+      type Expected = [T]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional', () => {
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+        optional: true,
+      } as const satisfies Schema
+
+      type Expected = [T] | undefined
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Nullable', () => {
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+        nullable: true,
+      } as const satisfies Schema
+
+      type Expected = [T] | null
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Optional + nullable', () => {
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+        optional: true,
+        nullable: true,
+      } as const satisfies Schema
+
+      type Expected = [T] | null | undefined
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+  })
+
+  describe('Nested PrimitiveSchema with no/all type related parameters set', () => {
+    it('String required', () => {
+      const nested = { type: 'string' } as const satisfies Schema
+      const schema = { type: 'tuple', of: [nested] } as const satisfies Schema
+
+      type Expected = [string]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('String optional + nullable + branded', () => {
+      const nested = {
+        type: 'string',
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [(string & { __x: 'y' }) | null | undefined]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Number required', () => {
+      const nested = { type: 'number' } as const satisfies Schema
+      const schema = { type: 'tuple', of: [nested] } as const satisfies Schema
+
+      type Expected = [number]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Number optional + nullable + branded', () => {
+      const nested = {
+        type: 'string',
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [(string & { __x: 'y' }) | null | undefined]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Boolean required', () => {
+      const nested = { type: 'boolean' } as const satisfies Schema
+      const schema = { type: 'tuple', of: [nested] } as const satisfies Schema
+
+      type Expected = [boolean]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Boolean optional + nullable + branded', () => {
+      const nested = {
+        type: 'boolean',
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [(boolean & { __x: 'y' }) | null | undefined]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Literal string required', () => {
+      const subject = 'x'
+      const nested = {
+        type: 'literal',
+        of: subject,
+      } as const satisfies Schema
+
+      const schema = { type: 'tuple', of: [nested] } as const satisfies Schema
+
+      type Expected = [typeof subject]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Literal string optional + nullable + branded', () => {
+      const subject = 'x'
+      const nested = {
+        type: 'literal',
+        of: subject,
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [(typeof subject & { __x: 'y' }) | null | undefined]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Literal string required', () => {
+      const subject = 0
+      const nested = {
+        type: 'literal',
+        of: subject,
+      } as const satisfies Schema
+
+      const schema = { type: 'tuple', of: [nested] } as const satisfies Schema
+
+      type Expected = [typeof subject]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('Literal string optional + nullable + branded', () => {
+      const subject = 0
+      const nested = {
+        type: 'literal',
+        of: subject,
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [(typeof subject & { __x: 'y' }) | null | undefined]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+  })
+
+  describe('Nested CompoundSchema with no/all type related parameters set', () => {
+    const deeplyNested = { type: 'string' } as const satisfies Schema
+    type T = SubjectType<typeof deeplyNested>
+
+    it('ArraySchema required', () => {
+      const nested = {
+        type: 'array',
+        of: deeplyNested,
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [T[]]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('ArraySchema optional + nullable', () => {
+      const nested = {
+        type: 'array',
+        of: deeplyNested,
+        optional: true,
+        nullable: true,
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [T[] | null | undefined]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('ObjectSchema required', () => {
+      const nested = {
+        type: 'object',
+        of: { x: deeplyNested },
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [{ x: T }]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('ObjectSchema optional + nullable', () => {
+      const nested = {
+        type: 'object',
+        of: { x: deeplyNested },
+        optional: true,
+        nullable: true,
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [{ x: T } | null | undefined]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('UnionSchema required', () => {
+      const subjX = 'x'
+      const subjY = 'y'
+
+      type T = typeof subjX | typeof subjY
+
+      const nested = {
+        type: 'union',
+        of: [
+          { type: 'literal', of: subjX },
+          { type: 'literal', of: subjY },
+        ],
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [T]
+      type Actual = SubjectType<typeof schema>
+
+      check<Actual, Expected>()
+      check<Expected, Actual>()
+    })
+
+    it('UnionSchema optional + nullable', () => {
+      const subjX = 'x'
+      const subjY = 'y'
+
+      type T = typeof subjX | typeof subjY
+
+      const nested = {
+        type: 'union',
+        of: [
+          { type: 'literal', of: subjX },
+          { type: 'literal', of: subjY },
+        ],
+        optional: true,
+        nullable: true,
+      } as const satisfies Schema
+
+      const schema = {
+        type: 'tuple',
+        of: [nested],
+      } as const satisfies Schema
+
+      type Expected = [T | null | undefined]
       type Actual = SubjectType<typeof schema>
 
       check<Actual, Expected>()
@@ -1090,7 +1491,7 @@ describe('Construct ObjectSchema subject type', () => {
   })
 })
 
-describe('Construct RECORD subject type', () => {
+describe('Construct RecordSchema subject type', () => {
   describe('Parent schema type related parameters', () => {
     const nested = { type: 'string' } as const satisfies Schema
 

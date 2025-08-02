@@ -3,7 +3,7 @@ import { validate } from './validate'
 import { parse } from './parse'
 
 import type { StringSchema } from './types/primitives'
-import type { NestedSchema, StructSchema, Schema } from './types/compounds'
+import type { NestedSchema, Schema, StructSchema } from './types/compounds'
 import type { Struct, StructParams } from './types/struct'
 
 export function makeStruct<T extends Schema>(schema: T): Struct<T>
@@ -109,6 +109,20 @@ export function array<
   },
 >(of: U) {
   const schema = { type: 'array', of: of.__schema } as V
+
+  return makeStruct(schema)
+}
+
+export function tuple<
+  T extends [
+    { __schema: StructSchema },
+    ...Readonly<Array<{ __schema: StructSchema }>>,
+  ],
+>(of: T) {
+  const schema = {
+    type: 'tuple',
+    of: of.map((x) => x.__schema) as { [K in keyof T]: T[K]['__schema'] },
+  } as const
 
   return makeStruct(schema)
 }

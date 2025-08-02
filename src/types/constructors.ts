@@ -1,17 +1,20 @@
 import type {
+  PrimitiveSchema,
+  //
   StringSchema,
   NumberSchema,
   BooleanSchema,
   LiteralSchema,
-  PrimitiveSchema,
 } from './primitives'
 
 import type {
+  Schema,
+  //
   ArraySchema,
   ObjectSchema,
   RecordSchema,
   UnionSchema,
-  Schema,
+  TupleSchema,
 } from './compounds'
 
 import type {
@@ -38,7 +41,7 @@ export type Con_ArraySchema_SubjT<T extends ArraySchema> = T extends {
     : never
   : never
 
-export type Prettify<T extends Record<string, unknown>> = {
+export type SimplifyObjectType<T extends Record<string, unknown>> = {
   [K in keyof T]: T[K]
 } & {}
 
@@ -52,7 +55,7 @@ export type Prettify<T extends Record<string, unknown>> = {
  * NOTE: `Exclude<T[K], undefined> will not work
  *       so we have technical constraint here
  **/
-export type MakeOptional<T> = Prettify<
+export type MakeOptional<T> = SimplifyObjectType<
   {
     [K in keyof T as undefined extends T[K] ? K : never]?: T[K]
   } & {
@@ -91,7 +94,18 @@ export type Con_UnionSchema_SubjT<T extends UnionSchema> = T extends {
     : never
   : never
 
-export type Con_Schema_SubjT<T extends Schema> = ExtWith_SchemaParams_SubjT<
+export type Con_TupleSchema_SubjT<T extends TupleSchema> = T extends {
+  type: 'tuple'
+  of: infer U
+}
+  ? U extends [...infer V]
+    ? {
+        [K in keyof V]: Con_Schema_SubjT<V[K]>
+      }
+    : never
+  : never
+
+export type Con_Schema_SubjT<T> = ExtWith_SchemaParams_SubjT<
   T,
   T extends PrimitiveSchema
     ? Con_PrimitiveSchema_SubjT<T>
@@ -103,13 +117,17 @@ export type Con_Schema_SubjT<T extends Schema> = ExtWith_SchemaParams_SubjT<
           ? Con_RecordSchema_SubjT<T>
           : T extends UnionSchema
             ? Con_UnionSchema_SubjT<T>
-            : never
+            : T extends TupleSchema
+              ? Con_TupleSchema_SubjT<T>
+              : never
+>
+
+export type Con_Struct_SubjT<T extends { __schema: Schema }> = Con_Schema_SubjT<
+  T['__schema']
 >
 
 export type SubjectType<T extends { __schema: Schema } | Schema> = T extends {
   __schema: Schema
 }
-  ? Con_Schema_SubjT<T['__schema']>
-  : T extends Schema
-    ? Con_Schema_SubjT<T>
-    : never
+  ? Con_Struct_SubjT<T>
+  : Con_Schema_SubjT<T>
