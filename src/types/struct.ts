@@ -18,12 +18,6 @@ import type {
 
 import type { Con_Schema_SubjT } from './constructors'
 
-type StructMethods<T extends Schema> = {
-  parse: (s: unknown) => Either<ParsingError, Con_Schema_SubjT<T>>
-  validate: (s: unknown) => Either<ParsingError, Con_Schema_SubjT<T>>
-  guard: (subject: unknown) => subject is Con_Schema_SubjT<T>
-}
-
 type ExtractParams<T extends Schema> = Exclude<keyof T, 'type' | 'of'>
 
 type ParamsBySchemaType = {
@@ -68,4 +62,7 @@ export type Struct<T extends Schema> = Omit<
     ParamsBySchemaType[T['type']]
   >,
   keyof T
-> & { __schema: Readonly<T> } & StructMethods<T>
+> & {
+  __schema: Readonly<T>
+  parse: (s: unknown) => Either<ParsingError, Con_Schema_SubjT<T>>
+}

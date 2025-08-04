@@ -13,7 +13,6 @@ export {
 
 export { left, right } from './utils/fp'
 export { parse } from './parse'
-export { validate, guard } from './validate'
 
 export type {
   BooleanSchema,

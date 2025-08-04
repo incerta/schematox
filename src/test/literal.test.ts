@@ -1,6 +1,5 @@
 import { ERROR_CODE } from '../error'
 import { parse } from '../parse'
-import { validate, guard } from '../validate'
 import { literal } from '../struct'
 import { check } from './test-utils'
 
@@ -82,68 +81,6 @@ describe('No schema parameters (string literal)', () => {
         ])
       }
     })
-
-    it('Validate valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = validate(schema, subject)
-
-        if (actual.left) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof actual.right
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-
-        expect(actual.right).toBe(subject)
-        expect(actual.left).toBeUndefined()
-      }
-    })
-
-    it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const actual = validate(schema, subject)
-
-        if (actual.left === undefined) {
-          throw Error('Not expected')
-        }
-
-        expect(actual.right).toBeUndefined()
-        expect(actual.left).toStrictEqual([
-          {
-            code: ERROR_CODE.invalidType,
-            schema: schema,
-            subject: subject,
-            path: [],
-          },
-        ])
-      }
-    })
-
-    it('Guard valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = guard(schema, subject)
-
-        if (actual === false) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof subject
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-      }
-    })
-
-    it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const expected = false
-        const actual = guard(schema, subject)
-
-        expect(actual).toBe(expected)
-      }
-    })
   })
 
   describe('Struct method parse/validate/guard', () => {
@@ -182,68 +119,6 @@ describe('No schema parameters (string literal)', () => {
             path: [],
           },
         ])
-      }
-    })
-
-    it('Validate valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = struct.validate(subject)
-
-        if (actual.left) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof actual.right
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-
-        expect(actual.right).toBe(subject)
-        expect(actual.left).toBeUndefined()
-      }
-    })
-
-    it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const actual = struct.validate(subject)
-
-        if (actual.left === undefined) {
-          throw Error('Not expected')
-        }
-
-        expect(actual.right).toBeUndefined()
-        expect(actual.left).toStrictEqual([
-          {
-            code: ERROR_CODE.invalidType,
-            schema: struct.__schema,
-            subject: subject,
-            path: [],
-          },
-        ])
-      }
-    })
-
-    it('Guard valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = struct.guard(subject)
-
-        if (actual === false) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof subject
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-      }
-    })
-
-    it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const expected = false
-        const actual = struct.guard(subject)
-
-        expect(actual).toBe(expected)
       }
     })
   })
@@ -313,68 +188,6 @@ describe('optional (number literal)', () => {
         ])
       }
     })
-
-    it('Validate valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = validate(schema, subject)
-
-        if (actual.left) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof actual.right
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-
-        expect(actual.right).toBe(subject)
-        expect(actual.left).toBeUndefined()
-      }
-    })
-
-    it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const actual = validate(schema, subject)
-
-        if (actual.left === undefined) {
-          throw Error('Not expected')
-        }
-
-        expect(actual.right).toBeUndefined()
-        expect(actual.left).toStrictEqual([
-          {
-            code: ERROR_CODE.invalidType,
-            schema: schema,
-            subject: subject,
-            path: [],
-          },
-        ])
-      }
-    })
-
-    it('Guard valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = guard(schema, subject)
-
-        if (actual === false) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof subject
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-      }
-    })
-
-    it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const expected = false
-        const actual = guard(schema, subject)
-
-        expect(actual).toBe(expected)
-      }
-    })
   })
 
   describe('Struct method parse/validate/guard', () => {
@@ -413,68 +226,6 @@ describe('optional (number literal)', () => {
             path: [],
           },
         ])
-      }
-    })
-
-    it('Validate valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = struct.validate(subject)
-
-        if (actual.left) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof actual.right
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-
-        expect(actual.right).toBe(subject)
-        expect(actual.left).toBeUndefined()
-      }
-    })
-
-    it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const actual = struct.validate(subject)
-
-        if (actual.left === undefined) {
-          throw Error('Not expected')
-        }
-
-        expect(actual.right).toBeUndefined()
-        expect(actual.left).toStrictEqual([
-          {
-            code: ERROR_CODE.invalidType,
-            schema: struct.__schema,
-            subject: subject,
-            path: [],
-          },
-        ])
-      }
-    })
-
-    it('Guard valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = struct.guard(subject)
-
-        if (actual === false) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof subject
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-      }
-    })
-
-    it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const expected = false
-        const actual = struct.guard(subject)
-
-        expect(actual).toBe(expected)
       }
     })
   })
@@ -544,68 +295,6 @@ describe('nullable (boolean literal)', () => {
         ])
       }
     })
-
-    it('Validate valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = validate(schema, subject)
-
-        if (actual.left) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof actual.right
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-
-        expect(actual.right).toBe(subject)
-        expect(actual.left).toBeUndefined()
-      }
-    })
-
-    it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const actual = validate(schema, subject)
-
-        if (actual.left === undefined) {
-          throw Error('Not expected')
-        }
-
-        expect(actual.right).toBeUndefined()
-        expect(actual.left).toStrictEqual([
-          {
-            code: ERROR_CODE.invalidType,
-            schema: schema,
-            subject: subject,
-            path: [],
-          },
-        ])
-      }
-    })
-
-    it('Guard valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = guard(schema, subject)
-
-        if (actual === false) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof subject
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-      }
-    })
-
-    it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const expected = false
-        const actual = guard(schema, subject)
-
-        expect(actual).toBe(expected)
-      }
-    })
   })
 
   describe('Struct method parse/validate/guard', () => {
@@ -644,68 +333,6 @@ describe('nullable (boolean literal)', () => {
             path: [],
           },
         ])
-      }
-    })
-
-    it('Validate valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = struct.validate(subject)
-
-        if (actual.left) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof actual.right
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-
-        expect(actual.right).toBe(subject)
-        expect(actual.left).toBeUndefined()
-      }
-    })
-
-    it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const actual = struct.validate(subject)
-
-        if (actual.left === undefined) {
-          throw Error('Not expected')
-        }
-
-        expect(actual.right).toBeUndefined()
-        expect(actual.left).toStrictEqual([
-          {
-            code: ERROR_CODE.invalidType,
-            schema: struct.__schema,
-            subject: subject,
-            path: [],
-          },
-        ])
-      }
-    })
-
-    it('Guard valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = struct.guard(subject)
-
-        if (actual === false) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof subject
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-      }
-    })
-
-    it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const expected = false
-        const actual = struct.guard(subject)
-
-        expect(actual).toBe(expected)
       }
     })
   })
@@ -778,68 +405,6 @@ describe('brand (boolean literal)', () => {
         ])
       }
     })
-
-    it('Validate valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = validate(schema, subject)
-
-        if (actual.left) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof actual.right
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-
-        expect(actual.right).toBe(subject)
-        expect(actual.left).toBeUndefined()
-      }
-    })
-
-    it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const actual = validate(schema, subject)
-
-        if (actual.left === undefined) {
-          throw Error('Not expected')
-        }
-
-        expect(actual.right).toBeUndefined()
-        expect(actual.left).toStrictEqual([
-          {
-            code: ERROR_CODE.invalidType,
-            schema: schema,
-            subject: subject,
-            path: [],
-          },
-        ])
-      }
-    })
-
-    it('Guard valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = guard(schema, subject)
-
-        if (actual === false) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof subject
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-      }
-    })
-
-    it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const expected = false
-        const actual = guard(schema, subject)
-
-        expect(actual).toBe(expected)
-      }
-    })
   })
 
   describe('Struct method parse/validate/guard', () => {
@@ -878,68 +443,6 @@ describe('brand (boolean literal)', () => {
             path: [],
           },
         ])
-      }
-    })
-
-    it('Validate valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = struct.validate(subject)
-
-        if (actual.left) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof actual.right
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-
-        expect(actual.right).toBe(subject)
-        expect(actual.left).toBeUndefined()
-      }
-    })
-
-    it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const actual = struct.validate(subject)
-
-        if (actual.left === undefined) {
-          throw Error('Not expected')
-        }
-
-        expect(actual.right).toBeUndefined()
-        expect(actual.left).toStrictEqual([
-          {
-            code: ERROR_CODE.invalidType,
-            schema: struct.__schema,
-            subject: subject,
-            path: [],
-          },
-        ])
-      }
-    })
-
-    it('Guard valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = struct.guard(subject)
-
-        if (actual === false) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof subject
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-      }
-    })
-
-    it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const expected = false
-        const actual = struct.guard(subject)
-
-        expect(actual).toBe(expected)
       }
     })
   })
@@ -1042,68 +545,6 @@ describe('optional + nullable + brand + description (number literal)', () => {
         ])
       }
     })
-
-    it('Validate valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = validate(schema, subject)
-
-        if (actual.left) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof actual.right
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-
-        expect(actual.right).toBe(subject)
-        expect(actual.left).toBeUndefined()
-      }
-    })
-
-    it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const actual = validate(schema, subject)
-
-        if (actual.left === undefined) {
-          throw Error('Not expected')
-        }
-
-        expect(actual.right).toBeUndefined()
-        expect(actual.left).toStrictEqual([
-          {
-            code: ERROR_CODE.invalidType,
-            schema: schema,
-            subject: subject,
-            path: [],
-          },
-        ])
-      }
-    })
-
-    it('Guard valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = guard(schema, subject)
-
-        if (actual === false) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof subject
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-      }
-    })
-
-    it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const expected = false
-        const actual = guard(schema, subject)
-
-        expect(actual).toBe(expected)
-      }
-    })
   })
 
   describe('Struct method parse/validate/guard', () => {
@@ -1142,68 +583,6 @@ describe('optional + nullable + brand + description (number literal)', () => {
             path: [],
           },
         ])
-      }
-    })
-
-    it('Validate valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = struct.validate(subject)
-
-        if (actual.left) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof actual.right
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-
-        expect(actual.right).toBe(subject)
-        expect(actual.left).toBeUndefined()
-      }
-    })
-
-    it('Validate INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const actual = struct.validate(subject)
-
-        if (actual.left === undefined) {
-          throw Error('Not expected')
-        }
-
-        expect(actual.right).toBeUndefined()
-        expect(actual.left).toStrictEqual([
-          {
-            code: ERROR_CODE.invalidType,
-            schema: struct.__schema,
-            subject: subject,
-            path: [],
-          },
-        ])
-      }
-    })
-
-    it('Guard valid subjects', () => {
-      for (const subject of validSubjects) {
-        const actual = struct.guard(subject)
-
-        if (actual === false) {
-          throw Error('Not expected')
-        }
-
-        type Actual = typeof subject
-
-        check<Actual, Expected>()
-        check<Expected, Actual>()
-      }
-    })
-
-    it('Guard INVALID_TYPE subjects', () => {
-      for (const subject of invalidSubjects) {
-        const expected = false
-        const actual = struct.guard(subject)
-
-        expect(actual).toBe(expected)
       }
     })
   })
