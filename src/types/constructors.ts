@@ -33,7 +33,7 @@ export type Con_PrimitiveSchema_SubjT<T extends PrimitiveSchema> =
           ? U
           : never
 
-export type Con_ArraySchema_SubjT<T extends ArraySchema> = T extends {
+export type Con_ArraySchema_SubjT<T extends ArraySchema<unknown>> = T extends {
   of: infer U
 }
   ? U extends Schema
@@ -63,7 +63,7 @@ export type MakeOptional<T> = SimplifyObjectType<
   }
 >
 
-export type Con_ObjectSchema_SubjT<T extends ObjectSchema> = T extends {
+export type Con_ObjectSchema_SubjT<T> = T extends {
   of: infer U
 }
   ? MakeOptional<{
@@ -73,19 +73,20 @@ export type Con_ObjectSchema_SubjT<T extends ObjectSchema> = T extends {
     }>
   : never
 
-export type Con_RecordSchema_SubjT<T extends RecordSchema> = T extends {
-  key?: infer U
-  of: infer V
-}
-  ? Record<
-      U extends StringSchema
-        ? ExtWith_Brand_SubjT<U, Con_PrimitiveSchema_SubjT<U>>
-        : string,
-      V extends Schema ? Con_Schema_SubjT<V> | undefined : never
-    >
-  : never
+export type Con_RecordSchema_SubjT<T extends RecordSchema<unknown>> =
+  T extends {
+    key?: infer U
+    of: infer V
+  }
+    ? Record<
+        U extends StringSchema
+          ? ExtWith_Brand_SubjT<U, Con_PrimitiveSchema_SubjT<U>>
+          : string,
+        V extends Schema ? Con_Schema_SubjT<V> | undefined : never
+      >
+    : never
 
-export type Con_UnionSchema_SubjT<T extends UnionSchema> = T extends {
+export type Con_UnionSchema_SubjT<T extends UnionSchema<unknown>> = T extends {
   type: 'union'
   of: Readonly<Array<infer U>>
 }
@@ -94,7 +95,7 @@ export type Con_UnionSchema_SubjT<T extends UnionSchema> = T extends {
     : never
   : never
 
-export type Con_TupleSchema_SubjT<T extends TupleSchema> = T extends {
+export type Con_TupleSchema_SubjT<T extends TupleSchema<unknown>> = T extends {
   type: 'tuple'
   of: infer U
 }
@@ -109,15 +110,15 @@ export type Con_Schema_SubjT<T> = ExtWith_SchemaParams_SubjT<
   T,
   T extends PrimitiveSchema
     ? Con_PrimitiveSchema_SubjT<T>
-    : T extends ArraySchema
+    : T extends ArraySchema<unknown>
       ? Con_ArraySchema_SubjT<T>
-      : T extends ObjectSchema
+      : T extends ObjectSchema<unknown>
         ? Con_ObjectSchema_SubjT<T>
-        : T extends RecordSchema
+        : T extends RecordSchema<unknown>
           ? Con_RecordSchema_SubjT<T>
-          : T extends UnionSchema
+          : T extends UnionSchema<unknown>
             ? Con_UnionSchema_SubjT<T>
-            : T extends TupleSchema
+            : T extends TupleSchema<unknown>
               ? Con_TupleSchema_SubjT<T>
               : never
 >

@@ -191,6 +191,41 @@ export function parse(
     return right(result)
   }
 
+  if (schema.type === 'tuple') {
+    if (Array.isArray(subject) === false) {
+      return left([
+        {
+          code: ERROR_CODE.invalidType,
+          path: this || [],
+          subject,
+          schema,
+        },
+      ])
+    }
+
+    const result: unknown[] = []
+
+    for (let i = 0; i < schema.of.length; i++) {
+      const nestedSchema = schema.of[i]!
+      const nestedValue = subject[i]
+
+      const parsed = parse.bind([...(this || []), i])(nestedSchema, nestedValue)
+
+      if (parsed.left) {
+        parsed.left.forEach((err) => errors.push(err))
+        continue
+      }
+
+      result.push(parsed.right)
+    }
+
+    if (errors.length) {
+      return left(errors)
+    }
+
+    return right(result)
+  }
+
   if (schema.type === 'union') {
     for (const subSchema of schema.of) {
       const parsed = parse(subSchema, subject)

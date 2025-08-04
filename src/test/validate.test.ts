@@ -4,7 +4,7 @@ import { check, unknownX } from './test-utils'
 
 import type { Schema } from '../types/compounds'
 
-describe('Validate PRIMITIVE schema with VALID subject', () => {
+describe('Validate PrimitiveSchema with VALID subject', () => {
   it('validate: `{ type: "string" }` schema', () => {
     const schema = { type: 'string' } satisfies Schema
     const subject = 'x'
@@ -38,7 +38,7 @@ describe('Validate PRIMITIVE schema with VALID subject', () => {
   })
 })
 
-describe('Validate PRIMITIVE schema with INVALID subject', () => {
+describe('Validate PrimitiveSchema with INVALID subject', () => {
   it('validate: base detailed schema', () => {
     const detailedReqStrSchema = { type: 'string' } satisfies Schema
     const undefinedSubj = undefined
@@ -72,7 +72,7 @@ describe('Validate PRIMITIVE schema with INVALID subject', () => {
   })
 })
 
-describe('Validate OBJECT schema with VALID subject', () => {
+describe('Validate ObjectSchema with VALID subject', () => {
   it('validate: nested base short schema subject', () => {
     const schema = {
       type: 'object',
@@ -173,7 +173,7 @@ describe('Validate OBJECT schema with VALID subject', () => {
   })
 })
 
-describe('Validate OBJECT schema with INVALID subject', () => {
+describe('Validate ObjectSchema with INVALID subject', () => {
   it('validate: required object with invalid direct subject', () => {
     const schema = {
       type: 'object',
@@ -442,7 +442,7 @@ describe('Validate OBJECT schema with INVALID subject', () => {
   })
 })
 
-describe('Validate RECORD schema with VALID subject', () => {
+describe('Validate RecordSchema with VALID subject', () => {
   it('validate: nested primitive schema', () => {
     const schema = {
       type: 'record',
@@ -503,7 +503,7 @@ describe('Validate RECORD schema with VALID subject', () => {
   })
 })
 
-describe('Validate RECORD schema with INVALID subject', () => {
+describe('Validate RecordSchema with INVALID subject', () => {
   it('validate: record with invalid direct subject', () => {
     const schema = {
       type: 'record',
@@ -638,7 +638,7 @@ describe('Validate RECORD schema with INVALID subject', () => {
   })
 })
 
-describe('Validate ARRAY schema with VALID subject', () => {
+describe('Validate ArraySchema with VALID subject', () => {
   it('validate: required base short schema subject', () => {
     const stringArrSchema = {
       type: 'array',
@@ -867,7 +867,7 @@ describe('Validate ARRAY schema with VALID subject', () => {
   })
 })
 
-describe('Validate ARRAY schema with INVALID subject', () => {
+describe('Validate ArraySchema with INVALID subject', () => {
   it('validate: required array with invalid direct subject', () => {
     const schema = {
       type: 'array',
@@ -1170,7 +1170,7 @@ describe('VALIDATE flow returns schema subject reference', () => {
   })
 })
 
-describe('Validate UNION schema with VALID subject', () => {
+describe('Validate UnionSchema with VALID subject', () => {
   it('validate: required mixed base schema union', () => {
     const schema = {
       type: 'union',
@@ -1356,7 +1356,7 @@ describe('Validate UNION schema with VALID subject', () => {
   })
 })
 
-describe('Validate UNION schema with INVALID subject', () => {
+describe('Validate UnionSchema with INVALID subject', () => {
   it('validate: required mixed base schema union', () => {
     const schema = {
       type: 'union',

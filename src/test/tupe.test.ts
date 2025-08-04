@@ -3,10 +3,31 @@ import { check } from './test-utils'
 import { parse } from '../parse'
 import { validate } from '../validate'
 
-import { array, object, string, number, boolean, literal } from '../struct'
+import {
+  array,
+  object,
+  string,
+  number,
+  boolean,
+  literal,
+  tuple,
+} from '../struct'
 
-describe('Object schema programmatic definition', () => {
-  it('object: required object with nested structure', () => {
+it('tuple: check', () => {
+  const struct = tuple([string()])
+  const result = struct.parse(['x'])
+
+  if (result.right) {
+    type Expected = [string]
+    type Actual = typeof result.right
+
+    check<Expected, Actual>()
+    check<Actual, Expected>()
+  }
+})
+
+describe('TupleSchema programmatic definition', () => {
+  it('required object with nested structure', () => {
     const schemaX = object({
       x: string(),
       y: boolean().optional(),
@@ -81,8 +102,7 @@ describe('Object schema programmatic definition', () => {
     expect(validate(schemaX.__schema, subject).left).toStrictEqual(undefined)
   })
 
-  it('object: max depth', () => {
-    // perttier-ignore
+  it('30 members', () => {
     const schema = object({
       1: object({
         2: object({
@@ -94,13 +114,7 @@ describe('Object schema programmatic definition', () => {
                     8: object({
                       9: object({
                         10: object({
-                          11: object({
-                            12: object({
-                              13: object({
-                                x: string(),
-                              }),
-                            }),
-                          }),
+                          11: object({ 12: object({ x: string() }) }),
                         }),
                       }),
                     }),

@@ -40,27 +40,6 @@ export type {
 } from './error'
 
 export type {
-  Schema,
-  //
-  ObjectSchema,
-  RecordSchema,
-  TupleSchema,
-  UnionSchema,
-  ArraySchema,
-  //
-  CompoundSchema,
-  StructSchema,
-  //
-  BaseArraySchema,
-  BaseObjectSchema,
-  BaseTupleSchema,
-  BaseUnionSchema,
-  //
-  NestedSchema,
-  NestedStructSchema,
-} from './types/compounds'
-
-export type {
   PrimitiveSchema,
   //
   BooleanSchema,
@@ -70,6 +49,28 @@ export type {
   //
   BrandSchema,
 } from './types/primitives'
+
+export type {
+  Schema,
+  //
+  ArraySchema,
+  ObjectSchema,
+  RecordSchema,
+  TupleSchema,
+  UnionSchema,
+  //
+  CompoundSchema,
+  StructSchema,
+  //
+  BaseArraySchema,
+  BaseObjectSchema,
+  BaseRecordSchema,
+  BaseTupleSchema,
+  BaseUnionSchema,
+  //
+  NestedSchema,
+  NestedStructSchema,
+} from './types/compounds'
 
 export type {
   ExtWith_Undefined_SubjT,

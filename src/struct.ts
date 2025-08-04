@@ -3,10 +3,10 @@ import { validate } from './validate'
 import { parse } from './parse'
 
 import type { StringSchema } from './types/primitives'
-import type { NestedSchema, Schema, StructSchema } from './types/compounds'
-import type { Struct, StructParams } from './types/struct'
+import type { NestedSchema, StructSchema } from './types/compounds'
+import type { Struct, StructParams, SchemaShallow } from './types/struct'
 
-export function makeStruct<T extends Schema>(schema: T): Struct<T>
+export function makeStruct<T extends SchemaShallow>(schema: T): Struct<T>
 export function makeStruct(schema: StructSchema) {
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const result: Record<string, unknown> = {
@@ -74,11 +74,11 @@ export function literal<T extends string | number | boolean>(of: T) {
 }
 
 export function object<
-  T extends StructSchema,
+  T extends SchemaShallow,
   U extends Record<string, { __schema: T }>,
   V extends {
     type: 'object'
-    of: Record<string, NestedSchema>
+    of: Record<string, SchemaShallow>
   } = { type: 'object'; of: { [k in keyof U]: U[k]['__schema'] } },
 >(of: U) {
   const schema = { type: 'object', of: {} } as V

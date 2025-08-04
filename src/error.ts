@@ -1,10 +1,7 @@
-import type { Schema } from './types/compounds'
-
 export type ErrorCode = (typeof ERROR_CODE)[keyof typeof ERROR_CODE]
 
 export type InvalidSubject = {
   code: ErrorCode
-  schema: Schema
   subject: unknown
   path: ErrorPath
 }

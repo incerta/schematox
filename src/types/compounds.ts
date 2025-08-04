@@ -98,20 +98,11 @@ export type NestedStructSchema = R/*1*/ <
   >
 >
 
-export type ArraySchema<T extends NestedSchema = NestedSchema> =
-  BaseArraySchema<T>
-
-export type TupleSchema<T extends NestedSchema = NestedSchema> =
-  BaseTupleSchema<T>
-
-export type ObjectSchema<T extends NestedSchema = NestedSchema> =
-  BaseObjectSchema<T>
-
-export type RecordSchema<T extends NestedSchema = NestedSchema> =
-  BaseRecordSchema<T>
-
-export type UnionSchema<T extends NestedSchema = NestedSchema> =
-  BaseUnionSchema<T>
+export type ArraySchema<T = NestedSchema> = BaseArraySchema<T>
+export type TupleSchema<T = NestedSchema> = BaseTupleSchema<T>
+export type ObjectSchema<T = NestedSchema> = BaseObjectSchema<T>
+export type RecordSchema<T = NestedSchema> = BaseRecordSchema<T>
+export type UnionSchema<T = NestedSchema> = BaseUnionSchema<T>
 
 export type CompoundSchema =
   | ObjectSchema

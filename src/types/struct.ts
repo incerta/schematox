@@ -9,7 +9,6 @@ import type {
 } from './primitives'
 
 import type {
-  Schema,
   ObjectSchema,
   ArraySchema,
   UnionSchema,
@@ -19,30 +18,34 @@ import type {
 
 import type { Con_Schema_SubjT } from './constructors'
 
-type StructMethods<T extends Schema> = {
+type StructMethods<T> = {
   parse: (s: unknown) => Either<ParsingError, Con_Schema_SubjT<T>>
   validate: (s: unknown) => Either<ParsingError, Con_Schema_SubjT<T>>
   guard: (subject: unknown) => subject is Con_Schema_SubjT<T>
 }
 
-type ExtractParams<T extends Schema> = Exclude<keyof T, 'type' | 'of'>
+type ExtractParams<T> = Exclude<keyof T, 'type' | 'of'>
 
 type ParamsBySchemaType = {
-  string: ExtractParams<StringSchema>
-  number: ExtractParams<NumberSchema>
   boolean: ExtractParams<BooleanSchema>
   literal: ExtractParams<LiteralSchema>
-  object: ExtractParams<ObjectSchema>
-  record: Exclude<ExtractParams<RecordSchema>, 'key'>
-  union: ExtractParams<UnionSchema>
-  array: ExtractParams<ArraySchema>
-  tuple: ExtractParams<TupleSchema>
+  number: ExtractParams<NumberSchema>
+  string: ExtractParams<StringSchema>
+  //
+  array: ExtractParams<ArraySchema<unknown>>
+  object: ExtractParams<ObjectSchema<unknown>>
+  record: Exclude<ExtractParams<RecordSchema<unknown>>, 'key'>
+  tuple: ExtractParams<TupleSchema<unknown>>
+  union: ExtractParams<UnionSchema<unknown>>
 }
+
+export type SchemaType = keyof ParamsBySchemaType
+export type SchemaShallow = Readonly<{ type: SchemaType }>
 
 export type StructParams =
   ParamsBySchemaType extends Record<string, infer U> ? U : never
 
-export type Struct<T extends Schema> = Omit<
+export type Struct<T extends SchemaShallow> = Omit<
   Pick<
     {
       optional: () => Struct<T & { optional: true }>
