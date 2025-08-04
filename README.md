@@ -1,8 +1,8 @@
 # schematox
 
-Schematox is a lightweight typesafe schema defined parser/validator. All schemas are JSON compatible.
+Schematox is a lightweight typesafe schema defined parser. All schemas are JSON compatible.
 
-Instead of supporting all possible JS/TS data structures, the library is focusing on fixed set of schema types: string, number, boolean, literal, object, record, array, union. Each schema can have parameters: optional, nullable, description. Each primitive schema has "brand" parameter as mean of making its subject type [nominal](https://github.com/Microsoft/TypeScript/wiki/FAQ#can-i-make-a-type-alias-nominal). The rest parameters is schema specific range limiters.
+The library is focusing on fixed set of schema types: string, number, boolean, literal, object, record, array, union. Each schema can have parameters: optional, nullable, description. Each primitive schema has "brand" parameter as mean of making its subject type [nominal](https://github.com/Microsoft/TypeScript/wiki/FAQ#can-i-make-a-type-alias-nominal). The rest parameters is schema specific range limiters.
 
 Library supports static schema definition which means your schemas could be completely independent from schematox. One could use such schemas as source for generation other structures like DB models.
 
@@ -23,7 +23,6 @@ The library is small so exploring README.md is enough for understanding its API,
   - [Record](#record)
   - [Array](#array)
   - [Union](#union)
-- [Difference between parse and validate](#difference-between-parse-and-validate)
 - [Schema parameters](#schema-parameters)
 - [Error shape](#error-shape)
 - [Use schematox schema as dependency with narrowed type](#use-schematox-schema-as-dependency-with-narrowed-type)
@@ -42,15 +41,11 @@ npm install schematox
 ## Features
 
 - Statically defined JSON compatible schema
-- Check defined schema correctness using non generic type "Schema"
 - Programmatically defined schema (struct)
-- Schema subject verification methods:
-  - parse: constructs new object based on the given schema and subject
-  - validate: checks and returns reference to the original schema subject
-  - guard: validates and narrows schema subject type in the current scope
+- Check defined schema correctness using non generic type "Schema"
 - Ether-style error handling (no unexpected throws)
 - First-class support for branded primitives (primitive nominal types alias)
-- Use schematox schema as dependency with narrowed type
+- Use schematox schema type as dependency with narrowed types
 
 ## Limitations
 
@@ -87,10 +82,10 @@ const schema = object({
 Statically defined schema:
 
 ```typescript
-import { parse, validate, guard } from 'schematox'
-import type { Schema } from 'schematox'
+import { parse } from 'schematox'
+import type { Schema, SubjectType } from 'schematox'
 
-export const userSchema = {
+export const schema = {
   type: 'object',
   of: {
     id: {
@@ -101,31 +96,27 @@ export const userSchema = {
   },
 } as const satisfies Schema
 
-const subject = {
-  id: '1' as SubjectType<typeof userSchema.id>,
-  name: 'John',
-} as unknown
+type User = SubjectType<typeof schema>
+  // ^?  { id: string & { __idFor: 'User' }, name: string }
 
+const subject = { id: '1'  name: 'John' }
 const parsed = parse(userSchema, subject)
+   // ^?  Either<ParsingError, User>
+
+parsed.left
+    // ^?  Either<ParsingError, User>
+
+parsed.right
+    // ^?  User | undefined
 
 if (parsed.left) {
-  throw Error('Not expected')
+  parsed.left
+      // ^? ParsingError
+  throw Error('Parsing error')
 }
 
-console.log(parsed.right) // { id: '1', name: 'John' }
-
-const validated = validate(userSchema, subject)
-
-if (validated.left) {
-  throw Error('Not expected')
-}
-
-console.log(validated.right) // { id: '1', name: 'John' }
-
-if (guard(userSchema, subject)) {
-  // { id: string & { __idFor: 'User' }; name: string }
-  subject
-}
+parsed.right
+    // ^? User
 ```
 
 ## Programmatic schema example
@@ -141,38 +132,47 @@ const struct = object({
   name: string(),
 })
 
-const subject = { id: '1', name: 'John' } as unknown
+type User = SubjectType<typeof struct>
+  // ^?  { id: string & { __idFor: 'User' }, name: string }
 
+const subject = { id: '1', name: 'John' }
 const parsed = struct.parse(subject)
+   // ^?  Either<ParsingError, User>
+
+parsed.left
+    // ^?  Either<ParsingError, User>
+
+parsed.right
+    // ^?  User | undefined
 
 if (parsed.left) {
-  throw Error('Not expected')
+  parsed.left
+      // ^? ParsingError
+  throw Error('Parsing error')
 }
 
-console.log(parsed.right) // { id: '1', name: 'John' }
-
-const validated = struct.validate(subject)
-
-if (validated.left) {
-  throw Error('Not expected')
-}
-
-console.log(validated.right) // { id: '1', name: 'John' }
-
-if (struct.guard(subject)) {
-  // { id: string & { __idFor: 'User' }; name: string }
-  subject
-}
+parsed.right
+    // ^? User
 ```
 
-All programmatically defined schemas are the same as static, one just needs to access it through `__schema` key. We can mix static/programmatic schemas either accessing it through `__schema` or wrap it by `{ __schema: T }` if consumer is programmatic schema.
+All programmatically defined schemas are the same as static, one just needs to access it through `__schema` key.
+
+## Transform static schema into struct
+
+```typescript
+import { makeStruct } from 'schematox'
+import type { Schema } from 'schematox'
+
+const schema = { type: 'string' } as const satisfies Schema
+const string = makeStruct(schema)
+```
 
 ## Example for all supported schema types
 
 We distinguish two main categories of schema units:
 
-- primitive: string, number, boolean, literal
-- compound: object, array, union
+- primitive: boolean, literal, number, boolean
+- compound: array, object, record, union
 
 Any schema share optional/nullable/description parameters. Any compound schema could have any other schema type as its member including itself. Any primitive schema can have "brand" parameter.
 
@@ -390,11 +390,6 @@ type ExpectedSubjectType = {
 - `minLength/maxLength/min/max` – schema type dependent limiting characteristics
 - `description?: string` – description of the particular schema property which can be used to provide more detailed information for the user/developer on validation/parse error
 
-## Difference between parse and validate
-
-Parsing creates a new object. Validation/guard checks if an existing object satisfies the defined schema.
-When you parse something, extra keys are allowed; if you validate/guard, extra keys will cause an `EXTRA_KEY` error.
-
 ## Error shape
 
 Nested schema example. Subject `0` is invalid, should be a `string`:
@@ -433,7 +428,6 @@ It's always an array with at least one entry. Each entry includes:
 - `code`: we support the following errors:
   - `INVALID_TYPE`: schema subject or default value don't meet schema type specifications
   - `INVALID_RANGE`: `min/max` or `minLength/maxLength` schema requirements aren't met
-  - `EXTRA_KEY`: `object` type validation subject has a key which is not specified in schema
 - `schema`: The specific section of `schema` where the invalid value is found.
 - `subject`: The specific part of the validated subject where the invalid value exists.
 - `path`: Traces the route from the root to the error subject, with strings as keys and numbers as array indexes.

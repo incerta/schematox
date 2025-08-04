@@ -1,5 +1,4 @@
 import { PARAMS_BY_SCHEMA_TYPE } from './constants'
-import { validate } from './validate'
 import { parse } from './parse'
 
 import type { StringSchema } from './types/primitives'
@@ -11,11 +10,7 @@ export function makeStruct(schema: StructSchema) {
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const result: Record<string, unknown> = {
     __schema: schema,
-
     parse: (subj: unknown) => parse(schema, subj),
-    validate: (subj: unknown) => validate(schema, subj),
-    guard: (subj: unknown): subj is string | undefined =>
-      validate(schema, subj).left === undefined,
   }
 
   if (params.has('optional')) {

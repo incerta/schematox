@@ -1,8 +1,5 @@
 import { check } from './test-utils'
-
 import { parse } from '../parse'
-import { validate } from '../validate'
-
 import {
   array,
   object,
@@ -59,10 +56,6 @@ describe('Record schema programmatic definition', () => {
     const parsed = parse(struct.__schema, subject)
 
     expect(parsed.left).toBe(undefined)
-
-    const validated = validate(struct.__schema, subject)
-
-    expect(validated.left).toBe(undefined)
   })
 
   it('record: optional -> description', () => {
@@ -78,9 +71,6 @@ describe('Record schema programmatic definition', () => {
 
     expect(parse(struct.__schema, undefined).right).toBe(undefined)
     expect(parse(struct.__schema, undefined).left).toBe(undefined)
-
-    expect(validate(struct.__schema, undefined).right).toBe(undefined)
-    expect(validate(struct.__schema, undefined).left).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
     expect(() => struct.optional()).not.toThrow()
@@ -102,9 +92,6 @@ describe('Record schema programmatic definition', () => {
 
     expect(parse(struct.__schema, undefined).right).toBe(undefined)
     expect(parse(struct.__schema, undefined).left).toBe(undefined)
-
-    expect(validate(struct.__schema, undefined).right).toBe(undefined)
-    expect(validate(struct.__schema, undefined).left).toBe(undefined)
 
     // @ts-expect-error Property 'optional' does not exist
     expect(() => struct.optional()).not.toThrow()
@@ -154,9 +141,6 @@ describe('Record schema programmatic definition', () => {
 
     expect(parse(schemaX.__schema, subject).left).toBe(undefined)
     expect(parse(schemaX.__schema, subject).right).toStrictEqual(subject)
-
-    expect(validate(schemaX.__schema, subject).right).toStrictEqual(subject)
-    expect(validate(schemaX.__schema, subject).left).toBe(undefined)
   })
 })
 
@@ -180,40 +164,6 @@ describe('Check type inference and parse/validate/guard struct method', () => {
 
     expect(parsed.right).toStrictEqual(subject)
     expect(parsed.left).toBeUndefined()
-  })
-
-  it('record: validate', () => {
-    const validated = struct.validate(subject)
-
-    if (!validated.left) {
-      check<Record<string, { x: string; y: number } | undefined>>(
-        validated.right
-      )
-      check<Record<string, { x: string; y: number; z: boolean } | undefined>>(
-        // @ts-expect-error '{ x: string; y: number; } | undefined' is not '{ x: string; y: number; z: boolean; } | undefined'
-        validated.right
-      )
-    }
-
-    expect(validated.right).toStrictEqual(subject)
-    expect(validated.left).toBeUndefined()
-  })
-
-  it('record: guard', () => {
-    const guard = struct.guard(subject)
-
-    expect(guard).toBe(true)
-
-    if (guard) {
-      check<Record<string, { x: string; y: number } | undefined>>(subject)
-      check<Record<string, { x: string; y: number; z: boolean } | undefined>>(
-        // @ts-expect-error '{ x: string; y: number; } | undefined' is not '{ x: string; y: number; z: boolean; } | undefined'
-        subject
-      )
-      return
-    }
-
-    throw Error('Not expected')
   })
 
   it('record: nested nullability', () => {

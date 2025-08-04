@@ -36,15 +36,6 @@ describe('Union nested structures', () => {
         { type: 'array', of: { type: 'number' } },
       ],
     })
-
-    const subj = 'x' as unknown
-
-    if (struct.guard(subj)) {
-      check<string | number | boolean | { x: string } | number[]>(subj)
-
-      // @ts-expect-error 'string | number | boolean | { x: string; } | number[]' is not 'string | boolean | number[] | { x: string; }'
-      check<string | boolean | { x: string } | number[]>(subj)
-    }
   })
 })
 
@@ -88,71 +79,6 @@ describe('Union methods', () => {
     }
 
     throw Error('Not expected')
-  })
-
-  it('union: validate valid', () => {
-    const struct = union([literal('x'), literal('y')])
-    const validated = struct.validate('x')
-
-    if (validated.left) {
-      throw Error('Not expected')
-    }
-
-    check<'x' | 'y'>(validated.right)
-    // @ts-expect-error '"x" | "y"' is not assignable to parameter of type '"x"'
-    check<'x'>(validated.right)
-
-    expect(validated.right).toBe('x')
-  })
-
-  it('union: validate invalid', () => {
-    const struct = union([literal('x'), literal('y')])
-    const subject = 'z'
-    const validated = struct.validate(subject)
-
-    if (validated.left) {
-      check<InvalidSubject[]>(validated.left)
-      // @ts-expect-error 'InvalidSubject[]' is not 'string[]'
-      check<string[]>(validated.left)
-
-      expect(validated.left).toStrictEqual([
-        {
-          code: ERROR_CODE.invalidType,
-          schema: struct.__schema,
-          subject,
-          path: [],
-        },
-      ])
-
-      return
-    }
-
-    throw Error('Not expected')
-  })
-
-  it('union: guard valid', () => {
-    const struct = union([literal('x'), literal('y')])
-    const subject = 'y' as unknown
-    const guarded = struct.guard(subject)
-
-    if (guarded) {
-      check<'x' | 'y'>(subject)
-      // @ts-expect-error '"x" | "y"' is not assignable to parameter of type '"x"'
-      check<'x'>(subject)
-      return
-    }
-
-    throw Error('Not expected')
-  })
-
-  it('union: guard invalid', () => {
-    const struct = union([literal('x'), literal('y')])
-    const subject = 'z' as unknown
-    const guarded = struct.guard(subject)
-
-    if (guarded) {
-      throw Error('Not expected')
-    }
   })
 })
 
