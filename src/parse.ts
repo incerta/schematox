@@ -36,7 +36,7 @@ export function parse(
       return left([
         {
           code: ERROR_CODE.invalidType,
-          path: this || [],
+          path: Array.isArray(this) ? this : [],
           schema,
           subject,
         },
@@ -54,7 +54,7 @@ export function parse(
           return left([
             {
               code: ERROR_CODE.invalidType,
-              path: [...(this || []), key],
+              path: [...(Array.isArray(this) ? this : []), key],
               schema,
               subject,
             },
@@ -66,7 +66,7 @@ export function parse(
 
       const nestedValue = narrowedSubj[key]
 
-      const parsed = parse.bind([...(this || []), key])(
+      const parsed = parse.bind([...(Array.isArray(this) ? this : []), key])(
         nestedSchema,
         nestedValue
       )
@@ -95,7 +95,7 @@ export function parse(
       return left([
         {
           code: ERROR_CODE.invalidType,
-          path: this || [],
+          path: Array.isArray(this) ? this : [],
           schema,
           subject,
         },
@@ -111,7 +111,10 @@ export function parse(
         continue
       }
 
-      const parsed = parse.bind([...(this || []), key])(schema.of, nestedValue)
+      const parsed = parse.bind([...(Array.isArray(this) ? this : []), key])(
+        schema.of,
+        nestedValue
+      )
 
       if (parsed.left) {
         parsed.left.forEach((err) => errors.push(err))
@@ -133,7 +136,7 @@ export function parse(
       return left([
         {
           code: ERROR_CODE.invalidType,
-          path: this || [],
+          path: Array.isArray(this) ? this : [],
           subject,
           schema,
         },
@@ -146,7 +149,10 @@ export function parse(
       const nestedSchema = schema.of
       const nestedValue = subject[i]
 
-      const parsed = parse.bind([...(this || []), i])(nestedSchema, nestedValue)
+      const parsed = parse.bind([...(Array.isArray(this) ? this : []), i])(
+        nestedSchema,
+        nestedValue
+      )
 
       if (parsed.left) {
         parsed.left.forEach((err) => errors.push(err))
@@ -167,7 +173,7 @@ export function parse(
       return left([
         {
           code: ERROR_CODE.invalidRange,
-          path: this || [],
+          path: Array.isArray(this) ? this : [],
           subject,
           schema,
         },
@@ -181,7 +187,7 @@ export function parse(
       return left([
         {
           code: ERROR_CODE.invalidRange,
-          path: this || [],
+          path: Array.isArray(this) ? this : [],
           subject,
           schema,
         },
@@ -203,7 +209,7 @@ export function parse(
     return left([
       {
         code: ERROR_CODE.invalidType,
-        path: this || [],
+        path: Array.isArray(this) ? this : [],
         subject,
         schema,
       },
@@ -219,7 +225,7 @@ export function parse(
   return left([
     {
       code: verified,
-      path: this || [],
+      path: Array.isArray(this) ? this : [],
       subject,
       schema,
     },
