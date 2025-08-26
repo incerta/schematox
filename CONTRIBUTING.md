@@ -6,6 +6,7 @@ Currently, it's a small, not well-known project so we don't need any strict cont
 
 - `schema` - JSON-compatible representation of JS runtime `primitive/object` entities
 - `struct` - programmatically defined schema with extra API
+- `construct` - struct created by direct `makeStruct` function call
 - `primitive schema` - the most basic unit of a schema `string/number/boolean/literal`
 - `compound schema` - higher-order structure that contains any other schema as its child
 - `subject` - the JS runtime primitive or object that is intended to be tested against the schema
@@ -13,6 +14,7 @@ Currently, it's a small, not well-known project so we don't need any strict cont
 - `brand` - intersection which makes primitive type nominal
 - `schema depth` - the number of nested levels a compound schema carries
 - `schema range parameter` - schema type dependent parameter used as value size restriction
+- `fold label` - code parts in tests that are not supposed to be copy pasted from test to test `foldA`, `foldB` etc.
 
 ## Primitive Schema
 
@@ -47,23 +49,27 @@ Generic that constructs type based on other type(s) in the manner which can not 
 
 The `ExtWith_${extension}<T, U>` used for extension of type `T` with some `U`. It might be intersection (brand) or just unionization with another type (optional, nullable).
 
+# Testing strategy
+
+Our tests are located at `src/tests/*`. Learn more about the testing structure and strategy at [tests/README.md](https://github.com/incerta/schematox/blob/main/src/tests/README.md).
+
 # Type testing
 
 For type testing we are using simple technique:
 
 ```typescript
-import { check } from './test-utils'
+import * as x from 'schematox'
 
-it('check: type compatibility', () => {
+it('type equivalence check example', () => {
   type Expected = string
   type Actual = string
 
-  check<Actual, Expected>()
-  check<Expected, Actual>()
+  x.tCh<Actual, Expected>()
+  x.tCh<Expected, Actual>()
 })
 ```
 
-The `check` function will raise static type error if the second generic argument type is not extends the first one. In order to make sure that types are structurally identical we must always have two casts: `<Actual, Expected>` and `<Expected, Actual>`.
+The `tCh` function will raise static type error if the second generic argument type is not extends the first one. In order to make sure that types are structurally identical we must always have two casts: `<Actual, Expected>` and `<Expected, Actual>`.
 
 # Development routine
 

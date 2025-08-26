@@ -2,51 +2,74 @@ export { ERROR_CODE } from './error'
 
 export {
   makeStruct,
-  string,
-  number,
+  //
   boolean,
   literal,
-  union,
+  number,
+  string,
+  //
   array,
   object,
+  record,
+  union,
 } from './struct'
 
+export { tCh } from './check'
 export { left, right } from './utils/fp'
 export { parse } from './parse'
 
 export type {
-  BooleanSchema,
-  BrandSchema,
-  LiteralSchema,
-  NumberSchema,
-  PrimitiveSchema,
-  StringSchema,
-} from './types/primitives'
-
-export type {
-  ArraySchema,
-  BaseArraySchema,
-  BaseObjectSchema,
-  BaseUnionSchema,
-  CompoundSchema,
-  NestedSchema,
-  NestedStructSchema,
-  ObjectSchema,
-  Schema,
-  StructSchema,
-  UnionSchema,
-} from './types/compounds'
-
-export type {
+  Infer, // @examples: Infer<typeof struct> | Infer<typeof schema>
+  SubjectType, // @deprecated in favor of "Infer"
+  //
+  Con_Schema_SubjT,
+  //
   Con_ArraySchema_SubjT,
   Con_ObjectSchema_SubjT,
   Con_PrimitiveSchema_SubjT,
-  Con_Schema_SubjT,
+  Con_RecordSchema_SubjT,
   Con_UnionSchema_SubjT,
+  //
   MakeOptional,
-  Prettify,
-  SubjectType,
 } from './types/constructors'
+
+export type {
+  ErrorCode,
+  ErrorPath,
+  InvalidSubject,
+  ParsingError,
+} from './error'
+
+export type {
+  PrimitiveSchema,
+  //
+  BooleanSchema,
+  LiteralSchema,
+  NumberSchema,
+  StringSchema,
+  //
+  BrandSchema,
+} from './types/primitives'
+
+export type {
+  Schema,
+  //
+  ArraySchema,
+  ObjectSchema,
+  RecordSchema,
+  UnionSchema,
+  //
+  CompoundSchema,
+  StructSchema,
+  //
+  BaseArraySchema,
+  BaseObjectSchema,
+  BaseRecordSchema,
+  BaseUnionSchema,
+  //
+  NestedSchema,
+  NestedStructSchema,
+} from './types/compounds'
 
 export type {
   ExtWith_Undefined_SubjT,
@@ -54,12 +77,5 @@ export type {
   ExtWith_Brand_SubjT,
   ExtWith_SchemaParams_SubjT,
 } from './types/extensions'
-
-export type {
-  ParsingError,
-  InvalidSubject,
-  ErrorPath,
-  ErrorCode,
-} from './error'
 
 export type { Either, Left, Right } from './utils/fp'
