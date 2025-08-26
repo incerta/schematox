@@ -9,7 +9,7 @@ export function makeStruct<T extends Schema>(schema: T): Struct<T>
 export function makeStruct(schema: StructSchema) {
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const result: Record<string, unknown> = {
-    __schema: schema,
+    __schema: { ...schema },
     parse: (subj: unknown) => parse(schema, subj),
   }
 
