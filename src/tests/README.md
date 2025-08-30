@@ -21,7 +21,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
   it.todo('optional + nullable + brand + min')
   it.todo('optional + nullable + brand + min + max')
   it.todo('optional + nullable + brand + min + max + description')
-  it.todo('description + maxLenght + min + brand + nullable + optional')
+  it.todo('description + max + min + brand + nullable + optional')
 })
 
 describe('ERROR_CODE.invalidType (foldC)', () => {
@@ -37,7 +37,7 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
 describe('Schema specifics (foldA)', () => {
   // depends on schema type
 })
-````
+```
 
 # Fold A
 
@@ -47,9 +47,8 @@ it('required', () => {
   const struct = x.boolean()
 
   type ExpectedSubj = boolean
-  type ExpectedSubjects = [ExpectedSubj, ...ExpectedSubj[]]
 
-  const subjects: ExpectedSubjects = [true, false]
+  const subjects: Array<ExpectedSubj> = [true, false]
 
   foldA: {
     const construct = x.makeStruct(schema)
@@ -183,40 +182,40 @@ it('optional', () => {
 # Fold C
 
 ```typescript
-  it('iterate over fixture.DATA_TYPE', () => {
-    const schema = { type: 'boolean' } satisfies x.Schema
-    const struct = x.boolean()
+it('iterate over fixture.DATA_TYPE', () => {
+  const schema = { type: 'boolean' } satisfies x.Schema
+  const struct = x.boolean()
 
-    foldC: {
-      const construct = x.makeStruct(schema)
+  foldC: {
+    const construct = x.makeStruct(schema)
 
-      for (const [kind, types] of fixture.DATA_TYPE) {
-        if (kind === schema.type) {
-          continue
-        }
+    for (const [kind, types] of fixture.DATA_TYPE) {
+      if (kind === schema.type) {
+        continue
+      }
 
-        for (const subject of types) {
-          const expectedError = [
-            {
-              code: x.ERROR_CODE.invalidType,
-              schema: schema,
-              subject: subject,
-              path: [],
-            },
-          ]
+      for (const subject of types) {
+        const expectedError = [
+          {
+            code: x.ERROR_CODE.invalidType,
+            schema: schema,
+            subject: subject,
+            path: [],
+          },
+        ]
 
-          const parsedSchema = x.parse(schema, subject)
-          const parsedConstruct = construct.parse(subject)
-          const parsedStruct = struct.parse(subject)
+        const parsedSchema = x.parse(schema, subject)
+        const parsedConstruct = construct.parse(subject)
+        const parsedStruct = struct.parse(subject)
 
-          expect(parsedSchema.left).toStrictEqual(expectedError)
-          expect(parsedConstruct.left).toStrictEqual(expectedError)
-          expect(parsedStruct.left).toStrictEqual(expectedError)
-        }
+        expect(parsedSchema.left).toStrictEqual(expectedError)
+        expect(parsedConstruct.left).toStrictEqual(expectedError)
+        expect(parsedStruct.left).toStrictEqual(expectedError)
       }
     }
-  })
-````
+  }
+})
+```
 
 # Fold D
 

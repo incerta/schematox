@@ -7,9 +7,8 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     const struct = x.boolean()
 
     type ExpectedSubj = boolean
-    type ExpectedSubjects = [ExpectedSubj, ...ExpectedSubj[]]
 
-    const subjects: ExpectedSubjects = [true, false]
+    const subjects: Array<ExpectedSubj> = [true, false]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -87,9 +86,8 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     const struct = x.boolean().optional()
 
     type ExpectedSubj = boolean | undefined
-    type ExpectedSubjects = [ExpectedSubj, ...ExpectedSubj[]]
 
-    const subjects: ExpectedSubjects = [true, false, undefined]
+    const subjects: Array<ExpectedSubj> = [true, false, undefined]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -167,9 +165,8 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     const struct = x.boolean().nullable()
 
     type ExpectedSubj = boolean | null
-    type ExpectedSubjects = [ExpectedSubj, ...ExpectedSubj[]]
 
-    const subjects: ExpectedSubjects = [true, false, null]
+    const subjects: Array<ExpectedSubj> = [true, false, null]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -248,9 +245,8 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     const struct = x.boolean().optional().nullable()
 
     type ExpectedSubj = boolean | undefined | null
-    type ExpectedSubjects = [ExpectedSubj, ...ExpectedSubj[]]
 
-    const subjects: ExpectedSubjects = [true, false, null, undefined]
+    const subjects: Array<ExpectedSubj> = [true, false, null, undefined]
 
     foldA: {
       const construct = x.makeStruct(schema)
