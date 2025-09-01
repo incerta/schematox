@@ -13,6 +13,7 @@ Currently, it's a small, not well-known project so we don't need any strict cont
 - `subject type` - the TypeScript type of the schema subject
 - `brand` - intersection which makes primitive type nominal
 - `schema depth` - the number of nested levels a compound schema carries
+- `nested schema` - a schema embedded within a compound schema
 - `schema range parameter` - schema type dependent parameter used as value size restriction
 - `fold label` - code parts in tests that are not supposed to be copy pasted from test to test `foldA`, `foldB` etc.
 

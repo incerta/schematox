@@ -24,8 +24,9 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
   it.todo('description + max + min + brand + nullable + optional')
 })
 
-describe('ERROR_CODE.invalidType (foldC)', () => {
+describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
   it.todo('iterate over fixture.DATA_TYPE')
+  it.todo('InvalidSubject error of nested schema should have correct path/schema/subject')
 })
 
 describe('ERROR_CODE.invalidRange (foldD)', () => {
@@ -34,8 +35,10 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
   it.todo('min + max')
 })
 
-describe('Schema specifics (foldA)', () => {
-  // depends on schema type
+describe('Compound schema specifics (foldA)', () => {
+  it.todo('nested primitive schema: optional + nullable + brand')
+  it.todo('nested compound schema: optional + nullable')
+  it.todo('nested by itself (schema depth: 4)')
 })
 ```
 
@@ -235,6 +238,60 @@ it('min', () => {
           schema: schema,
           subject: subject,
           path: [],
+        },
+      ]
+
+      const parsedSchema = x.parse(schema, subject)
+      const parsedConstruct = construct.parse(subject)
+      const parsedStruct = struct.parse(subject)
+
+      expect(parsedSchema.left).toStrictEqual(expectedError)
+      expect(parsedConstruct.left).toStrictEqual(expectedError)
+      expect(parsedStruct.left).toStrictEqual(expectedError)
+    }
+  }
+})
+```
+
+# Fold E
+
+```typescript
+it('InvalidSubject error of nested schema should have correct path/schema/subject', () => {
+  const schema = {
+    type: 'array',
+    of: { type: 'array', of: { type: 'boolean' } },
+  } as const satisfies x.Schema
+
+  const struct = x.array(x.array(x.boolean()))
+  const samples: Array<
+    [
+      subj: unknown[],
+      invalidSubj: unknown,
+      invalidSubjSchema: x.Schema,
+      errorPath: x.ErrorPath,
+    ]
+  > = [
+    [[[null, false, true]], null, schema.of.of, [0, 0]],
+    [[[], [null, false, true]], null, schema.of.of, [1, 0]],
+    [[[], [], [null, false, true]], null, schema.of.of, [2, 0]],
+    [[[true, 'str', true]], 'str', schema.of.of, [0, 1]],
+    [[[], [true, 'str', true]], 'str', schema.of.of, [1, 1]],
+    [[[], [], [true, 'str', true]], 'str', schema.of.of, [2, 1]],
+    [[[true, false, 69]], 69, schema.of.of, [0, 2]],
+    [[[], [true, false, 69]], 69, schema.of.of, [1, 2]],
+    [[[], [], [true, false, 69]], 69, schema.of.of, [2, 2]],
+  ]
+
+  foldE: {
+    const construct = x.makeStruct(schema)
+
+    for (const [subject, invalidSubj, invalidSubjSchema, path] of samples) {
+      const expectedError = [
+        {
+          path,
+          code: x.ERROR_CODE.invalidType,
+          schema: invalidSubjSchema,
+          subject: invalidSubj,
         },
       ]
 
