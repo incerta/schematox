@@ -496,7 +496,6 @@ describe('Parse RECORD schema with VALID subject', () => {
     const subject = {
       x: 'a',
       y: 'c',
-      z: undefined,
     }
 
     const expectedSubject = {

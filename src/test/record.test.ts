@@ -171,7 +171,7 @@ describe('Check type inference and parse/validate/guard struct method', () => {
     const parsed = struct.parse({})
 
     if (parsed.right) {
-      type Expected = Record<string, string | null | undefined>
+      type Expected = Record<string, string | null>
       type Actual = typeof parsed.right
 
       check<Expected, Actual>()

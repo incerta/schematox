@@ -978,7 +978,7 @@ describe('Compound schema specifics (foldA)', () => {
       //
       array: boolean[]
       object: { x: boolean }
-      record: Record<string, boolean | undefined>
+      record: Record<string, boolean>
       union: boolean
     }
 

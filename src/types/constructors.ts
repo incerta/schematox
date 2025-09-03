@@ -78,7 +78,7 @@ export type Con_RecordSchema_SubjT<T extends RecordSchema> = T extends {
       U extends StringSchema
         ? ExtWith_Brand_SubjT<U, Con_PrimitiveSchema_SubjT<U>>
         : string,
-      V extends Schema ? Con_Schema_SubjT<V> | undefined : never
+      V extends Schema ? Con_Schema_SubjT<V> : never
     >
   : never
 
