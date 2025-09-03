@@ -16,7 +16,6 @@ describe('Record schema programmatic definition', () => {
 
     expect(struct.__schema).toStrictEqual({
       type: 'record',
-      key: { type: 'string' },
       of: {
         type: 'object',
         of: {
@@ -46,7 +45,6 @@ describe('Record schema programmatic definition', () => {
 
     expect(struct.__schema).toStrictEqual({
       type: 'record',
-      key: { type: 'string' },
       of: { type: 'string' },
       optional: true,
     })
@@ -63,7 +61,6 @@ describe('Record schema programmatic definition', () => {
 
     expect(struct.__schema).toStrictEqual({
       type: 'record',
-      key: { type: 'string' },
       of: { type: 'string' },
       optional: true,
       description: 'x',
@@ -84,7 +81,6 @@ describe('Record schema programmatic definition', () => {
 
     expect(struct.__schema).toStrictEqual({
       type: 'record',
-      key: { type: 'string' },
       of: { type: 'string' },
       optional: true,
       description: 'x',
