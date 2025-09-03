@@ -947,11 +947,7 @@ describe('Compound schema specifics (foldA)', () => {
         //
         array: { type: 'array', of: { type: 'boolean' } },
         object: { type: 'object', of: { x: { type: 'boolean' } } },
-        record: {
-          type: 'record',
-          of: { type: 'boolean' },
-          key: { type: 'string' },
-        },
+        record: { type: 'record', of: { type: 'boolean' } },
         union: { type: 'union', of: [{ type: 'boolean' }] },
       },
     } as const satisfies x.Schema

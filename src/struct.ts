@@ -87,10 +87,14 @@ export function object<
 
 export function record<
   T extends { __schema: StructSchema },
-  U extends { __schema: StringSchema },
-  V extends { type: 'record'; of: T['__schema']; key: U['__schema'] },
->(of: T, key: U = { __schema: { type: 'string' } } as U) {
-  const schema = { type: 'record', of: of.__schema, key: key.__schema } as V
+  U extends { __schema: StringSchema } | undefined,
+  V extends U extends { __schema: infer W }
+    ? { type: 'record'; of: T['__schema']; key: W }
+    : { type: 'record'; of: T['__schema'] },
+>(of: T, key?: U) {
+  const schema = key
+    ? ({ type: 'record', of: of.__schema, key: key.__schema } as V)
+    : ({ type: 'record', of: of.__schema } as V)
 
   return makeStruct(schema)
 }
