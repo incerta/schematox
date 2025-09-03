@@ -1100,7 +1100,7 @@ describe('Construct RECORD subject type', () => {
         of: nested,
       } as const satisfies Schema
 
-      type Expected = Record<string, string | undefined>
+      type Expected = Record<string, string>
       type Actual = SubjectType<typeof schema>
 
       check<Actual, Expected>()
@@ -1114,7 +1114,7 @@ describe('Construct RECORD subject type', () => {
         optional: true,
       } as const satisfies Schema
 
-      type Expected = Record<string, string | undefined> | undefined
+      type Expected = Record<string, string> | undefined
       type Actual = SubjectType<typeof schema>
 
       check<Actual, Expected>()
@@ -1128,7 +1128,7 @@ describe('Construct RECORD subject type', () => {
         nullable: true,
       } as const satisfies Schema
 
-      type Expected = Record<string, string | undefined> | null
+      type Expected = Record<string, string> | null
       type Actual = SubjectType<typeof schema>
 
       check<Actual, Expected>()
@@ -1143,7 +1143,7 @@ describe('Construct RECORD subject type', () => {
         nullable: true,
       } as const satisfies Schema
 
-      type Expected = Record<string, string | undefined> | null | undefined
+      type Expected = Record<string, string> | null | undefined
       type Actual = SubjectType<typeof schema>
 
       check<Actual, Expected>()
@@ -1195,12 +1195,11 @@ describe('Construct RECORD subject type', () => {
 
       type Expected = Record<
         string,
-        | {
-            object: { x: T }
-            array: T[]
-            union: T
-          }
-        | undefined
+        {
+          object: { x: T }
+          array: T[]
+          union: T
+        }
       >
 
       type Actual = SubjectType<typeof schema>
@@ -1241,12 +1240,11 @@ describe('Construct RECORD subject type', () => {
 
       type Expected = Record<
         string,
-        | {
-            object?: { x: T } | null | undefined
-            array?: T[] | null | undefined
-            union?: string | null | undefined
-          }
-        | undefined
+        {
+          object?: { x: T } | null | undefined
+          array?: T[] | null | undefined
+          union?: string | null | undefined
+        }
       >
 
       type Actual = SubjectType<typeof schema>
