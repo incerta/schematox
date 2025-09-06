@@ -2,17 +2,107 @@ import * as x from '../../'
 import * as fixture from '../fixtures'
 
 describe('Type inference and parse by schema/construct/struct (foldA)', () => {
-  it('required', () => {
+  it('branded key', () => {
     const schema = {
-      type: 'object',
-      of: { x: { type: 'boolean' } },
+      type: 'record',
+      key: { type: 'string', brand: ['x', 'y'] },
+      of: { type: 'boolean' },
     } as const satisfies x.Schema
 
-    const struct = x.object({ x: x.boolean() })
+    const struct = x.record(x.boolean(), x.string().brand('x', 'y'))
 
-    type ExpectedSubj = { x: boolean }
+    type Key = string & { __x: 'y' }
+    type ExpectedSubj = Record<Key, boolean>
 
-    const subjects: Array<ExpectedSubj> = [{ x: true }, { x: false }]
+    const subjects: Array<ExpectedSubj> = [
+      {},
+      // @ts-expect-error must not allow not branded string key declaration
+      { ['x']: true },
+      { ['x' as Key]: false },
+    ]
+
+    // @ts-expect-error must not allow not branded string property access
+    subjects[1]!['x'] = false
+
+    foldA: {
+      const construct = x.makeStruct(schema)
+
+      /* ensure that schema/construct/struct subject types are identical */
+
+      type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
+
+      x.tCh<ConstructSchemaSubj, ExpectedSubj>()
+      x.tCh<ExpectedSubj, ConstructSchemaSubj>()
+
+      type SchemaSubj = x.Infer<typeof schema>
+
+      x.tCh<SchemaSubj, ExpectedSubj>()
+      x.tCh<ExpectedSubj, SchemaSubj>()
+
+      type StructSubj = x.Infer<typeof struct.__schema>
+
+      x.tCh<StructSubj, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StructSubj>()
+
+      /* parsed either type check */
+
+      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+
+      const parsed = x.parse(schema, undefined)
+
+      type SchemaParsed = typeof parsed
+
+      x.tCh<SchemaParsed, ExpectedParsed>()
+      x.tCh<ExpectedParsed, SchemaParsed>()
+
+      type ConstructParsed = ReturnType<typeof construct.parse>
+
+      x.tCh<ConstructParsed, ExpectedParsed>()
+      x.tCh<ExpectedParsed, ConstructParsed>()
+
+      type StructParsed = ReturnType<typeof struct.parse>
+
+      x.tCh<StructParsed, ExpectedParsed>()
+      x.tCh<ExpectedParsed, StructParsed>()
+
+      /* runtime schema check */
+
+      expect(struct.__schema).toStrictEqual(schema)
+      expect(construct.__schema).toStrictEqual(schema)
+      expect(construct.__schema === schema).toBe(false)
+
+      /* parse result check */
+
+      for (const subj of subjects) {
+        const schemaParsed = x.parse(schema, subj)
+
+        expect(schemaParsed.left).toBe(undefined)
+        expect(schemaParsed.right).toStrictEqual(subj)
+
+        const constructParsed = construct.parse(subj)
+
+        expect(constructParsed.left).toBe(undefined)
+        expect(constructParsed.right).toStrictEqual(subj)
+
+        const structParsed = construct.parse(subj)
+
+        expect(structParsed.left).toBe(undefined)
+        expect(structParsed.right).toStrictEqual(subj)
+      }
+    }
+  })
+
+  it('required', () => {
+    const schema = {
+      type: 'record',
+      of: { type: 'boolean' },
+    } as const satisfies x.Schema
+
+    const struct = x.record(x.boolean())
+
+    type ExpectedSubj = Record<string, boolean>
+
+    const subjects: Array<ExpectedSubj> = [{}, { x: true }, { x: false }]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -84,16 +174,16 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
   it('optional', () => {
     const schema = {
-      type: 'object',
-      of: { x: { type: 'boolean' } },
+      type: 'record',
+      of: { type: 'boolean' },
       optional: true,
     } as const satisfies x.Schema
 
-    const struct = x.object({ x: x.boolean() }).optional()
+    const struct = x.record(x.boolean()).optional()
 
-    type ExpectedSubj = { x: boolean } | undefined
+    type ExpectedSubj = Record<string, boolean> | undefined
 
-    const subjects: Array<ExpectedSubj> = [{ x: true }, undefined]
+    const subjects: Array<ExpectedSubj> = [{}, { x: true }]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -165,14 +255,14 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
   it('nullable', () => {
     const schema = {
-      type: 'object',
-      of: { x: { type: 'boolean' } },
+      type: 'record',
+      of: { type: 'boolean' },
       nullable: true,
     } as const satisfies x.Schema
 
-    const struct = x.object({ x: x.boolean() }).nullable()
+    const struct = x.record(x.boolean()).nullable()
 
-    type ExpectedSubj = { x: boolean } | null
+    type ExpectedSubj = Record<string, boolean> | null
 
     const subjects: Array<ExpectedSubj> = [{ x: true }, null]
 
@@ -244,17 +334,21 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     }
   })
 
-  it('optional + nullable', () => {
+  it('optional + nullable + branded key', () => {
     const schema = {
-      type: 'object',
-      of: { x: { type: 'boolean' } },
+      type: 'record',
+      key: { type: 'string', brand: ['x', 'y'] },
+      of: { type: 'boolean' },
       optional: true,
       nullable: true,
     } as const satisfies x.Schema
 
-    const struct = x.object({ x: x.boolean() }).optional().nullable()
+    const struct = x
+      .record(x.boolean(), x.string().brand('x', 'y'))
+      .optional()
+      .nullable()
 
-    type ExpectedSubj = { x: boolean } | undefined | null
+    type ExpectedSubj = Record<string, boolean> | undefined | null
 
     const subjects: Array<ExpectedSubj> = [{ x: true }, undefined, null]
 
@@ -330,12 +424,12 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 describe('Struct parameter keys reduction and schema immutability (foldB)', () => {
   it('optional', () => {
     const schema = {
-      type: 'object',
-      of: { x: { type: 'boolean' } },
+      type: 'record',
+      of: { type: 'boolean' },
       optional: true,
     } as const satisfies x.Schema
 
-    const prevStruct = x.object({ x: x.boolean() })
+    const prevStruct = x.record(x.boolean())
     const struct = prevStruct.optional()
 
     type ExpectedKeys = '__schema' | 'description' | 'nullable' | 'parse'
@@ -382,13 +476,13 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
   it('optional + nullable', () => {
     const schema = {
-      type: 'object',
-      of: { x: { type: 'boolean' } },
+      type: 'record',
+      of: { type: 'boolean' },
       optional: true,
       nullable: true,
     } as const satisfies x.Schema
 
-    const prevStruct = x.object({ x: x.boolean() }).optional()
+    const prevStruct = x.record(x.boolean()).optional()
     const struct = prevStruct.nullable()
 
     type ExpectedKeys = '__schema' | 'description' | 'parse'
@@ -435,16 +529,15 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
   it('optional + nullable + description', () => {
     const schema = {
-      type: 'object',
-      of: { x: { type: 'boolean' } },
+      type: 'record',
+      of: { type: 'boolean' },
       optional: true,
       nullable: true,
       description: 'x',
     } as const satisfies x.Schema
 
-    const prevStruct = x.object({ x: x.boolean() }).optional().nullable()
-
-    const struct = prevStruct.description(schema.description)
+    const prevStruct = x.record(x.boolean()).optional().nullable()
+    const struct = prevStruct.description('x')
 
     type ExpectedKeys = '__schema' | 'parse'
 
@@ -500,8 +593,9 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x
       .object({ x: x.boolean() })
       .description(schema.description)
+      .nullable()
 
-    const struct = prevStruct.nullable().optional()
+    const struct = prevStruct.optional()
 
     type ExpectedKeys = '__schema' | 'parse'
 
@@ -549,12 +643,12 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
   it('iterate over fixture.DATA_TYPE', () => {
     const schema = {
-      type: 'object',
-      of: { x: { type: 'boolean' } },
+      type: 'record',
+      of: { type: 'boolean' },
     } as const satisfies x.Schema
 
-    const struct = x.object({ x: x.boolean() })
-    const subjects = fixture.DATA_TYPE
+    const struct = x.record(x.boolean())
+    const subjects = fixture.DATA_TYPE.filter(([type]) => type !== 'object')
 
     foldC: {
       const construct = x.makeStruct(schema)
@@ -588,35 +682,31 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
 
   it('InvalidSubject error of nested schema should have correct path/schema/subject', () => {
     const schema = {
-      type: 'object',
+      type: 'record',
       of: {
-        x: {
-          type: 'array',
+        type: 'array',
+        of: {
+          type: 'object',
           of: {
-            type: 'object',
-            of: {
-              y: { type: 'literal', of: '_' },
-            },
+            y: { type: 'literal', of: '_' },
           },
         },
       },
     } as const satisfies x.Schema
 
-    const struct = x.object({
-      x: x.array(x.object({ y: x.literal('_') })),
-    })
+    const struct = x.record(x.array(x.object({ y: x.literal('_') })))
 
     // prettier-ignore
     const samples: Array<[
-        subj: { x: Array<{ y: unknown }> },
+        subj: Record<string, Array<{ y: unknown }>>,
         invalidSubj: unknown,
         invalidSubjSchema: x.Schema,
         errorPath: x.ErrorPath,
       ]
     > = [
-      [{ x: [{ y: '+' }, { y: '_' }, { y: '_' }] }, '+', schema.of.x.of.of.y, ['x', 0, 'y']],
-      [{ x: [{ y: '_' }, { y: '+' }, { y: '_' }] }, '+', schema.of.x.of.of.y, ['x', 1, 'y']],
-      [{ x: [{ y: '_' }, { y: '_' }, { y: '+' }] }, '+', schema.of.x.of.of.y, ['x', 2, 'y']],
+      [{ x: [{ y: '+' }, { y: '_' }, { y: '_' }] }, '+', schema.of.of.of.y, ['x', 0, 'y']],
+      [{ y: [{ y: '_' }, { y: '+' }, { y: '_' }] }, '+', schema.of.of.of.y, ['y', 1, 'y']],
+      [{ z: [{ y: '_' }, { y: '_' }, { y: '+' }] }, '+', schema.of.of.of.y, ['z', 2, 'y']],
     ]
 
     foldE: {
@@ -647,31 +737,34 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
 describe('Compound schema specifics (foldA)', () => {
   it('nested primitive schema: optional + nullable + brand', () => {
     const schema = {
-      type: 'object',
+      type: 'record',
       of: {
-        x: {
-          type: 'boolean',
-          optional: true,
-          nullable: true,
-          brand: ['x', 'y'],
-        },
+        type: 'boolean',
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
       },
     } as const satisfies x.Schema
 
-    const struct = x.object({
-      x: x
+    const struct = x.record(
+      x
         .boolean()
         .optional()
         .nullable()
-        .brand(...schema.of.x.brand),
-    })
+        .brand(...schema.of.brand)
+    )
 
     type Branded = boolean & { __x: 'y' }
+
+    // TODO: expected that `{ x?: Branded | undefined | null }` will not be
+    //       equivalent to `Record<Branded | undefined | null>`
+    //
+    //       either `tCh` has a flaw or typescript itself, need to investigate this later
+    //
     type ExpectedSubj = { x?: Branded | undefined | null }
 
     const subjects = [
       {},
-      { x: undefined },
       { x: null },
       { x: true as Branded },
       { x: false as Branded },
@@ -745,27 +838,34 @@ describe('Compound schema specifics (foldA)', () => {
     }
   })
 
+  /**
+   * We ensure that when a developer makes `Object.keys` on a record,
+   * they are, in fact, keys of existing entities within its record.
+   **/
+  it('parsed record should not keep if its value is undefined', () => {
+    const struct = x.record(x.boolean().optional())
+    const parsed = struct.parse({ x: undefined })
+
+    expect(parsed.right).toStrictEqual({})
+  })
+
   it('nested compound schema: optional + nullable', () => {
     const schema = {
-      type: 'object',
+      type: 'record',
       of: {
-        x: {
-          type: 'array',
-          of: { type: 'boolean' },
-          optional: true,
-          nullable: true,
-        },
+        type: 'array',
+        of: { type: 'boolean' },
+        optional: true,
+        nullable: true,
       },
     } as const satisfies x.Schema
 
-    const struct = x.object({ x: x.array(x.boolean()).optional().nullable() })
+    const struct = x.record(x.array(x.boolean()).optional().nullable())
 
     type ExpectedSubj = { x?: Array<boolean> | undefined | null }
 
     const subjects = [
-      {},
       { x: [] },
-      { x: undefined },
       { x: null },
       { x: [] },
       { x: [true] },
@@ -841,158 +941,24 @@ describe('Compound schema specifics (foldA)', () => {
 
   it('nested by itself (schema depth: 4)', () => {
     const schema = {
-      type: 'object',
+      type: 'record',
       of: {
-        x: {
-          type: 'object',
-          of: {
-            y: {
-              type: 'object',
-              of: {
-                z: { type: 'boolean' },
-              },
-            },
-          },
+        type: 'record',
+        of: {
+          type: 'record',
+          of: { type: 'boolean' },
         },
       },
     } as const satisfies x.Schema
 
-    const struct = x.object({
-      x: x.object({ y: x.object({ z: x.boolean() }) }),
-    })
+    const struct = x.record(x.record(x.record(x.boolean())))
 
-    type ExpectedSubj = { x: { y: { z: boolean } } }
+    type ExpectedSubj = Record<string, Record<string, Record<string, boolean>>>
 
     const subjects = [
       { x: { y: { z: true } } },
       { x: { y: { z: false } } },
     ] as const satisfies Array<ExpectedSubj>
-
-    foldA: {
-      const construct = x.makeStruct(schema)
-
-      /* ensure that schema/construct/struct subject types are identical */
-
-      type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
-
-      x.tCh<ConstructSchemaSubj, ExpectedSubj>()
-      x.tCh<ExpectedSubj, ConstructSchemaSubj>()
-
-      type SchemaSubj = x.Infer<typeof schema>
-
-      x.tCh<SchemaSubj, ExpectedSubj>()
-      x.tCh<ExpectedSubj, SchemaSubj>()
-
-      type StructSubj = x.Infer<typeof struct.__schema>
-
-      x.tCh<StructSubj, ExpectedSubj>()
-      x.tCh<ExpectedSubj, StructSubj>()
-
-      /* parsed either type check */
-
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
-
-      const parsed = x.parse(schema, undefined)
-
-      type SchemaParsed = typeof parsed
-
-      x.tCh<SchemaParsed, ExpectedParsed>()
-      x.tCh<ExpectedParsed, SchemaParsed>()
-
-      type ConstructParsed = ReturnType<typeof construct.parse>
-
-      x.tCh<ConstructParsed, ExpectedParsed>()
-      x.tCh<ExpectedParsed, ConstructParsed>()
-
-      type StructParsed = ReturnType<typeof struct.parse>
-
-      x.tCh<StructParsed, ExpectedParsed>()
-      x.tCh<ExpectedParsed, StructParsed>()
-
-      /* runtime schema check */
-
-      expect(struct.__schema).toStrictEqual(schema)
-      expect(construct.__schema).toStrictEqual(schema)
-      expect(construct.__schema === schema).toBe(false)
-
-      /* parse result check */
-
-      for (const subj of subjects) {
-        const schemaParsed = x.parse(schema, subj)
-
-        expect(schemaParsed.left).toBe(undefined)
-        expect(schemaParsed.right).toStrictEqual(subj)
-
-        const constructParsed = construct.parse(subj)
-
-        expect(constructParsed.left).toBe(undefined)
-        expect(constructParsed.right).toStrictEqual(subj)
-
-        const structParsed = construct.parse(subj)
-
-        expect(structParsed.left).toBe(undefined)
-        expect(structParsed.right).toStrictEqual(subj)
-      }
-    }
-  })
-
-  it('each schema type as nested schema', () => {
-    const schema = {
-      type: 'object',
-      of: {
-        boolean: { type: 'boolean' },
-        literalBoolean: { type: 'literal', of: true },
-        literalNumber: { type: 'literal', of: 0 },
-        number: { type: 'number' },
-        string: { type: 'string' },
-        //
-        array: { type: 'array', of: { type: 'boolean' } },
-        object: { type: 'object', of: { x: { type: 'boolean' } } },
-        record: { type: 'record', of: { type: 'boolean' } },
-        union: { type: 'union', of: [{ type: 'boolean' }] },
-      },
-    } as const satisfies x.Schema
-
-    const struct = x.object({
-      boolean: x.boolean(),
-      literalBoolean: x.literal(true),
-      literalNumber: x.literal(0),
-      number: x.number(),
-      string: x.string(),
-      //
-      array: x.array(x.boolean()),
-      object: x.object({ x: x.boolean() }),
-      record: x.record(x.boolean()),
-      union: x.union([x.boolean()]),
-    })
-
-    type ExpectedSubj = {
-      boolean: boolean
-      literalBoolean: true
-      literalNumber: 0
-      number: number
-      string: string
-      //
-      array: boolean[]
-      object: { x: boolean }
-      record: Record<string, boolean>
-      union: boolean
-    }
-
-    const subjects: Array<ExpectedSubj> = [
-      {
-        boolean: true,
-        literalBoolean: true,
-        literalNumber: 0,
-        number: 69,
-        string: 'x',
-        //
-        array: [true, false],
-        object: { x: true },
-        record: { x: true },
-        union: false,
-      },
-    ]
 
     foldA: {
       const construct = x.makeStruct(schema)
