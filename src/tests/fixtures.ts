@@ -32,6 +32,7 @@ export const DATA_TYPE = [
   ['array', [[], ['x', 'y']]],
   ['object', [{}, { x: 'y' }]],
   ['record', []], // added to be consistent with `foldC`
+  ['union', []], // added to be consistent with `foldC`
   ['set', [new Set(), new WeakSet()]],
   ['map', [new Map(), new WeakMap()]],
   ['error', [new Error()]],
