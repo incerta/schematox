@@ -602,18 +602,18 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
       },
     } as const satisfies x.Schema
 
-    const struct = x.object({
-      x: x.array(x.object({ y: x.literal('_') })),
-    })
+    const struct = x.object({ x: x.array(x.object({ y: x.literal('_') })) })
 
     // prettier-ignore
     const samples: Array<[
-        subj: { x: Array<{ y: unknown }> },
+        subj: unknown,
         invalidSubj: unknown,
         invalidSubjSchema: x.Schema,
         errorPath: x.ErrorPath,
       ]
     > = [
+      [null, null, schema, []],
+      [{}, undefined, schema.of.x, ['x']],
       [{ x: [{ y: '+' }, { y: '_' }, { y: '_' }] }, '+', schema.of.x.of.of.y, ['x', 0, 'y']],
       [{ x: [{ y: '_' }, { y: '+' }, { y: '_' }] }, '+', schema.of.x.of.of.y, ['x', 1, 'y']],
       [{ x: [{ y: '_' }, { y: '_' }, { y: '+' }] }, '+', schema.of.x.of.of.y, ['x', 2, 'y']],
@@ -641,6 +641,50 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
         expect(parsedStruct.left).toStrictEqual(expectedError)
       }
     }
+  })
+
+  it('multiple errors', () => {
+    const schema = {
+      type: 'object',
+      of: {
+        x: { type: 'boolean' },
+        y: { type: 'literal', of: true },
+        z: { type: 'literal', of: 0 },
+      },
+    } as const satisfies x.Schema
+
+    const struct = x.object({
+      x: x.boolean(),
+      y: x.literal(true),
+      z: x.literal(0),
+    })
+
+    const construct = x.makeStruct(schema)
+
+    const subject = { y: null, z: 0 }
+
+    const expectedError: x.ParsingError = [
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: ['x'],
+        schema: schema.of.x,
+        subject: undefined,
+      },
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: ['y'],
+        schema: schema.of.y,
+        subject: null,
+      },
+    ]
+
+    const parsedSchema = x.parse(schema, subject)
+    const parsedStruct = struct.parse(subject)
+    const parsedConstruct = construct.parse(subject)
+
+    expect(parsedSchema.left).toStrictEqual(expectedError)
+    expect(parsedStruct.left).toStrictEqual(expectedError)
+    expect(parsedConstruct.left).toStrictEqual(expectedError)
   })
 })
 
