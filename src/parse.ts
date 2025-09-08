@@ -1,9 +1,8 @@
 import { ERROR_CODE } from './error'
-import { left, right } from './utils/fp'
-import { verifyPrimitive } from './verify-primitive'
+import { left, right, verifyPrimitive, makeErrorPath } from './utils'
 
 import type { InvalidSubject, ErrorPath, ParsingError } from './error'
-import type { Either } from './utils/fp'
+import type { Either } from './types/utils'
 import type { Schema } from './types/compounds'
 import type { Con_Schema_SubjT } from './types/constructors'
 
@@ -13,7 +12,7 @@ export function parse<T extends Schema>(
 ): Either<ParsingError, Con_Schema_SubjT<T>>
 
 export function parse(
-  this: ErrorPath | void,
+  this: ErrorPath | unknown,
   schema: Schema,
   subject: unknown
 ): Either<ParsingError, unknown> {
@@ -36,7 +35,7 @@ export function parse(
       return left([
         {
           code: ERROR_CODE.invalidType,
-          path: Array.isArray(this) ? this : [],
+          path: makeErrorPath(this),
           schema,
           subject,
         },
@@ -50,7 +49,7 @@ export function parse(
       const nestedSchema = schema.of[key] as Schema
       const nestedValue = narrowedSubj[key]
 
-      const parsed = parse.bind([...(Array.isArray(this) ? this : []), key])(
+      const parsed = parse.bind(makeErrorPath(this, key))(
         nestedSchema,
         nestedValue
       )
@@ -81,7 +80,7 @@ export function parse(
       return left([
         {
           code: ERROR_CODE.invalidType,
-          path: Array.isArray(this) ? this : [],
+          path: makeErrorPath(this),
           schema,
           subject,
         },
@@ -97,7 +96,7 @@ export function parse(
         continue
       }
 
-      const parsed = parse.bind([...(Array.isArray(this) ? this : []), key])(
+      const parsed = parse.bind(makeErrorPath(this, key))(
         schema.of,
         nestedValue
       )
@@ -122,7 +121,7 @@ export function parse(
       return left([
         {
           code: ERROR_CODE.invalidType,
-          path: Array.isArray(this) ? this : [],
+          path: makeErrorPath(this),
           subject,
           schema,
         },
@@ -135,7 +134,7 @@ export function parse(
       const nestedSchema = schema.of
       const nestedValue = subject[i]
 
-      const parsed = parse.bind([...(Array.isArray(this) ? this : []), i])(
+      const parsed = parse.bind(makeErrorPath(this, i))(
         nestedSchema,
         nestedValue
       )
@@ -159,7 +158,7 @@ export function parse(
       return left([
         {
           code: ERROR_CODE.invalidRange,
-          path: Array.isArray(this) ? this : [],
+          path: makeErrorPath(this),
           subject,
           schema,
         },
@@ -173,7 +172,7 @@ export function parse(
       return left([
         {
           code: ERROR_CODE.invalidRange,
-          path: Array.isArray(this) ? this : [],
+          path: makeErrorPath(this),
           subject,
           schema,
         },
@@ -195,25 +194,25 @@ export function parse(
     return left([
       {
         code: ERROR_CODE.invalidType,
-        path: Array.isArray(this) ? this : [],
+        path: makeErrorPath(this),
         subject,
         schema,
       },
     ])
   }
 
-  const verified = verifyPrimitive(schema, subject)
+  const errorCodeOrTrue = verifyPrimitive(schema, subject)
 
-  if (verified === true) {
-    return right(subject)
+  if (errorCodeOrTrue !== true) {
+    return left([
+      {
+        code: errorCodeOrTrue,
+        path: makeErrorPath(this),
+        subject,
+        schema,
+      },
+    ])
   }
 
-  return left([
-    {
-      code: verified,
-      path: Array.isArray(this) ? this : [],
-      subject,
-      schema,
-    },
-  ])
+  return right(subject)
 }

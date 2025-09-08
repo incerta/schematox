@@ -4,9 +4,9 @@ export type ErrorCode = (typeof ERROR_CODE)[keyof typeof ERROR_CODE]
 
 export type InvalidSubject = {
   code: ErrorCode
+  path: ErrorPath
   schema: Schema
   subject: unknown
-  path: ErrorPath
 }
 
 export type ParsingError = InvalidSubject[]

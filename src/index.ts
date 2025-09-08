@@ -14,8 +14,7 @@ export {
   union,
 } from './struct'
 
-export { tCh } from './check'
-export { left, right } from './utils/fp'
+export { tCh, left, right, verifyPrimitive, makeErrorPath } from './utils'
 export { parse } from './parse'
 
 export type {
@@ -78,4 +77,4 @@ export type {
   ExtWith_SchemaParams_SubjT,
 } from './types/extensions'
 
-export type { Either, Left, Right } from './utils/fp'
+export type { Either, Left, Right } from './types/utils'

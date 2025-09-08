@@ -1,7 +1,17 @@
 import { ERROR_CODE } from './error'
 
-import { ErrorCode } from './error'
+import type { ErrorCode, ErrorPath } from './error'
 import type { PrimitiveSchema } from './types/primitives'
+import type { Left, Right } from './types/utils'
+
+/**
+ * Type equivalence check utility
+ * @example tCh<TypeA, TypeB>(); tCh<TypeB, TypeA>()
+ **/
+export const tCh = <T, U extends T = T>(...x: T[]): U[] => x as U[]
+
+export const left = <T>(value: T): Left<T> => ({ left: value })
+export const right = <T>(value: T): Right<T> => ({ right: value })
 
 export function verifyPrimitive(
   schema: PrimitiveSchema,
@@ -81,4 +91,17 @@ export function verifyPrimitive(
       return true
     }
   }
+}
+
+export function makeErrorPath(
+  parentPath: ErrorPath | unknown,
+  keyOrIndex?: number | string
+): ErrorPath {
+  const pathUpdate = Array.isArray(parentPath) ? [...parentPath] : []
+
+  if (keyOrIndex !== undefined) {
+    pathUpdate.push(keyOrIndex)
+  }
+
+  return pathUpdate
 }
