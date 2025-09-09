@@ -106,6 +106,9 @@ export type Con_Schema_SubjT<T extends Schema> = ExtWith_SchemaParams_SubjT<
             : never
 >
 
+/**
+ * @example Infer<typeof struct> | Infer<typeof schema>
+ **/
 export type Infer<T extends { __schema: Schema } | Schema> = T extends {
   __schema: Schema
 }
@@ -113,10 +116,3 @@ export type Infer<T extends { __schema: Schema } | Schema> = T extends {
   : T extends Schema
     ? Con_Schema_SubjT<T>
     : never
-
-/**
- * @deprecated use `Infer` instead
- *
- * We will drop support of this alias in version 1.0.0 of the module
- **/
-export type SubjectType<T extends { __schema: Schema } | Schema> = Infer<T>

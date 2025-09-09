@@ -18,8 +18,7 @@ export { tCh, left, right, verifyPrimitive, makeErrorPath } from './utils'
 export { parse } from './parse'
 
 export type {
-  Infer, // @examples: Infer<typeof struct> | Infer<typeof schema>
-  SubjectType, // @deprecated in favor of "Infer"
+  Infer,
   //
   Con_Schema_SubjT,
   //
@@ -32,12 +31,7 @@ export type {
   MakeOptional,
 } from './types/constructors'
 
-export type {
-  ErrorCode,
-  ErrorPath,
-  InvalidSubject,
-  ParsingError,
-} from './error'
+export type { ErrorCode, ErrorPath, InvalidSubject } from './error'
 
 export type {
   PrimitiveSchema,

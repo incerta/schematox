@@ -36,7 +36,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -117,7 +117,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -198,7 +198,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -280,7 +280,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -663,7 +663,7 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
 
     const subject = { y: null, z: 0 }
 
-    const expectedError: x.ParsingError = [
+    const expectedError: x.InvalidSubject[] = [
       {
         code: x.ERROR_CODE.invalidType,
         path: ['x'],
@@ -743,7 +743,7 @@ describe('Compound schema specifics (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -837,7 +837,7 @@ describe('Compound schema specifics (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -934,7 +934,7 @@ describe('Compound schema specifics (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -1060,7 +1060,7 @@ describe('Compound schema specifics (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
