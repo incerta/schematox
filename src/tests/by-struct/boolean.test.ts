@@ -32,7 +32,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -111,7 +111,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -190,7 +190,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -270,7 +270,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.ParsingError, ExpectedSubj>
+      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 

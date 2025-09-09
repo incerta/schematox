@@ -1,7 +1,5 @@
 import type { Schema } from './types/compounds'
 
-export type ErrorCode = (typeof ERROR_CODE)[keyof typeof ERROR_CODE]
-
 export type InvalidSubject = {
   code: ErrorCode
   path: ErrorPath
@@ -9,11 +7,11 @@ export type InvalidSubject = {
   subject: unknown
 }
 
-export type ParsingError = InvalidSubject[]
-
 export type ErrorPath = Array<
   string /* object key */ | number /* array index */
 >
+
+export type ErrorCode = (typeof ERROR_CODE)[keyof typeof ERROR_CODE]
 
 export const ERROR_CODE = {
   invalidType: 'INVALID_TYPE',

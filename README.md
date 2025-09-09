@@ -83,7 +83,7 @@ Statically defined schema:
 
 ```typescript
 import { parse } from 'schematox'
-import type { Schema, SubjectType } from 'schematox'
+import type { Schema, Infer } from 'schematox'
 
 export const schema = {
   type: 'object',
@@ -96,22 +96,22 @@ export const schema = {
   },
 } as const satisfies Schema
 
-type User = SubjectType<typeof schema>
+type User = Infer<typeof schema>
   // ^?  { id: string & { __idFor: 'User' }, name: string }
 
 const subject = { id: '1'  name: 'John' }
 const parsed = parse(userSchema, subject)
-   // ^?  Either<ParsingError, User>
+   // ^?  Either<InvalidSubject[], User>
 
 parsed.left
-    // ^?  Either<ParsingError, User>
+    // ^?  Either<InvalidSubject[], User>
 
 parsed.right
     // ^?  User | undefined
 
 if (parsed.left) {
   parsed.left
-      // ^? ParsingError
+      // ^? InvalidSubject[]
   throw Error('Parsing error')
 }
 
@@ -125,29 +125,29 @@ Same schema but defined programmatically:
 
 ```typescript
 import { object, string } from 'schematox'
-import type { SubjectType } from 'schematox'
+import type { Infer } from 'schematox'
 
 const struct = object({
   id: string().brand('idFor', 'User'),
   name: string(),
 })
 
-type User = SubjectType<typeof struct>
+type User = Infer<typeof struct>
   // ^?  { id: string & { __idFor: 'User' }, name: string }
 
 const subject = { id: '1', name: 'John' }
 const parsed = struct.parse(subject)
-   // ^?  Either<ParsingError, User>
+   // ^?  Either<InvalidSubject[], User>
 
 parsed.left
-    // ^?  Either<ParsingError, User>
+    // ^?  Either<InvalidSubject[], User>
 
 parsed.right
     // ^?  User | undefined
 
 if (parsed.left) {
   parsed.left
-      // ^? ParsingError
+      // ^? InvalidSubject[]
   throw Error('Parsing error')
 }
 
@@ -198,8 +198,8 @@ const struct = string()
   .description('x')
 
 // (string & { __x: 'y' }) | undefined | null
-type FromSchema = SubjectType<typeof schema>
-type FromStruct = SubjectType<typeof struct>
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
 ```
 
 ### Number
@@ -224,8 +224,8 @@ const struct = number()
   .description('x')
 
 // (number & { __x: 'y' }) | undefined | null
-type FromSchema = SubjectType<typeof schema>
-type FromStruct = SubjectType<typeof struct>
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
 //
 ```
 
@@ -247,8 +247,8 @@ const struct = boolean() //
   .description('x')
 
 // (boolean & { __x: 'y' }) | undefined | null
-type FromSchema = SubjectType<typeof schema>
-type FromStruct = SubjectType<typeof struct>
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
 ```
 
 ### Literal
@@ -272,8 +272,8 @@ const struct = literal('x') //
   .description('x')
 
 // ('x' & { __x: 'y' }) | undefined | null
-type FromSchema = SubjectType<typeof schema>
-type FromStruct = SubjectType<typeof struct>
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
 ```
 
 ### Object
@@ -299,8 +299,8 @@ const struct = object({
   .description('x')
 
 // { x: string; y: number } | undefined | null
-type FromSchema = SubjectType<typeof schema>
-type FromStruct = SubjectType<typeof struct>
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
 ```
 
 ### Record
@@ -322,8 +322,8 @@ const userId = string().brand('idFor', 'user')
 const struct = object(number(), userId).optional().nullable().description('x')
 
 // Record<string & { __brand: ['idFor', 'user'] }, number | undefined>  | null | undefined
-type FromSchema = SubjectType<typeof schema>
-type FromStruct = SubjectType<typeof struct>
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
 ```
 
 ### Array
@@ -346,8 +346,8 @@ const struct = array(string())
   .description('x')
 
 // string[] | undefined | null
-type FromSchema = SubjectType<typeof schema>
-type FromStruct = SubjectType<typeof struct>
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
 ```
 
 ### Union
@@ -367,8 +367,8 @@ const struct = union([string(), number()])
   .description('x')
 
 // string | number | undefined | null
-type FromSchema = SubjectType<typeof schema>
-type FromStruct = SubjectType<typeof struct>
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
 ```
 
 ## Schema parameters
@@ -380,7 +380,7 @@ In the context of the object, optional values will be treated as optional proper
 ```typescript
 const struct = object({ x: string().optional() })
 
-type ExpectedSubjectType = {
+type ExpectedInfer = {
   x?: string | undefined
 }
 ```
@@ -450,7 +450,7 @@ import type {
   NumberSchema,
   LiteralSchema,
   BaseArraySchema,
-  SubjectType,
+  Infer,
 } from 'schematox'
 
 // Restricting model schema to one dimensional object
@@ -478,7 +478,7 @@ export type RepoTox = {
 // How repo model
 export type RepoModel<
   T extends RepoTox = RepoTox,
-  U extends Record<string, unknown> = SubjectType<T>,
+  U extends Record<string, unknown> = Infer<T>,
 > = {
   tox: T
   relations: FieldRelation[]

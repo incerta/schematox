@@ -1,7 +1,7 @@
 import { ERROR_CODE } from './error'
 import { left, right, verifyPrimitive, makeErrorPath } from './utils'
 
-import type { InvalidSubject, ErrorPath, ParsingError } from './error'
+import type { ErrorPath, InvalidSubject } from './error'
 import type { Either } from './types/utils'
 import type { Schema } from './types/compounds'
 import type { Con_Schema_SubjT } from './types/constructors'
@@ -9,13 +9,13 @@ import type { Con_Schema_SubjT } from './types/constructors'
 export function parse<T extends Schema>(
   schema: T,
   subject: unknown
-): Either<ParsingError, Con_Schema_SubjT<T>>
+): Either<InvalidSubject[], Con_Schema_SubjT<T>>
 
 export function parse(
   this: ErrorPath | unknown,
   schema: Schema,
   subject: unknown
-): Either<ParsingError, unknown> {
+): Either<InvalidSubject[], unknown> {
   const errors: InvalidSubject[] = []
 
   if (schema.optional === true && subject === undefined) {
