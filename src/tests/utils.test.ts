@@ -123,14 +123,72 @@ describe('Type equivalence check by `tCh` utility', () => {
   })
 })
 
-describe('Check `left` and `right` utilities', () => {
-  it('error: creates error object', () => {
-    expect(x.left('x')).toEqual({ left: 'x' })
+describe('Check ParseResult utilities', () => {
+  it('ParseResult typguards are functional', () => {
+    const parsed = x.boolean().parse(undefined)
+
+    if (parsed.success) {
+      x.tCh<typeof parsed.data, boolean>()
+      x.tCh<boolean, typeof parsed.data>()
+
+      x.tCh<typeof parsed.error, undefined>()
+      x.tCh<undefined, typeof parsed.error>()
+    }
+
+    if (parsed.data !== undefined) {
+      x.tCh<typeof parsed.data, boolean>()
+      x.tCh<boolean, typeof parsed.data>()
+
+      x.tCh<typeof parsed.error, undefined>()
+      x.tCh<undefined, typeof parsed.error>()
+    }
+
+    if (parsed.success === false) {
+      x.tCh<typeof parsed.error, x.InvalidSubject[]>()
+      x.tCh<x.InvalidSubject[], typeof parsed.error>()
+
+      x.tCh<typeof parsed.data, undefined>()
+      x.tCh<undefined, typeof parsed.data>()
+    }
+
+    if (parsed.error) {
+      x.tCh<typeof parsed.error, x.InvalidSubject[]>()
+      x.tCh<x.InvalidSubject[], typeof parsed.error>()
+
+      x.tCh<typeof parsed.data, undefined>()
+      x.tCh<undefined, typeof parsed.data>()
+    }
   })
 
-  it('data: creates data object', () => {
-    expect(x.right('x')).toEqual({ right: 'x' })
+  it('ParseError result', () => {
+    const invalidSubjects: x.InvalidSubject[] = [
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: [],
+        schema: { type: 'string' },
+        subject: undefined,
+      },
+    ]
+
+    const parseError = x.error(invalidSubjects)
+
+    expect('data' in parseError).toBe(false)
+    expect(parseError.success).toBe(false)
+    expect(parseError.error === invalidSubjects).toBe(true)
   })
+
+  it('ParseSuccess result', () => {
+    const validSubj = 'sample'
+    const parsedSuccess = x.data(validSubj)
+
+    expect('error' in parsedSuccess).toBe(false)
+    expect(parsedSuccess.success).toBe(true)
+    expect(parsedSuccess.data).toBe(validSubj)
+  })
+})
+
+it('PARAMS_BY_SCHEMA_TYPE is exported', () => {
+  expect(x.PARAMS_BY_SCHEMA_TYPE).toStrictEqual(x.PARAMS_BY_SCHEMA_TYPE)
 })
 
 describe('Check `verifyPrimitive` utility', () => {

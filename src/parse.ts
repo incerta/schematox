@@ -1,29 +1,28 @@
-import { ERROR_CODE } from './error'
-import { left, right, verifyPrimitive, makeErrorPath } from './utils'
+import { ERROR_CODE } from './constants'
+import { error, data, verifyPrimitive, makeErrorPath } from './utils'
 
-import type { ErrorPath, InvalidSubject } from './error'
-import type { Either } from './types/utils'
-import type { Schema } from './types/compounds'
+import type { ErrorPath, InvalidSubject, ParseResult } from './types/utils'
 import type { Con_Schema_SubjT } from './types/constructors'
+import type { Schema } from './types/compounds'
 
 export function parse<T extends Schema>(
   schema: T,
   subject: unknown
-): Either<InvalidSubject[], Con_Schema_SubjT<T>>
+): ParseResult<Con_Schema_SubjT<T>>
 
 export function parse(
   this: ErrorPath | unknown,
   schema: Schema,
   subject: unknown
-): Either<InvalidSubject[], unknown> {
+): ParseResult<unknown> {
   const errors: InvalidSubject[] = []
 
   if (schema.optional === true && subject === undefined) {
-    return right(undefined)
+    return data(undefined)
   }
 
   if (schema.nullable === true && subject === null) {
-    return right(null)
+    return data(null)
   }
 
   if (schema.type === 'object') {
@@ -32,7 +31,7 @@ export function parse(
       subject === null ||
       subject.constructor !== Object
     ) {
-      return left([
+      return error([
         {
           code: ERROR_CODE.invalidType,
           path: makeErrorPath(this),
@@ -54,21 +53,21 @@ export function parse(
         nestedValue
       )
 
-      if (parsed.left) {
-        parsed.left.forEach((err) => errors.push(err))
+      if (parsed.error) {
+        parsed.error.forEach((err) => errors.push(err))
         continue
       }
 
       if (Object.prototype.hasOwnProperty.call(narrowedSubj, key)) {
-        result[key] = parsed.right
+        result[key] = parsed.data
       }
     }
 
     if (errors.length) {
-      return left(errors)
+      return error(errors)
     }
 
-    return right(result)
+    return data(result)
   }
 
   if (schema.type === 'record') {
@@ -77,7 +76,7 @@ export function parse(
       subject === null ||
       subject.constructor !== Object
     ) {
-      return left([
+      return error([
         {
           code: ERROR_CODE.invalidType,
           path: makeErrorPath(this),
@@ -101,24 +100,24 @@ export function parse(
         nestedValue
       )
 
-      if (parsed.left) {
-        parsed.left.forEach((err) => errors.push(err))
+      if (parsed.error) {
+        parsed.error.forEach((err) => errors.push(err))
         continue
       }
 
-      result[key] = parsed.right
+      result[key] = parsed.data
     }
 
     if (errors.length) {
-      return left(errors)
+      return error(errors)
     }
 
-    return right(result)
+    return data(result)
   }
 
   if (schema.type === 'array') {
     if (Array.isArray(subject) === false) {
-      return left([
+      return error([
         {
           code: ERROR_CODE.invalidType,
           path: makeErrorPath(this),
@@ -139,23 +138,23 @@ export function parse(
         nestedValue
       )
 
-      if (parsed.left) {
-        parsed.left.forEach((err) => errors.push(err))
+      if (parsed.error) {
+        parsed.error.forEach((err) => errors.push(err))
         continue
       }
 
-      result.push(parsed.right)
+      result.push(parsed.data)
     }
 
     if (errors.length) {
-      return left(errors)
+      return error(errors)
     }
 
     if (
       typeof schema.minLength === 'number' &&
       result.length < schema.minLength
     ) {
-      return left([
+      return error([
         {
           code: ERROR_CODE.invalidRange,
           path: makeErrorPath(this),
@@ -169,7 +168,7 @@ export function parse(
       typeof schema.maxLength === 'number' &&
       result.length > schema.maxLength
     ) {
-      return left([
+      return error([
         {
           code: ERROR_CODE.invalidRange,
           path: makeErrorPath(this),
@@ -179,19 +178,19 @@ export function parse(
       ])
     }
 
-    return right(result)
+    return data(result)
   }
 
   if (schema.type === 'union') {
     for (const subSchema of schema.of) {
       const parsed = parse(subSchema, subject)
 
-      if (parsed.left === undefined) {
-        return right(parsed.right)
+      if (parsed.error === undefined) {
+        return data(parsed.data)
       }
     }
 
-    return left([
+    return error([
       {
         code: ERROR_CODE.invalidType,
         path: makeErrorPath(this),
@@ -204,7 +203,7 @@ export function parse(
   const errorCodeOrTrue = verifyPrimitive(schema, subject)
 
   if (errorCodeOrTrue !== true) {
-    return left([
+    return error([
       {
         code: errorCodeOrTrue,
         path: makeErrorPath(this),
@@ -214,5 +213,5 @@ export function parse(
     ])
   }
 
-  return right(subject)
+  return data(subject)
 }

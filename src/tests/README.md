@@ -105,18 +105,18 @@ it('required', () => {
     for (const subj of subjects) {
       const schemaParsed = x.parse(schema, subj)
 
-      expect(schemaParsed.left).toBe(undefined)
-      expect(schemaParsed.right).toStrictEqual(subj)
+      expect(schemaParsed.error).toBe(undefined)
+      expect(schemaParsed.data).toStrictEqual(subj)
 
       const constructParsed = construct.parse(subj)
 
-      expect(constructParsed.left).toBe(undefined)
-      expect(constructParsed.right).toStrictEqual(subj)
+      expect(constructParsed.error).toBe(undefined)
+      expect(constructParsed.data).toStrictEqual(subj)
 
       const structParsed = construct.parse(subj)
 
-      expect(structParsed.left).toBe(undefined)
-      expect(structParsed.right).toStrictEqual(subj)
+      expect(structParsed.error).toBe(undefined)
+      expect(structParsed.data).toStrictEqual(subj)
     }
   }
 })
@@ -211,9 +211,9 @@ it('iterate over fixture.DATA_TYPE', () => {
         const parsedConstruct = construct.parse(subject)
         const parsedStruct = struct.parse(subject)
 
-        expect(parsedSchema.left).toStrictEqual(expectedError)
-        expect(parsedConstruct.left).toStrictEqual(expectedError)
-        expect(parsedStruct.left).toStrictEqual(expectedError)
+        expect(parsedSchema.error).toStrictEqual(expectedError)
+        expect(parsedConstruct.error).toStrictEqual(expectedError)
+        expect(parsedStruct.error).toStrictEqual(expectedError)
       }
     }
   }
@@ -245,9 +245,9 @@ it('min', () => {
       const parsedConstruct = construct.parse(subject)
       const parsedStruct = struct.parse(subject)
 
-      expect(parsedSchema.left).toStrictEqual(expectedError)
-      expect(parsedConstruct.left).toStrictEqual(expectedError)
-      expect(parsedStruct.left).toStrictEqual(expectedError)
+      expect(parsedSchema.error).toStrictEqual(expectedError)
+      expect(parsedConstruct.error).toStrictEqual(expectedError)
+      expect(parsedStruct.error).toStrictEqual(expectedError)
     }
   }
 })
@@ -299,9 +299,9 @@ it('InvalidSubject error of nested schema should have correct path/schema/subjec
       const parsedConstruct = construct.parse(subject)
       const parsedStruct = struct.parse(subject)
 
-      expect(parsedSchema.left).toStrictEqual(expectedError)
-      expect(parsedConstruct.left).toStrictEqual(expectedError)
-      expect(parsedStruct.left).toStrictEqual(expectedError)
+      expect(parsedSchema.error).toStrictEqual(expectedError)
+      expect(parsedConstruct.error).toStrictEqual(expectedError)
+      expect(parsedStruct.error).toStrictEqual(expectedError)
     }
   }
 })

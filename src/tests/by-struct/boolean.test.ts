@@ -32,7 +32,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
+      type ExpectedParsed = x.ParseResult<ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -62,18 +62,18 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
       for (const subj of subjects) {
         const schemaParsed = x.parse(schema, subj)
 
-        expect(schemaParsed.left).toBe(undefined)
-        expect(schemaParsed.right).toStrictEqual(subj)
+        expect(schemaParsed.error).toBe(undefined)
+        expect(schemaParsed.data).toStrictEqual(subj)
 
         const constructParsed = construct.parse(subj)
 
-        expect(constructParsed.left).toBe(undefined)
-        expect(constructParsed.right).toStrictEqual(subj)
+        expect(constructParsed.error).toBe(undefined)
+        expect(constructParsed.data).toStrictEqual(subj)
 
         const structParsed = construct.parse(subj)
 
-        expect(structParsed.left).toBe(undefined)
-        expect(structParsed.right).toStrictEqual(subj)
+        expect(structParsed.error).toBe(undefined)
+        expect(structParsed.data).toStrictEqual(subj)
       }
     }
   })
@@ -111,7 +111,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
+      type ExpectedParsed = x.ParseResult<ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -141,18 +141,18 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
       for (const subj of subjects) {
         const schemaParsed = x.parse(schema, subj)
 
-        expect(schemaParsed.left).toBe(undefined)
-        expect(schemaParsed.right).toStrictEqual(subj)
+        expect(schemaParsed.error).toBe(undefined)
+        expect(schemaParsed.data).toStrictEqual(subj)
 
         const constructParsed = construct.parse(subj)
 
-        expect(constructParsed.left).toBe(undefined)
-        expect(constructParsed.right).toStrictEqual(subj)
+        expect(constructParsed.error).toBe(undefined)
+        expect(constructParsed.data).toStrictEqual(subj)
 
         const structParsed = construct.parse(subj)
 
-        expect(structParsed.left).toBe(undefined)
-        expect(structParsed.right).toStrictEqual(subj)
+        expect(structParsed.error).toBe(undefined)
+        expect(structParsed.data).toStrictEqual(subj)
       }
     }
   })
@@ -190,7 +190,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
+      type ExpectedParsed = x.ParseResult<ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -220,18 +220,18 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
       for (const subj of subjects) {
         const schemaParsed = x.parse(schema, subj)
 
-        expect(schemaParsed.left).toBe(undefined)
-        expect(schemaParsed.right).toStrictEqual(subj)
+        expect(schemaParsed.error).toBe(undefined)
+        expect(schemaParsed.data).toStrictEqual(subj)
 
         const constructParsed = construct.parse(subj)
 
-        expect(constructParsed.left).toBe(undefined)
-        expect(constructParsed.right).toStrictEqual(subj)
+        expect(constructParsed.error).toBe(undefined)
+        expect(constructParsed.data).toStrictEqual(subj)
 
         const structParsed = construct.parse(subj)
 
-        expect(structParsed.left).toBe(undefined)
-        expect(structParsed.right).toStrictEqual(subj)
+        expect(structParsed.error).toBe(undefined)
+        expect(structParsed.data).toStrictEqual(subj)
       }
     }
   })
@@ -270,7 +270,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       /* parsed either type check */
 
-      type ExpectedParsed = x.Either<x.InvalidSubject[], ExpectedSubj>
+      type ExpectedParsed = x.ParseResult<ExpectedSubj>
 
       const parsed = x.parse(schema, undefined)
 
@@ -300,18 +300,18 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
       for (const subj of subjects) {
         const schemaParsed = x.parse(schema, subj)
 
-        expect(schemaParsed.left).toBe(undefined)
-        expect(schemaParsed.right).toStrictEqual(subj)
+        expect(schemaParsed.error).toBe(undefined)
+        expect(schemaParsed.data).toStrictEqual(subj)
 
         const constructParsed = construct.parse(subj)
 
-        expect(constructParsed.left).toBe(undefined)
-        expect(constructParsed.right).toStrictEqual(subj)
+        expect(constructParsed.error).toBe(undefined)
+        expect(constructParsed.data).toStrictEqual(subj)
 
         const structParsed = construct.parse(subj)
 
-        expect(structParsed.left).toBe(undefined)
-        expect(structParsed.right).toStrictEqual(subj)
+        expect(structParsed.error).toBe(undefined)
+        expect(structParsed.data).toStrictEqual(subj)
       }
     }
   })
@@ -615,9 +615,9 @@ describe('ERROR_CODE.invalidType (foldC)', () => {
           const parsedConstruct = construct.parse(subject)
           const parsedStruct = struct.parse(subject)
 
-          expect(parsedSchema.left).toStrictEqual(expectedError)
-          expect(parsedConstruct.left).toStrictEqual(expectedError)
-          expect(parsedStruct.left).toStrictEqual(expectedError)
+          expect(parsedSchema.error).toStrictEqual(expectedError)
+          expect(parsedConstruct.error).toStrictEqual(expectedError)
+          expect(parsedStruct.error).toStrictEqual(expectedError)
         }
       }
     }

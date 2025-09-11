@@ -1,11 +1,28 @@
-export type Left<T> = {
-  left: T
-  right?: never
+import type { Schema } from './compounds'
+
+export type ParseResult<T> = NonNullable<ParseError | ParseSuccess<T>>
+
+export type ErrorCode = 'INVALID_TYPE' | 'INVALID_RANGE'
+
+export type ErrorPath = Array<
+  string /* object key */ | number /* array index */
+>
+
+export type InvalidSubject = {
+  code: ErrorCode
+  path: ErrorPath
+  schema: Schema
+  subject: unknown
 }
 
-export type Right<U> = {
-  left?: never
-  right: U
+export type ParseError = {
+  success: false
+  error: InvalidSubject[]
+  data?: never
 }
 
-export type Either<T, U> = NonNullable<Left<T> | Right<U>>
+export type ParseSuccess<T> = {
+  success: true
+  error?: never
+  data: T
+}
