@@ -1,5 +1,4 @@
-import type { Either } from '../utils/fp'
-import type { InvalidSubject[] } from '../error'
+import { ParseResult } from './utils'
 
 import type {
   StringSchema,
@@ -64,5 +63,5 @@ export type Struct<T extends Schema> = Omit<
   keyof T
 > & {
   __schema: Readonly<T>
-  parse: (s: unknown) => Either<InvalidSubject[], Con_Schema_SubjT<T>>
+  parse: (s: unknown) => ParseResult<Con_Schema_SubjT<T>>
 }

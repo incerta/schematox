@@ -1,8 +1,13 @@
-import { ERROR_CODE } from './error'
+import { ERROR_CODE } from './constants'
 
-import type { ErrorCode, ErrorPath } from './error'
 import type { PrimitiveSchema } from './types/primitives'
-import type { Left, Right } from './types/utils'
+import type {
+  ParseError,
+  ParseSuccess,
+  ErrorCode,
+  ErrorPath,
+  InvalidSubject,
+} from './types/utils'
 
 /**
  * Type equivalence check utility
@@ -10,8 +15,12 @@ import type { Left, Right } from './types/utils'
  **/
 export const tCh = <T, U extends T = T>(...x: T[]): U[] => x as U[]
 
-export const left = <T>(value: T): Left<T> => ({ left: value })
-export const right = <T>(value: T): Right<T> => ({ right: value })
+export const error = (error: InvalidSubject[]): ParseError => ({
+  success: false,
+  error,
+})
+
+export const data = <T>(data: T): ParseSuccess<T> => ({ success: true, data })
 
 export function verifyPrimitive(
   schema: PrimitiveSchema,

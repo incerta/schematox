@@ -1,5 +1,3 @@
-export { ERROR_CODE } from './error'
-
 export {
   makeStruct,
   //
@@ -14,8 +12,19 @@ export {
   union,
 } from './struct'
 
-export { tCh, left, right, verifyPrimitive, makeErrorPath } from './utils'
+export { tCh, error, data, verifyPrimitive, makeErrorPath } from './utils'
 export { parse } from './parse'
+
+export { ERROR_CODE, PARAMS_BY_SCHEMA_TYPE } from './constants'
+
+export type {
+  ErrorCode,
+  ErrorPath,
+  InvalidSubject,
+  ParseError,
+  ParseResult,
+  ParseSuccess,
+} from './types/utils'
 
 export type {
   Infer,
@@ -30,8 +39,6 @@ export type {
   //
   MakeOptional,
 } from './types/constructors'
-
-export type { ErrorCode, ErrorPath, InvalidSubject } from './error'
 
 export type {
   PrimitiveSchema,
@@ -70,5 +77,3 @@ export type {
   ExtWith_Brand_SubjT,
   ExtWith_SchemaParams_SubjT,
 } from './types/extensions'
-
-export type { Either, Left, Right } from './types/utils'

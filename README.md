@@ -103,19 +103,19 @@ const subject = { id: '1'  name: 'John' }
 const parsed = parse(userSchema, subject)
    // ^?  Either<InvalidSubject[], User>
 
-parsed.left
+parsed.error
     // ^?  Either<InvalidSubject[], User>
 
-parsed.right
+parsed.data
     // ^?  User | undefined
 
-if (parsed.left) {
-  parsed.left
+if (parsed.error) {
+  parsed.error
       // ^? InvalidSubject[]
   throw Error('Parsing error')
 }
 
-parsed.right
+parsed.data
     // ^? User
 ```
 
@@ -139,19 +139,19 @@ const subject = { id: '1', name: 'John' }
 const parsed = struct.parse(subject)
    // ^?  Either<InvalidSubject[], User>
 
-parsed.left
+parsed.error
     // ^?  Either<InvalidSubject[], User>
 
-parsed.right
+parsed.data
     // ^?  User | undefined
 
-if (parsed.left) {
-  parsed.left
+if (parsed.error) {
+  parsed.error
       // ^? InvalidSubject[]
   throw Error('Parsing error')
 }
 
-parsed.right
+parsed.data
     // ^? User
 ```
 
@@ -410,7 +410,7 @@ const struct = object({
 const result = struct.parse({ x: { y: [{ z: 0 }] } })
 ```
 
-The `result.left` shape is:
+The `result.error` shape is:
 
 ```json
 [
