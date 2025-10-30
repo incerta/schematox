@@ -12,7 +12,7 @@ export {
   union,
 } from './struct'
 
-export { tCh, error, data, verifyPrimitive, makeErrorPath } from './utils'
+export { tCh, error, data } from './utils'
 export { parse } from './parse'
 
 export { ERROR_CODE, PARAMS_BY_SCHEMA_TYPE } from './constants'
