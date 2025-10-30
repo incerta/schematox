@@ -698,16 +698,16 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
 
     // prettier-ignore
     const samples: Array<[
-        subj: Record<string, Array<{ y: unknown }>>,
-        invalidSubj: unknown,
-        invalidSubjSchema: x.Schema,
-        errorPath: x.ErrorPath,
-      ]
-    > = [
-      [{ x: [{ y: '+' }, { y: '_' }, { y: '_' }] }, '+', schema.of.of.of.y, ['x', 0, 'y']],
-      [{ y: [{ y: '_' }, { y: '+' }, { y: '_' }] }, '+', schema.of.of.of.y, ['y', 1, 'y']],
-      [{ z: [{ y: '_' }, { y: '_' }, { y: '+' }] }, '+', schema.of.of.of.y, ['z', 2, 'y']],
+      subj: Record<string, Array<{ y: unknown }>>,
+      invalidSubj: unknown,
+      invalidSubjSchema: x.Schema,
+      errorPath: x.ErrorPath,
     ]
+    > = [
+        [{ x: [{ y: '+' }, { y: '_' }, { y: '_' }] }, '+', schema.of.of.of.y, ['x', 0, 'y']],
+        [{ y: [{ y: '_' }, { y: '+' }, { y: '_' }] }, '+', schema.of.of.of.y, ['y', 1, 'y']],
+        [{ z: [{ y: '_' }, { y: '_' }, { y: '+' }] }, '+', schema.of.of.of.y, ['z', 2, 'y']],
+      ]
 
     foldE: {
       const construct = x.makeStruct(schema)
@@ -731,6 +731,29 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
         expect(parsedStruct.error).toStrictEqual(expectedError)
       }
     }
+  })
+
+  it('Multiple errors', () => {
+    const schema: x.Schema = { type: 'record', of: { type: 'boolean' } }
+    const subject = { x: true, y: '', z: 0 }
+
+    const parsed = x.parse(schema, subject)
+    const expectedError: x.InvalidSubject[] = [
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: ['y'],
+        subject: subject.y,
+        schema: schema.of,
+      },
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: ['z'],
+        subject: subject.z,
+        schema: schema.of,
+      },
+    ]
+
+    expect(parsed.error).toStrictEqual(expectedError)
   })
 })
 

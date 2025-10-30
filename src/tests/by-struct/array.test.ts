@@ -959,6 +959,42 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
       }
     }
   })
+
+  it('multiple errors', () => {
+    const schema = {
+      type: 'array',
+      of: { type: 'boolean' },
+    } as const satisfies x.Schema
+
+    const struct = x.array(x.boolean())
+
+    const construct = x.makeStruct(schema)
+
+    const subject = [null, true, undefined]
+
+    const expectedError: x.InvalidSubject[] = [
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: [0],
+        schema: schema.of,
+        subject: null,
+      },
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: [2],
+        schema: schema.of,
+        subject: undefined,
+      },
+    ]
+
+    const parsedSchema = x.parse(schema, subject)
+    const parsedStruct = struct.parse(subject)
+    const parsedConstruct = construct.parse(subject)
+
+    expect(parsedSchema.error).toStrictEqual(expectedError)
+    expect(parsedStruct.error).toStrictEqual(expectedError)
+    expect(parsedConstruct.error).toStrictEqual(expectedError)
+  })
 })
 
 describe('ERROR_CODE.INVALID_RANGE (foldD)', () => {
