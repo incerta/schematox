@@ -205,7 +205,7 @@ function parseArray(
   }
 
   const result: unknown[] = []
-  let errors: InvalidSubject[] | undefined
+  let invalidSubjects: InvalidSubject[] | undefined
 
   for (let i = 0; i < subject.length; i++) {
     const nestedSchema = schema.of
@@ -215,16 +215,19 @@ function parseArray(
     const parsed = parseRecursively(updatedErrorPath, nestedSchema, nestedValue)
 
     if (parsed.error) {
-      errors = errors ?? []
-      parsed.error.forEach((err) => errors!.push(err))
+      invalidSubjects = invalidSubjects ?? []
+
+      for (const invalidSubject of parsed.error) {
+        invalidSubjects.push(invalidSubject)
+      }
       continue
     }
 
     result.push(parsed.data)
   }
 
-  if (errors?.length) {
-    return error(errors)
+  if (invalidSubjects?.length) {
+    return error(invalidSubjects)
   }
 
   if (
@@ -279,8 +282,9 @@ function parseObject(
   }
 
   const result: Record<string, unknown> = {}
-  let errors: InvalidSubject[] | undefined
+  let invalidSubjects: InvalidSubject[] | undefined
 
+  // Extra keys in the subject are ignored
   for (const key in schema.of) {
     const narrowedSubj = subject as Record<string, unknown>
     const nestedSchema = schema.of[key] as Schema
@@ -290,8 +294,11 @@ function parseObject(
     const parsed = parseRecursively(updatedErrorPath, nestedSchema, nestedValue)
 
     if (parsed.error) {
-      errors = errors ?? []
-      parsed.error.forEach((err) => errors!.push(err))
+      invalidSubjects = invalidSubjects ?? []
+
+      for (const invalidSubject of parsed.error) {
+        invalidSubjects.push(invalidSubject)
+      }
       continue
     }
 
@@ -300,8 +307,8 @@ function parseObject(
     }
   }
 
-  if (errors?.length) {
-    return error(errors)
+  if (invalidSubjects?.length) {
+    return error(invalidSubjects)
   }
 
   return data(result)
@@ -328,7 +335,7 @@ function parseRecord(
   }
 
   const result: Record<string, unknown> = {}
-  let errors: InvalidSubject[] | undefined
+  let invalidSubjects: InvalidSubject[] | undefined
 
   for (const key in subject) {
     const nestedValue = (subject as Record<string, unknown>)[key]
@@ -342,16 +349,19 @@ function parseRecord(
     const parsed = parseRecursively(updatedErrorPath, schema.of, nestedValue)
 
     if (parsed.error) {
-      errors = errors ?? []
-      parsed.error.forEach((err) => errors!.push(err))
+      invalidSubjects = invalidSubjects ?? []
+
+      for (const invalidSubject of parsed.error) {
+        invalidSubjects.push(invalidSubject)
+      }
       continue
     }
 
     result[key] = parsed.data
   }
 
-  if (errors?.length) {
-    return error(errors)
+  if (invalidSubjects?.length) {
+    return error(invalidSubjects)
   }
 
   return data(result)

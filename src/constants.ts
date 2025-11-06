@@ -3,7 +3,6 @@ export const ERROR_CODE = {
   invalidRange: 'INVALID_RANGE',
 } as const
 
-// I found the untested structre, it's constant, why it's perseived as function?
 // prettier-ignore
 export const PARAMS_BY_SCHEMA_TYPE = {
   boolean:  new Set(['optional', 'nullable', 'brand', 'description'] as const),
