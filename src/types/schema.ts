@@ -10,7 +10,7 @@ export type Schema =
    | PrimitiveSchema
    | { type: 'array'; of: Schema; minLength?: number; maxLength?: number } & SchemaShared
    | { type: 'object'; of: Record<string, Schema> } & SchemaShared
-   | { type: 'record'; of: Schema, key?: StringSchema } & SchemaShared
+   | { type: 'record'; of: Schema; key?: StringSchema } & SchemaShared
    | { type: 'union'; of: Array<Schema> } & SchemaShared
 
 /**
