@@ -1,16 +1,15 @@
 import { PARAMS_BY_SCHEMA_TYPE } from './constants'
 import { parse } from './parse'
 
-import type { StringSchema } from './types/primitives'
-import type { NestedSchema, StructSchema, Schema } from './types/compounds'
-import type { Struct, StructParams } from './types/struct'
+import type { Schema, StringSchema } from './types/schema'
+import type { Struct, StructParams, StructShape } from './types/struct'
 
 export function makeStruct<T extends Schema>(schema: T): Struct<T>
-export function makeStruct(schema: StructSchema) {
+export function makeStruct(schema: Schema) {
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const result: Record<string, unknown> = {
     __schema: { ...schema },
-    parse: (subj: unknown) => parse(schema, subj),
+    parse: (subj: unknown) => parse(schema as never, subj),
   }
 
   if (params.has('optional')) {
@@ -52,13 +51,9 @@ export function makeStruct(schema: StructSchema) {
   return result
 }
 
-export function string() {
-  return makeStruct({ type: 'string' })
-}
-
-export function number() {
-  return makeStruct({ type: 'number' })
-}
+/**
+ * Primitives
+ **/
 
 export function boolean() {
   return makeStruct({ type: 'boolean' })
@@ -68,15 +63,30 @@ export function literal<T extends string | number | boolean>(of: T) {
   return makeStruct({ type: 'literal', of })
 }
 
-export function object<
-  T extends StructSchema,
-  U extends Record<string, { __schema: T }>,
-  V extends {
-    type: 'object'
-    of: Record<string, NestedSchema>
-  } = { type: 'object'; of: { [k in keyof U]: U[k]['__schema'] } },
->(of: U) {
-  const schema = { type: 'object', of: {} } as V
+export function number() {
+  return makeStruct({ type: 'number' })
+}
+
+export function string() {
+  return makeStruct({ type: 'string' })
+}
+
+/**
+ * Compounds
+ **/
+
+export function array<T extends StructShape<Schema>>(of: T) {
+  return makeStruct({
+    type: 'array',
+    of: of.__schema as T['__schema'],
+  })
+}
+
+export function object<T extends Record<string, StructShape<Schema>>>(of: T) {
+  const schema = {
+    type: 'object' as const,
+    of: {} as { [K in keyof T]: T[K]['__schema'] },
+  }
 
   for (const key in of) {
     schema.of[key] = (of[key] as NonNullable<(typeof of)[typeof key]>).__schema
@@ -86,41 +96,31 @@ export function object<
 }
 
 export function record<
-  T extends { __schema: StructSchema },
-  U extends { __schema: StringSchema } | undefined,
-  V extends U extends { __schema: infer W }
-    ? { type: 'record'; of: T['__schema']; key: W }
-    : { type: 'record'; of: T['__schema'] },
+  T extends StructShape<Schema>,
+  U extends StructShape<StringSchema> | undefined,
 >(of: T, key?: U) {
-  const schema = key
-    ? ({ type: 'record', of: of.__schema, key: key.__schema } as V)
-    : ({ type: 'record', of: of.__schema } as V)
-
-  return makeStruct(schema)
-}
-
-export function array<
-  T extends StructSchema,
-  U extends { __schema: T },
-  V extends { type: 'array'; of: StructSchema } = {
-    type: 'array'
-    of: U['__schema']
-  },
->(of: U) {
-  const schema = { type: 'array', of: of.__schema } as V
-
-  return makeStruct(schema)
+  return makeStruct(
+    key
+      ? {
+          type: 'record',
+          of: of.__schema as T['__schema'],
+          key: key.__schema as (typeof key)['__schema'],
+        }
+      : { type: 'record', of: of.__schema as T['__schema'] }
+  )
 }
 
 export function union<
-  T extends StructSchema,
-  U extends { __schema: T },
-  V extends {
+  T extends [StructShape<Schema>, ...Array<StructShape<Schema>>],
+>(of: T) {
+  const schema = { type: 'union', of: [] as unknown[] } as {
     type: 'union'
-    of: Array<NestedSchema>
-  } = { type: 'union'; of: Array<U['__schema']> },
->(of: Array<U>) {
-  const schema = { type: 'union', of: [] as unknown[] } as V
+    of: T extends [...infer U]
+      ? {
+          [K in keyof U]: U[K] extends StructShape<infer V> ? V : never
+        }
+      : never
+  }
 
   for (const subSchema of of) {
     schema.of.push(subSchema.__schema)

@@ -1,37 +1,20 @@
 import { ParseResult } from './utils'
 
 import type {
-  StringSchema,
-  NumberSchema,
+  Schema,
+  //
+  ArraySchema,
+  ObjectSchema,
+  RecordSchema,
+  UnionSchema,
+  //
   BooleanSchema,
   LiteralSchema,
-} from './primitives'
-
-import type {
-  Schema,
-  ObjectSchema,
-  ArraySchema,
-  UnionSchema,
-  RecordSchema,
-} from './compounds'
+  NumberSchema,
+  StringSchema,
+} from './schema'
 
 import type { Con_Schema_SubjT } from './constructors'
-
-type ExtractParams<T extends Schema> = Exclude<keyof T, 'type' | 'of'>
-
-type ParamsBySchemaType = {
-  string: ExtractParams<StringSchema>
-  number: ExtractParams<NumberSchema>
-  boolean: ExtractParams<BooleanSchema>
-  literal: ExtractParams<LiteralSchema>
-  object: ExtractParams<ObjectSchema>
-  record: Exclude<ExtractParams<RecordSchema>, 'key'>
-  union: ExtractParams<UnionSchema>
-  array: ExtractParams<ArraySchema>
-}
-
-export type StructParams =
-  ParamsBySchemaType extends Record<string, infer U> ? U : never
 
 export type Struct<T extends Schema> = Omit<
   Pick<
@@ -65,3 +48,22 @@ export type Struct<T extends Schema> = Omit<
   __schema: Readonly<T>
   parse: (s: unknown) => ParseResult<Con_Schema_SubjT<T>>
 }
+
+export type StructShape<T> = { __schema: T }
+
+type ParamsBySchemaType = {
+  boolean: ExtractParams<BooleanSchema>
+  literal: ExtractParams<LiteralSchema>
+  number: ExtractParams<NumberSchema>
+  string: ExtractParams<StringSchema>
+  //
+  array: ExtractParams<ArraySchema>
+  object: ExtractParams<ObjectSchema>
+  record: Exclude<ExtractParams<RecordSchema>, 'key'>
+  union: ExtractParams<UnionSchema>
+}
+
+type ExtractParams<T> = Exclude<keyof T, 'type' | 'of'>
+
+export type StructParams =
+  ParamsBySchemaType extends Record<string, infer U> ? U : never

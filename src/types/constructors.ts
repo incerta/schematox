@@ -1,76 +1,59 @@
 import type {
-  StringSchema,
-  NumberSchema,
-  BooleanSchema,
-  LiteralSchema,
-  PrimitiveSchema,
-} from './primitives'
-
-import type {
+  Schema,
+  //
   ArraySchema,
   ObjectSchema,
   RecordSchema,
   UnionSchema,
-  Schema,
-} from './compounds'
+  //
+  PrimitiveSchema,
+  //
+  BooleanSchema,
+  LiteralSchema,
+  NumberSchema,
+  StringSchema,
+} from './schema'
+
+import type { StructShape } from './struct'
 
 import type {
   ExtWith_SchemaParams_SubjT,
   ExtWith_Brand_SubjT,
 } from './extensions'
 
-export type Con_PrimitiveSchema_SubjT<T extends PrimitiveSchema> =
-  T extends StringSchema
-    ? string
-    : T extends NumberSchema
-      ? number
-      : T extends BooleanSchema
-        ? boolean
-        : T extends LiteralSchema<infer U>
-          ? U
-          : never
+export type Con_PrimitiveSchema_SubjT<T> = T extends StringSchema
+  ? string
+  : T extends NumberSchema
+    ? number
+    : T extends BooleanSchema
+      ? boolean
+      : T extends LiteralSchema<infer U>
+        ? U
+        : never
 
-export type Con_ArraySchema_SubjT<T extends ArraySchema> = T extends {
-  of: infer U
-}
-  ? U extends Schema
-    ? Array<Con_Schema_SubjT<U>>
-    : never
-  : never
+export type Con_ArraySchema_SubjT<T> =
+  T extends ArraySchema<infer U> ? Array<Con_Schema_SubjT<U>> : never
 
-export type Prettify<T extends Record<string, unknown>> = {
+type PrettifyRecord<T extends Record<string, unknown>> = {
   [K in keyof T]: T[K]
 } & {}
 
-/**
- * ```MakeOptional{ x: T | undefined, y: T }```
- *
- * will make:
- *
- * ```{ x?: T | undefined, y: T }```
- *
- * NOTE: `Exclude<T[K], undefined> will not work
- *       so we have technical constraint here
- **/
-export type MakeOptional<T> = Prettify<
-  {
-    [K in keyof T as undefined extends T[K] ? K : never]?: T[K]
-  } & {
-    [K in keyof T as undefined extends T[K] ? never : K]: T[K]
-  }
->
+export type Con_ObjectSchema_SubjT<T> =
+  T extends ObjectSchema<infer U>
+    ? PrettifyRecord<
+        {
+          [K in keyof U as U[K] extends { optional: true }
+            ? K
+            : never]?: Con_Schema_SubjT<U[K]>
+        } & {
+          [K in keyof U as U[K] extends { optional: true }
+            ? never
+            : K]: Con_Schema_SubjT<U[K]>
+        }
+      >
+    : never
 
-export type Con_ObjectSchema_SubjT<T extends ObjectSchema> = T extends {
-  of: infer U
-}
-  ? MakeOptional<{
-      -readonly [k in keyof U]: U[k] extends Schema
-        ? Con_Schema_SubjT<U[k]>
-        : never
-    }>
-  : never
-
-export type Con_RecordSchema_SubjT<T extends RecordSchema> = T extends {
+export type Con_RecordSchema_SubjT<T> = T extends {
   key?: infer U
   of: infer V
 }
@@ -82,7 +65,7 @@ export type Con_RecordSchema_SubjT<T extends RecordSchema> = T extends {
     >
   : never
 
-export type Con_UnionSchema_SubjT<T extends UnionSchema> = T extends {
+export type Con_UnionSchema_SubjT<T> = T extends {
   type: 'union'
   of: Readonly<Array<infer U>>
 }
@@ -91,7 +74,7 @@ export type Con_UnionSchema_SubjT<T extends UnionSchema> = T extends {
     : never
   : never
 
-export type Con_Schema_SubjT<T extends Schema> = ExtWith_SchemaParams_SubjT<
+export type Con_Schema_SubjT<T> = ExtWith_SchemaParams_SubjT<
   T,
   T extends PrimitiveSchema
     ? Con_PrimitiveSchema_SubjT<T>
@@ -109,10 +92,5 @@ export type Con_Schema_SubjT<T extends Schema> = ExtWith_SchemaParams_SubjT<
 /**
  * @example Infer<typeof struct> | Infer<typeof schema>
  **/
-export type Infer<T extends { __schema: Schema } | Schema> = T extends {
-  __schema: Schema
-}
-  ? Con_Schema_SubjT<T['__schema']>
-  : T extends Schema
-    ? Con_Schema_SubjT<T>
-    : never
+export type Infer<T> =
+  T extends StructShape<infer U> ? Con_Schema_SubjT<U> : Con_Schema_SubjT<T>

@@ -331,9 +331,6 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 })
 
 describe('Struct parameter keys reduction and schema immutability (foldB)', () => {
-  // TODO: fix 'optional' ts-ignore and add missing `it.todo` tests
-  //       after general types/struct simplification
-
   it('optional', () => {
     const schema = {
       type: 'union',
@@ -366,16 +363,12 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
       type ExpectedSchema = typeof schema
       type StructSchema = typeof struct.__schema
 
-      // @ts-ignore fix after construct types simplification
       x.tCh<StructSchema, ExpectedSchema>()
-      // @ts-ignore fix after construct types simplification
       x.tCh<ExpectedSchema, StructSchema>()
 
       type ConstructSchema = typeof struct.__schema
 
-      // @ts-ignore fix after construct types simplification
       x.tCh<ConstructSchema, ExpectedSchema>()
-      // @ts-ignore fix after construct types simplification
       x.tCh<ExpectedSchema, ConstructSchema>()
 
       /* runtime schema check */
@@ -390,9 +383,170 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     }
   })
 
-  it.todo('optional + nullable')
-  it.todo('optional + nullable + description')
-  it.todo('description + nullable + optional')
+  it('optional + nullable', () => {
+    const schema = {
+      type: 'union',
+      of: [{ type: 'boolean' }],
+      optional: true,
+      nullable: true,
+    } as const satisfies x.Schema
+
+    const prevStruct = x.union([x.boolean()]).optional()
+    const struct = prevStruct.nullable()
+
+    type ExpectedKeys = '__schema' | 'description' | 'parse'
+
+    foldB: {
+      const construct = x.makeStruct(schema)
+
+      /* ensure that struct keys are reduced after application */
+
+      type StructKeys = keyof typeof struct
+
+      x.tCh<StructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, StructKeys>()
+
+      type ConstructKeys = keyof typeof construct
+
+      x.tCh<ConstructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, ConstructKeys>()
+
+      /* ensure that construct/struct schema types are identical  */
+
+      type ExpectedSchema = typeof schema
+      type StructSchema = typeof struct.__schema
+
+      x.tCh<StructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, StructSchema>()
+
+      type ConstructSchema = typeof struct.__schema
+
+      x.tCh<ConstructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, ConstructSchema>()
+
+      /* runtime schema check */
+
+      expect(struct.__schema).toStrictEqual(schema)
+      expect(construct.__schema).toStrictEqual(schema)
+      expect(construct.__schema === schema).toBe(false)
+
+      /* runtime schema parameter application immutability check */
+
+      expect(prevStruct.__schema === struct.__schema).toBe(false)
+    }
+  })
+
+  it('optional + nullable + description', () => {
+    const schema = {
+      type: 'union',
+      of: [{ type: 'boolean' }],
+      optional: true,
+      nullable: true,
+      description: 'description-value',
+    } as const satisfies x.Schema
+
+    const prevStruct = x.union([x.boolean()]).optional().nullable()
+    const struct = prevStruct.description(schema.description)
+
+    type ExpectedKeys = '__schema' | 'parse'
+
+    foldB: {
+      const construct = x.makeStruct(schema)
+
+      /* ensure that struct keys are reduced after application */
+
+      type StructKeys = keyof typeof struct
+
+      x.tCh<StructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, StructKeys>()
+
+      type ConstructKeys = keyof typeof construct
+
+      x.tCh<ConstructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, ConstructKeys>()
+
+      /* ensure that construct/struct schema types are identical  */
+
+      type ExpectedSchema = typeof schema
+      type StructSchema = typeof struct.__schema
+
+      x.tCh<StructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, StructSchema>()
+
+      type ConstructSchema = typeof struct.__schema
+
+      x.tCh<ConstructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, ConstructSchema>()
+
+      /* runtime schema check */
+
+      expect(struct.__schema).toStrictEqual(schema)
+      expect(construct.__schema).toStrictEqual(schema)
+      expect(construct.__schema === schema).toBe(false)
+
+      /* runtime schema parameter application immutability check */
+
+      expect(prevStruct.__schema === struct.__schema).toBe(false)
+    }
+  })
+
+  it('description + nullable + optional', () => {
+    const schema = {
+      type: 'union',
+      of: [{ type: 'boolean' }],
+      optional: true,
+      nullable: true,
+      description: 'description-value',
+    } as const satisfies x.Schema
+
+    const prevStruct = x
+      .union([x.boolean()])
+      .description(schema.description)
+      .nullable()
+
+    const struct = prevStruct.optional()
+
+    type ExpectedKeys = '__schema' | 'parse'
+
+    foldB: {
+      const construct = x.makeStruct(schema)
+
+      /* ensure that struct keys are reduced after application */
+
+      type StructKeys = keyof typeof struct
+
+      x.tCh<StructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, StructKeys>()
+
+      type ConstructKeys = keyof typeof construct
+
+      x.tCh<ConstructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, ConstructKeys>()
+
+      /* ensure that construct/struct schema types are identical  */
+
+      type ExpectedSchema = typeof schema
+      type StructSchema = typeof struct.__schema
+
+      x.tCh<StructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, StructSchema>()
+
+      type ConstructSchema = typeof struct.__schema
+
+      x.tCh<ConstructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, ConstructSchema>()
+
+      /* runtime schema check */
+
+      expect(struct.__schema).toStrictEqual(schema)
+      expect(construct.__schema).toStrictEqual(schema)
+      expect(construct.__schema === schema).toBe(false)
+
+      /* runtime schema parameter application immutability check */
+
+      expect(prevStruct.__schema === struct.__schema).toBe(false)
+    }
+  })
 })
 
 describe('ERROR_CODE.invalidType (foldC, foldE)', () => {

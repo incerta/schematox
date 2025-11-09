@@ -734,7 +734,11 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
   })
 
   it('Multiple errors', () => {
-    const schema: x.Schema = { type: 'record', of: { type: 'boolean' } }
+    const schema = {
+      type: 'record',
+      of: { type: 'boolean' },
+    } as const satisfies x.Schema
+
     const subject = { x: true, y: '', z: 0 }
 
     const parsed = x.parse(schema, subject)

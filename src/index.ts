@@ -36,40 +36,26 @@ export type {
   Con_PrimitiveSchema_SubjT,
   Con_RecordSchema_SubjT,
   Con_UnionSchema_SubjT,
-  //
-  MakeOptional,
 } from './types/constructors'
 
 export type {
-  PrimitiveSchema,
-  //
-  BooleanSchema,
-  LiteralSchema,
-  NumberSchema,
-  StringSchema,
-  //
-  BrandSchema,
-} from './types/primitives'
-
-export type {
   Schema,
+  PrimitiveSchema,
   //
   ArraySchema,
   ObjectSchema,
   RecordSchema,
   UnionSchema,
   //
-  CompoundSchema,
-  StructSchema,
+  BrandSchema,
   //
-  BaseArraySchema,
-  BaseObjectSchema,
-  BaseRecordSchema,
-  BaseUnionSchema,
-  //
-  NestedSchema,
-  NestedStructSchema,
-} from './types/compounds'
+  BooleanSchema,
+  LiteralSchema,
+  NumberSchema,
+  StringSchema,
+} from './types/schema'
+
+export type { Struct, StructShape, StructParams } from './types/struct'
 
 export type {
   ExtWith_Undefined_SubjT,
