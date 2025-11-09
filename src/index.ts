@@ -1,3 +1,7 @@
+export { ERROR_CODE, PARAMS_BY_SCHEMA_TYPE } from './constants'
+
+export { parse } from './parse'
+
 export {
   makeStruct,
   //
@@ -13,10 +17,7 @@ export {
   union,
 } from './struct'
 
-export { tCh, error, data } from './utils'
-export { parse } from './parse'
-
-export { ERROR_CODE, PARAMS_BY_SCHEMA_TYPE } from './constants'
+export { error, success, tCh } from './utils'
 
 export type {
   ErrorCode,

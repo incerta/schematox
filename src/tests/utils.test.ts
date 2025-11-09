@@ -178,7 +178,7 @@ describe('Check ParseResult utilities', () => {
 
   it('ParseSuccess result', () => {
     const validSubj = 'sample'
-    const parsedSuccess = x.data(validSubj)
+    const parsedSuccess = x.success(validSubj)
 
     expect('error' in parsedSuccess).toBe(false)
     expect(parsedSuccess.success).toBe(true)

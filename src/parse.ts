@@ -1,5 +1,5 @@
 import { ERROR_CODE } from './constants'
-import { error, data } from './utils'
+import { error, success } from './utils'
 
 import type { ErrorPath, InvalidSubject, ParseResult } from './types/utils'
 import type { Con_Schema_SubjT } from './types/constructors'
@@ -47,11 +47,11 @@ function parseRecursively(
   subject: unknown
 ): ParseResult<unknown> {
   if (schema.optional === true && subject === undefined) {
-    return data(undefined)
+    return success(undefined)
   }
 
   if (schema.nullable === true && subject === null) {
-    return data(null)
+    return success(null)
   }
 
   return PARSE_FN_BY_SCHEMA_KIND[schema.type](
@@ -77,7 +77,7 @@ function parseBoolean(
     ])
   }
 
-  return data(subject)
+  return success(subject)
 }
 
 function parseLiteral(
@@ -96,7 +96,7 @@ function parseLiteral(
     ])
   }
 
-  return data(subject)
+  return success(subject)
 }
 
 function parseNumber(
@@ -141,7 +141,7 @@ function parseNumber(
     }
   }
 
-  return data(subject)
+  return success(subject)
 }
 
 function parseString(
@@ -186,7 +186,7 @@ function parseString(
     }
   }
 
-  return data(subject)
+  return success(subject)
 }
 
 function parseArray(
@@ -259,7 +259,7 @@ function parseArray(
     ])
   }
 
-  return data(result)
+  return success(result)
 }
 
 function parseObject(
@@ -312,7 +312,7 @@ function parseObject(
     return error(invalidSubjects)
   }
 
-  return data(result)
+  return success(result)
 }
 
 function parseRecord(
@@ -365,7 +365,7 @@ function parseRecord(
     return error(invalidSubjects)
   }
 
-  return data(result)
+  return success(result)
 }
 
 function parseTuple(
@@ -410,7 +410,7 @@ function parseTuple(
     return error(invalidSubjects)
   }
 
-  return data(result)
+  return success(result)
 }
 
 function parseUnion(
