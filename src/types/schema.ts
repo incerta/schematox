@@ -11,6 +11,7 @@ export type Schema =
    | { type: 'array'; of: Schema; minLength?: number; maxLength?: number } & SchemaShared
    | { type: 'object'; of: Record<string, Schema> } & SchemaShared
    | { type: 'record'; of: Schema; key?: StringSchema } & SchemaShared
+   | { type: 'tuple'; of: Array<Schema> } & SchemaShared
    | { type: 'union'; of: Array<Schema> } & SchemaShared
 
 /**
@@ -33,6 +34,11 @@ export type RecordSchema<T = unknown> = SchemaShared & {
   type: 'record'
   of: T
   key?: StringSchema
+}
+
+export type TupleSchema<T = unknown> = SchemaShared & {
+  type: 'tuple'
+  of: T
 }
 
 export type UnionSchema<T = unknown> = SchemaShared & {

@@ -4,6 +4,7 @@ import type {
   ArraySchema,
   ObjectSchema,
   RecordSchema,
+  TupleSchema,
   UnionSchema,
   //
   PrimitiveSchema,
@@ -65,6 +66,15 @@ export type Con_RecordSchema_SubjT<T> = T extends {
     >
   : never
 
+export type Con_TupleSchema_SubjT<T> =
+  T extends TupleSchema<infer U>
+    ? U extends [...infer V]
+      ? {
+          [K in keyof V]: Con_Schema_SubjT<V[K]>
+        }
+      : never
+    : never
+
 export type Con_UnionSchema_SubjT<T> = T extends {
   type: 'union'
   of: Readonly<Array<infer U>>
@@ -84,9 +94,11 @@ export type Con_Schema_SubjT<T> = ExtWith_SchemaParams_SubjT<
         ? Con_ObjectSchema_SubjT<T>
         : T extends RecordSchema
           ? Con_RecordSchema_SubjT<T>
-          : T extends UnionSchema
-            ? Con_UnionSchema_SubjT<T>
-            : never
+          : T extends TupleSchema
+            ? Con_TupleSchema_SubjT<T>
+            : T extends UnionSchema
+              ? Con_UnionSchema_SubjT<T>
+              : never
 >
 
 /**

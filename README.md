@@ -2,7 +2,7 @@
 
 Schematox is a lightweight typesafe schema defined parser. All schemas are JSON compatible.
 
-The library is focusing on fixed set of schema types: string, number, boolean, literal, object, record, array, union. Each schema can have parameters: optional, nullable, description. Each primitive schema has "brand" parameter as mean of making its subject type [nominal](https://github.com/Microsoft/TypeScript/wiki/FAQ#can-i-make-a-type-alias-nominal). The rest parameters is schema specific range limiters.
+The library is focusing on fixed set of schema types: boolean, literal, number, string, array, object, record, tuple, union. Each schema can have parameters: optional, nullable, description. Each primitive schema has "brand" parameter as mean of making its subject type [nominal](https://github.com/Microsoft/TypeScript/wiki/FAQ#can-i-make-a-type-alias-nominal). The rest parameters is schema specific range limiters.
 
 Library supports static schema definition which means your schemas could be completely independent from schematox. One could use such schemas as source for generation other structures like DB models.
 
@@ -14,13 +14,14 @@ The library is small so exploring README.md is enough for understanding its API,
 - [Static schema example](#static-schema-example)
 - [Programmatic schema example](#programmatic-schema-example)
 - [Example for all supported schema types](#example-for-all-supported-schema-types)
-  - [String](#string)
-  - [Number](#number)
   - [Boolean](#boolean)
   - [Literal](#literal)
+  - [Number](#number)
+  - [String](#string)
+  - [Array](#array)
   - [Object](#object)
   - [Record](#record)
-  - [Array](#array)
+  - [Tuple](#tuple)
   - [Union](#union)
 - [Schema parameters](#schema-parameters)
 - [Error shape](#error-shape)
@@ -70,15 +71,15 @@ type User = Infer<typeof schema>
 
 const subject = { id: '1'  name: 'John' }
 const parsed = parse(userSchema, subject)
-   // ^?  Either<InvalidSubject[], User>
+   // ^? ParseResult<User>
 
 parsed.error
-    // ^?  Either<InvalidSubject[], User>
+    // ^? InvlidSubject[] | undefined
 
 parsed.data
     // ^?  User | undefined
 
-if (parsed.error) {
+if (parsed.success === false) {
   parsed.error
       // ^? InvalidSubject[]
   throw Error('Parsing error')
@@ -106,15 +107,15 @@ type User = Infer<typeof struct>
 
 const subject = { id: '1', name: 'John' }
 const parsed = struct.parse(subject)
-   // ^?  Either<InvalidSubject[], User>
+   // ^?  ParseResult<User>
 
 parsed.error
-    // ^?  Either<InvalidSubject[], User>
+    // ^?  InvalidSubject[] | undefined
 
 parsed.data
     // ^?  User | undefined
 
-if (parsed.error) {
+if (parsed.success === false) {
   parsed.error
       // ^? InvalidSubject[]
   throw Error('Parsing error')
@@ -125,6 +126,7 @@ parsed.data
 ```
 
 All programmatically defined schemas are the same as static, one just needs to access it through `__schema` key.
+A statically defined schema can be transformed to a struct using the `makeStruct` utility function and can have custom props.
 
 ## Transform static schema into struct
 
@@ -144,6 +146,28 @@ We distinguish two main categories of schema units:
 - compound: array, object, record, union
 
 Any schema share optional/nullable/description parameters. Any compound schema could have any other schema type as its member including itself. Any primitive schema can have "brand" parameter.
+
+### Boolean
+
+```typescript
+const schema = {
+  type: 'boolean',
+  optional: true,
+  nullable: true,
+  brand: ['x', 'y'],
+  description: 'x',
+} as const satisfies Schema
+
+const struct = boolean() //
+  .optional()
+  .nullable()
+  .brand('x', 'y')
+  .description('x')
+
+// (boolean & { __x: 'y' }) | undefined | null
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
+```
 
 ### String
 
@@ -167,6 +191,31 @@ const struct = string()
   .description('x')
 
 // (string & { __x: 'y' }) | undefined | null
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
+```
+
+### Literal
+
+Could be string/number/boolean literal
+
+```typescript
+const schema = {
+  type: 'literal',
+  of: 'x',
+  optional: true,
+  nullable: true,
+  brand: ['x', 'y'],
+  description: 'x',
+} as const satisfies Schema
+
+const struct = literal('x') //
+  .optional()
+  .nullable()
+  .brand('x', 'y')
+  .description('x')
+
+// ('x' & { __x: 'y' }) | undefined | null
 type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
 ```
@@ -198,49 +247,26 @@ type FromStruct = Infer<typeof struct>
 //
 ```
 
-### Boolean
+### Array
 
 ```typescript
 const schema = {
-  type: 'boolean',
+  type: 'array',
+  of: { type: 'string' },
   optional: true,
-  nullable: true,
-  brand: ['x', 'y'],
+  minLength: 1,
+  maxLength: 1000,
   description: 'x',
 } as const satisfies Schema
 
-const struct = boolean() //
+const struct = array(string())
   .optional()
   .nullable()
-  .brand('x', 'y')
+  .minLength(1)
+  .maxLength(1000)
   .description('x')
 
-// (boolean & { __x: 'y' }) | undefined | null
-type FromSchema = Infer<typeof schema>
-type FromStruct = Infer<typeof struct>
-```
-
-### Literal
-
-Could be string/number/boolean literal
-
-```typescript
-const schema = {
-  type: 'literal',
-  of: 'x',
-  optional: true,
-  nullable: true,
-  brand: ['x', 'y'],
-  description: 'x',
-} as const satisfies Schema
-
-const struct = literal('x') //
-  .optional()
-  .nullable()
-  .brand('x', 'y')
-  .description('x')
-
-// ('x' & { __x: 'y' }) | undefined | null
+// string[] | undefined | null
 type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
 ```
@@ -295,26 +321,23 @@ type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
 ```
 
-### Array
+### Tuple
 
 ```typescript
 const schema = {
-  type: 'array',
-  of: { type: 'string' },
+  type: 'tuple',
+  of: [{ type: 'string' }, { type: 'number' }],
   optional: true,
-  minLength: 1,
-  maxLength: 1000,
+  nullable: true,
   description: 'x',
 } as const satisfies Schema
 
-const struct = array(string())
+const struct = tuple([string(), number()])
   .optional()
   .nullable()
-  .minLength(1)
-  .maxLength(1000)
   .description('x')
 
-// string[] | undefined | null
+// [string, number] | undefined | null
 type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
 ```

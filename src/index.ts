@@ -9,6 +9,7 @@ export {
   array,
   object,
   record,
+  tuple,
   union,
 } from './struct'
 
