@@ -5,19 +5,18 @@ import type { ErrorPath, InvalidSubject, ParseResult } from './types/utils'
 import type { Con_Schema_SubjT } from './types/constructors'
 
 import type {
-  BooleanSchema,
-  LiteralSchema,
-  NumberSchema,
-  StringSchema,
-} from './types/primitives'
-
-import type {
+  Schema,
+  //
   ArraySchema,
   ObjectSchema,
   RecordSchema,
   UnionSchema,
-  Schema,
-} from './types/compounds'
+  //
+  BooleanSchema,
+  LiteralSchema,
+  NumberSchema,
+  StringSchema,
+} from './types/schema'
 
 const PARSE_FN_BY_SCHEMA_KIND = {
   boolean: parseBoolean,
@@ -190,7 +189,7 @@ function parseString(
 
 function parseArray(
   errorPath: ErrorPath,
-  schema: ArraySchema,
+  schema: ArraySchema<Schema>,
   subject: unknown
 ) {
   if (Array.isArray(subject) === false) {
@@ -263,7 +262,7 @@ function parseArray(
 
 function parseObject(
   errorPath: ErrorPath,
-  schema: ObjectSchema,
+  schema: ObjectSchema<Record<string, Schema>>,
   subject: unknown
 ): ParseResult<unknown> {
   if (
@@ -316,7 +315,7 @@ function parseObject(
 
 function parseRecord(
   errorPath: ErrorPath,
-  schema: RecordSchema,
+  schema: RecordSchema<Schema>,
   subject: unknown
 ) {
   if (
@@ -369,7 +368,7 @@ function parseRecord(
 
 function parseUnion(
   errorPath: ErrorPath,
-  schema: UnionSchema,
+  schema: UnionSchema<Array<Schema>>,
   subject: unknown
 ) {
   for (const subSchema of schema.of) {

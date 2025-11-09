@@ -1,4 +1,4 @@
-import type { Schema } from './compounds'
+import type { Schema } from './schema'
 
 export type ParseResult<T> = NonNullable<ParseError | ParseSuccess<T>>
 

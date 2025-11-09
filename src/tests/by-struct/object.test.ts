@@ -980,6 +980,144 @@ describe('Compound schema specifics (foldA)', () => {
     }
   })
 
+  it('max static schema definition depth using "satisfies x.Schema": 47', () => {
+    // prettier-ignore
+    const schema = {
+      type:'object', of: { 1: { type: 'object', of: { 2: { type: 'object', of: { 3: { type: 'object', of: { 4: { type: 'object', of: {
+        5: { type: 'object', of: { 6: { type: 'object', of: { 7: { type: 'object', of: { 8: { type: 'object', of: {
+        9: { type: 'object', of: { 10: { type: 'object', of: { 11: { type: 'object', of: { 12: {type: 'object', of: {
+        11: { type: 'object', of: { 12: { type: 'object', of: { 13: { type: 'object', of: { 14: {type: 'object', of: {
+        15: { type: 'object', of: { 16: { type: 'object', of: { 17: { type: 'object', of: { 18: {type: 'object', of: {
+        19: { type: 'object', of: { 20: { type: 'object', of: { 21: { type: 'object', of: { 22: {type: 'object', of: {
+        23: { type: 'object', of: { 24: { type: 'object', of: { 25: { type: 'object', of: { 26: {type: 'object', of: {
+        27: { type: 'object', of: { 28: { type: 'object', of: { 29: { type: 'object', of: { 30: {type: 'object', of: {
+        31: { type: 'object', of: { 32: { type: 'object', of: { 33: { type: 'object', of: { 34: {type: 'object', of: {
+        35: { type: 'object', of: { 36: { type: 'object', of: { 37: { type: 'object', of: { 38: {type: 'object', of: {
+        39: { type: 'object', of: { 40: { type: 'object', of: { 41: { type: 'object', of: { 42: {type: 'object', of: {
+        43: { type: 'object', of: { 44: { type: 'object', of: { 45: { type: 'object', of: { 46: {type: 'object', of: {
+        47: { type: 'object', of: {} },
+      }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+    } as const satisfies x.Schema
+
+    expect(typeof schema).toBe('object')
+  })
+
+  it('max static schema definition depth using "satisfies x.Schema" available to direct parse: 22', () => {
+    // prettier-ignore
+    const schema = {
+      type:'object', of: { 1: { type: 'object', of: { 2: { type: 'object', of: { 3: { type: 'object', of: { 4: { type: 'object', of: {
+        5: { type: 'object', of: { 6: { type: 'object', of: { 7: { type: 'object', of: { 8: { type: 'object', of: {
+        9: { type: 'object', of: { 10: { type: 'object', of: { 11: { type: 'object', of: { 12: {type: 'object', of: {
+        11: { type: 'object', of: { 12: { type: 'object', of: { 13: { type: 'object', of: { 14: {type: 'object', of: {
+        15: { type: 'object', of: { 16: { type: 'object', of: { 17: { type: 'object', of: { 18: {type: 'object', of: {
+        19: { type: 'object', of: { 20: { type: 'object', of: { 21: { type: 'object', of: { 22: {type: 'object', of: {
+        }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+    } as const satisfies x.Schema
+
+    expect(x.parse(schema, {}).error).toBeTruthy()
+  })
+
+  it('extreme depth: 100', () => {
+    const o = x.object
+
+    // prettier-ignore
+    const struct = o({
+      1: o({ 2: o({ 3: o({ 4: o({ 5: o({ 6: o({ 7: o({ 8: o({ 9: o({ 10: o({
+      11: o({ 12: o({ 13: o({ 14: o({ 15: o({ 16: o({ 17: o({ 18: o({ 19: o({ 20: o({
+      21: o({ 22: o({ 23: o({ 24: o({ 25: o({ 26: o({ 27: o({ 28: o({ 29: o({ 30: o({
+      31: o({ 32: o({ 33: o({ 34: o({ 35: o({ 36: o({ 37: o({ 38: o({ 39: o({ 40: o({
+      41: o({ 42: o({ 43: o({ 44: o({ 45: o({ 46: o({ 47: o({ 48: o({ 49: o({ 50: o({
+      1: o({ 2: o({ 3: o({ 4: o({ 5: o({ 6: o({ 7: o({ 8: o({ 9: o({ 10: o({
+      11: o({ 12: o({ 13: o({ 14: o({ 15: o({ 16: o({ 17: o({ 18: o({ 19: o({ 20: o({
+      21: o({ 22: o({ 23: o({ 24: o({ 25: o({ 26: o({ 27: o({ 28: o({ 29: o({ 30: o({
+      31: o({ 32: o({ 33: o({ 34: o({ 35: o({ 36: o({ 37: o({ 38: o({ 39: o({ 40: o({
+      41: o({ 42: o({ 43: o({ 44: o({ 45: o({ 46: o({ 47: o({ 48: o({ 49: o({ 50: o({
+        x: x.string()
+      }),
+      }),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),
+      }),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),
+      }),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),
+      }),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),}),})
+
+    // prettier-ignore
+    // @ts-ignore
+    const validSubject = {
+      1:{2:{3:{4:{5:{6:{7:{8:{9:{10:{
+      11:{12:{13:{14:{15:{16:{17:{18:{19:{20:{
+      21:{22:{23:{24:{25:{26:{27:{28:{29:{30:{
+      31:{32:{33:{34:{35:{36:{37:{38:{39:{40:{
+      41:{42:{43:{44:{45:{46:{47:{48:{49:{50:{
+      1:{2:{3:{4:{5:{6:{7:{8:{9:{10:{
+      11:{12:{13:{14:{15:{16:{17:{18:{19:{20:{
+      21:{22:{23:{24:{25:{26:{27:{28:{29:{30:{
+      31:{32:{33:{34:{35:{36:{37:{38:{39:{40:{
+      41:{42:{43:{44:{45:{46:{47:{48:{49:{50:{
+        x: 'x-value'
+      }
+    }
+    }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+    }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+    const parsed = struct.parse(validSubject)
+
+    if (parsed.success) {
+      // prettier-ignore
+      const tail =
+        parsed.data
+          [1][2][3][4][5][6][7][8][9][10][11][12][13][14][15][16][17][18][19][20][21][22][23][24][25]
+          [26][27][28][29][30][31][32][33][34][35][36][37][38][39][40][41][42][43][44][45][46][47][48][49][50]
+          [1][2][3][4][5][6][7][8][9][10][11][12][13][14][15][16][17][18][19][20][21][22][23][24][25]
+          [26][27][28][29][30][31][32][33][34][35][36][37][38][39][40][41][42][43][44][45][46][47][48][49][50]
+
+      type Actual = typeof tail
+      type Expected = { x: string }
+
+      x.tCh<Expected, Actual>()
+      x.tCh<Actual, Expected>()
+    }
+
+    expect(parsed.data).toStrictEqual(validSubject)
+
+    // prettier-ignore
+    // @ts-ignore
+    const invalidSubject = {
+      1:{2:{3:{4:{5:{6:{7:{8:{9:{10:{
+      11:{12:{13:{14:{15:{16:{17:{18:{19:{20:{
+      21:{22:{23:{24:{25:{26:{27:{28:{29:{30:{
+      31:{32:{33:{34:{35:{36:{37:{38:{39:{40:{
+      41:{42:{43:{44:{45:{46:{47:{48:{49:{50:{
+      1:{2:{3:{4:{5:{6:{7:{8:{9:{10:{
+      11:{12:{13:{14:{15:{16:{17:{18:{19:{20:{
+      21:{22:{23:{24:{25:{26:{27:{28:{29:{30:{
+      31:{32:{33:{34:{35:{36:{37:{38:{39:{40:{
+      41:{42:{43:{44:{45:{46:{47:{48:{49:{50:{
+        x: 0
+      }
+    }
+    }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+    }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+    const expectedError: x.InvalidSubject[] = [
+      {
+        code: x.ERROR_CODE.invalidType,
+        schema: { type: 'string' },
+        // prettier-ignore
+        path: [
+         '1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',
+         '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37',
+         '38','39','40','41','42','43','44','45','46','47','48','49','50',
+         '1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20',
+         '21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37',
+         '38','39','40','41','42','43','44','45','46','47','48','49','50',
+         'x'
+        ],
+        subject: 0,
+      },
+    ]
+
+    expect(struct.parse(invalidSubject).error).toStrictEqual(expectedError)
+  })
+
   it('each schema type as nested schema', () => {
     const schema = {
       type: 'object',
