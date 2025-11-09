@@ -11,4 +11,7 @@ export const error = (error: InvalidSubject[]): ParseError => ({
   error,
 })
 
-export const data = <T>(data: T): ParseSuccess<T> => ({ success: true, data })
+export const success = <T>(data: T): ParseSuccess<T> => ({
+  success: true,
+  data,
+})
