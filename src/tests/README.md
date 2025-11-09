@@ -1,3 +1,17 @@
+The testing strategy for schematox uses a **fold-based approach** to ensure consistency across all data type tests. The system tests three equivalent ways of creating and using schemas:
+
+1. **Raw schema objects** (e.g., `{ type: 'boolean' }`)
+2. **Constructs** created via `x.makeStruct(schema)`
+3. **Structs** created via fluent API (e.g., `x.boolean()`)
+
+The key principle is that all three approaches should behave identically in terms of:
+- Type inference
+- Runtime parsing
+- Error handling
+- Schema immutability
+
+**Folds** are reusable code blocks marked with comments like `foldA:`, `foldB:`, etc. These are automatically synchronized across all type tests using the `npm run morph` script with AST manipulation, ensuring consistency and reducing maintenance overhead.
+
 # By struct scaffold
 
 ```typescript
@@ -42,7 +56,9 @@ describe('Compound schema specifics (foldA)', () => {
 })
 ```
 
-# Fold A
+# Fold A: Type Inference and Parse Consistency
+
+Purpose**: Validates that all three approaches (schema, construct, struct) produce identical TypeScript types and runtime behavior for successful parsing scenarios.
 
 ```typescript
 it('required', () => {
@@ -113,7 +129,7 @@ it('required', () => {
       expect(constructParsed.error).toBe(undefined)
       expect(constructParsed.data).toStrictEqual(subj)
 
-      const structParsed = construct.parse(subj)
+      const structParsed = struct.parse(subj)
 
       expect(structParsed.error).toBe(undefined)
       expect(structParsed.data).toStrictEqual(subj)
@@ -122,7 +138,9 @@ it('required', () => {
 })
 ```
 
-# Fold B
+# Fold B: Parameter Keys Reduction and Schema Immutability
+
+Purpose**: Tests that fluent API methods correctly reduce available keys (removing applied methods) and ensure schema objects are immutable when parameters are applied.
 
 ```typescript
 it('optional', () => {
@@ -182,17 +200,20 @@ it('optional', () => {
 })
 ```
 
-# Fold C
+# Fold C: Invalid Type Error Handling
+
+Purpose**: Systematically tests type validation errors by feeding incompatible data types and ensuring consistent error responses across all three approaches.
 
 ```typescript
 it('iterate over fixture.DATA_TYPE', () => {
   const schema = { type: 'boolean' } satisfies x.Schema
   const struct = x.boolean()
+  const source = fixture.DATA_TYPE
 
   foldC: {
     const construct = x.makeStruct(schema)
 
-    for (const [kind, types] of fixture.DATA_TYPE) {
+    for (const [kind, types] of source) {
       if (kind === schema.type) {
         continue
       }
@@ -220,7 +241,9 @@ it('iterate over fixture.DATA_TYPE', () => {
 })
 ```
 
-# Fold D
+Fold D: Range Validation Error Handling
+
+Purpose**: Tests range/constraint validation errors (like `min`, `max`, `minLength`, `maxLength`) ensuring consistent error handling.
 
 ```typescript
 it('min', () => {
@@ -253,7 +276,9 @@ it('min', () => {
 })
 ```
 
-# Fold E
+# Fold E: Nested Schema Error Path Tracking
+
+Purpose**: Tests that error reporting correctly tracks the path to invalid data in nested structures, ensuring the `path`, `schema`, and `subject` properties in errors point to the exact location and nature of validation failures.
 
 ```typescript
 it('InvalidSubject error of nested schema should have correct path/schema/subject', () => {

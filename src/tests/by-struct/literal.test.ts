@@ -70,7 +70,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -151,7 +151,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -232,7 +232,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -313,7 +313,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -606,11 +606,12 @@ describe('ERROR_CODE.invalidType (foldC)', () => {
     } as const satisfies x.Schema
 
     const struct = x.literal(schema.of)
+    const source = fixture.DATA_TYPE
 
     foldC: {
       const construct = x.makeStruct(schema)
 
-      for (const [kind, types] of fixture.DATA_TYPE) {
+      for (const [kind, types] of source) {
         if (kind === schema.type) {
           continue
         }

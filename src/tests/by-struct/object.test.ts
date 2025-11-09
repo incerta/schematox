@@ -74,7 +74,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -155,7 +155,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -236,7 +236,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -318,7 +318,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -554,12 +554,12 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
     } as const satisfies x.Schema
 
     const struct = x.object({ x: x.boolean() })
-    const subjects = fixture.DATA_TYPE
+    const source = fixture.DATA_TYPE
 
     foldC: {
       const construct = x.makeStruct(schema)
 
-      for (const [kind, types] of subjects) {
+      for (const [kind, types] of source) {
         if (kind === schema.type) {
           continue
         }
@@ -781,7 +781,7 @@ describe('Compound schema specifics (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -875,7 +875,7 @@ describe('Compound schema specifics (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -972,7 +972,7 @@ describe('Compound schema specifics (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
@@ -1236,7 +1236,7 @@ describe('Compound schema specifics (foldA)', () => {
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
-        const structParsed = construct.parse(subj)
+        const structParsed = struct.parse(subj)
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
