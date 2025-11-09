@@ -26,19 +26,20 @@ export type {
   ParseError,
   ParseResult,
   ParseSuccess,
+  PrettifyObject,
 } from './types/utils'
 
 export type {
   Infer,
   //
-  Con_Schema_SubjT,
+  InferSchema,
+  InferPrimitive,
   //
-  Con_ArraySchema_SubjT,
-  Con_ObjectSchema_SubjT,
-  Con_PrimitiveSchema_SubjT,
-  Con_RecordSchema_SubjT,
-  Con_UnionSchema_SubjT,
-} from './types/constructors'
+  InferArray,
+  InferObject,
+  InferRecord,
+  InferUnion,
+} from './types/infer'
 
 export type {
   Schema,
@@ -60,8 +61,9 @@ export type {
 export type { Struct, StructShape, StructParams } from './types/struct'
 
 export type {
-  ExtWith_Undefined_SubjT,
-  ExtWith_Null_SubjT,
-  ExtWith_Brand_SubjT,
-  ExtWith_SchemaParams_SubjT,
+  ExtendParams,
+  //
+  ExtendBrand,
+  ExtendOptional,
+  ExtendNullable,
 } from './types/extensions'

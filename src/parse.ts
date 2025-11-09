@@ -1,8 +1,8 @@
 import { ERROR_CODE } from './constants'
 import { error, success } from './utils'
 
+import type { InferSchema } from './types/infer'
 import type { ErrorPath, InvalidSubject, ParseResult } from './types/utils'
-import type { Con_Schema_SubjT } from './types/constructors'
 
 import type {
   Schema,
@@ -35,7 +35,7 @@ const PARSE_FN_BY_SCHEMA_KIND = {
 export function parse<T extends Schema>(
   schema: T,
   subject: unknown
-): ParseResult<Con_Schema_SubjT<T>>
+): ParseResult<InferSchema<T>>
 
 export function parse(schema: Schema, subject: unknown): ParseResult<unknown> {
   return parseRecursively([], schema, subject)

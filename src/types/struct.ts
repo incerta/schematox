@@ -15,7 +15,7 @@ import type {
   StringSchema,
 } from './schema'
 
-import type { Con_Schema_SubjT } from './constructors'
+import type { InferSchema } from './infer'
 
 export type Struct<T extends Schema> = Omit<
   Pick<
@@ -47,7 +47,7 @@ export type Struct<T extends Schema> = Omit<
   keyof T
 > & {
   __schema: Readonly<T>
-  parse: (s: unknown) => ParseResult<Con_Schema_SubjT<T>>
+  parse: (s: unknown) => ParseResult<InferSchema<T>>
 }
 
 export type StructShape<T> = { __schema: T }

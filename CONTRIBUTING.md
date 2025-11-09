@@ -1,6 +1,6 @@
 # How To Contribute
 
-Currently, it's a small, not well-known project so we don't need any strict contribution policy. Simply make a fork and create a PR if you think that something is off. Alternatively, create an [issue](https://github.com/incerta/schematox/issues) if you find a bug or have an idea/question.
+Simply make a fork and create a PR if you think that something is off. Alternatively, create an [issue](https://github.com/incerta/schematox/issues) if you find a bug or have an idea/question.
 
 # Glossary
 
@@ -16,39 +16,6 @@ Currently, it's a small, not well-known project so we don't need any strict cont
 - `nested schema` - a schema embedded within a compound schema
 - `schema range parameter` - schema type dependent parameter used as value size restriction
 - `fold label` - code parts in tests that are not supposed to be copy pasted from test to test `foldA`, `foldB` etc.
-
-## Primitive Schema
-
-Primitive schema represented by js object that always has a required `type`, `of` (for `literal`) property and some [optional properties](#detailed-schemas-optional-properties). Complete list of the base detailed schema types:
-
-- `StringSchema` - result in `string` subject type. Has range parameters:
-  - `minLength?: number` - schema subject `.length` should be >= specified value to pass validate/parse successfully
-  - `maxLength?: number` - schema subject `.length` should be <= specified value to pass validate/parse successfully
-- `NumberSchema` - result in `number` or `number | undefined` schema subject type. Has extra properties:
-  - `min?: number` - schema subject value should be >= specified value to pass validate/parse successfully
-  - `max?: number` - schema subject value should be <= specified value to pass validate/parse successfully
-- `BooleanSchema` - result in `boolean` or `boolean | undefined` schema subject type
-- `LiteralSchema` - result in either `string` or `number` schema subject literal type
-
-All those types is gathered under `PrimitiveSchema` union
-
-## Compound schema
-
-- `ObjectSchema` - result in object subject type with defined keys and value types
-- `ArraySchema` - result in `Array<T>` subject type. Has range parameters:
-  - `minLength?: number` - schema subject `.length` should be >= specified value to pass validate/parse successfully
-  - `maxLength?: number` - schema subject `.length` should be <= specified value to pass validate/parse successfully
-- `UnionSchema` - result in any available schema type union
-
-All those types is gathered under `CompooundSchema` union
-
-## Construct type generic. "Con\_" prefix
-
-Generic that constructs type based on other type(s) in the manner which can not be strictly described as extenstion or reduction (narrowing, inference, extraction).
-
-## Extension type generic. "ExtWith\_" prefix
-
-The `ExtWith_${extension}<T, U>` used for extension of type `T` with some `U`. It might be intersection (brand) or just unionization with another type (optional, nullable).
 
 # Testing strategy
 

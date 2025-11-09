@@ -1,27 +1,32 @@
-export type ExtWith_Undefined_SubjT<T, U> = T extends { optional: true }
-  ? U | undefined
-  : U
+import type { BrandSchema } from './schema'
+import type { InferBrand } from './infer'
 
-export type ExtWith_Null_SubjT<T, U> = T extends {
+// Intersections must be applied at the very beginning
+// otherwise `&` will clear incompatible union types like "null" or "undefined"
+export type ExtendParams<
+  Schema,
+  Subject,
+  T0 = ExtendBrand<Schema, Subject>,
+  T1 = ExtendOptional<Schema, T0>,
+  T2 = ExtendNullable<Schema, T1>,
+> = T2
+
+export type ExtendBrand<Schema, Subject> = Schema extends {
+  brand: infer T
+}
+  ? T extends BrandSchema
+    ? InferBrand<T> & Subject
+    : never
+  : Subject
+
+export type ExtendOptional<Schema, Subject> = Schema extends {
+  optional: true
+}
+  ? Subject | undefined
+  : Subject
+
+export type ExtendNullable<Schema, Subject> = Schema extends {
   nullable: true
 }
-  ? U | null
-  : U
-
-export type ExtWith_Brand_SubjT<T, U> = T extends {
-  brand: Readonly<[infer V, infer W]>
-}
-  ? V extends string
-    ? { [k in `__${V}`]: W } & U
-    : never
-  : U
-
-// Intersections should be applied at the very beginning
-// otherwise `&` will clear incompatible union types like "null" or "undefined"
-export type ExtWith_SchemaParams_SubjT<
-  T,
-  U,
-  V = ExtWith_Brand_SubjT<T, U>,
-  W = ExtWith_Undefined_SubjT<T, V>,
-  X = ExtWith_Null_SubjT<T, W>,
-> = X
+  ? Subject | null
+  : Subject

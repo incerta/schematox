@@ -1,10 +1,4 @@
-export type SchemaShared = {
-  optional?: boolean
-  nullable?: boolean
-  description?: string
-}
-
-// Compound schema code duplication exists due to generic type circularly reference limitation (ts 2456)
+// Generics omitted to avoid TypeScript circular reference error (ts 2456)
 // prettier-ignore
 export type Schema =
    | PrimitiveSchema
@@ -13,6 +7,28 @@ export type Schema =
    | { type: 'record'; of: Schema; key?: StringSchema } & SchemaShared
    | { type: 'tuple'; of: Array<Schema> } & SchemaShared
    | { type: 'union'; of: Array<Schema> } & SchemaShared
+
+export type BrandSchema<T = string, U = unknown> = Readonly<
+  [category: T, subCategory: U]
+>
+
+export type SchemaShared = {
+  /**
+   * T -> T | undefined
+   **/
+  optional?: boolean
+
+  /**
+   * T -> T | null
+   **/
+  nullable?: boolean
+
+  /**
+   * Optional description for documentation purposes.
+   * This field has no impact on validation or type inference.
+   **/
+  description?: string
+}
 
 /**
  * Compound schema
@@ -50,12 +66,12 @@ export type UnionSchema<T = unknown> = SchemaShared & {
  * Primitive schema
  **/
 
-/**
- * @example ['idFor', 'User'] -> T & { __idFor: 'User' }
- **/
-export type BrandSchema = Readonly<[string, string]>
-
-export type PrimitiveSchemaShared = SchemaShared & { brand?: BrandSchema }
+export type PrimitiveSchemaShared = SchemaShared & {
+  /**
+   * @example ['idFor', 'User'] -> T & { __idFor: 'User' }
+   **/
+  brand?: BrandSchema
+}
 
 export type PrimitiveSchema =
   | StringSchema

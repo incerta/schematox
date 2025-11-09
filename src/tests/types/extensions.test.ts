@@ -7,7 +7,7 @@ describe('ExtWith_SchemaParams_SubjT<T, U>: U is primitive', () => {
     const schema = {} as const
 
     type Expected = U
-    type Actual = x.ExtWith_SchemaParams_SubjT<typeof schema, U>
+    type Actual = x.ExtendParams<typeof schema, U>
 
     x.tCh<Expected, Actual>()
     x.tCh<Actual, Expected>()
@@ -17,7 +17,7 @@ describe('ExtWith_SchemaParams_SubjT<T, U>: U is primitive', () => {
     const schema = { optional: true } as const
 
     type Expected = U | undefined
-    type Actual = x.ExtWith_SchemaParams_SubjT<typeof schema, U>
+    type Actual = x.ExtendParams<typeof schema, U>
 
     x.tCh<Actual, Expected>()
     x.tCh<Expected, Actual>()
@@ -27,7 +27,7 @@ describe('ExtWith_SchemaParams_SubjT<T, U>: U is primitive', () => {
     const schema = { nullable: true } as const
 
     type Expected = U | null
-    type Actual = x.ExtWith_SchemaParams_SubjT<typeof schema, U>
+    type Actual = x.ExtendParams<typeof schema, U>
 
     x.tCh<Actual, Expected>()
     x.tCh<Expected, Actual>()
@@ -37,7 +37,7 @@ describe('ExtWith_SchemaParams_SubjT<T, U>: U is primitive', () => {
     const schema = { brand: ['x', 'y'] } as const
 
     type Expected = U & { __x: 'y' }
-    type Actual = x.ExtWith_SchemaParams_SubjT<typeof schema, U>
+    type Actual = x.ExtendParams<typeof schema, U>
 
     x.tCh<Actual, Expected>()
     x.tCh<Expected, Actual>()
@@ -51,7 +51,7 @@ describe('ExtWith_SchemaParams_SubjT<T, U>: U is primitive', () => {
     } as const
 
     type Expected = (U & { __x: 'y' }) | null | undefined
-    type Actual = x.ExtWith_SchemaParams_SubjT<typeof schema, U>
+    type Actual = x.ExtendParams<typeof schema, U>
 
     x.tCh<Actual, Expected>()
     x.tCh<Expected, Actual>()
@@ -65,7 +65,7 @@ describe('ExtWith_SchemaParams_SubjT<T, U>: U is object', () => {
     const schema = {} as const
 
     type Expected = U
-    type Actual = x.ExtWith_SchemaParams_SubjT<typeof schema, U>
+    type Actual = x.ExtendParams<typeof schema, U>
 
     x.tCh<Actual, Expected>()
     x.tCh<Expected, Actual>()
@@ -75,7 +75,7 @@ describe('ExtWith_SchemaParams_SubjT<T, U>: U is object', () => {
     const schema = { optional: true } as const
 
     type Expected = U | undefined
-    type Actual = x.ExtWith_SchemaParams_SubjT<typeof schema, U>
+    type Actual = x.ExtendParams<typeof schema, U>
 
     x.tCh<Actual, Expected>()
     x.tCh<Expected, Actual>()
@@ -85,7 +85,7 @@ describe('ExtWith_SchemaParams_SubjT<T, U>: U is object', () => {
     const schema = { nullable: true } as const
 
     type Expected = U | null
-    type Actual = x.ExtWith_SchemaParams_SubjT<typeof schema, U>
+    type Actual = x.ExtendParams<typeof schema, U>
 
     x.tCh<Actual, Expected>()
     x.tCh<Expected, Actual>()
@@ -95,7 +95,7 @@ describe('ExtWith_SchemaParams_SubjT<T, U>: U is object', () => {
     const schema = { brand: ['x', 'y'] } as const
 
     type Expected = U & { __x: 'y' }
-    type Actual = x.ExtWith_SchemaParams_SubjT<typeof schema, U>
+    type Actual = x.ExtendParams<typeof schema, U>
 
     x.tCh<Actual, Expected>()
     x.tCh<Expected, Actual>()
@@ -109,7 +109,7 @@ describe('ExtWith_SchemaParams_SubjT<T, U>: U is object', () => {
     } as const
 
     type Expected = (U & { __x: 'y' }) | null | undefined
-    type Actual = x.ExtWith_SchemaParams_SubjT<typeof schema, U>
+    type Actual = x.ExtendParams<typeof schema, U>
 
     x.tCh<Actual, Expected>()
     x.tCh<Expected, Actual>()
