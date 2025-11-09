@@ -6,7 +6,7 @@ The library is focusing on fixed set of schema types: boolean, literal, number, 
 
 Library supports static schema definition which means your schemas could be completely independent from schematox. One could use such schemas as source for generation other structures like DB models.
 
-The library is small so exploring README.md is enough for understanding its API, checkout limitations/examples and you good to go:
+The library is small so exploring README.md is enough for understanding its API, checkout [examples](#example-for-all-supported-schema-types) and you good to go:
 
 - [Install](#install)
 - [Minimal requirements](#minimal-requirements)
@@ -74,7 +74,7 @@ const parsed = parse(userSchema, subject)
    // ^? ParseResult<User>
 
 parsed.error
-    // ^? InvlidSubject[] | undefined
+    // ^? InvalidSubject[] | undefined
 
 parsed.data
     // ^?  User | undefined
@@ -197,7 +197,7 @@ type FromStruct = Infer<typeof struct>
 
 ### Literal
 
-Could be string/number/boolean literal
+Could be string/number/boolean literal.
 
 ```typescript
 const schema = {
@@ -221,6 +221,8 @@ type FromStruct = Infer<typeof struct>
 ```
 
 ### Number
+
+We accept only finite numbers as valid number schema subjects.
 
 ```typescript
 const schema = {
@@ -273,6 +275,9 @@ type FromStruct = Infer<typeof struct>
 
 ### Object
 
+Extra properties in the parsed subject that are not specified in the `object` schema will not cause an error and will be skipped.
+This is a deliberate decision that allows client schemas to remain functional whenever the API is extended.
+
 ```typescript
 const schema = {
   type: 'object',
@@ -299,6 +304,8 @@ type FromStruct = Infer<typeof struct>
 ```
 
 ### Record
+
+Undefined record entries are skipped in parsed results. If a key exists, it means a value is also present.
 
 ```typescript
 const schema = {
@@ -344,6 +351,8 @@ type FromStruct = Infer<typeof struct>
 
 ### Union
 
+Be careful with object unions that do not have a unique discriminant. The parser will check the subject in the order that is specified in the union array and accept the first match.
+
 ```typescript
 const schema = {
   type: 'union',
@@ -366,17 +375,6 @@ type FromStruct = Infer<typeof struct>
 ## Schema parameters
 
 - `optional?: boolean` –  unionize with `undefined`: `{ type: 'string', optinoal: true }` result in `string | undefined`
-
-In the context of the object, optional values will be treated as optional properties:
-
-```typescript
-const struct = object({ x: string().optional() })
-
-type ExpectedInfer = {
-  x?: string | undefined
-}
-```
-
 - `nullable?: boolean` – unionize with `null`: `{ type: 'string', nullable: true }` result in `string | null`
 - `brand?: [string, string]` – make primitive type nominal "['idFor', 'User'] -> T & { \_\_idFor: 'User' }"
 - `minLength/maxLength/min/max` – schema type dependent limiting characteristics
@@ -415,7 +413,7 @@ The `result.error` shape is:
 ]
 ```
 
-It's always an array with at least one entry. Each entry includes:
+It's always an array of `InvalidSubject` entries, each of which has the following properties:
 
 - `code`: we support the following errors:
   - `INVALID_TYPE`: schema subject or default value don't meet schema type specifications
