@@ -10,6 +10,7 @@ import type {
   ArraySchema,
   ObjectSchema,
   RecordSchema,
+  TupleSchema,
   UnionSchema,
   //
   BooleanSchema,
@@ -27,6 +28,7 @@ const PARSE_FN_BY_SCHEMA_KIND = {
   array: parseArray,
   object: parseObject,
   record: parseRecord,
+  tuple: parseTuple,
   union: parseUnion,
 }
 
@@ -357,6 +359,51 @@ function parseRecord(
     }
 
     result[key] = parsed.data
+  }
+
+  if (invalidSubjects?.length) {
+    return error(invalidSubjects)
+  }
+
+  return data(result)
+}
+
+function parseTuple(
+  errorPath: ErrorPath,
+  schema: TupleSchema<Array<Schema>>,
+  subject: unknown
+) {
+  if (Array.isArray(subject) === false) {
+    return error([
+      {
+        code: ERROR_CODE.invalidType,
+        path: errorPath,
+        subject,
+        schema,
+      },
+    ])
+  }
+
+  const result: unknown[] = []
+  let invalidSubjects: InvalidSubject[] | undefined
+
+  for (let i = 0; i < schema.of.length; i++) {
+    const nestedSchema = schema.of[i]!
+    const nestedValue = subject[i]
+
+    const updatedErrorPath = [...errorPath, i]
+    const parsed = parseRecursively(updatedErrorPath, nestedSchema, nestedValue)
+
+    if (parsed.error) {
+      invalidSubjects = invalidSubjects ?? []
+
+      for (const invalidSubject of parsed.error) {
+        invalidSubjects.push(invalidSubject)
+      }
+      continue
+    }
+
+    result.push(parsed.data)
   }
 
   if (invalidSubjects?.length) {

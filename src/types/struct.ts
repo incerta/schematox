@@ -6,6 +6,7 @@ import type {
   ArraySchema,
   ObjectSchema,
   RecordSchema,
+  TupleSchema,
   UnionSchema,
   //
   BooleanSchema,
@@ -60,6 +61,7 @@ type ParamsBySchemaType = {
   array: ExtractParams<ArraySchema>
   object: ExtractParams<ObjectSchema>
   record: Exclude<ExtractParams<RecordSchema>, 'key'>
+  tuple: ExtractParams<TupleSchema>
   union: ExtractParams<UnionSchema>
 }
 

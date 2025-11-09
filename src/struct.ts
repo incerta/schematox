@@ -110,6 +110,17 @@ export function record<
   )
 }
 
+export function tuple<
+  T extends [StructShape<Schema>, ...Array<StructShape<Schema>>],
+>(of: T) {
+  const schema = {
+    type: 'tuple',
+    of: of.map((x) => x.__schema) as { [K in keyof T]: T[K]['__schema'] },
+  } as const
+
+  return makeStruct(schema)
+}
+
 export function union<
   T extends [StructShape<Schema>, ...Array<StructShape<Schema>>],
 >(of: T) {
