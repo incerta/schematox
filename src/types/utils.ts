@@ -1,6 +1,6 @@
 import type { Schema } from './schema'
 
-export type ParseResult<T> = NonNullable<ParseError | ParseSuccess<T>>
+export type ParseResult<T> = ParseError | ParseSuccess<T>
 
 export type ParseError = {
   success: false
@@ -21,20 +21,20 @@ export type InvalidSubject = {
    * Path to the invalid data, represented as an array of object keys (strings)
    * and array indices (numbers) that can be used to navigate to the specific
    * location where validation failed
-   */
+   **/
   path: ErrorPath
 
   /**
    * The specific part of the schema definition that was used to validate
    * the subject data (not necessarily the overall schema, but the schema
    * fragment that caused the validation failure)
-   */
+   **/
   schema: Schema
 
   /**
    * The specific data value that failed validation (not necessarily the
    * entire input, but the particular piece of data that caused the issue)
-   */
+   **/
   subject: unknown
 }
 

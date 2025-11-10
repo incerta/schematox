@@ -406,9 +406,26 @@ The `result.error` shape is:
 [
   {
     "code": "INVALID_TYPE",
-    "schema": { "type": "string" },
-    "subject": 0,
+
+    /**
+     * Path to the invalid data, represented as an array of object keys (strings)
+     * and array indices (numbers) that can be used to navigate to the specific
+     * location where validation failed
+    **/
     "path": ["x", "y", 0, "z"]
+
+    /**
+     * The specific part of the schema definition that was used to validate
+     * the subject data (not necessarily the overall schema, but the schema
+     * fragment that caused the validation failure)
+    **/
+    "schema": { "type": "string" },
+
+    /**
+     * The specific data value that failed validation (not necessarily the
+     * entire input, but the particular piece of data that caused the issue)
+    **/
+    "subject": 0,
   }
 ]
 ```
