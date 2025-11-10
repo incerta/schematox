@@ -654,6 +654,42 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
       }
     }
   })
+
+  it('multiple errors', () => {
+    const schema = {
+      type: 'tuple',
+      of: [{ type: 'boolean' }, { type: 'literal', of: 'x' }],
+    } as const satisfies x.Schema
+
+    const struct = x.tuple([x.boolean(), x.literal('x')])
+
+    const construct = x.makeStruct(schema)
+
+    const subject = ['A', 'B']
+
+    const expectedError: x.InvalidSubject[] = [
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: [0],
+        schema: schema.of[0],
+        subject: 'A',
+      },
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: [1],
+        schema: schema.of[1],
+        subject: 'B',
+      },
+    ]
+
+    const parsedSchema = x.parse(schema, subject)
+    const parsedStruct = struct.parse(subject)
+    const parsedConstruct = construct.parse(subject)
+
+    expect(parsedSchema.error).toStrictEqual(expectedError)
+    expect(parsedStruct.error).toStrictEqual(expectedError)
+    expect(parsedConstruct.error).toStrictEqual(expectedError)
+  })
 })
 
 describe('Compound schema specifics (foldA)', () => {

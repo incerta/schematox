@@ -997,7 +997,7 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
   })
 })
 
-describe('ERROR_CODE.INVALID_RANGE (foldD)', () => {
+describe('ERROR_CODE.invalidRange (foldD)', () => {
   it('minLength', () => {
     const schema = {
       type: 'array',

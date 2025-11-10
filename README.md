@@ -406,35 +406,18 @@ The `result.error` shape is:
 [
   {
     "code": "INVALID_TYPE",
-
-    /**
-     * Path to the invalid data, represented as an array of object keys (strings)
-     * and array indices (numbers) that can be used to navigate to the specific
-     * location where validation failed
-    **/
     "path": ["x", "y", 0, "z"]
-
-    /**
-     * The specific part of the schema definition that was used to validate
-     * the subject data (not necessarily the overall schema, but the schema
-     * fragment that caused the validation failure)
-    **/
     "schema": { "type": "string" },
-
-    /**
-     * The specific data value that failed validation (not necessarily the
-     * entire input, but the particular piece of data that caused the issue)
-    **/
     "subject": 0,
   }
 ]
 ```
 
-It's always an array of `InvalidSubject` entries, each of which has the following properties:
+It's always an array of `InvalidSubject` entries, each has the following properties:
 
-- `code`: we support the following errors:
+- `code`:
   - `INVALID_TYPE`: schema subject or default value don't meet schema type specifications
   - `INVALID_RANGE`: `min/max` or `minLength/maxLength` schema requirements aren't met
-- `schema`: The specific section of `schema` where the invalid value is found.
-- `subject`: The specific part of the validated subject where the invalid value exists.
-- `path`: Traces the route from the root to the error subject, with strings as keys and numbers as array indexes.
+- `schema`: the specific section of `schema` where the invalid value is found.
+- `subject`: the specific part of the validated subject where the invalid value exists.
+- `path`: traces the route from the root to the error subject, with strings as keys and numbers as array indexes.

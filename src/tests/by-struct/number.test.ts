@@ -942,7 +942,7 @@ describe('ERROR_CODE.invalidType (foldC)', () => {
   })
 })
 
-describe('ERROR_CODE.INVALID_RANGE (foldD)', () => {
+describe('ERROR_CODE.invalidRange (foldD)', () => {
   it('min', () => {
     const schema = { type: 'number', min: 0 } satisfies x.Schema
     const struct = x.number().min(schema.min)

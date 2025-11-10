@@ -26,14 +26,13 @@
     "ts-morph": "^26.0.0",
     "typescript": "^5.3.2"
   },
-  "description": "Define JSON compatible schema statically/programmatically and parse/validate/guard its subject with typesafety",
+  "description": "Define JSON compatible schema statically/programmatically and parse its subject with typesafety",
   "author": "Kanstantsin Mazur",
   "license": "MIT",
   "keywords": [
     "typescript",
     "schema",
     "parser",
-    "validator",
     "typeguard",
     "static schema definition",
     "programmatic schema definition",
