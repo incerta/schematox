@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/incerta/schematox/compare/v0.4.0...v1.0.0)
+
+The module went through major refactoring so it could be ready for production usage:
+
+- [RecordSchema support #34](https://github.com/incerta/schematox/pull/34)
+- [Drop validate/guard feature support #36](https://github.com/incerta/schematox/pull/36)
+- [Pre major release testing architecture and file structure refactoring #38](https://github.com/incerta/schematox/pull/38)
+- [Break down parse logic into smaller functions #39](https://github.com/incerta/schematox/pull/39)
+- [Support unrestricted object schema depth #42](https://github.com/incerta/schematox/pull/42)
+- [Support tuple schema #43](https://github.com/incerta/schematox/pull/43)
+
 ## [0.4.0](https://github.com/incerta/schematox/compare/v0.3.1...v0.4.0)
 
 - [`aa0d95e`](https://github.com/incerta/schematox/commit/aa0d95e30b7784c0ce29317ae808e4ba7950abab) Extend compound structure nesting limit to 12 layers of depth
