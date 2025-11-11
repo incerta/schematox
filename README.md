@@ -1,4 +1,4 @@
-# schematox
+# Schematox
 
 Schematox is a lightweight typesafe schema defined parser. All schemas are JSON compatible.
 
@@ -142,10 +142,12 @@ const string = makeStruct(schema)
 
 We distinguish two main categories of schema units:
 
-- primitive: boolean, literal, number, boolean
-- compound: array, object, record, union
+- primitive: boolean, literal, number, string
+- compound: array, object, record, tuple, union
 
-Any schema share optional/nullable/description parameters. Any compound schema could have any other schema type as its member including itself. Any primitive schema can have "brand" parameter.
+Any schema share optional/nullable/description parameters.
+Any primitive schema can have "brand" parameter.
+Any compound schema could have any other schema type as its member including itself.
 
 ### Boolean
 
