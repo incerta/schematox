@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 MAIN_BRANCH="main"
 BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
