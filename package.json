@@ -1,6 +1,6 @@
 {
   "name": "schematox",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "prepublishOnly": "bash release-check.sh",
     "test": "jest",
