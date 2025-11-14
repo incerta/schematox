@@ -26,17 +26,18 @@ export type Struct<T extends Schema> = Omit<
       nullable: () => Struct<T & { nullable: true }>
 
       brand: <
-        U extends string,
-        V extends
-          | boolean
-          | number
-          | string
-          | ReadonlyArray<unknown>
-          | Record<string, unknown>,
+        U extends [string, BrandSubType] | [Readonly<[string, BrandSubType]>],
       >(
-        key: U,
-        value: V
-      ) => Struct<T & { brand: BrandSchema<U, V> }>
+        ...args: U
+      ) => Struct<
+        T & {
+          brand: U extends [infer V, infer W]
+            ? BrandSchema<V, W>
+            : U extends [Readonly<[infer V, infer W]>]
+              ? BrandSchema<V, W>
+              : never
+        }
+      >
 
       minLength: <U extends number>(
         minLength: U
@@ -59,6 +60,13 @@ export type Struct<T extends Schema> = Omit<
   __schema: Readonly<T>
   parse: (s: unknown) => ParseResult<InferSchema<T>>
 }
+
+type BrandSubType =
+  | boolean
+  | number
+  | string
+  | ReadonlyArray<unknown>
+  | Record<string, unknown>
 
 export type StructShape<T> = { __schema: T }
 

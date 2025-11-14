@@ -493,7 +493,7 @@ describe('Construct ArraySchema subject type', () => {
     })
   })
 
-  describe('Nested primitve schema with no/all type related parameters set', () => {
+  describe('Nested primitive schema with no/all type related parameters set', () => {
     it('required', () => {
       const nested = { type: 'boolean' } as const satisfies x.Schema
       const schema = { type: 'array', of: nested } as const satisfies x.Schema
@@ -1233,7 +1233,8 @@ describe('Different kinds of brand', () => {
     const brand = ['Category', true] as const satisfies x.BrandSchema
     const schema = { type: 'boolean', brand } as const satisfies x.Schema
 
-    const struct = x.boolean().brand('Category', true)
+    const structA = x.boolean().brand('Category', true)
+    const structB = x.boolean().brand(brand)
     const construct = x.makeStruct(schema)
 
     type Expected = { __Category: true } & boolean
@@ -1243,22 +1244,32 @@ describe('Different kinds of brand', () => {
     x.tCh<Expected, Schema>()
     x.tCh<Schema, Expected>()
 
-    type Struct = x.Infer<typeof struct>
+    type StructA = x.Infer<typeof structA>
 
-    x.tCh<Expected, Struct>()
-    x.tCh<Struct, Expected>()
+    x.tCh<Expected, StructA>()
+    x.tCh<StructA, Expected>()
+
+    type StructB = x.Infer<typeof structB>
+
+    x.tCh<Expected, StructB>()
+    x.tCh<StructB, Expected>()
 
     type Construct = x.Infer<typeof construct>
 
     x.tCh<Expected, Construct>()
     x.tCh<Construct, Expected>()
+
+    expect(structA.__schema.brand).toStrictEqual(brand)
+    expect(structB.__schema.brand).toStrictEqual(brand)
+    expect(construct.__schema.brand).toStrictEqual(brand)
   })
 
   it('brand: [string, number]', () => {
     const brand = ['Category', 0] as const satisfies x.BrandSchema
     const schema = { type: 'boolean', brand } as const satisfies x.Schema
 
-    const struct = x.boolean().brand('Category', 0)
+    const structA = x.boolean().brand('Category', 0)
+    const structB = x.boolean().brand(brand)
     const construct = x.makeStruct(schema)
 
     type Expected = { __Category: 0 } & boolean
@@ -1268,22 +1279,32 @@ describe('Different kinds of brand', () => {
     x.tCh<Expected, Schema>()
     x.tCh<Schema, Expected>()
 
-    type Struct = x.Infer<typeof struct>
+    type StructA = x.Infer<typeof structA>
 
-    x.tCh<Expected, Struct>()
-    x.tCh<Struct, Expected>()
+    x.tCh<Expected, StructA>()
+    x.tCh<StructA, Expected>()
+
+    type StructB = x.Infer<typeof structB>
+
+    x.tCh<Expected, StructB>()
+    x.tCh<StructB, Expected>()
 
     type Construct = x.Infer<typeof construct>
 
     x.tCh<Expected, Construct>()
     x.tCh<Construct, Expected>()
+
+    expect(structA.__schema.brand).toStrictEqual(brand)
+    expect(structB.__schema.brand).toStrictEqual(brand)
+    expect(construct.__schema.brand).toStrictEqual(brand)
   })
 
   it('brand: [string, string]', () => {
     const brand = ['Category', 'SubCategory'] as const satisfies x.BrandSchema
     const schema = { type: 'boolean', brand } as const satisfies x.Schema
 
-    const struct = x.boolean().brand('Category', 'SubCategory')
+    const structA = x.boolean().brand('Category', 'SubCategory')
+    const structB = x.boolean().brand(brand)
     const construct = x.makeStruct(schema)
 
     type Expected = { __Category: 'SubCategory' } & boolean
@@ -1293,22 +1314,32 @@ describe('Different kinds of brand', () => {
     x.tCh<Expected, Schema>()
     x.tCh<Schema, Expected>()
 
-    type Struct = x.Infer<typeof struct>
+    type StructA = x.Infer<typeof structA>
 
-    x.tCh<Expected, Struct>()
-    x.tCh<Struct, Expected>()
+    x.tCh<Expected, StructA>()
+    x.tCh<StructA, Expected>()
+
+    type StructB = x.Infer<typeof structB>
+
+    x.tCh<Expected, StructB>()
+    x.tCh<StructB, Expected>()
 
     type Construct = x.Infer<typeof construct>
 
     x.tCh<Expected, Construct>()
     x.tCh<Construct, Expected>()
+
+    expect(structA.__schema.brand).toStrictEqual(brand)
+    expect(structB.__schema.brand).toStrictEqual(brand)
+    expect(construct.__schema.brand).toStrictEqual(brand)
   })
 
   it('brand: [string, array]', () => {
     const brand = ['Category', ['x']] as const satisfies x.BrandSchema
     const schema = { type: 'boolean', brand } as const satisfies x.Schema
 
-    const struct = x.boolean().brand('Category', ['x'] as const)
+    const structA = x.boolean().brand('Category', ['x'] as const)
+    const structB = x.boolean().brand(brand)
     const construct = x.makeStruct(schema)
 
     type Expected = { __Category: Readonly<['x']> } & boolean
@@ -1318,15 +1349,24 @@ describe('Different kinds of brand', () => {
     x.tCh<Expected, Schema>()
     x.tCh<Schema, Expected>()
 
-    type Struct = x.Infer<typeof struct>
+    type StructA = x.Infer<typeof structA>
 
-    x.tCh<Expected, Struct>()
-    x.tCh<Struct, Expected>()
+    x.tCh<Expected, StructA>()
+    x.tCh<StructA, Expected>()
+
+    type StructB = x.Infer<typeof structB>
+
+    x.tCh<Expected, StructB>()
+    x.tCh<StructB, Expected>()
 
     type Construct = x.Infer<typeof construct>
 
     x.tCh<Expected, Construct>()
     x.tCh<Construct, Expected>()
+
+    expect(structA.__schema.brand).toStrictEqual(brand)
+    expect(structB.__schema.brand).toStrictEqual(brand)
+    expect(construct.__schema.brand).toStrictEqual(brand)
   })
 
   it('brand: [string, record]', () => {
@@ -1337,7 +1377,8 @@ describe('Different kinds of brand', () => {
 
     const schema = { type: 'boolean', brand } as const satisfies x.Schema
 
-    const struct = x.boolean().brand('Category', { x: 'x-value' } as const)
+    const structA = x.boolean().brand('Category', { x: 'x-value' } as const)
+    const structB = x.boolean().brand(brand)
     const construct = x.makeStruct(schema)
 
     type Expected = { __Category: { x: 'x-value' } } & boolean
@@ -1347,14 +1388,23 @@ describe('Different kinds of brand', () => {
     x.tCh<Expected, Schema>()
     x.tCh<Schema, Expected>()
 
-    type Struct = x.Infer<typeof struct>
+    type StructA = x.Infer<typeof structA>
 
-    x.tCh<Expected, Struct>()
-    x.tCh<Struct, Expected>()
+    x.tCh<Expected, StructA>()
+    x.tCh<StructA, Expected>()
+
+    type StructB = x.Infer<typeof structB>
+
+    x.tCh<Expected, StructB>()
+    x.tCh<StructB, Expected>()
 
     type Construct = x.Infer<typeof construct>
 
     x.tCh<Expected, Construct>()
     x.tCh<Construct, Expected>()
+
+    expect(structA.__schema.brand).toStrictEqual(brand)
+    expect(structB.__schema.brand).toStrictEqual(brand)
+    expect(construct.__schema.brand).toStrictEqual(brand)
   })
 })
