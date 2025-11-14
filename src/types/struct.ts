@@ -9,6 +9,8 @@ import type {
   TupleSchema,
   UnionSchema,
   //
+  BrandSchema,
+  //
   BooleanSchema,
   LiteralSchema,
   NumberSchema,
@@ -23,10 +25,18 @@ export type Struct<T extends Schema> = Omit<
       optional: () => Struct<T & { optional: true }>
       nullable: () => Struct<T & { nullable: true }>
 
-      brand: <V extends string, W extends string>(
-        key: V,
-        value: W
-      ) => Struct<T & { brand: Readonly<[V, W]> }>
+      brand: <
+        U extends string,
+        V extends
+          | boolean
+          | number
+          | string
+          | ReadonlyArray<unknown>
+          | Record<string, unknown>,
+      >(
+        key: U,
+        value: V
+      ) => Struct<T & { brand: BrandSchema<U, V> }>
 
       minLength: <U extends number>(
         minLength: U

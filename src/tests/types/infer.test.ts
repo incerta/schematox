@@ -1227,3 +1227,134 @@ describe('Construct all compound schemas with 7 depth by itself', () => {
     x.tCh<Expected, Actual>()
   })
 })
+
+describe('Different kinds of brand', () => {
+  it('brand: [string, boolean]', () => {
+    const brand = ['Category', true] as const satisfies x.BrandSchema
+    const schema = { type: 'boolean', brand } as const satisfies x.Schema
+
+    const struct = x.boolean().brand('Category', true)
+    const construct = x.makeStruct(schema)
+
+    type Expected = { __Category: true } & boolean
+
+    type Schema = x.Infer<typeof schema>
+
+    x.tCh<Expected, Schema>()
+    x.tCh<Schema, Expected>()
+
+    type Struct = x.Infer<typeof struct>
+
+    x.tCh<Expected, Struct>()
+    x.tCh<Struct, Expected>()
+
+    type Construct = x.Infer<typeof construct>
+
+    x.tCh<Expected, Construct>()
+    x.tCh<Construct, Expected>()
+  })
+
+  it('brand: [string, number]', () => {
+    const brand = ['Category', 0] as const satisfies x.BrandSchema
+    const schema = { type: 'boolean', brand } as const satisfies x.Schema
+
+    const struct = x.boolean().brand('Category', 0)
+    const construct = x.makeStruct(schema)
+
+    type Expected = { __Category: 0 } & boolean
+
+    type Schema = x.Infer<typeof schema>
+
+    x.tCh<Expected, Schema>()
+    x.tCh<Schema, Expected>()
+
+    type Struct = x.Infer<typeof struct>
+
+    x.tCh<Expected, Struct>()
+    x.tCh<Struct, Expected>()
+
+    type Construct = x.Infer<typeof construct>
+
+    x.tCh<Expected, Construct>()
+    x.tCh<Construct, Expected>()
+  })
+
+  it('brand: [string, string]', () => {
+    const brand = ['Category', 'SubCategory'] as const satisfies x.BrandSchema
+    const schema = { type: 'boolean', brand } as const satisfies x.Schema
+
+    const struct = x.boolean().brand('Category', 'SubCategory')
+    const construct = x.makeStruct(schema)
+
+    type Expected = { __Category: 'SubCategory' } & boolean
+
+    type Schema = x.Infer<typeof schema>
+
+    x.tCh<Expected, Schema>()
+    x.tCh<Schema, Expected>()
+
+    type Struct = x.Infer<typeof struct>
+
+    x.tCh<Expected, Struct>()
+    x.tCh<Struct, Expected>()
+
+    type Construct = x.Infer<typeof construct>
+
+    x.tCh<Expected, Construct>()
+    x.tCh<Construct, Expected>()
+  })
+
+  it('brand: [string, array]', () => {
+    const brand = ['Category', ['x']] as const satisfies x.BrandSchema
+    const schema = { type: 'boolean', brand } as const satisfies x.Schema
+
+    const struct = x.boolean().brand('Category', ['x'] as const)
+    const construct = x.makeStruct(schema)
+
+    type Expected = { __Category: Readonly<['x']> } & boolean
+
+    type Schema = x.Infer<typeof schema>
+
+    x.tCh<Expected, Schema>()
+    x.tCh<Schema, Expected>()
+
+    type Struct = x.Infer<typeof struct>
+
+    x.tCh<Expected, Struct>()
+    x.tCh<Struct, Expected>()
+
+    type Construct = x.Infer<typeof construct>
+
+    x.tCh<Expected, Construct>()
+    x.tCh<Construct, Expected>()
+  })
+
+  it('brand: [string, record]', () => {
+    const brand = [
+      'Category',
+      { x: 'x-value' },
+    ] as const satisfies x.BrandSchema
+
+    const schema = { type: 'boolean', brand } as const satisfies x.Schema
+
+    const struct = x.boolean().brand('Category', { x: 'x-value' } as const)
+    const construct = x.makeStruct(schema)
+
+    type Expected = { __Category: { x: 'x-value' } } & boolean
+
+    type Schema = x.Infer<typeof schema>
+
+    x.tCh<Expected, Schema>()
+    x.tCh<Schema, Expected>()
+
+    type Struct = x.Infer<typeof struct>
+
+    x.tCh<Expected, Struct>()
+    x.tCh<Struct, Expected>()
+
+    type Construct = x.Infer<typeof construct>
+
+    x.tCh<Expected, Construct>()
+    x.tCh<Construct, Expected>()
+  })
+})
