@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.1](https://github.com/incerta/schematox/compare/v1.0.0...v1.0.1)
+
+- [FIX: struct brand assignment second argument type restriction #44](https://github.com/incerta/schematox/pull/44)
+
 ## [1.0.0](https://github.com/incerta/schematox/compare/v0.4.0...v1.0.0)
 
 The module went through major refactoring so it could be ready for production usage:
