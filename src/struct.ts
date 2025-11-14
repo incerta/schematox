@@ -1,7 +1,7 @@
 import { PARAMS_BY_SCHEMA_TYPE } from './constants'
 import { parse } from './parse'
 
-import type { Schema, StringSchema } from './types/schema'
+import type { Schema, BrandSchema, StringSchema } from './types/schema'
 import type { Struct, StructParams, StructShape } from './types/struct'
 
 export function makeStruct<T extends Schema>(schema: T): Struct<T>
@@ -26,8 +26,12 @@ export function makeStruct(schema: Schema) {
   }
 
   if (params.has('brand')) {
-    result.brand = (key: string, value: string) =>
-      makeStruct({ ...schema, brand: [key, value] })
+    result.brand = (...args: BrandSchema | [BrandSchema]) => {
+      return makeStruct({
+        ...schema,
+        brand: (Array.isArray(args[0]) ? args[0] : args) as BrandSchema,
+      })
+    }
   }
 
   if (params.has('min')) {
