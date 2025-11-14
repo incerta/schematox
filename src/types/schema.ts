@@ -8,9 +8,7 @@ export type Schema =
    | { type: 'tuple'; of: Array<Schema> } & SchemaShared
    | { type: 'union'; of: Array<Schema> } & SchemaShared
 
-export type BrandSchema<T = string, U = unknown> = Readonly<
-  [category: T, subCategory: U]
->
+export type BrandSchema<T = string, U = unknown> = Readonly<[T, U]>
 
 export type SchemaShared = {
   /**
