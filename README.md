@@ -6,25 +6,28 @@ The library is focusing on fixed set of schema types: boolean, literal, number, 
 
 Library supports static schema definition which means your schemas could be completely independent from schematox. One could use such schemas as source for generation other structures like DB models.
 
-The library is small so exploring README.md is enough for understanding its API, checkout [examples](#example-for-all-supported-schema-types) and you good to go:
+The library is small so exploring README.md is enough for understanding its API, checkout [examples](#quick-start) and you good to go:
 
 - [Install](#install)
-- [Minimal requirements](#minimal-requirements)
+- [Minimal Requirements](#minimal-requirements)
 - [Features](#features)
-- [Static schema example](#static-schema-example)
-- [Programmatic schema example](#programmatic-schema-example)
-- [Example for all supported schema types](#example-for-all-supported-schema-types)
+- [Quick Start](#quick-start)
+  - [Static Schema](#static-schema)
+  - [Struct](#struct)
+  - [Construct](#construct)
+- [Primitive Schema](#primitive-schema)
   - [Boolean](#boolean)
   - [Literal](#literal)
   - [Number](#number)
   - [String](#string)
+- [Compound Schema](#compound-schema)
   - [Array](#array)
   - [Object](#object)
   - [Record](#record)
   - [Tuple](#tuple)
   - [Union](#union)
-- [Schema parameters](#schema-parameters)
-- [Error shape](#error-shape)
+- [Schema Parameters](#schema-parameters)
+- [Error Shape](#error-shape)
 
 ## Install
 
@@ -32,7 +35,7 @@ The library is small so exploring README.md is enough for understanding its API,
 npm install schematox
 ```
 
-## Minimal requirements
+## Minimal Requirements
 
 - ECMAScript version: `2018`
 - TypeScript version: `5.3.2`
@@ -47,9 +50,20 @@ npm install schematox
 - Construct type requirement for schema itself using exposed type generics
 
 
-## Static schema example
+## Quick Start
 
-Statically defined schema:
+One can use three ways of schema definition using `schematox` library:
+
+- **Static**: a JSON-compatible object that structurally conforms to the `Schema` type
+- **Struct**: is commonly accepted way of schema definition, as seen in [zod](https://github.com/colinhacks/zod) or [superstruct](https://github.com/ianstormtaylor/superstruct)
+- **Construct**: use `makeStruct` function to get `struct` from `static` schema
+
+All **programmatically defined** (`struct`, `construct`) schemas are eventually based on `static`, which could be accessed by `__schema` key. All schemas must be immutable constants and should not be mutated by the user. Each application of `struct` parameters related to schema update will create shallow copy of the original schema.
+
+### Static schema
+
+A JSON-compatible object that structurally conforms to the `Schema` type.
+The `satisfies Schema` check is optional, structurally valid schema will be accepted by the parser.
 
 ```typescript
 import { parse } from 'schematox'
@@ -89,9 +103,9 @@ parsed.data
     // ^? User
 ```
 
-## Programmatic schema example
+### Struct
 
-Same schema but defined programmatically:
+Is commonly accepted way of schema, as seen in [zod](https://github.com/colinhacks/zod) or [superstruct](https://github.com/ianstormtaylor/superstruct) library:
 
 ```typescript
 import { object, string } from 'schematox'
@@ -125,10 +139,7 @@ parsed.data
     // ^? User
 ```
 
-All programmatically defined schemas are the same as static, one just needs to access it through `__schema` key.
-A statically defined schema can be transformed to a struct using the `makeStruct` utility function and can have custom props.
-
-## Transform static schema into struct
+### Construct
 
 ```typescript
 import { makeStruct } from 'schematox'
@@ -138,16 +149,9 @@ const schema = { type: 'string' } as const satisfies Schema
 const string = makeStruct(schema)
 ```
 
-## Example for all supported schema types
+## Primitive Schema
 
-We distinguish two main categories of schema units:
-
-- primitive: boolean, literal, number, string
-- compound: array, object, record, tuple, union
-
-Any schema share optional/nullable/description parameters.
-Any primitive schema can have "brand" parameter.
-Any compound schema could have any other schema type as its member including itself.
+Any schema share optional/nullable/description/brand parameters.
 
 ### Boolean
 
@@ -250,6 +254,10 @@ type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
 //
 ```
+
+## Compound Schema
+
+Any compound schema could have any other schema type as its member including itself.
 
 ### Array
 
@@ -374,15 +382,15 @@ type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
 ```
 
-## Schema parameters
+## Schema Parameters
 
-- `optional?: boolean` –  unionize with `undefined`: `{ type: 'string', optinoal: true }` result in `string | undefined`
+- `optional?: boolean` – unionize with `undefined`: `{ type: 'string', optinoal: true }` result in `string | undefined`
 - `nullable?: boolean` – unionize with `null`: `{ type: 'string', nullable: true }` result in `string | null`
-- `brand?: [string, string]` – make primitive type nominal "['idFor', 'User'] -> T & { \_\_idFor: 'User' }"
-- `minLength/maxLength/min/max` – schema type dependent limiting characteristics
-- `description?: string` – description of the particular schema property which can be used to provide more detailed information for the user/developer on validation/parse error
+- `brand?: [string, unknown]` – make primitive type nominal "['idFor', 'User'] -> T & { \_\_idFor: 'User' }"
+- `minLength/maxLength/min/max` – schema type dependent limiting characteristics
+- `description?: string` – description of the particular schema property which can be used to provide more detailed information for the user/developer on validation/parse error
 
-## Error shape
+## Error Shape
 
 Nested schema example. Subject `0` is invalid, should be a `string`:
 
