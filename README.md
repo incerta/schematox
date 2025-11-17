@@ -42,13 +42,13 @@ npm install schematox
 
 ## Features
 
-- Statically defined JSON compatible schema
-- Programmatically defined schema (struct)
-- Check defined schema correctness using non generic type "Schema"
+- Statically defined **JSON** compatible schema
+- Programmatically defined schema (**struct**, **construct**)
+- Check defined schema correctness using non generic type **Schema**
 - Ether-style error handling (no unexpected throws)
 - First-class support for branded primitives (primitive nominal types alias)
 - Construct type requirement for schema itself using exposed type generics
-
+- Support the [standard schema](https://standardschema.dev) - a common interface for TypeScript validation libraries
 
 ## Quick Start
 

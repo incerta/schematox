@@ -72,7 +72,7 @@ it('required', () => {
   foldA: {
     const construct = x.makeStruct(schema)
 
-    /* ensure that schema/construct/struct subject types are identical */
+    /* ensure that schema/construct/struct/~standard subject types are identical */
 
     type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
 
@@ -89,9 +89,16 @@ it('required', () => {
     x.tCh<StructSubj, ExpectedSubj>()
     x.tCh<ExpectedSubj, StructSubj>()
 
+    type StandardSubj = NonNullable<
+      (typeof struct)['~standard']['types']
+    >['output']
+
+    x.tCh<StandardSubj, ExpectedSubj>()
+    x.tCh<ExpectedSubj, StandardSubj>()
+
     /* parsed either type check */
 
-    type ExpectedParsed = x.Either<x.Errors, ExpectedSubj>
+    type ExpectedParsed = x.ParseResult<ExpectedSubj>
 
     const parsed = x.parse(schema, undefined)
 
@@ -109,6 +116,14 @@ it('required', () => {
 
     x.tCh<StructParsed, ExpectedParsed>()
     x.tCh<ExpectedParsed, StructParsed>()
+
+    type StandardParsed = Extract<
+      ReturnType<(typeof struct)['~standard']['validate']>,
+      { value: unknown }
+    >['value']
+
+    x.tCh<StandardParsed, ExpectedSubj>()
+    x.tCh<ExpectedSubj, StandardParsed>()
 
     /* runtime schema check */
 
@@ -133,6 +148,18 @@ it('required', () => {
 
       expect(structParsed.error).toBe(undefined)
       expect(structParsed.data).toStrictEqual(subj)
+
+      const standardParsed = struct['~standard'].validate(subj)
+
+      if (standardParsed instanceof Promise) {
+        throw Error('Not expected')
+      }
+
+      if (standardParsed.issues !== undefined) {
+        throw Error('not expected')
+      }
+
+      expect(standardParsed.value).toStrictEqual(subj)
     }
   }
 })
@@ -235,6 +262,16 @@ it('iterate over fixture.DATA_TYPE', () => {
         expect(parsedSchema.error).toStrictEqual(expectedError)
         expect(parsedConstruct.error).toStrictEqual(expectedError)
         expect(parsedStruct.error).toStrictEqual(expectedError)
+
+        const parsedStandard = struct['~standard'].validate(subject)
+
+        if (parsedStandard instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        expect(parsedStandard.issues).toStrictEqual([
+          { message: x.ERROR_CODE.invalidType, path: [] },
+        ])
       }
     }
   }
@@ -271,6 +308,16 @@ it('min', () => {
       expect(parsedSchema.error).toStrictEqual(expectedError)
       expect(parsedConstruct.error).toStrictEqual(expectedError)
       expect(parsedStruct.error).toStrictEqual(expectedError)
+
+      const parsedStandard = struct['~standard'].validate(subject)
+
+      if (parsedStandard instanceof Promise) {
+        throw Error('Not expected')
+      }
+
+      expect(parsedStandard.issues).toStrictEqual([
+        { message: x.ERROR_CODE.invalidRange, path: [] },
+      ])
     }
   }
 })
@@ -327,6 +374,16 @@ it('InvalidSubject error of nested schema should have correct path/schema/subjec
       expect(parsedSchema.error).toStrictEqual(expectedError)
       expect(parsedConstruct.error).toStrictEqual(expectedError)
       expect(parsedStruct.error).toStrictEqual(expectedError)
+
+      const parsedStandard = struct['~standard'].validate(subject)
+
+      if (parsedStandard instanceof Promise) {
+        throw Error('Not expected')
+      }
+
+      expect(parsedStandard.issues).toStrictEqual([
+        { path, message: x.ERROR_CODE.invalidType },
+      ])
     }
   }
 })

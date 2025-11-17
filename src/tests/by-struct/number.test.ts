@@ -1,6 +1,8 @@
 import * as x from '../../'
 import * as fixture from '../fixtures'
 
+import type { StructSharedKeys } from '../type'
+
 describe('Type inference and parse by schema/construct/struct (foldA)', () => {
   it('required', () => {
     const schema = { type: 'number' } as const satisfies x.Schema
@@ -13,7 +15,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     foldA: {
       const construct = x.makeStruct(schema)
 
-      /* ensure that schema/construct/struct subject types are identical */
+      /* ensure that schema/construct/struct/~standard subject types are identical */
 
       type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
 
@@ -29,6 +31,13 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StructSubj>()
+
+      type StandardSubj = NonNullable<
+        (typeof struct)['~standard']['types']
+      >['output']
+
+      x.tCh<StandardSubj, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardSubj>()
 
       /* parsed either type check */
 
@@ -50,6 +59,14 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, StructParsed>()
+
+      type StandardParsed = Extract<
+        ReturnType<(typeof struct)['~standard']['validate']>,
+        { value: unknown }
+      >['value']
+
+      x.tCh<StandardParsed, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardParsed>()
 
       /* runtime schema check */
 
@@ -74,6 +91,18 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
+
+        const standardParsed = struct['~standard'].validate(subj)
+
+        if (standardParsed instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        if (standardParsed.issues !== undefined) {
+          throw Error('not expected')
+        }
+
+        expect(standardParsed.value).toStrictEqual(subj)
       }
     }
   })
@@ -96,7 +125,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     foldA: {
       const construct = x.makeStruct(schema)
 
-      /* ensure that schema/construct/struct subject types are identical */
+      /* ensure that schema/construct/struct/~standard subject types are identical */
 
       type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
 
@@ -112,6 +141,13 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StructSubj>()
+
+      type StandardSubj = NonNullable<
+        (typeof struct)['~standard']['types']
+      >['output']
+
+      x.tCh<StandardSubj, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardSubj>()
 
       /* parsed either type check */
 
@@ -133,6 +169,14 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, StructParsed>()
+
+      type StandardParsed = Extract<
+        ReturnType<(typeof struct)['~standard']['validate']>,
+        { value: unknown }
+      >['value']
+
+      x.tCh<StandardParsed, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardParsed>()
 
       /* runtime schema check */
 
@@ -157,6 +201,18 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
+
+        const standardParsed = struct['~standard'].validate(subj)
+
+        if (standardParsed instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        if (standardParsed.issues !== undefined) {
+          throw Error('not expected')
+        }
+
+        expect(standardParsed.value).toStrictEqual(subj)
       }
     }
   })
@@ -179,7 +235,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     foldA: {
       const construct = x.makeStruct(schema)
 
-      /* ensure that schema/construct/struct subject types are identical */
+      /* ensure that schema/construct/struct/~standard subject types are identical */
 
       type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
 
@@ -195,6 +251,13 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StructSubj>()
+
+      type StandardSubj = NonNullable<
+        (typeof struct)['~standard']['types']
+      >['output']
+
+      x.tCh<StandardSubj, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardSubj>()
 
       /* parsed either type check */
 
@@ -216,6 +279,14 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, StructParsed>()
+
+      type StandardParsed = Extract<
+        ReturnType<(typeof struct)['~standard']['validate']>,
+        { value: unknown }
+      >['value']
+
+      x.tCh<StandardParsed, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardParsed>()
 
       /* runtime schema check */
 
@@ -240,6 +311,18 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
+
+        const standardParsed = struct['~standard'].validate(subj)
+
+        if (standardParsed instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        if (standardParsed.issues !== undefined) {
+          throw Error('not expected')
+        }
+
+        expect(standardParsed.value).toStrictEqual(subj)
       }
     }
   })
@@ -259,7 +342,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     foldA: {
       const construct = x.makeStruct(schema)
 
-      /* ensure that schema/construct/struct subject types are identical */
+      /* ensure that schema/construct/struct/~standard subject types are identical */
 
       type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
 
@@ -275,6 +358,13 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StructSubj>()
+
+      type StandardSubj = NonNullable<
+        (typeof struct)['~standard']['types']
+      >['output']
+
+      x.tCh<StandardSubj, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardSubj>()
 
       /* parsed either type check */
 
@@ -296,6 +386,14 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, StructParsed>()
+
+      type StandardParsed = Extract<
+        ReturnType<(typeof struct)['~standard']['validate']>,
+        { value: unknown }
+      >['value']
+
+      x.tCh<StandardParsed, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardParsed>()
 
       /* runtime schema check */
 
@@ -320,6 +418,18 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
+
+        const standardParsed = struct['~standard'].validate(subj)
+
+        if (standardParsed instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        if (standardParsed.issues !== undefined) {
+          throw Error('not expected')
+        }
+
+        expect(standardParsed.value).toStrictEqual(subj)
       }
     }
   })
@@ -339,7 +449,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     foldA: {
       const construct = x.makeStruct(schema)
 
-      /* ensure that schema/construct/struct subject types are identical */
+      /* ensure that schema/construct/struct/~standard subject types are identical */
 
       type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
 
@@ -355,6 +465,13 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StructSubj>()
+
+      type StandardSubj = NonNullable<
+        (typeof struct)['~standard']['types']
+      >['output']
+
+      x.tCh<StandardSubj, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardSubj>()
 
       /* parsed either type check */
 
@@ -376,6 +493,14 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, StructParsed>()
+
+      type StandardParsed = Extract<
+        ReturnType<(typeof struct)['~standard']['validate']>,
+        { value: unknown }
+      >['value']
+
+      x.tCh<StandardParsed, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardParsed>()
 
       /* runtime schema check */
 
@@ -400,6 +525,18 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
+
+        const standardParsed = struct['~standard'].validate(subj)
+
+        if (standardParsed instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        if (standardParsed.issues !== undefined) {
+          throw Error('not expected')
+        }
+
+        expect(standardParsed.value).toStrictEqual(subj)
       }
     }
   })
@@ -427,7 +564,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     foldA: {
       const construct = x.makeStruct(schema)
 
-      /* ensure that schema/construct/struct subject types are identical */
+      /* ensure that schema/construct/struct/~standard subject types are identical */
 
       type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
 
@@ -443,6 +580,13 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StructSubj>()
+
+      type StandardSubj = NonNullable<
+        (typeof struct)['~standard']['types']
+      >['output']
+
+      x.tCh<StandardSubj, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardSubj>()
 
       /* parsed either type check */
 
@@ -464,6 +608,14 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, StructParsed>()
+
+      type StandardParsed = Extract<
+        ReturnType<(typeof struct)['~standard']['validate']>,
+        { value: unknown }
+      >['value']
+
+      x.tCh<StandardParsed, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardParsed>()
 
       /* runtime schema check */
 
@@ -488,6 +640,18 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
+
+        const standardParsed = struct['~standard'].validate(subj)
+
+        if (standardParsed instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        if (standardParsed.issues !== undefined) {
+          throw Error('not expected')
+        }
+
+        expect(standardParsed.value).toStrictEqual(subj)
       }
     }
   })
@@ -504,13 +668,12 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const struct = prevStruct.optional()
 
     type ExpectedKeys =
-      | '__schema'
+      | StructSharedKeys
       | 'brand'
       | 'description'
       | 'max'
       | 'min'
       | 'nullable'
-      | 'parse'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -563,12 +726,11 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const struct = prevStruct.nullable()
 
     type ExpectedKeys =
-      | '__schema'
+      | StructSharedKeys
       | 'brand'
       | 'description'
       | 'max'
       | 'min'
-      | 'parse'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -621,7 +783,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x.number().optional().nullable()
     const struct = prevStruct.brand('x', 'y')
 
-    type ExpectedKeys = 'description' | '__schema' | 'parse' | 'min' | 'max'
+    type ExpectedKeys = StructSharedKeys | 'description' | 'min' | 'max'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -675,7 +837,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x.number().optional().nullable().min(schema.min)
     const struct = prevStruct.brand('x', 'y')
 
-    type ExpectedKeys = 'description' | '__schema' | 'parse' | 'max'
+    type ExpectedKeys = StructSharedKeys | 'description' | 'max'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -736,7 +898,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
     const struct = prevStruct.brand('x', 'y')
 
-    type ExpectedKeys = 'description' | '__schema' | 'parse'
+    type ExpectedKeys = StructSharedKeys | 'description'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -799,7 +961,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
     const struct = prevStruct.brand('x', 'y')
 
-    type ExpectedKeys = '__schema' | 'parse'
+    type ExpectedKeys = StructSharedKeys
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -862,7 +1024,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
     const struct = prevStruct.optional()
 
-    type ExpectedKeys = '__schema' | 'parse'
+    type ExpectedKeys = StructSharedKeys
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -936,6 +1098,16 @@ describe('ERROR_CODE.invalidType (foldC)', () => {
           expect(parsedSchema.error).toStrictEqual(expectedError)
           expect(parsedConstruct.error).toStrictEqual(expectedError)
           expect(parsedStruct.error).toStrictEqual(expectedError)
+
+          const parsedStandard = struct['~standard'].validate(subject)
+
+          if (parsedStandard instanceof Promise) {
+            throw Error('Not expected')
+          }
+
+          expect(parsedStandard.issues).toStrictEqual([
+            { message: x.ERROR_CODE.invalidType, path: [] },
+          ])
         }
       }
     }
@@ -968,6 +1140,16 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
         expect(parsedSchema.error).toStrictEqual(expectedError)
         expect(parsedConstruct.error).toStrictEqual(expectedError)
         expect(parsedStruct.error).toStrictEqual(expectedError)
+
+        const parsedStandard = struct['~standard'].validate(subject)
+
+        if (parsedStandard instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        expect(parsedStandard.issues).toStrictEqual([
+          { message: x.ERROR_CODE.invalidRange, path: [] },
+        ])
       }
     }
   })
@@ -997,6 +1179,16 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
         expect(parsedSchema.error).toStrictEqual(expectedError)
         expect(parsedConstruct.error).toStrictEqual(expectedError)
         expect(parsedStruct.error).toStrictEqual(expectedError)
+
+        const parsedStandard = struct['~standard'].validate(subject)
+
+        if (parsedStandard instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        expect(parsedStandard.issues).toStrictEqual([
+          { message: x.ERROR_CODE.invalidRange, path: [] },
+        ])
       }
     }
   })
@@ -1026,6 +1218,16 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
         expect(parsedSchema.error).toStrictEqual(expectedError)
         expect(parsedConstruct.error).toStrictEqual(expectedError)
         expect(parsedStruct.error).toStrictEqual(expectedError)
+
+        const parsedStandard = struct['~standard'].validate(subject)
+
+        if (parsedStandard instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        expect(parsedStandard.issues).toStrictEqual([
+          { message: x.ERROR_CODE.invalidRange, path: [] },
+        ])
       }
     }
   })

@@ -3,7 +3,7 @@
 const FOLD_A = `{
   const construct = x.makeStruct(schema)
 
-  /* ensure that schema/construct/struct subject types are identical */
+  /* ensure that schema/construct/struct/~standard subject types are identical */
 
   type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
 
@@ -19,6 +19,13 @@ const FOLD_A = `{
 
   x.tCh<StructSubj, ExpectedSubj>()
   x.tCh<ExpectedSubj, StructSubj>()
+
+  type StandardSubj = NonNullable<
+    (typeof struct)['~standard']['types']
+  >['output']
+
+  x.tCh<StandardSubj, ExpectedSubj>()
+  x.tCh<ExpectedSubj, StandardSubj>()
 
   /* parsed either type check */
 
@@ -41,6 +48,14 @@ const FOLD_A = `{
   x.tCh<StructParsed, ExpectedParsed>()
   x.tCh<ExpectedParsed, StructParsed>()
 
+  type StandardParsed = Extract<
+    ReturnType<(typeof struct)['~standard']['validate']>,
+    { value: unknown }
+  >['value']
+
+  x.tCh<StandardParsed, ExpectedSubj>()
+  x.tCh<ExpectedSubj, StandardParsed>()
+
   /* runtime schema check */
 
   expect(struct.__schema).toStrictEqual(schema)
@@ -50,20 +65,32 @@ const FOLD_A = `{
   /* parse result check */
 
   for (const subj of subjects) {
-  const schemaParsed = x.parse(schema, subj)
+    const schemaParsed = x.parse(schema, subj)
 
-  expect(schemaParsed.error).toBe(undefined)
-  expect(schemaParsed.data).toStrictEqual(subj)
+    expect(schemaParsed.error).toBe(undefined)
+    expect(schemaParsed.data).toStrictEqual(subj)
 
-  const constructParsed = construct.parse(subj)
+    const constructParsed = construct.parse(subj)
 
-  expect(constructParsed.error).toBe(undefined)
-  expect(constructParsed.data).toStrictEqual(subj)
+    expect(constructParsed.error).toBe(undefined)
+    expect(constructParsed.data).toStrictEqual(subj)
 
-  const structParsed = struct.parse(subj)
+    const structParsed = struct.parse(subj)
 
-  expect(structParsed.error).toBe(undefined)
-  expect(structParsed.data).toStrictEqual(subj)
+    expect(structParsed.error).toBe(undefined)
+    expect(structParsed.data).toStrictEqual(subj)
+
+    const standardParsed = struct['~standard'].validate(subj)
+
+    if (standardParsed instanceof Promise) {
+      throw Error('Not expected')
+    }
+
+    if (standardParsed.issues !== undefined) {
+      throw Error('not expected')
+    }
+
+    expect(standardParsed.value).toStrictEqual(subj)
   }
 }`
 
@@ -131,6 +158,16 @@ const FOLD_C = `{
       expect(parsedSchema.error).toStrictEqual(expectedError)
       expect(parsedConstruct.error).toStrictEqual(expectedError)
       expect(parsedStruct.error).toStrictEqual(expectedError)
+
+      const parsedStandard = struct['~standard'].validate(subject)
+
+      if (parsedStandard instanceof Promise) {
+        throw Error('Not expected')
+      }
+
+      expect(parsedStandard.issues).toStrictEqual([
+        { message: x.ERROR_CODE.invalidType, path: [] },
+      ])
     }
   }
 }`
@@ -155,6 +192,16 @@ const FOLD_D = `{
     expect(parsedSchema.error).toStrictEqual(expectedError)
     expect(parsedConstruct.error).toStrictEqual(expectedError)
     expect(parsedStruct.error).toStrictEqual(expectedError)
+
+    const parsedStandard = struct['~standard'].validate(subject)
+
+    if (parsedStandard instanceof Promise) {
+      throw Error('Not expected')
+    }
+
+    expect(parsedStandard.issues).toStrictEqual([
+      { message: x.ERROR_CODE.invalidRange, path: [] },
+    ])
   }
 }`
 
@@ -178,6 +225,16 @@ const FOLD_E = `{
     expect(parsedSchema.error).toStrictEqual(expectedError)
     expect(parsedConstruct.error).toStrictEqual(expectedError)
     expect(parsedStruct.error).toStrictEqual(expectedError)
+
+    const parsedStandard = struct['~standard'].validate(subject)
+
+    if (parsedStandard instanceof Promise) {
+      throw Error('Not expected')
+    }
+
+    expect(parsedStandard.issues).toStrictEqual([
+      { path, message: x.ERROR_CODE.invalidType },
+    ])
   }
 }`
 
