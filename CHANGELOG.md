@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.1](https://github.com/incerta/schematox/compare/v1.0.1...v1.1.0)
+
+- [Standard schema support #46](https://github.com/incerta/schematox/pull/46)
+
 ## [1.0.1](https://github.com/incerta/schematox/compare/v1.0.0...v1.0.1)
 
 - [FIX: struct brand assignment second argument type restriction #44](https://github.com/incerta/schematox/pull/44)
