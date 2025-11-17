@@ -16,3 +16,8 @@ export const PARAMS_BY_SCHEMA_TYPE = {
   tuple:    new Set(['optional', 'nullable', 'description'] as const),
   union:    new Set(['optional', 'nullable', 'description'] as const),
 } as const
+
+export const STANDARD_SCHEMA = {
+  version: 1,
+  vendor: 'schematox',
+} as const

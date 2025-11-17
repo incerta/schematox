@@ -1,5 +1,6 @@
 import { ParseResult } from './utils'
 
+import type { StandardSchemaV1 } from './standard-schema'
 import type {
   Schema,
   //
@@ -59,7 +60,7 @@ export type Struct<T extends Schema> = Omit<
 > & {
   __schema: Readonly<T>
   parse: (s: unknown) => ParseResult<InferSchema<T>>
-}
+} & StandardSchemaV1<unknown, InferSchema<T>>
 
 type BrandSubType =
   | boolean

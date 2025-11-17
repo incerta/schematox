@@ -1,15 +1,31 @@
-import { PARAMS_BY_SCHEMA_TYPE } from './constants'
+import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants'
 import { parse } from './parse'
 
+import type { StandardSchemaV1 } from './types/standard-schema'
 import type { Schema, BrandSchema, StringSchema } from './types/schema'
 import type { Struct, StructParams, StructShape } from './types/struct'
 
 export function makeStruct<T extends Schema>(schema: T): Struct<T>
 export function makeStruct(schema: Schema) {
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
-  const result: Record<string, unknown> = {
+  const result: Record<string, unknown> & StandardSchemaV1 = {
     __schema: { ...schema },
     parse: (subj: unknown) => parse(schema as never, subj),
+    ['~standard']: {
+      ...STANDARD_SCHEMA,
+      validate: (input) => {
+        const parsed = parse(schema as never, input)
+
+        return parsed.success
+          ? { value: parsed.data }
+          : {
+              issues: parsed.error.map((x) => ({
+                path: x.path,
+                message: x.code,
+              })),
+            }
+      },
+    },
   }
 
   if (params.has('optional')) {
