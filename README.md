@@ -315,25 +315,29 @@ type FromStruct = Infer<typeof struct>
 
 ### Record
 
-Undefined record entries are skipped in parsed results. If a key exists, it means a value is also present.
+Undefined record entries are skipped in parsed results and ignored by range limiter counter. If a key exists, it means a value is also present.
 
 ```typescript
 const schema = {
   type: 'record',
-  // key property is optional
   key: { type: 'string', brand: ['idFor', 'user'] },
   of: { type: 'number' },
+  minLength: 1,
+  maxLength: 1,
   optional: true,
   nullable: true,
   description: 'x',
 } as const satisfies Schema
 
 const userId = string().brand('idFor', 'user')
+const struct = record(number(), userId)
+  .minLength(1)
+  .maxLength(1)
+  .optional()
+  .nullable()
+  .description('x')
 
-// second argument is optional
-const struct = object(number(), userId).optional().nullable().description('x')
-
-// Record<string & { __brand: ['idFor', 'user'] }, number | undefined>  | null | undefined
+// Record<string & { __brand: ['idFor', 'user'] }, number>  | null | undefined
 type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
 ```

@@ -225,6 +225,20 @@ function parseArray(
     }
 
     result.push(parsed.data)
+
+    if (
+      typeof schema.maxLength === 'number' &&
+      result.length > schema.maxLength
+    ) {
+      return error([
+        {
+          code: ERROR_CODE.invalidRange,
+          path: errorPath,
+          subject,
+          schema,
+        },
+      ])
+    }
   }
 
   if (invalidSubjects?.length) {
@@ -234,20 +248,6 @@ function parseArray(
   if (
     typeof schema.minLength === 'number' &&
     result.length < schema.minLength
-  ) {
-    return error([
-      {
-        code: ERROR_CODE.invalidRange,
-        path: errorPath,
-        subject,
-        schema,
-      },
-    ])
-  }
-
-  if (
-    typeof schema.maxLength === 'number' &&
-    result.length > schema.maxLength
   ) {
     return error([
       {
@@ -337,6 +337,7 @@ function parseRecord(
 
   const result: Record<string, unknown> = {}
   let invalidSubjects: InvalidSubject[] | undefined
+  let validEntryCounter = 0
 
   for (const key in subject) {
     const nestedValue = (subject as Record<string, unknown>)[key]
@@ -358,7 +359,37 @@ function parseRecord(
       continue
     }
 
+    validEntryCounter++
+
+    if (
+      typeof schema.maxLength === 'number' &&
+      validEntryCounter > schema.maxLength
+    ) {
+      return error([
+        {
+          code: ERROR_CODE.invalidRange,
+          path: errorPath,
+          subject,
+          schema,
+        },
+      ])
+    }
+
     result[key] = parsed.data
+  }
+
+  if (
+    typeof schema.minLength === 'number' &&
+    validEntryCounter < schema.minLength
+  ) {
+    return error([
+      {
+        code: ERROR_CODE.invalidRange,
+        path: errorPath,
+        subject,
+        schema,
+      },
+    ])
   }
 
   if (invalidSubjects?.length) {

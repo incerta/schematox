@@ -4,7 +4,7 @@ export type Schema =
    | PrimitiveSchema
    | { type: 'array'; of: Schema; minLength?: number; maxLength?: number } & SchemaShared
    | { type: 'object'; of: Record<string, Schema> } & SchemaShared
-   | { type: 'record'; of: Schema; key?: StringSchema } & SchemaShared
+   | { type: 'record'; of: Schema; key?: StringSchema; minLength?: number; maxLength?: number } & SchemaShared
    | { type: 'tuple'; of: Array<Schema> } & SchemaShared
    | { type: 'union'; of: Array<Schema> } & SchemaShared
 
@@ -48,6 +48,8 @@ export type RecordSchema<T = unknown> = SchemaShared & {
   type: 'record'
   of: T
   key?: StringSchema
+  minLength?: number /* >= */
+  maxLength?: number /* <= */
 }
 
 export type TupleSchema<T = unknown> = SchemaShared & {
