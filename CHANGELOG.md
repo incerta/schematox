@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.2.1](https://github.com/incerta/schematox/compare/v1.2.0...v1.2.1)
+
+- [Add type "module" to package.json #51](https://github.com/incerta/schematox/pull/51)
+
 ## [1.2.0](https://github.com/incerta/schematox/compare/v1.1.0...v1.2.0)
 
 - [Record schema range limiters support #48](https://github.com/incerta/schematox/pull/48)
