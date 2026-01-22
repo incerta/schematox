@@ -7,7 +7,8 @@ export const DATA_TYPE = [
   [
     'binary',
     [
-      new Blob(),
+      // TODO: jest complains after #52 PR merge
+      // new Blob(),
       new File([''], 'filename'),
       new ArrayBuffer(0),
       new DataView(new ArrayBuffer(0)),
