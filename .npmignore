@@ -13,3 +13,5 @@
 /.prettierrc.json
 /.prettierignore
 /release-check.sh
+/tmp
+*.log
