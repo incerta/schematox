@@ -11,4 +11,5 @@
 /.prettierignore
 /release-check.sh
 /tmp
+/.nvmrc
 *.log
