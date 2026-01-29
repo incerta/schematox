@@ -2,16 +2,16 @@ import { Project, SyntaxKind } from 'ts-morph'
 import { FOLDS } from './fold-constants'
 
 const FILE_PATHS = [
-  'src/tests/by-struct/boolean.test.ts',
-  'src/tests/by-struct/literal.test.ts',
-  'src/tests/by-struct/number.test.ts',
-  'src/tests/by-struct/string.test.ts',
+  'tests/by-struct/boolean.test.ts',
+  'tests/by-struct/literal.test.ts',
+  'tests/by-struct/number.test.ts',
+  'tests/by-struct/string.test.ts',
   //
-  'src/tests/by-struct/array.test.ts',
-  'src/tests/by-struct/object.test.ts',
-  'src/tests/by-struct/record.test.ts',
-  'src/tests/by-struct/tuple.test.ts',
-  'src/tests/by-struct/union.test.ts',
+  'tests/by-struct/array.test.ts',
+  'tests/by-struct/object.test.ts',
+  'tests/by-struct/record.test.ts',
+  'tests/by-struct/tuple.test.ts',
+  'tests/by-struct/union.test.ts',
 ]
 
 for (const filePath of FILE_PATHS) {

@@ -1,14 +1,11 @@
 /node_modules
-/src/test
-/src/tests
+/tests
 /benchmark
-/.husky
 /.git
 /.gitignore
 /coverage
 /tsconfig.json
 /CONTRIBUTING.md
-/README.md
 /jest.config.js
 /.prettierrc.json
 /.prettierignore

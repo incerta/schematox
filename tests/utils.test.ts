@@ -1,4 +1,4 @@
-import * as x from '../'
+import * as x from '../src'
 
 describe('Type equivalence check by `tCh` utility', () => {
   describe('Union of literals', () => {

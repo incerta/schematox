@@ -1,4 +1,4 @@
-import * as x from '../../'
+import * as x from '../../src'
 import * as fixture from '../fixtures'
 
 import type { StructSharedKeys } from '../type'
@@ -6,15 +6,18 @@ import type { StructSharedKeys } from '../type'
 describe('Type inference and parse by schema/construct/struct (foldA)', () => {
   it('required', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [{ type: 'boolean' }, { type: 'literal', of: 0 }],
     } as const satisfies x.Schema
 
-    const struct = x.union([x.boolean(), x.literal(0)])
+    const struct = x.tuple([x.boolean(), x.literal(0)])
 
-    type ExpectedSubj = boolean | 0
+    type ExpectedSubj = [boolean, 0]
 
-    const subjects: Array<ExpectedSubj> = [false, true, 0]
+    const subjects: Array<ExpectedSubj> = [
+      [false, 0],
+      [true, 0],
+    ]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -113,16 +116,16 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
   it('optional', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [{ type: 'boolean' }, { type: 'literal', of: 0 }],
       optional: true,
     } as const satisfies x.Schema
 
-    const struct = x.union([x.boolean(), x.literal(0)]).optional()
+    const struct = x.tuple([x.boolean(), x.literal(0)]).optional()
 
-    type ExpectedSubj = boolean | 0 | undefined
+    type ExpectedSubj = [boolean, 0] | undefined
 
-    const subjects: Array<ExpectedSubj> = [false, true, 0, undefined]
+    const subjects: Array<ExpectedSubj> = [[false, 0], [true, 0], undefined]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -221,16 +224,16 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
   it('nullable', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [{ type: 'boolean' }, { type: 'literal', of: 0 }],
       nullable: true,
     } as const satisfies x.Schema
 
-    const struct = x.union([x.boolean(), x.literal(0)]).nullable()
+    const struct = x.tuple([x.boolean(), x.literal(0)]).nullable()
 
-    type ExpectedSubj = boolean | 0 | null
+    type ExpectedSubj = [boolean, 0] | null
 
-    const subjects: Array<ExpectedSubj> = [false, true, 0, null]
+    const subjects: Array<ExpectedSubj> = [[false, 0], [true, 0], null]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -329,20 +332,25 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
   it('optional + nullable', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [{ type: 'boolean' }, { type: 'literal', of: 0 }],
       optional: true,
       nullable: true,
     } as const satisfies x.Schema
 
     const struct = x
-      .union([x.boolean(), x.literal(0)])
+      .tuple([x.boolean(), x.literal(0)])
       .optional()
       .nullable()
 
-    type ExpectedSubj = boolean | 0 | undefined | undefined | null
+    type ExpectedSubj = [boolean, 0] | undefined | null
 
-    const subjects: Array<ExpectedSubj> = [false, true, 0, undefined, null]
+    const subjects: Array<ExpectedSubj> = [
+      [false, 0],
+      [true, 0],
+      undefined,
+      null,
+    ]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -443,12 +451,12 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 describe('Struct parameter keys reduction and schema immutability (foldB)', () => {
   it('optional', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [{ type: 'boolean' }],
       optional: true,
     } as const satisfies x.Schema
 
-    const prevStruct = x.union([x.boolean()])
+    const prevStruct = x.tuple([x.boolean()])
     const struct = prevStruct.optional()
 
     type ExpectedKeys = StructSharedKeys | 'description' | 'nullable'
@@ -495,13 +503,13 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
   it('optional + nullable', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [{ type: 'boolean' }],
       optional: true,
       nullable: true,
     } as const satisfies x.Schema
 
-    const prevStruct = x.union([x.boolean()]).optional()
+    const prevStruct = x.tuple([x.boolean()]).optional()
     const struct = prevStruct.nullable()
 
     type ExpectedKeys = StructSharedKeys | 'description'
@@ -548,14 +556,14 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
   it('optional + nullable + description', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [{ type: 'boolean' }],
       optional: true,
       nullable: true,
       description: 'description-value',
     } as const satisfies x.Schema
 
-    const prevStruct = x.union([x.boolean()]).optional().nullable()
+    const prevStruct = x.tuple([x.boolean()]).optional().nullable()
     const struct = prevStruct.description(schema.description)
 
     type ExpectedKeys = StructSharedKeys
@@ -602,7 +610,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
   it('description + nullable + optional', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [{ type: 'boolean' }],
       optional: true,
       nullable: true,
@@ -610,7 +618,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     } as const satisfies x.Schema
 
     const prevStruct = x
-      .union([x.boolean()])
+      .tuple([x.boolean()])
       .description(schema.description)
       .nullable()
 
@@ -662,14 +670,12 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
   it('iterate over fixture.DATA_TYPE', () => {
     const schema = {
-      type: 'union',
-      of: [{ type: 'boolean' }, { type: 'number' }],
+      type: 'tuple',
+      of: [{ type: 'boolean' }],
     } as const satisfies x.Schema
 
-    const struct = x.union([x.boolean(), x.number()])
-    const source = fixture.DATA_TYPE.filter(
-      ([type]) => type !== 'boolean' && type !== 'number'
-    )
+    const struct = x.tuple([x.boolean()])
+    const source = fixture.DATA_TYPE.filter(([kind]) => kind !== 'array')
 
     foldC: {
       const construct = x.makeStruct(schema)
@@ -719,13 +725,18 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
         of: {
           type: 'object',
           of: {
-            y: { type: 'union', of: [{ type: 'literal', of: '_' }] },
+            y: {
+              type: 'tuple',
+              of: [{ type: 'number' }, { type: 'literal', of: '_' }],
+            },
           },
         },
       },
     } as const satisfies x.Schema
 
-    const struct = x.record(x.array(x.object({ y: x.union([x.literal('_')]) })))
+    const struct = x.record(
+      x.array(x.object({ y: x.tuple([x.number(), x.literal('_')]) }))
+    )
 
     // prettier-ignore
     const samples: Array<[
@@ -735,9 +746,9 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
         errorPath: x.ErrorPath,
       ]
     > = [
-      [{ x: [{ y: '+' }, { y: '_' }, { y: '_' }] }, '+', schema.of.of.of.y, ['x', 0, 'y']],
-      [{ y: [{ y: '_' }, { y: '+' }, { y: '_' }] }, '+', schema.of.of.of.y, ['y', 1, 'y']],
-      [{ z: [{ y: '_' }, { y: '_' }, { y: '+' }] }, '+', schema.of.of.of.y, ['z', 2, 'y']],
+      [{ x: [{ y: [0, '+'] }, { y: [0, '_'] }, { y: [0, '_'] }] }, '+', schema.of.of.of.y.of[1], ['x', 0, 'y', 1]],
+      [{ x: [{ y: [0, '_'] }, { y: [0, '+'] }, { y: [0, '_'] }] }, '+', schema.of.of.of.y.of[1], ['x', 1, 'y', 1]],
+      [{ x: [{ y: [0, '_'] }, { y: [0, '_'] }, { y: [0, '+'] }] }, '+', schema.of.of.of.y.of[1], ['x', 2, 'y', 1]],
     ]
 
     foldE: {
@@ -773,12 +784,48 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
       }
     }
   })
+
+  it('multiple errors', () => {
+    const schema = {
+      type: 'tuple',
+      of: [{ type: 'boolean' }, { type: 'literal', of: 'x' }],
+    } as const satisfies x.Schema
+
+    const struct = x.tuple([x.boolean(), x.literal('x')])
+
+    const construct = x.makeStruct(schema)
+
+    const subject = ['A', 'B']
+
+    const expectedError: x.InvalidSubject[] = [
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: [0],
+        schema: schema.of[0],
+        subject: 'A',
+      },
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: [1],
+        schema: schema.of[1],
+        subject: 'B',
+      },
+    ]
+
+    const parsedSchema = x.parse(schema, subject)
+    const parsedStruct = struct.parse(subject)
+    const parsedConstruct = construct.parse(subject)
+
+    expect(parsedSchema.error).toStrictEqual(expectedError)
+    expect(parsedStruct.error).toStrictEqual(expectedError)
+    expect(parsedConstruct.error).toStrictEqual(expectedError)
+  })
 })
 
 describe('Compound schema specifics (foldA)', () => {
   it('nested primitive schema: optional + nullable + brand', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [
         {
           type: 'boolean',
@@ -789,7 +836,7 @@ describe('Compound schema specifics (foldA)', () => {
       ],
     } as const satisfies x.Schema
 
-    const struct = x.union([
+    const struct = x.tuple([
       x
         .boolean()
         .optional()
@@ -798,13 +845,13 @@ describe('Compound schema specifics (foldA)', () => {
     ])
 
     type Branded = boolean & { __x: 'y' }
-    type ExpectedSubj = Branded | undefined | null
+    type ExpectedSubj = [Branded | undefined | null]
 
     const subjects = [
-      true as Branded,
-      false as Branded,
-      undefined,
-      null,
+      [true as Branded],
+      [false as Branded],
+      [undefined],
+      [null],
     ] as const satisfies Array<ExpectedSubj>
 
     foldA: {
@@ -904,7 +951,7 @@ describe('Compound schema specifics (foldA)', () => {
 
   it('nested compound schema: optional + nullable', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [
         {
           type: 'array',
@@ -915,11 +962,15 @@ describe('Compound schema specifics (foldA)', () => {
       ],
     } as const satisfies x.Schema
 
-    const struct = x.union([x.array(x.boolean()).optional().nullable()])
+    const struct = x.tuple([x.array(x.boolean()).optional().nullable()])
 
-    type ExpectedSubj = Array<boolean> | undefined | null
+    type ExpectedSubj = [Array<boolean> | undefined | null]
 
-    const subjects = [[], null, [true]] as const satisfies Array<ExpectedSubj>
+    const subjects = [
+      [undefined],
+      [null],
+      [[true]],
+    ] as const satisfies Array<ExpectedSubj>
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -1018,13 +1069,13 @@ describe('Compound schema specifics (foldA)', () => {
 
   it('nested by itself (schema depth: 4)', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [
         {
-          type: 'union',
+          type: 'tuple',
           of: [
             {
-              type: 'union',
+              type: 'tuple',
               of: [{ type: 'boolean' }],
             },
           ],
@@ -1032,11 +1083,14 @@ describe('Compound schema specifics (foldA)', () => {
       ],
     } as const satisfies x.Schema
 
-    const struct = x.union([x.union([x.union([x.boolean()])])])
+    const struct = x.tuple([x.tuple([x.tuple([x.boolean()])])])
 
-    type ExpectedSubj = boolean
+    type ExpectedSubj = [[[boolean]]]
 
-    const subjects = [true, false] as const satisfies Array<ExpectedSubj>
+    const subjects = [
+      [[[true]]],
+      [[[false]]],
+    ] as const satisfies Array<ExpectedSubj>
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -1135,7 +1189,7 @@ describe('Compound schema specifics (foldA)', () => {
 
   it('each schema type as nested schema', () => {
     const schema = {
-      type: 'union',
+      type: 'tuple',
       of: [
         { type: 'boolean' },
         { type: 'literal', of: true },
@@ -1150,7 +1204,7 @@ describe('Compound schema specifics (foldA)', () => {
       ],
     } as const satisfies x.Schema
 
-    const struct = x.union([
+    const struct = x.tuple([
       x.boolean(),
       x.literal(true),
       x.literal(0),
@@ -1163,28 +1217,31 @@ describe('Compound schema specifics (foldA)', () => {
       x.union([x.boolean()]),
     ])
 
-    type ExpectedSubj =
-      | boolean
-      | true
-      | 0
-      | number
-      | string
-      //
-      | boolean[]
-      | { x: boolean }
-      | Record<string, boolean>
-      | boolean
-
-    const subjects: Array<ExpectedSubj> = [
+    type ExpectedSubj = [
+      boolean,
       true,
       0,
-      69,
-      'x',
-      //
-      [true, false],
-      { x: true },
-      { x: true },
-      false,
+      number,
+      string,
+      boolean[],
+      { x: boolean },
+      Record<string, boolean>,
+      boolean,
+    ]
+
+    const subjects: Array<ExpectedSubj> = [
+      [
+        false,
+        true,
+        0,
+        69,
+        'x',
+        //
+        [true, false],
+        { x: true },
+        { x: true },
+        false,
+      ],
     ]
 
     foldA: {

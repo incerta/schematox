@@ -1,16 +1,16 @@
-import * as x from '../../'
+import * as x from '../../src'
 import * as fixture from '../fixtures'
 
 import type { StructSharedKeys } from '../type'
 
 describe('Type inference and parse by schema/construct/struct (foldA)', () => {
   it('required', () => {
-    const schema = { type: 'boolean' } as const satisfies x.Schema
-    const struct = x.boolean()
+    const schema = { type: 'literal', of: 'x' } as const satisfies x.Schema
+    const struct = x.literal('x')
 
-    type ExpectedSubj = boolean
+    type ExpectedSubj = 'x'
 
-    const subjects: Array<ExpectedSubj> = [true, false]
+    const subjects: Array<ExpectedSubj> = ['x']
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -109,14 +109,16 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
   it('optional', () => {
     const schema = {
-      type: 'boolean',
+      type: 'literal',
+      of: 0,
       optional: true,
     } as const satisfies x.Schema
-    const struct = x.boolean().optional()
 
-    type ExpectedSubj = boolean | undefined
+    const struct = x.literal(0).optional()
 
-    const subjects: Array<ExpectedSubj> = [true, false, undefined]
+    type ExpectedSubj = 0 | undefined
+
+    const subjects: Array<ExpectedSubj> = [0, undefined]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -215,14 +217,16 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
   it('nullable', () => {
     const schema = {
-      type: 'boolean',
+      type: 'literal',
+      of: true,
       nullable: true,
     } as const satisfies x.Schema
-    const struct = x.boolean().nullable()
 
-    type ExpectedSubj = boolean | null
+    const struct = x.literal(true).nullable()
 
-    const subjects: Array<ExpectedSubj> = [true, false, null]
+    type ExpectedSubj = true | null
+
+    const subjects: Array<ExpectedSubj> = [true, null]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -321,15 +325,16 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
   it('optional + nullable', () => {
     const schema = {
-      type: 'boolean',
+      type: 'literal',
+      of: 2,
       optional: true,
       nullable: true,
     } as const satisfies x.Schema
-    const struct = x.boolean().optional().nullable()
+    const struct = x.literal(2).optional().nullable()
 
-    type ExpectedSubj = boolean | undefined | null
+    type ExpectedSubj = 2 | undefined | null
 
-    const subjects: Array<ExpectedSubj> = [true, false, null, undefined]
+    const subjects: Array<ExpectedSubj> = [2, null, undefined]
 
     foldA: {
       const construct = x.makeStruct(schema)
@@ -430,11 +435,12 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 describe('Struct parameter keys reduction and schema immutability (foldB)', () => {
   it('optional', () => {
     const schema = {
-      type: 'boolean',
+      type: 'literal',
+      of: 0,
       optional: true,
     } as const satisfies x.Schema
 
-    const prevStruct = x.boolean()
+    const prevStruct = x.literal(0)
     const struct = prevStruct.optional()
 
     type ExpectedKeys = StructSharedKeys | 'brand' | 'nullable' | 'description'
@@ -481,12 +487,13 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
   it('optional + nullable', () => {
     const schema = {
-      type: 'boolean',
+      type: 'literal',
+      of: 0,
       optional: true,
       nullable: true,
     } as const satisfies x.Schema
 
-    const prevStruct = x.boolean().optional()
+    const prevStruct = x.literal(0).optional()
     const struct = prevStruct.nullable()
 
     type ExpectedKeys = StructSharedKeys | 'brand' | 'description'
@@ -533,13 +540,14 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
   it('optional + nullable + brand', () => {
     const schema = {
-      type: 'boolean',
+      type: 'literal',
+      of: 0,
       optional: true,
       nullable: true,
       brand: ['x', 'y'],
     } as const satisfies x.Schema
 
-    const prevStruct = x.boolean().optional().nullable()
+    const prevStruct = x.literal(0).optional().nullable()
     const struct = prevStruct.brand('x', 'y')
 
     type ExpectedKeys = StructSharedKeys | 'description'
@@ -586,14 +594,15 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
   it('optional + nullable + brand + description', () => {
     const schema = {
-      type: 'boolean',
+      type: 'literal',
+      of: 0,
       optional: true,
       nullable: true,
       brand: ['x', 'y'],
       description: 'x',
     } as const satisfies x.Schema
 
-    const prevStruct = x.boolean().optional().nullable().brand('x', 'y')
+    const prevStruct = x.literal(0).optional().nullable().brand('x', 'y')
     const struct = prevStruct.description('x')
 
     type ExpectedKeys = StructSharedKeys
@@ -640,14 +649,15 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
   it('description + brand + nullable + optional', () => {
     const schema = {
-      type: 'boolean',
+      type: 'literal',
+      of: 0,
       optional: true,
       nullable: true,
       brand: ['x', 'y'],
       description: 'x',
     } as const satisfies x.Schema
 
-    const prevStruct = x.boolean().description('x').brand('x', 'y').nullable()
+    const prevStruct = x.literal(0).description('x').brand('x', 'y').nullable()
     const struct = prevStruct.optional()
 
     type ExpectedKeys = StructSharedKeys
@@ -695,8 +705,12 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
 describe('ERROR_CODE.invalidType (foldC)', () => {
   it('iterate over fixture.DATA_TYPE', () => {
-    const schema = { type: 'boolean' } satisfies x.Schema
-    const struct = x.boolean()
+    const schema = {
+      type: 'literal',
+      of: 'LITERAL_STRING',
+    } as const satisfies x.Schema
+
+    const struct = x.literal(schema.of)
     const source = fixture.DATA_TYPE
 
     foldC: {
