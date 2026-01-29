@@ -1,4 +1,4 @@
-import * as x from '../../'
+import * as x from '../../src'
 import * as fixture from '../fixtures'
 
 import type { StructSharedKeys } from '../type'

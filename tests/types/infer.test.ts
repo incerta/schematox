@@ -1,4 +1,4 @@
-import * as x from '../../index'
+import * as x from '../../src'
 
 describe('Construct all primitive schemas subject type', () => {
   describe('BooleanSchema', () => {
