@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/incerta/schematox/compare/v1.2.2...v1.2.3)
+
+- [PR #55: Fix npm publishing issues & add nvmrc](https://github.com/incerta/schematox/pull/55)
+  - [ISSUE #54: Tests are included in published module despite .npmignore](https://github.com/incerta/schematox/issues/54)
+  - [ISSUE #56: Lock Node version by adding .nvmrc file](https://github.com/incerta/schematox/issues/56)
+  - [ISSUE #57: Update tsconfig to target ES2018](https://github.com/incerta/schematox/issues/57)
+
 ## [1.2.2](https://github.com/incerta/schematox/compare/v1.2.1...v1.2.2)
 
 - [Transpile TypeScript to JavaScript for distribution #53](https://github.com/incerta/schematox/pull/53)
