@@ -76,6 +76,7 @@ export type PrimitiveSchemaShared = SchemaShared & {
 export type PrimitiveSchema =
   | StringSchema
   | NumberSchema
+  | BigintSchema
   | BooleanSchema
   | LiteralSchema
 
@@ -93,6 +94,12 @@ export type NumberSchema = PrimitiveSchemaShared & {
   type: 'number'
   min?: number /* >= */
   max?: number /* <= */
+}
+
+export type BigintSchema = PrimitiveSchemaShared & {
+  type: 'bigint'
+  min?: bigint /* >= */
+  max?: bigint /* <= */
 }
 
 export type LiteralSchema<

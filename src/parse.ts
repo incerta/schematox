@@ -16,6 +16,7 @@ import type {
   BooleanSchema,
   LiteralSchema,
   NumberSchema,
+  BigintSchema,
   StringSchema,
 } from './types/schema'
 
@@ -23,6 +24,7 @@ const PARSE_FN_BY_SCHEMA_KIND = {
   boolean: parseBoolean,
   literal: parseLiteral,
   number: parseNumber,
+  bigint: parseBigint,
   string: parseString,
   //
   array: parseArray,
@@ -129,6 +131,51 @@ function parseNumber(
   }
 
   if (typeof schema.max === 'number') {
+    if (subject > schema.max) {
+      return error([
+        {
+          code: ERROR_CODE.invalidRange,
+          path: errorPath,
+          subject,
+          schema,
+        },
+      ])
+    }
+  }
+
+  return success(subject)
+}
+
+function parseBigint(
+  errorPath: ErrorPath,
+  schema: BigintSchema,
+  subject: unknown
+) {
+  if (typeof subject !== 'bigint') {
+    return error([
+      {
+        code: ERROR_CODE.invalidType,
+        path: errorPath,
+        subject,
+        schema,
+      },
+    ])
+  }
+
+  if (typeof schema.min === 'bigint') {
+    if (subject < schema.min) {
+      return error([
+        {
+          code: ERROR_CODE.invalidRange,
+          path: errorPath,
+          subject,
+          schema,
+        },
+      ])
+    }
+  }
+
+  if (typeof schema.max === 'bigint') {
     if (subject > schema.max) {
       return error([
         {
