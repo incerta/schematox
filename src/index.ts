@@ -8,6 +8,7 @@ export {
   boolean,
   literal,
   number,
+  bigint,
   string,
   //
   array,
@@ -55,6 +56,7 @@ export type {
   BooleanSchema,
   LiteralSchema,
   NumberSchema,
+  BigintSchema,
   StringSchema,
 } from './types/schema'
 

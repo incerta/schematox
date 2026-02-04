@@ -51,11 +51,19 @@ export function makeStruct(schema: Schema) {
   }
 
   if (params.has('min')) {
-    result.min = (min: number) => makeStruct({ ...schema, min })
+    if (schema.type === 'bigint') {
+      result.min = (min: bigint) => makeStruct({ ...schema, min })
+    } else {
+      result.min = (min: number) => makeStruct({ ...schema, min })
+    }
   }
 
   if (params.has('max')) {
-    result.max = (max: number) => makeStruct({ ...schema, max })
+    if (schema.type === 'bigint') {
+      result.max = (max: bigint) => makeStruct({ ...schema, max })
+    } else {
+      result.max = (max: number) => makeStruct({ ...schema, max })
+    }
   }
 
   if (params.has('minLength')) {
@@ -85,6 +93,10 @@ export function literal<T extends string | number | boolean>(of: T) {
 
 export function number() {
   return makeStruct({ type: 'number' })
+}
+
+export function bigint() {
+  return makeStruct({ type: 'bigint' })
 }
 
 export function string() {
