@@ -15,6 +15,7 @@ import type {
   BooleanSchema,
   LiteralSchema,
   NumberSchema,
+  BigintSchema,
   StringSchema,
 } from './schema'
 
@@ -47,8 +48,16 @@ export type Struct<T extends Schema> = Omit<
         maxLength: U
       ) => Struct<T & { maxLength: U }>
 
-      min: <U extends number>(min: U) => Struct<T & { min: U }>
-      max: <U extends number>(max: U) => Struct<T & { max: U }>
+      min: <
+        U extends T extends { type: 'bigint' } ? bigint : number,
+      >(
+        min: U
+      ) => Struct<T & { min: U }>
+      max: <
+        U extends T extends { type: 'bigint' } ? bigint : number,
+      >(
+        max: U
+      ) => Struct<T & { max: U }>
 
       description: <U extends string>(
         description: U
@@ -75,6 +84,7 @@ type ParamsBySchemaType = {
   boolean: ExtractParams<BooleanSchema>
   literal: ExtractParams<LiteralSchema>
   number: ExtractParams<NumberSchema>
+  bigint: ExtractParams<BigintSchema>
   string: ExtractParams<StringSchema>
   //
   array: ExtractParams<ArraySchema>

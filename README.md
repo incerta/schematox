@@ -2,7 +2,7 @@
 
 Schematox is a lightweight typesafe schema defined parser. All schemas are JSON compatible.
 
-The library is focusing on fixed set of schema types: boolean, literal, number, string, array, object, record, tuple, union. Each schema can have parameters: optional, nullable, description. Each primitive schema has "brand" parameter as mean of making its subject type [nominal](https://github.com/Microsoft/TypeScript/wiki/FAQ#can-i-make-a-type-alias-nominal). The rest parameters is schema specific range limiters.
+The library is focusing on fixed set of schema types: boolean, literal, number, bigint, string, array, object, record, tuple, union. Each schema can have parameters: optional, nullable, description. Each primitive schema has "brand" parameter as mean of making its subject type [nominal](https://github.com/Microsoft/TypeScript/wiki/FAQ#can-i-make-a-type-alias-nominal). The rest parameters is schema specific range limiters.
 
 Library supports static schema definition which means your schemas could be completely independent from schematox. One could use such schemas as source for generation other structures like DB models.
 
@@ -19,6 +19,7 @@ The library is small so exploring README.md is enough for understanding its API,
   - [Boolean](#boolean)
   - [Literal](#literal)
   - [Number](#number)
+  - [BigInt](#bigint)
   - [String](#string)
 - [Compound Schema](#compound-schema)
   - [Array](#array)
@@ -250,6 +251,35 @@ const struct = number()
   .description('x')
 
 // (number & { __x: 'y' }) | undefined | null
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
+//
+```
+
+### BigInt
+
+Native support for JavaScript's `bigint` primitive type.
+
+```typescript
+const schema = {
+  type: 'bigint',
+  optional: true,
+  nullable: true,
+  brand: ['x', 'y'],
+  min: BigInt(1),
+  max: BigInt(2),
+  description: 'x',
+} as const satisfies Schema
+
+const struct = bigint()
+  .optional()
+  .nullable()
+  .brand('x', 'y')
+  .min(BigInt(1))
+  .max(BigInt(2))
+  .description('x')
+
+// (bigint & { __x: 'y' }) | undefined | null
 type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
 //

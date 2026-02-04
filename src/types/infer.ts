@@ -12,6 +12,7 @@ import type {
   BooleanSchema,
   LiteralSchema,
   NumberSchema,
+  BigintSchema,
   StringSchema,
   //
   BrandSchema,
@@ -56,6 +57,8 @@ export type InferPrimitive<T> = T extends StringSchema
   ? string
   : T extends NumberSchema
     ? number
+    : T extends BigintSchema
+      ? bigint
     : T extends BooleanSchema
       ? boolean
       : T extends LiteralSchema<infer U>
