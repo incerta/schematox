@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.2.4](https://github.com/incerta/schematox/compare/v1.2.3...v1.2.4)
+
+- [FIX: incorrect record struct with branded key type inference #60](https://github.com/incerta/schematox/pull/60)
+
 ## [1.2.3](https://github.com/incerta/schematox/compare/v1.2.2...v1.2.3)
 
 - [PR #55: Fix npm publishing issues & add nvmrc](https://github.com/incerta/schematox/pull/55)
