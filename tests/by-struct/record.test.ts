@@ -784,6 +784,62 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
       }
     }
   })
+
+  it('record struct branded key subject lookup', () => {
+    const idStruct = x.string().brand('x', 'y')
+    const recordStruct = x.record(x.boolean(), idStruct)
+
+    type Id = x.Infer<typeof idStruct>
+    type Expected = Record<Id, boolean>
+    type Actual = x.Infer<typeof recordStruct>
+
+    const id = 'x' as Id
+    const value = true
+    const subject: unknown = { [id]: value }
+    const parsed = recordStruct.parse(subject)
+
+    x.tCh<Expected, Actual>()
+    x.tCh<Actual, Expected>()
+
+    if (parsed.error) {
+      throw Error(`Not expected`)
+    }
+
+    const data = parsed.data
+    const lookupResult = data[id]
+
+    expect(lookupResult).toBe(value)
+  })
+
+  it('record schema branded key subject lookup', () => {
+    const idStruct = x.string().brand('x', 'y')
+    const recordSchema = {
+      type: 'record',
+      of: { type: 'boolean' },
+      key: idStruct.__schema,
+    } as const satisfies x.Schema
+
+    type Id = x.Infer<typeof idStruct>
+    type Expected = Record<Id, boolean>
+    type Actual = x.Infer<typeof recordSchema>
+
+    const id = 'x' as Id
+    const value = true
+    const subject: unknown = { [id]: value }
+    const parsed = x.parse(recordSchema, subject)
+
+    x.tCh<Expected, Actual>()
+    x.tCh<Actual, Expected>()
+
+    if (parsed.error) {
+      throw Error(`Not expected`)
+    }
+
+    const data = parsed.data
+    const lookupResult = data[id]
+
+    expect(lookupResult).toBe(value)
+  })
 })
 
 describe('Struct parameter keys reduction and schema immutability (foldB)', () => {

@@ -115,19 +115,29 @@ export function object<T extends Record<string, StructShape<Schema>>>(of: T) {
   return makeStruct(schema)
 }
 
+export function record<T extends StructShape<Schema>>(
+  of: T,
+  key?: undefined
+): Struct<{ type: 'record'; of: T['__schema'] }>
+
 export function record<
   T extends StructShape<Schema>,
-  U extends StructShape<StringSchema> | undefined,
->(of: T, key?: U) {
-  return makeStruct(
-    key
-      ? {
-          type: 'record',
-          of: of.__schema as T['__schema'],
-          key: key.__schema as (typeof key)['__schema'],
-        }
-      : { type: 'record', of: of.__schema as T['__schema'] }
-  )
+  U extends StructShape<StringSchema>,
+>(
+  of: T,
+  key: U
+): Struct<{ type: 'record'; of: T['__schema']; key: U['__schema'] }>
+
+export function record(of: StructShape<any>, key?: StructShape<any>) {
+  if (key !== undefined) {
+    return makeStruct({
+      type: 'record',
+      of: of.__schema,
+      key: key.__schema,
+    })
+  }
+
+  return makeStruct({ type: 'record', of: of.__schema })
 }
 
 export function tuple<
