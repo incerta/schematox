@@ -12,11 +12,13 @@ import type {
   //
   BrandSchema,
   //
+  BigIntSchema,
   BooleanSchema,
   LiteralSchema,
   NumberSchema,
-  BigintSchema,
   StringSchema,
+  //
+  BigIntString,
 } from './schema'
 
 import type { InferSchema } from './infer'
@@ -44,20 +46,18 @@ export type Struct<T extends Schema> = Omit<
       minLength: <U extends number>(
         minLength: U
       ) => Struct<T & { minLength: U }>
+
       maxLength: <U extends number>(
         maxLength: U
       ) => Struct<T & { maxLength: U }>
 
-      min: <
-        U extends T extends { type: 'bigint' } ? bigint : number,
-      >(
-        min: U
-      ) => Struct<T & { min: U }>
-      max: <
-        U extends T extends { type: 'bigint' } ? bigint : number,
-      >(
-        max: U
-      ) => Struct<T & { max: U }>
+      max: T extends BigIntSchema
+        ? <U extends BigIntString>(max: U) => Struct<T & { max: U }>
+        : <U extends number>(max: U) => Struct<T & { max: U }>
+
+      min: T extends BigIntSchema
+        ? <U extends BigIntString>(min: U) => Struct<T & { min: U }>
+        : <U extends number>(min: U) => Struct<T & { min: U }>
 
       description: <U extends string>(
         description: U
@@ -81,10 +81,10 @@ type BrandSubType =
 export type StructShape<T> = { __schema: T }
 
 type ParamsBySchemaType = {
+  bigint: ExtractParams<BigIntSchema>
   boolean: ExtractParams<BooleanSchema>
   literal: ExtractParams<LiteralSchema>
   number: ExtractParams<NumberSchema>
-  bigint: ExtractParams<BigintSchema>
   string: ExtractParams<StringSchema>
   //
   array: ExtractParams<ArraySchema>

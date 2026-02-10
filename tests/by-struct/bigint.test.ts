@@ -330,47 +330,60 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
   it('min', () => {
     const schema = {
       type: 'bigint',
-      min: BigInt(0),
+      min: '0',
     } as const satisfies x.Schema
 
     const struct = x.bigint().min(schema.min)
 
     type ExpectedSubj = bigint
 
-    const subjects: Array<ExpectedSubj> = [BigInt(0), BigInt(1)]
+    const subjects: Array<ExpectedSubj> = [BigInt(-0), BigInt(0), BigInt(1)]
 
     foldA: {
       const construct = x.makeStruct(schema)
 
+      /* ensure that schema/construct/struct/~standard subject types are identical */
+
       type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
+
       x.tCh<ConstructSchemaSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, ConstructSchemaSubj>()
 
       type SchemaSubj = x.Infer<typeof schema>
+
       x.tCh<SchemaSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, SchemaSubj>()
 
       type StructSubj = x.Infer<typeof struct.__schema>
+
       x.tCh<StructSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StructSubj>()
 
       type StandardSubj = NonNullable<
         (typeof struct)['~standard']['types']
       >['output']
+
       x.tCh<StandardSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StandardSubj>()
 
+      /* parsed either type check */
+
       type ExpectedParsed = x.ParseResult<ExpectedSubj>
+
       const parsed = x.parse(schema, undefined)
+
       type SchemaParsed = typeof parsed
+
       x.tCh<SchemaParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, SchemaParsed>()
 
       type ConstructParsed = ReturnType<typeof construct.parse>
+
       x.tCh<ConstructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, ConstructParsed>()
 
       type StructParsed = ReturnType<typeof struct.parse>
+
       x.tCh<StructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, StructParsed>()
 
@@ -378,29 +391,44 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         ReturnType<(typeof struct)['~standard']['validate']>,
         { value: unknown }
       >['value']
+
       x.tCh<StandardParsed, ExpectedSubj>()
       x.tCh<ExpectedSubj, StandardParsed>()
+
+      /* runtime schema check */
 
       expect(struct.__schema).toStrictEqual(schema)
       expect(construct.__schema).toStrictEqual(schema)
       expect(construct.__schema === schema).toBe(false)
 
+      /* parse result check */
+
       for (const subj of subjects) {
         const schemaParsed = x.parse(schema, subj)
+
         expect(schemaParsed.error).toBe(undefined)
         expect(schemaParsed.data).toStrictEqual(subj)
 
         const constructParsed = construct.parse(subj)
+
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
         const structParsed = struct.parse(subj)
+
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
 
         const standardParsed = struct['~standard'].validate(subj)
-        if (standardParsed instanceof Promise) throw Error('Not expected')
-        if (standardParsed.issues !== undefined) throw Error('not expected')
+
+        if (standardParsed instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        if (standardParsed.issues !== undefined) {
+          throw Error('not expected')
+        }
+
         expect(standardParsed.value).toStrictEqual(subj)
       }
     }
@@ -409,47 +437,60 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
   it('max', () => {
     const schema = {
       type: 'bigint',
-      max: BigInt(0),
+      max: '0',
     } as const satisfies x.Schema
 
     const struct = x.bigint().max(schema.max)
 
     type ExpectedSubj = bigint
 
-    const subjects: Array<ExpectedSubj> = [BigInt(-1), BigInt(0)]
+    const subjects: Array<ExpectedSubj> = [BigInt(-1), BigInt(-2)]
 
     foldA: {
       const construct = x.makeStruct(schema)
 
+      /* ensure that schema/construct/struct/~standard subject types are identical */
+
       type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
+
       x.tCh<ConstructSchemaSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, ConstructSchemaSubj>()
 
       type SchemaSubj = x.Infer<typeof schema>
+
       x.tCh<SchemaSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, SchemaSubj>()
 
       type StructSubj = x.Infer<typeof struct.__schema>
+
       x.tCh<StructSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StructSubj>()
 
       type StandardSubj = NonNullable<
         (typeof struct)['~standard']['types']
       >['output']
+
       x.tCh<StandardSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StandardSubj>()
 
+      /* parsed either type check */
+
       type ExpectedParsed = x.ParseResult<ExpectedSubj>
+
       const parsed = x.parse(schema, undefined)
+
       type SchemaParsed = typeof parsed
+
       x.tCh<SchemaParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, SchemaParsed>()
 
       type ConstructParsed = ReturnType<typeof construct.parse>
+
       x.tCh<ConstructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, ConstructParsed>()
 
       type StructParsed = ReturnType<typeof struct.parse>
+
       x.tCh<StructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, StructParsed>()
 
@@ -457,29 +498,44 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         ReturnType<(typeof struct)['~standard']['validate']>,
         { value: unknown }
       >['value']
+
       x.tCh<StandardParsed, ExpectedSubj>()
       x.tCh<ExpectedSubj, StandardParsed>()
+
+      /* runtime schema check */
 
       expect(struct.__schema).toStrictEqual(schema)
       expect(construct.__schema).toStrictEqual(schema)
       expect(construct.__schema === schema).toBe(false)
 
+      /* parse result check */
+
       for (const subj of subjects) {
         const schemaParsed = x.parse(schema, subj)
+
         expect(schemaParsed.error).toBe(undefined)
         expect(schemaParsed.data).toStrictEqual(subj)
 
         const constructParsed = construct.parse(subj)
+
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
         const structParsed = struct.parse(subj)
+
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
 
         const standardParsed = struct['~standard'].validate(subj)
-        if (standardParsed instanceof Promise) throw Error('Not expected')
-        if (standardParsed.issues !== undefined) throw Error('not expected')
+
+        if (standardParsed instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        if (standardParsed.issues !== undefined) {
+          throw Error('not expected')
+        }
+
         expect(standardParsed.value).toStrictEqual(subj)
       }
     }
@@ -490,8 +546,8 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
       type: 'bigint',
       optional: true,
       nullable: true,
-      min: BigInt(0),
-      max: BigInt(1),
+      min: '0',
+      max: '1',
     } as const satisfies x.Schema
 
     const struct = x
@@ -513,35 +569,48 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     foldA: {
       const construct = x.makeStruct(schema)
 
+      /* ensure that schema/construct/struct/~standard subject types are identical */
+
       type ConstructSchemaSubj = x.Infer<typeof construct.__schema>
+
       x.tCh<ConstructSchemaSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, ConstructSchemaSubj>()
 
       type SchemaSubj = x.Infer<typeof schema>
+
       x.tCh<SchemaSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, SchemaSubj>()
 
       type StructSubj = x.Infer<typeof struct.__schema>
+
       x.tCh<StructSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StructSubj>()
 
       type StandardSubj = NonNullable<
         (typeof struct)['~standard']['types']
       >['output']
+
       x.tCh<StandardSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StandardSubj>()
 
+      /* parsed either type check */
+
       type ExpectedParsed = x.ParseResult<ExpectedSubj>
+
       const parsed = x.parse(schema, undefined)
+
       type SchemaParsed = typeof parsed
+
       x.tCh<SchemaParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, SchemaParsed>()
 
       type ConstructParsed = ReturnType<typeof construct.parse>
+
       x.tCh<ConstructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, ConstructParsed>()
 
       type StructParsed = ReturnType<typeof struct.parse>
+
       x.tCh<StructParsed, ExpectedParsed>()
       x.tCh<ExpectedParsed, StructParsed>()
 
@@ -549,29 +618,44 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
         ReturnType<(typeof struct)['~standard']['validate']>,
         { value: unknown }
       >['value']
+
       x.tCh<StandardParsed, ExpectedSubj>()
       x.tCh<ExpectedSubj, StandardParsed>()
+
+      /* runtime schema check */
 
       expect(struct.__schema).toStrictEqual(schema)
       expect(construct.__schema).toStrictEqual(schema)
       expect(construct.__schema === schema).toBe(false)
 
+      /* parse result check */
+
       for (const subj of subjects) {
         const schemaParsed = x.parse(schema, subj)
+
         expect(schemaParsed.error).toBe(undefined)
         expect(schemaParsed.data).toStrictEqual(subj)
 
         const constructParsed = construct.parse(subj)
+
         expect(constructParsed.error).toBe(undefined)
         expect(constructParsed.data).toStrictEqual(subj)
 
         const structParsed = struct.parse(subj)
+
         expect(structParsed.error).toBe(undefined)
         expect(structParsed.data).toStrictEqual(subj)
 
         const standardParsed = struct['~standard'].validate(subj)
-        if (standardParsed instanceof Promise) throw Error('Not expected')
-        if (standardParsed.issues !== undefined) throw Error('not expected')
+
+        if (standardParsed instanceof Promise) {
+          throw Error('Not expected')
+        }
+
+        if (standardParsed.issues !== undefined) {
+          throw Error('not expected')
+        }
+
         expect(standardParsed.value).toStrictEqual(subj)
       }
     }
@@ -595,6 +679,357 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
       | 'max'
       | 'min'
       | 'nullable'
+
+    foldB: {
+      const construct = x.makeStruct(schema)
+
+      /* ensure that struct keys are reduced after application */
+
+      type StructKeys = keyof typeof struct
+
+      x.tCh<StructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, StructKeys>()
+
+      type ConstructKeys = keyof typeof construct
+
+      x.tCh<ConstructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, ConstructKeys>()
+
+      /* ensure that construct/struct schema types are identical  */
+
+      type ExpectedSchema = typeof schema
+      type StructSchema = typeof struct.__schema
+
+      x.tCh<StructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, StructSchema>()
+
+      type ConstructSchema = typeof struct.__schema
+
+      x.tCh<ConstructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, ConstructSchema>()
+
+      /* runtime schema check */
+
+      expect(struct.__schema).toStrictEqual(schema)
+      expect(construct.__schema).toStrictEqual(schema)
+      expect(construct.__schema === schema).toBe(false)
+
+      /* runtime schema parameter application immutability check */
+
+      expect(prevStruct.__schema === struct.__schema).toBe(false)
+    }
+  })
+
+  it('optional + nullable', () => {
+    const schema = {
+      type: 'bigint',
+      optional: true,
+      nullable: true,
+    } as const satisfies x.Schema
+
+    const prevStruct = x.bigint().optional()
+    const struct = prevStruct.nullable()
+
+    type ExpectedKeys =
+      | StructSharedKeys
+      | 'brand'
+      | 'description'
+      | 'max'
+      | 'min'
+
+    foldB: {
+      const construct = x.makeStruct(schema)
+
+      /* ensure that struct keys are reduced after application */
+
+      type StructKeys = keyof typeof struct
+
+      x.tCh<StructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, StructKeys>()
+
+      type ConstructKeys = keyof typeof construct
+
+      x.tCh<ConstructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, ConstructKeys>()
+
+      /* ensure that construct/struct schema types are identical  */
+
+      type ExpectedSchema = typeof schema
+      type StructSchema = typeof struct.__schema
+
+      x.tCh<StructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, StructSchema>()
+
+      type ConstructSchema = typeof struct.__schema
+
+      x.tCh<ConstructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, ConstructSchema>()
+
+      /* runtime schema check */
+
+      expect(struct.__schema).toStrictEqual(schema)
+      expect(construct.__schema).toStrictEqual(schema)
+      expect(construct.__schema === schema).toBe(false)
+
+      /* runtime schema parameter application immutability check */
+
+      expect(prevStruct.__schema === struct.__schema).toBe(false)
+    }
+  })
+
+  it('optional + nullable + brand', () => {
+    const schema = {
+      type: 'bigint',
+      optional: true,
+      nullable: true,
+      brand: ['x', 'y'],
+    } as const satisfies x.Schema
+
+    const prevStruct = x.bigint().optional().nullable()
+    const struct = prevStruct.brand('x', 'y')
+
+    type ExpectedKeys = StructSharedKeys | 'description' | 'min' | 'max'
+
+    foldB: {
+      const construct = x.makeStruct(schema)
+
+      /* ensure that struct keys are reduced after application */
+
+      type StructKeys = keyof typeof struct
+
+      x.tCh<StructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, StructKeys>()
+
+      type ConstructKeys = keyof typeof construct
+
+      x.tCh<ConstructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, ConstructKeys>()
+
+      /* ensure that construct/struct schema types are identical  */
+
+      type ExpectedSchema = typeof schema
+      type StructSchema = typeof struct.__schema
+
+      x.tCh<StructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, StructSchema>()
+
+      type ConstructSchema = typeof struct.__schema
+
+      x.tCh<ConstructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, ConstructSchema>()
+
+      /* runtime schema check */
+
+      expect(struct.__schema).toStrictEqual(schema)
+      expect(construct.__schema).toStrictEqual(schema)
+      expect(construct.__schema === schema).toBe(false)
+
+      /* runtime schema parameter application immutability check */
+
+      expect(prevStruct.__schema === struct.__schema).toBe(false)
+    }
+  })
+
+  it('optional + nullable + brand + min', () => {
+    const schema = {
+      type: 'bigint',
+      optional: true,
+      nullable: true,
+      brand: ['x', 'y'],
+      min: '0',
+    } as const satisfies x.Schema
+
+    const prevStruct = x.bigint().optional().nullable().min(schema.min)
+    const struct = prevStruct.brand('x', 'y')
+
+    type ExpectedKeys = StructSharedKeys | 'description' | 'max'
+
+    foldB: {
+      const construct = x.makeStruct(schema)
+
+      /* ensure that struct keys are reduced after application */
+
+      type StructKeys = keyof typeof struct
+
+      x.tCh<StructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, StructKeys>()
+
+      type ConstructKeys = keyof typeof construct
+
+      x.tCh<ConstructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, ConstructKeys>()
+
+      /* ensure that construct/struct schema types are identical  */
+
+      type ExpectedSchema = typeof schema
+      type StructSchema = typeof struct.__schema
+
+      x.tCh<StructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, StructSchema>()
+
+      type ConstructSchema = typeof struct.__schema
+
+      x.tCh<ConstructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, ConstructSchema>()
+
+      /* runtime schema check */
+
+      expect(struct.__schema).toStrictEqual(schema)
+      expect(construct.__schema).toStrictEqual(schema)
+      expect(construct.__schema === schema).toBe(false)
+
+      /* runtime schema parameter application immutability check */
+
+      expect(prevStruct.__schema === struct.__schema).toBe(false)
+    }
+  })
+
+  it('optional + nullable + brand + min + max', () => {
+    const schema = {
+      type: 'bigint',
+      optional: true,
+      nullable: true,
+      brand: ['x', 'y'],
+      min: '0',
+      max: '0',
+    } as const satisfies x.Schema
+
+    const prevStruct = x
+      .bigint()
+      .optional()
+      .nullable()
+      .min(schema.min)
+      .max(schema.max)
+
+    const struct = prevStruct.brand('x', 'y')
+
+    type ExpectedKeys = StructSharedKeys | 'description'
+
+    foldB: {
+      const construct = x.makeStruct(schema)
+
+      /* ensure that struct keys are reduced after application */
+
+      type StructKeys = keyof typeof struct
+
+      x.tCh<StructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, StructKeys>()
+
+      type ConstructKeys = keyof typeof construct
+
+      x.tCh<ConstructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, ConstructKeys>()
+
+      /* ensure that construct/struct schema types are identical  */
+
+      type ExpectedSchema = typeof schema
+      type StructSchema = typeof struct.__schema
+
+      x.tCh<StructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, StructSchema>()
+
+      type ConstructSchema = typeof struct.__schema
+
+      x.tCh<ConstructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, ConstructSchema>()
+
+      /* runtime schema check */
+
+      expect(struct.__schema).toStrictEqual(schema)
+      expect(construct.__schema).toStrictEqual(schema)
+      expect(construct.__schema === schema).toBe(false)
+
+      /* runtime schema parameter application immutability check */
+
+      expect(prevStruct.__schema === struct.__schema).toBe(false)
+    }
+  })
+
+  it('optional + nullable + brand + min + max + description', () => {
+    const schema = {
+      type: 'bigint',
+      optional: true,
+      nullable: true,
+      brand: ['x', 'y'],
+      min: '0',
+      max: '0',
+      description: 'x',
+    } as const satisfies x.Schema
+
+    const prevStruct = x
+      .bigint()
+      .optional()
+      .nullable()
+      .min(schema.min)
+      .max(schema.max)
+      .description('x')
+
+    const struct = prevStruct.brand('x', 'y')
+
+    type ExpectedKeys = StructSharedKeys
+
+    foldB: {
+      const construct = x.makeStruct(schema)
+
+      /* ensure that struct keys are reduced after application */
+
+      type StructKeys = keyof typeof struct
+
+      x.tCh<StructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, StructKeys>()
+
+      type ConstructKeys = keyof typeof construct
+
+      x.tCh<ConstructKeys, ExpectedKeys>()
+      x.tCh<ExpectedKeys, ConstructKeys>()
+
+      /* ensure that construct/struct schema types are identical  */
+
+      type ExpectedSchema = typeof schema
+      type StructSchema = typeof struct.__schema
+
+      x.tCh<StructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, StructSchema>()
+
+      type ConstructSchema = typeof struct.__schema
+
+      x.tCh<ConstructSchema, ExpectedSchema>()
+      x.tCh<ExpectedSchema, ConstructSchema>()
+
+      /* runtime schema check */
+
+      expect(struct.__schema).toStrictEqual(schema)
+      expect(construct.__schema).toStrictEqual(schema)
+      expect(construct.__schema === schema).toBe(false)
+
+      /* runtime schema parameter application immutability check */
+
+      expect(prevStruct.__schema === struct.__schema).toBe(false)
+    }
+  })
+
+  it('description + max + min + brand + nullable + optional', () => {
+    const schema = {
+      type: 'bigint',
+      optional: true,
+      nullable: true,
+      brand: ['x', 'y'],
+      description: 'x',
+      min: '0',
+      max: '0',
+    } as const satisfies x.Schema
+
+    const prevStruct = x
+      .bigint()
+      .description('x')
+      .max(schema.max)
+      .min(schema.min)
+      .brand('x', 'y')
+      .nullable()
+
+    const struct = prevStruct.optional()
+
+    type ExpectedKeys = StructSharedKeys
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -686,7 +1121,7 @@ describe('ERROR_CODE.invalidType (foldC)', () => {
 
 describe('ERROR_CODE.invalidRange (foldD)', () => {
   it('min', () => {
-    const schema = { type: 'bigint', min: BigInt(0) } satisfies x.Schema
+    const schema = { type: 'bigint', min: '0' } satisfies x.Schema
     const struct = x.bigint().min(schema.min)
     const subjects = [BigInt(-1), BigInt(-2), BigInt(-3)]
 
@@ -725,7 +1160,7 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
   })
 
   it('max', () => {
-    const schema = { type: 'bigint', max: BigInt(0) } satisfies x.Schema
+    const schema = { type: 'bigint', max: '0' } satisfies x.Schema
     const struct = x.bigint().max(schema.max)
     const subjects = [BigInt(1), BigInt(2), BigInt(3)]
 
@@ -764,11 +1199,7 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
   })
 
   it('min + max', () => {
-    const schema = {
-      type: 'bigint',
-      min: BigInt(0),
-      max: BigInt(0),
-    } satisfies x.Schema
+    const schema = { type: 'bigint', min: '0', max: '0' } satisfies x.Schema
     const struct = x.bigint().min(schema.min).max(schema.max)
     const subjects = [BigInt(-1), BigInt(1)]
 
@@ -806,4 +1237,3 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
     }
   })
 })
-

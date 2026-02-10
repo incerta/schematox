@@ -9,10 +9,10 @@ import type {
   //
   PrimitiveSchema,
   //
+  BigIntSchema,
   BooleanSchema,
   LiteralSchema,
   NumberSchema,
-  BigintSchema,
   StringSchema,
   //
   BrandSchema,
@@ -53,17 +53,17 @@ export type InferBrand<T extends BrandSchema> =
       : never
     : never
 
-export type InferPrimitive<T> = T extends StringSchema
-  ? string
-  : T extends NumberSchema
-    ? number
-    : T extends BigintSchema
-      ? bigint
-    : T extends BooleanSchema
-      ? boolean
-      : T extends LiteralSchema<infer U>
-        ? U
-        : never
+export type InferPrimitive<T> = T extends BigIntSchema
+  ? bigint
+  : T extends BooleanSchema
+    ? boolean
+    : T extends NumberSchema
+      ? number
+      : T extends StringSchema
+        ? string
+        : T extends LiteralSchema<infer U>
+          ? U
+          : never
 
 export type InferArray<T> =
   T extends ArraySchema<infer U> ? Array<InferSchema<U>> : never

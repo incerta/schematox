@@ -53,11 +53,13 @@ export type {
   //
   BrandSchema,
   //
+  BigIntSchema,
   BooleanSchema,
   LiteralSchema,
   NumberSchema,
-  BigintSchema,
   StringSchema,
+  //
+  BigIntString,
 } from './types/schema'
 
 export type { Struct, StructShape, StructParams } from './types/struct'

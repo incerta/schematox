@@ -74,11 +74,11 @@ export type PrimitiveSchemaShared = SchemaShared & {
 }
 
 export type PrimitiveSchema =
-  | StringSchema
-  | NumberSchema
-  | BigintSchema
+  | BigIntSchema
   | BooleanSchema
   | LiteralSchema
+  | NumberSchema
+  | StringSchema
 
 export type BooleanSchema = PrimitiveSchemaShared & {
   type: 'boolean'
@@ -96,10 +96,12 @@ export type NumberSchema = PrimitiveSchemaShared & {
   max?: number /* <= */
 }
 
-export type BigintSchema = PrimitiveSchemaShared & {
+export type BigIntString = `${bigint}`
+
+export type BigIntSchema = PrimitiveSchemaShared & {
   type: 'bigint'
-  min?: bigint /* >= */
-  max?: bigint /* <= */
+  min?: BigIntString /* >= */
+  max?: BigIntString /* <= */
 }
 
 export type LiteralSchema<
