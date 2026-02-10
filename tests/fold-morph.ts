@@ -2,6 +2,7 @@ import { Project, SyntaxKind } from 'ts-morph'
 import { FOLDS } from './fold-constants'
 
 const FILE_PATHS = [
+  'tests/by-struct/bigint.test.ts',
   'tests/by-struct/boolean.test.ts',
   'tests/by-struct/literal.test.ts',
   'tests/by-struct/number.test.ts',
