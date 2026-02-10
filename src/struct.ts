@@ -2,7 +2,12 @@ import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants'
 import { parse } from './parse'
 
 import type { StandardSchemaV1 } from './types/standard-schema'
-import type { Schema, BrandSchema, StringSchema } from './types/schema'
+import type {
+  Schema,
+  BigIntString,
+  BrandSchema,
+  StringSchema,
+} from './types/schema'
 import type { Struct, StructParams, StructShape } from './types/struct'
 
 export function makeStruct<T extends Schema>(schema: T): Struct<T>
@@ -52,7 +57,7 @@ export function makeStruct(schema: Schema) {
 
   if (params.has('min')) {
     if (schema.type === 'bigint') {
-      result.min = (min: bigint) => makeStruct({ ...schema, min })
+      result.min = (min: BigIntString) => makeStruct({ ...schema, min })
     } else {
       result.min = (min: number) => makeStruct({ ...schema, min })
     }
@@ -60,7 +65,7 @@ export function makeStruct(schema: Schema) {
 
   if (params.has('max')) {
     if (schema.type === 'bigint') {
-      result.max = (max: bigint) => makeStruct({ ...schema, max })
+      result.max = (max: BigIntString) => makeStruct({ ...schema, max })
     } else {
       result.max = (max: number) => makeStruct({ ...schema, max })
     }

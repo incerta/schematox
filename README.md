@@ -38,12 +38,12 @@ npm install schematox
 
 ## Minimal Requirements
 
-- ECMAScript version: `2018`
+- ECMAScript version: `2020`
 - TypeScript version: `5.3.2`
 
 ## Features
 
-- Statically defined **JSON** compatible schema
+- Statically defined **JSON** compatible schema (easy to serialize/deserialize/generate/store/transfer)
 - Programmatically defined schema (**struct**, **construct**)
 - Check defined schema correctness using non generic type **Schema**
 - Ether-style error handling (no unexpected throws)
@@ -106,7 +106,7 @@ parsed.data
 
 ### Struct
 
-Is commonly accepted way of schema, as seen in [zod](https://github.com/colinhacks/zod) or [superstruct](https://github.com/ianstormtaylor/superstruct) library:
+Is commonly accepted way of schema definition, as seen in [zod](https://github.com/colinhacks/zod) or [superstruct](https://github.com/ianstormtaylor/superstruct) library:
 
 ```typescript
 import { object, string } from 'schematox'
@@ -238,7 +238,7 @@ const schema = {
   nullable: true,
   brand: ['x', 'y'],
   min: 1,
-  max: 2,
+  max: 4,
   description: 'x',
 } as const satisfies Schema
 
@@ -247,13 +247,12 @@ const struct = number()
   .nullable()
   .brand('x', 'y')
   .min(1)
-  .max(2)
+  .max(4)
   .description('x')
 
 // (number & { __x: 'y' }) | undefined | null
 type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
-//
 ```
 
 ### BigInt
@@ -266,8 +265,8 @@ const schema = {
   optional: true,
   nullable: true,
   brand: ['x', 'y'],
-  min: BigInt(1),
-  max: BigInt(2),
+  min: '1',
+  max: '4',
   description: 'x',
 } as const satisfies Schema
 
@@ -275,14 +274,13 @@ const struct = bigint()
   .optional()
   .nullable()
   .brand('x', 'y')
-  .min(BigInt(1))
-  .max(BigInt(2))
+  .min('1')
+  .max('4')
   .description('x')
 
 // (bigint & { __x: 'y' }) | undefined | null
 type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
-//
 ```
 
 ## Compound Schema

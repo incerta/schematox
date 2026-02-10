@@ -1,6 +1,72 @@
 import * as x from '../../src'
 
 describe('Construct all primitive schemas subject type', () => {
+  describe('BigIntSchema', () => {
+    it('required', () => {
+      const schema = { type: 'bigint' } as const satisfies x.Schema
+
+      type Expected = bigint
+      type Actual = x.Infer<typeof schema>
+
+      x.tCh<Actual, Expected>()
+      x.tCh<Expected, Actual>()
+    })
+
+    it('optional', () => {
+      const schema = {
+        type: 'bigint',
+        optional: true,
+      } as const satisfies x.Schema
+
+      type Expected = bigint | undefined
+      type Actual = x.Infer<typeof schema>
+
+      x.tCh<Actual, Expected>()
+      x.tCh<Expected, Actual>()
+    })
+
+    it('nullable', () => {
+      const schema = {
+        type: 'bigint',
+        nullable: true,
+      } as const satisfies x.Schema
+
+      type Expected = bigint | null
+      type Actual = x.Infer<typeof schema>
+
+      x.tCh<Actual, Expected>()
+      x.tCh<Expected, Actual>()
+    })
+
+    it('brand', () => {
+      const schema = {
+        type: 'bigint',
+        brand: ['x', 'y'],
+      } as const satisfies x.Schema
+
+      type Expected = bigint & { __x: 'y' }
+      type Actual = x.Infer<typeof schema>
+
+      x.tCh<Actual, Expected>()
+      x.tCh<Expected, Actual>()
+    })
+
+    it('optional + nullable + brand', () => {
+      const schema = {
+        type: 'bigint',
+        optional: true,
+        nullable: true,
+        brand: ['x', 'y'],
+      } as const satisfies x.Schema
+
+      type Expected = (bigint & { __x: 'y' }) | null | undefined
+      type Actual = x.Infer<typeof schema>
+
+      x.tCh<Actual, Expected>()
+      x.tCh<Expected, Actual>()
+    })
+  })
+
   describe('BooleanSchema', () => {
     it('required', () => {
       const schema = { type: 'boolean' } as const satisfies x.Schema

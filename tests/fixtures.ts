@@ -2,7 +2,10 @@ export const DATA_TYPE = [
   ['boolean', [true, false]],
   ['literal', []], // added to be consistent with `foldC`
   ['number', [-1, -0.001, 0, 0.001, 1]],
-  ['bigint', [BigInt(12)]],
+  [
+    'bigint',
+    [BigInt('9007199254740994'), BigInt('0'), BigInt('-9007199254740994')],
+  ],
   ['string', ['', 'x', 'xy', 'xyz']],
   [
     'binary',

@@ -13,18 +13,18 @@ import type {
   TupleSchema,
   UnionSchema,
   //
+  BigIntSchema,
   BooleanSchema,
   LiteralSchema,
   NumberSchema,
-  BigintSchema,
   StringSchema,
 } from './types/schema'
 
 const PARSE_FN_BY_SCHEMA_KIND = {
+  bigint: parseBigInt,
   boolean: parseBoolean,
   literal: parseLiteral,
   number: parseNumber,
-  bigint: parseBigint,
   string: parseString,
   //
   array: parseArray,
@@ -61,6 +61,55 @@ function parseRecursively(
     schema as never,
     subject
   )
+}
+
+function parseBigInt(
+  errorPath: ErrorPath,
+  schema: BigIntSchema,
+  subject: unknown
+) {
+  if (typeof subject !== 'bigint') {
+    return error([
+      {
+        code: ERROR_CODE.invalidType,
+        path: errorPath,
+        subject,
+        schema,
+      },
+    ])
+  }
+
+  if (typeof schema.min === 'string') {
+    const min = BigInt(schema.min)
+
+    if (subject < min) {
+      return error([
+        {
+          code: ERROR_CODE.invalidRange,
+          path: errorPath,
+          subject,
+          schema,
+        },
+      ])
+    }
+  }
+
+  if (typeof schema.max === 'string') {
+    const max = BigInt(schema.max)
+
+    if (subject > max) {
+      return error([
+        {
+          code: ERROR_CODE.invalidRange,
+          path: errorPath,
+          subject,
+          schema,
+        },
+      ])
+    }
+  }
+
+  return success(subject)
 }
 
 function parseBoolean(
@@ -131,51 +180,6 @@ function parseNumber(
   }
 
   if (typeof schema.max === 'number') {
-    if (subject > schema.max) {
-      return error([
-        {
-          code: ERROR_CODE.invalidRange,
-          path: errorPath,
-          subject,
-          schema,
-        },
-      ])
-    }
-  }
-
-  return success(subject)
-}
-
-function parseBigint(
-  errorPath: ErrorPath,
-  schema: BigintSchema,
-  subject: unknown
-) {
-  if (typeof subject !== 'bigint') {
-    return error([
-      {
-        code: ERROR_CODE.invalidType,
-        path: errorPath,
-        subject,
-        schema,
-      },
-    ])
-  }
-
-  if (typeof schema.min === 'bigint') {
-    if (subject < schema.min) {
-      return error([
-        {
-          code: ERROR_CODE.invalidRange,
-          path: errorPath,
-          subject,
-          schema,
-        },
-      ])
-    }
-  }
-
-  if (typeof schema.max === 'bigint') {
     if (subject > schema.max) {
       return error([
         {
