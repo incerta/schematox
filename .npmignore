@@ -3,6 +3,7 @@
 /benchmark
 /.git
 /.gitignore
+/.github
 /coverage
 /tsconfig.json
 /CONTRIBUTING.md
