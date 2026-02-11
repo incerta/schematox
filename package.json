@@ -8,7 +8,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "formatter:fix": "prettier --write .",
-    "formatter:check": "prettier --check . || (echo \"ERROR: use `npm run formatter:fix`\" && exit 1)",
+    "formatter:check": "prettier --check . || (echo \"FORMATTING ERROR: use 'npm run formatter:fix'\" && exit 1)",
     "ts": "tsc --noEmit",
     "check": "npm run formatter:check && npm run ts && npm run test:coverage",
     "morph": "jiti tests/fold-morph.ts && npm run formatter:fix",
