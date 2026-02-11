@@ -1,4 +1,4 @@
-export { ERROR_CODE, PARAMS_BY_SCHEMA_TYPE } from './constants'
+  export { ERROR_CODE, PARAMS_BY_SCHEMA_TYPE } from './constants'
 
 export { parse } from './parse'
 
