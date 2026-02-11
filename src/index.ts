@@ -71,3 +71,7 @@ export type {
   ExtendOptional,
   ExtendNullable,
 } from './types/extensions'
+
+export function ciUnitTestsTestCoverageFailingCheck(x: string) {
+  return x
+}
