@@ -10,7 +10,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
     type ExpectedSubj = boolean
 
-    const subjects: Array<ExpectedSubj> = [true, false]
+    const subjects: Array<ExpectedSubj> = [true, false, true]
 
     foldA: {
       const construct = x.makeStruct(schema)
