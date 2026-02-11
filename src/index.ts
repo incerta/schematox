@@ -71,5 +71,3 @@ export type {
   ExtendOptional,
   ExtendNullable,
 } from './types/extensions'
-
-export const CheckCITypeScriptCheckFailing: number = 'string'
