@@ -4,6 +4,10 @@ import * as fixture from '../fixtures'
 import type { StructSharedKeys } from '../type'
 
 describe('Type inference and parse by schema/construct/struct (foldA)', () => {
+  it('ci: check unit tests ci workflow step is failing', () => {
+    expect('x').toBe('y')
+  })
+
   it('required', () => {
     const schema = { type: 'boolean' } as const satisfies x.Schema
     const struct = x.boolean()
