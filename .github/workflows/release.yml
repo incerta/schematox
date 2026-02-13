@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tag.outputs.value }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run checks
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish to npm
+        run: npm publish --provenance
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          VERSION="${{ steps.tag.outputs.value }}"
+          VERSION="${VERSION#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+          BODY=$(bash scripts/extract-changelog.sh "$VERSION")
+
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "body<<$EOF" >> "$GITHUB_OUTPUT"
+          echo "$BODY" >> "$GITHUB_OUTPUT"
+          echo "$EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ steps.changelog.outputs.version }}
+          body: ${{ steps.changelog.outputs.body }}
+          tag_name: ${{ steps.tag.outputs.value }}

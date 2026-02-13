@@ -10,7 +10,7 @@ benchmark
 coverage
 jest.config.js
 node_modules
-publish-alpha.sh
+scripts
 tests
 tmp
 tsconfig.json

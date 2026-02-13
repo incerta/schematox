@@ -1,0 +1,32 @@
+name: Tag Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    if: >
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Create and push tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Detected version: ${VERSION}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"

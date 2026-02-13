@@ -13,7 +13,8 @@
     "morph": "jiti tests/fold-morph.ts && npm run formatter:fix",
     "version:patch": "npm run check && npm version patch",
     "version:minor": "npm run check && npm version minor",
-    "version:major": "npm run check && npm version major"
+    "version:major": "npm run check && npm version major",
+    "publish:alpha": "bash scripts/publish-alpha.sh"
   },
   "peerDependencies": {
     "typescript": ">=5.3.2"
@@ -42,7 +43,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/incerta/schematox.git"
+    "url": "https://github.com/incerta/schematox.git"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
