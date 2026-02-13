@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 CURRENT_VERSION=$(node -p "require('./package.json').version")
