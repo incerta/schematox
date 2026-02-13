@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/incerta/schematox/compare/v1.2.4...v1.3.0)
+
+- [feat: add BigInt schema support #58](https://github.com/incerta/schematox/pull/62) by [@IvanDen](https://github.com/IvanDen)
+- [FIX: formatter:check script executes formatter:fix on failing #62](https://github.com/incerta/schematox/pull/62)
+- [Add publish-alpha.sh script and remove prepublishOnly redundancy #63](https://github.com/incerta/schematox/pull/63)
+- [Add prepare-release.sh script for release PR creation #64](https://github.com/incerta/schematox/pull/64)
+- [CHANGELOG.md dependent NPM package publishing and release automation #64](https://github.com/incerta/schematox/pull/64)
+
 ## [1.2.4](https://github.com/incerta/schematox/compare/v1.2.3...v1.2.4)
 
 - [FIX: incorrect record struct with branded key type inference #60](https://github.com/incerta/schematox/pull/60)
