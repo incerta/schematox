@@ -1,5 +1,5 @@
 import { Project, SyntaxKind } from 'ts-morph'
-import { FOLDS } from './fold-constants'
+import { FOLDS } from './fold-constants.js'
 
 const FILE_PATHS = [
   'tests/by-struct/bigint.test.ts',

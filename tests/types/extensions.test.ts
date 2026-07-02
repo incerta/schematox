@@ -1,5 +1,5 @@
 import { describe, it } from 'vitest'
-import * as x from '../../src'
+import * as x from '../../src/index.js'
 
 describe('ExtWith_SchemaParams_SubjT<T, U>: U is primitive', () => {
   type U = boolean
