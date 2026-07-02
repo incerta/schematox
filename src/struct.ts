@@ -1,14 +1,14 @@
-import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants'
-import { parse } from './parse'
+import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants.js'
+import { parse } from './parse.js'
 
-import type { StandardSchemaV1 } from './types/standard-schema'
+import type { StandardSchemaV1 } from './types/standard-schema.ts'
 import type {
   Schema,
   BigIntString,
   BrandSchema,
   StringSchema,
-} from './types/schema'
-import type { Struct, StructParams, StructShape } from './types/struct'
+} from './types/schema.ts'
+import type { Struct, StructParams, StructShape } from './types/struct.ts'
 
 export function makeStruct<T extends Schema>(schema: T): Struct<T>
 export function makeStruct(schema: Schema) {
@@ -33,18 +33,14 @@ export function makeStruct(schema: Schema) {
     },
   }
 
-  if (params.has('optional')) {
-    result.optional = () => makeStruct({ ...schema, optional: true })
-  }
+  /* Params present in all schema types */
 
-  if (params.has('nullable')) {
-    result.nullable = () => makeStruct({ ...schema, nullable: true })
-  }
+  result.optional = () => makeStruct({ ...schema, optional: true })
+  result.nullable = () => makeStruct({ ...schema, nullable: true })
+  result.description = (description: string) =>
+    makeStruct({ ...schema, description })
 
-  if (params.has('description')) {
-    result.description = (description: string) =>
-      makeStruct({ ...schema, description })
-  }
+  /* Schema specific params */
 
   if (params.has('brand')) {
     result.brand = (...args: BrandSchema | [BrandSchema]) => {

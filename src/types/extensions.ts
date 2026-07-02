@@ -1,5 +1,5 @@
-import type { BrandSchema } from './schema'
-import type { InferBrand } from './infer'
+import type { BrandSchema } from './schema.ts'
+import type { InferBrand } from './infer.ts'
 
 // Intersections must be applied at the very beginning
 // otherwise `&` will clear incompatible union types like "null" or "undefined"

@@ -1,6 +1,6 @@
-export { ERROR_CODE, PARAMS_BY_SCHEMA_TYPE } from './constants'
+export { ERROR_CODE, PARAMS_BY_SCHEMA_TYPE } from './constants.js'
 
-export { parse } from './parse'
+export { parse } from './parse.js'
 
 export {
   makeStruct,
@@ -16,9 +16,9 @@ export {
   record,
   tuple,
   union,
-} from './struct'
+} from './struct.js'
 
-export { error, success, tCh } from './utils'
+export { error, success, tCh } from './utils.js'
 
 export type {
   ErrorCode,
@@ -28,7 +28,7 @@ export type {
   ParseResult,
   ParseSuccess,
   PrettifyObject,
-} from './types/utils'
+} from './types/utils.js'
 
 export type {
   Infer,
@@ -40,7 +40,7 @@ export type {
   InferObject,
   InferRecord,
   InferUnion,
-} from './types/infer'
+} from './types/infer.js'
 
 export type {
   Schema,
@@ -60,9 +60,9 @@ export type {
   StringSchema,
   //
   BigIntString,
-} from './types/schema'
+} from './types/schema.js'
 
-export type { Struct, StructShape, StructParams } from './types/struct'
+export type { Struct, StructShape, StructParams } from './types/struct.js'
 
 export type {
   ExtendParams,
@@ -70,4 +70,4 @@ export type {
   ExtendBrand,
   ExtendOptional,
   ExtendNullable,
-} from './types/extensions'
+} from './types/extensions.js'

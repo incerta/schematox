@@ -1,4 +1,4 @@
-import type { ParseError, ParseSuccess, InvalidSubject } from './types/utils'
+import type { ParseError, ParseSuccess, InvalidSubject } from './types/utils.ts'
 
 /**
  * Type equivalence check utility

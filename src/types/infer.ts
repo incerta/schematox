@@ -16,12 +16,12 @@ import type {
   StringSchema,
   //
   BrandSchema,
-} from './schema'
+} from './schema.ts'
 
-import type { StructShape } from './struct'
-import type { PrettifyObject } from './utils'
+import type { StructShape } from './struct.ts'
+import type { PrettifyObject } from './utils.ts'
 
-import type { ExtendParams, ExtendBrand } from './extensions'
+import type { ExtendParams, ExtendBrand } from './extensions.ts'
 
 /**
  * @example Infer<typeof struct> | Infer<typeof schema>
