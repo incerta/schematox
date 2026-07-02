@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import * as x from '../../src'
-import * as fixture from '../fixtures'
+import * as x from '../../src/index.js'
+import * as fixture from '../fixtures.js'
 
-import type { StructSharedKeys } from '../type'
+import type { StructSharedKeys } from '../type.js'
 
 describe('Type inference and parse by schema/construct/struct (foldA)', () => {
   it('branded key', () => {

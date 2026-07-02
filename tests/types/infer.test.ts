@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import * as x from '../../src'
+import * as x from '../../src/index.js'
 
 describe('Construct all primitive schemas subject type', () => {
   describe('BigIntSchema', () => {
