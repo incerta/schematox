@@ -1,3 +1,4 @@
+import { describe, it } from 'vitest'
 import * as x from '../../src'
 
 describe('ExtWith_SchemaParams_SubjT<T, U>: U is primitive', () => {

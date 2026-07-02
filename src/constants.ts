@@ -5,11 +5,11 @@ export const ERROR_CODE = {
 
 // prettier-ignore
 export const PARAMS_BY_SCHEMA_TYPE = {
-  boolean:  new Set(['optional', 'nullable', 'brand', 'description'] as const),
-  literal:  new Set(['optional', 'nullable', 'brand', 'description'] as const),
-  number:   new Set(['optional', 'nullable', 'brand', 'description', 'min', 'max'] as const),
-  bigint:   new Set(['optional', 'nullable', 'brand', 'description', 'min', 'max'] as const),
-  string:   new Set(['optional', 'nullable', 'brand', 'description', 'minLength', 'maxLength'] as const),
+  boolean:  new Set(['optional', 'nullable', 'description', 'brand'] as const),
+  literal:  new Set(['optional', 'nullable', 'description', 'brand'] as const),
+  number:   new Set(['optional', 'nullable', 'description', 'brand', 'min', 'max'] as const),
+  bigint:   new Set(['optional', 'nullable', 'description', 'brand', 'min', 'max'] as const),
+  string:   new Set(['optional', 'nullable', 'description', 'brand', 'minLength', 'maxLength'] as const),
   //
   array:    new Set(['optional', 'nullable', 'description', 'minLength', 'maxLength'] as const),
   object:   new Set(['optional', 'nullable', 'description'] as const),

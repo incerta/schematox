@@ -1,4 +1,4 @@
-import type { Schema } from './schema'
+import type { Schema } from './schema.ts'
 
 export type ParseResult<T> = ParseError | ParseSuccess<T>
 

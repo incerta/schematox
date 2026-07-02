@@ -1,8 +1,8 @@
-import { ERROR_CODE } from './constants'
-import { error, success } from './utils'
+import { ERROR_CODE } from './constants.js'
+import { error, success } from './utils.js'
 
-import type { InferSchema } from './types/infer'
-import type { ErrorPath, InvalidSubject, ParseResult } from './types/utils'
+import type { InferSchema } from './types/infer.js'
+import type { ErrorPath, InvalidSubject, ParseResult } from './types/utils.js'
 
 import type {
   Schema,
@@ -18,7 +18,7 @@ import type {
   LiteralSchema,
   NumberSchema,
   StringSchema,
-} from './types/schema'
+} from './types/schema.js'
 
 const PARSE_FN_BY_SCHEMA_KIND = {
   bigint: parseBigInt,

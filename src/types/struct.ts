@@ -1,6 +1,6 @@
-import { ParseResult } from './utils'
+import { ParseResult } from './utils.js'
 
-import type { StandardSchemaV1 } from './standard-schema'
+import type { StandardSchemaV1 } from './standard-schema.ts'
 import type {
   Schema,
   //
@@ -19,9 +19,9 @@ import type {
   StringSchema,
   //
   BigIntString,
-} from './schema'
+} from './schema.ts'
 
-import type { InferSchema } from './infer'
+import type { InferSchema } from './infer.ts'
 
 export type Struct<T extends Schema> = Omit<
   Pick<
