@@ -743,12 +743,12 @@ describe('Construct ObjectSchema subject type', () => {
       } as const satisfies x.Schema
 
       type Expected = {
-        boolean?: (boolean & { __x: 'boolean' }) | null
-        literalBoolean?: (false & { __x: 'literalBoolean' }) | null
-        literalNumber?: (0 & { __x: 'literalNumber' }) | null
-        literalString?: ('x' & { __x: 'literalString' }) | null
-        number?: (number & { __x: 'number' }) | null
-        string?: (string & { __x: 'string' }) | null
+        boolean?: (boolean & { __x: 'boolean' }) | null | undefined
+        literalBoolean?: (false & { __x: 'literalBoolean' }) | null | undefined
+        literalNumber?: (0 & { __x: 'literalNumber' }) | null | undefined
+        literalString?: ('x' & { __x: 'literalString' }) | null | undefined
+        number?: (number & { __x: 'number' }) | null | undefined
+        string?: (string & { __x: 'string' }) | null | undefined
       }
 
       type Actual = x.Infer<typeof schema>
