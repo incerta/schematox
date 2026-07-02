@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.3.1](https://github.com/incerta/schematox/compare/v1.3.0...v1.3.1)
+
+- [Modernize schematox ESM TypeScript build and test setup #58](https://github.com/incerta/schematox/pull/67)
+
 ## [1.3.0](https://github.com/incerta/schematox/compare/v1.2.4...v1.3.0)
 
 - [feat: add BigInt schema support #58](https://github.com/incerta/schematox/pull/62) by [@IvanDen](https://github.com/IvanDen)
