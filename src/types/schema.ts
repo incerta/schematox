@@ -74,11 +74,7 @@ export type PrimitiveSchemaShared = SchemaShared & {
 }
 
 export type PrimitiveSchema =
-  | BigIntSchema
-  | BooleanSchema
-  | LiteralSchema
-  | NumberSchema
-  | StringSchema
+  BigIntSchema | BooleanSchema | LiteralSchema | NumberSchema | StringSchema
 
 export type BooleanSchema = PrimitiveSchemaShared & {
   type: 'boolean'
