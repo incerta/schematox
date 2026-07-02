@@ -68,17 +68,14 @@ export type InferPrimitive<T> = T extends BigIntSchema
 export type InferArray<T> =
   T extends ArraySchema<infer U> ? Array<InferSchema<U>> : never
 
+// prettier-ignore
 export type InferObject<T> =
   T extends ObjectSchema<infer U>
     ? PrettifyObject<
         {
-          [
-            K in keyof U as U[K] extends { optional: true } ? K : never
-          ]?: InferSchema<U[K]>
+          [K in keyof U as U[K] extends { optional: true } ? K : never]?: InferSchema<U[K]>
         } & {
-          [
-            K in keyof U as U[K] extends { optional: true } ? never : K
-          ]: InferSchema<U[K]>
+          [K in keyof U as U[K] extends { optional: true } ? never : K]: InferSchema<U[K]>
         }
       >
     : never
