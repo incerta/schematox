@@ -45,22 +45,18 @@ The `tCh` function will raise static type error if the second generic argument t
 - Create feature branch
 - Make a PR against `main` branch
 - Review diff
+- Publish alpha version using `npm run publish:alpha` script
 - Rebase PR commits into `main` branch
-- Update `CHANGELOG.md` with `chore: release $VERSION` commit
-- Patch version by semver
-  - `npm run version:patch`
-  - `npm run version:minor`
-  - `npm run version:major`
-- Run `npm publish` to release
+- Update `CHANGELOG.md` file but don't commit changes
+- Run `npm run release`
+  - Release script going to extract new version from the `CHANGELOG.md` file
+  - Release branch going to be created and pushed automatically
+  - Wait for CI checks to pass and rebase changes to the main branch
+  - NPM publish and GitHub Release should be applied automatically
 
 ## Checks before publish
 
-We using `package.json` > `prepublishOnly` script to ensure that following conditions are satisfied.
-
 - No formatting errors
 - No type errors
-- No lint errors
 - No unit test errors
 - Test coverage: branches 100%, functions 100%, lines 100%, statements 100%
-- Current branch is `main` branch
-- The `main` branch is in sync with github remote repo
