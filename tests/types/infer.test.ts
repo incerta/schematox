@@ -1064,11 +1064,7 @@ describe('Construct UnionSchema subject type', () => {
       } as const satisfies x.Schema
 
       type Expected =
-        | boolean[]
-        | { x: boolean }
-        | Record<string, boolean>
-        | boolean
-        | 0
+        boolean[] | { x: boolean } | Record<string, boolean> | boolean | 0
 
       type Actual = x.Infer<typeof schema>
 

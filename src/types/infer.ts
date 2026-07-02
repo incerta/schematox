@@ -72,13 +72,13 @@ export type InferObject<T> =
   T extends ObjectSchema<infer U>
     ? PrettifyObject<
         {
-          [K in keyof U as U[K] extends { optional: true }
-            ? K
-            : never]?: InferSchema<U[K]>
+          [
+            K in keyof U as U[K] extends { optional: true } ? K : never
+          ]?: InferSchema<U[K]>
         } & {
-          [K in keyof U as U[K] extends { optional: true }
-            ? never
-            : K]: InferSchema<U[K]>
+          [
+            K in keyof U as U[K] extends { optional: true } ? never : K
+          ]: InferSchema<U[K]>
         }
       >
     : never

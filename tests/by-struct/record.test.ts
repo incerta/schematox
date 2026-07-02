@@ -855,11 +855,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const struct = prevStruct.optional()
 
     type ExpectedKeys =
-      | StructSharedKeys
-      | 'description'
-      | 'nullable'
-      | 'minLength'
-      | 'maxLength'
+      StructSharedKeys | 'description' | 'nullable' | 'minLength' | 'maxLength'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -913,10 +909,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const struct = prevStruct.nullable()
 
     type ExpectedKeys =
-      | StructSharedKeys
-      | 'description'
-      | 'minLength'
-      | 'maxLength'
+      StructSharedKeys | 'description' | 'minLength' | 'maxLength'
 
     foldB: {
       const construct = x.makeStruct(schema)

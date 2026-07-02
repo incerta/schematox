@@ -72,11 +72,7 @@ export type Struct<T extends Schema> = Omit<
 } & StandardSchemaV1<unknown, InferSchema<T>>
 
 type BrandSubType =
-  | boolean
-  | number
-  | string
-  | ReadonlyArray<unknown>
-  | Record<string, unknown>
+  boolean | number | string | ReadonlyArray<unknown> | Record<string, unknown>
 
 export type StructShape<T> = { __schema: T }
 
