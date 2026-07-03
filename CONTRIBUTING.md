@@ -53,6 +53,8 @@ The `tCh` function will raise static type error if the second generic argument t
   - Release branch going to be created and pushed automatically
   - Wait for CI checks to pass and rebase changes to the main branch
   - NPM publish and GitHub Release should be applied automatically
+  - If release is not triggered automatically, go to [release action page](https://github.com/incerta/schematox/actions/workflows/release.yml)
+    and trigger it by clicking `Run workflow` button
 
 ## Checks before publish
 
