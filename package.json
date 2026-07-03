@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest",
-    "test:watch": "jest --watch",
+    "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage",
     "formatter:fix": "prettier --write .",
     "formatter:check": "prettier --check . || (echo \"FORMATTING ERROR: use 'npm run formatter:fix'\" && exit 1)",
