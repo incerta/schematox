@@ -1,16 +1,18 @@
 # Schematox
 
-Schematox is a lightweight typesafe schema defined parser. All schemas are JSON compatible.
+**A typesafe schema that's also just data.**
 
-The library is focusing on fixed set of schema types: bigint, boolean, literal, number, string, array, object, record, tuple, union. Each schema can have parameters: optional, nullable, description. Each primitive schema has "brand" parameter as mean of making its subject type [nominal](https://github.com/Microsoft/TypeScript/wiki/FAQ#can-i-make-a-type-alias-nominal). The rest parameters is schema specific range limiters.
+[![npm version](https://img.shields.io/npm/v/schematox.svg)](https://www.npmjs.com/package/schematox)
+[![npm downloads](https://img.shields.io/npm/dm/schematox.svg)](https://www.npmjs.com/package/schematox)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/schematox)](https://bundlephobia.com/package/schematox)
+[![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://www.npmjs.com/package/schematox)
+[![license](https://img.shields.io/npm/l/schematox.svg)](./LICENSE)
 
-Library supports static schema definition which means your schemas could be completely independent from schematox. One could use such schemas as source for generation other structures like DB models.
-
-The library is small so exploring README.md is enough for understanding its API, checkout [examples](#quick-start) and you good to go:
+Most TypeScript validators (Zod, Yup, Joi) make you build a schema out of function calls, which means the schema only exists as code you import. Schematox schemas are plain JSON objects that structurally satisfy a `Schema` type — so the same schema can be serialized, stored in a database, sent over the wire, diffed between versions, or generated from another source of truth, in addition to being usable directly as a typesafe parser. You still get a familiar chainable `struct` builder (à la Zod) if you'd rather write schemas as code — both approaches produce the exact same JSON underneath.
 
 - [Install](#install)
 - [Minimal Requirements](#minimal-requirements)
-- [Features](#features)
+- [Why Schematox?](#why-schematox)
 - [Quick Start](#quick-start)
   - [Static Schema](#static-schema)
   - [Struct](#struct)
@@ -41,15 +43,15 @@ npm install schematox
 - ECMAScript version: `2020`
 - TypeScript version: `5.3.2`
 
-## Features
+## Why Schematox?
 
-- Statically defined **JSON** compatible schema (easy to serialize/deserialize/generate/store/transfer)
-- Programmatically defined schema (**struct**, **construct**)
-- Check defined schema correctness using non generic type **Schema**
-- Ether-style error handling (no unexpected throws)
-- First-class support for branded primitives (primitive nominal types alias)
-- Construct type requirement for schema itself using exposed type generics
-- Support the [standard schema](https://standardschema.dev) - a common interface for TypeScript validation libraries
+- **Schemas are data, not just code.** A schema is a plain JSON object that structurally satisfies the `Schema` type — no function calls required. Store it, transfer it, generate it, diff it, or use it as the source of truth for other structures like DB models.
+- **Zero dependencies.** Nothing to audit, nothing to update out from under you.
+- **Small enough to read.** The whole library is ~1,200 lines of TypeScript — you can read it end to end instead of trusting a black box.
+- **Either-style error handling.** `parse()` never throws. You always get `{ success, data, error }` back and decide what happens next.
+- **Branded primitives, first-class.** Nominal typing (`string & { __idFor: 'User' }`) is built in, not bolted on.
+- **[Standard Schema](https://standardschema.dev) compliant.** Works with any tool built against the shared validation interface used by Zod, Valibot, and others.
+- **100% test coverage, enforced.** Statements, branches, functions, and lines — every release is gated on it.
 
 ## Quick Start
 
