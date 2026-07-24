@@ -34,3 +34,6 @@ jobs:
 
       - name: Unit tests coverage
         run: npm run test:coverage
+
+      - name: Package build & export/resolution check (are the types wrong?)
+        run: npm run attw
