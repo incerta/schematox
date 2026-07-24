@@ -1,5 +1,6 @@
 import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants.js'
 import { parse } from './parse.js'
+import { assignOwnProperty } from './utils.js'
 
 import type { StandardSchemaV1 } from './types/standard-schema.ts'
 import type {
@@ -127,7 +128,11 @@ export function object<T extends Record<string, StructShape<Schema>>>(of: T) {
   }
 
   for (const key in of) {
-    schema.of[key] = (of[key] as NonNullable<(typeof of)[typeof key]>).__schema
+    assignOwnProperty(
+      schema.of,
+      key,
+      (of[key] as NonNullable<(typeof of)[typeof key]>).__schema
+    )
   }
 
   return makeStruct(schema)
