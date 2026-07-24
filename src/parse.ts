@@ -384,6 +384,22 @@ function parseRecord(
     }
 
     const updatedErrorPath = [...errorPath, key]
+
+    let keyIsValid = true
+
+    if (schema.key !== undefined) {
+      const parsedKey = parseRecursively(updatedErrorPath, schema.key, key)
+
+      if (parsedKey.error) {
+        keyIsValid = false
+        invalidSubjects = invalidSubjects ?? []
+
+        for (const invalidSubject of parsedKey.error) {
+          invalidSubjects.push(invalidSubject)
+        }
+      }
+    }
+
     const parsed = parseRecursively(updatedErrorPath, schema.of, nestedValue)
 
     if (parsed.error) {
@@ -392,6 +408,10 @@ function parseRecord(
       for (const invalidSubject of parsed.error) {
         invalidSubjects.push(invalidSubject)
       }
+      continue
+    }
+
+    if (!keyIsValid) {
       continue
     }
 

@@ -349,6 +349,8 @@ Undefined record entries are skipped in parsed results and ignored by range limi
 
 Like `object`, any plain object is accepted as a subject (including `Object.create(null)` and native-bound objects like `process.env`); `Map`, `Set`, `Error`, typed arrays, and similar built-ins are rejected.
 
+If a `key` schema is given, every key is parsed against it, same as values are parsed against `of` — an entry with an invalid key produces an error and is excluded from the parsed result and from `minLength`/`maxLength` counting.
+
 ```typescript
 const schema = {
   type: 'record',

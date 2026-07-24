@@ -1348,6 +1348,63 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
       expect(struct.parse(subject).error).toBeTruthy()
     }
   })
+
+  it('the `key` schema is enforced at runtime, not just used for type inference', () => {
+    const struct = x.record(x.boolean(), x.string().minLength(5))
+
+    const parsed = struct.parse({ a: true })
+
+    expect(parsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: ['a'],
+        schema: { type: 'string', minLength: 5 },
+      },
+    ])
+  })
+
+  it('rejects a valid value under an invalid key, without counting it toward minLength/maxLength', () => {
+    const struct = x.record(x.boolean(), x.string().minLength(5)).maxLength(1)
+
+    const parsed = struct.parse({ a: true, valid: true })
+
+    expect(parsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: ['a'],
+        schema: { type: 'string', minLength: 5 },
+      },
+    ])
+    expect(parsed.data).toBe(undefined)
+  })
+
+  it('reports both the key error and the value error for the same entry', () => {
+    const struct = x.record(x.number(), x.string().minLength(5))
+
+    const parsed = struct.parse({ a: 'not a number' })
+
+    expect(parsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: ['a'],
+        schema: { type: 'string', minLength: 5 },
+      },
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: ['a'],
+        schema: { type: 'number' },
+      },
+    ])
+  })
+
+  it('a valid key with a valid value still parses normally', () => {
+    const struct = x.record(x.boolean(), x.string().minLength(5))
+
+    const parsed = struct.parse({ valid: true })
+
+    expect(parsed.error).toBe(undefined)
+    expect(parsed.data).toStrictEqual({ valid: true })
+  })
 })
 
 describe('ERROR_CODE.invalidRange (foldD)', () => {
