@@ -265,6 +265,16 @@ function parseArray(
     }
 
     result.push(parsed.data)
+
+    // Once the array is already too long, further elements can't change
+    // that verdict — stop instead of validating an attacker-controlled
+    // tail with unbounded work. Errors collected so far are preserved.
+    if (
+      typeof schema.maxLength === 'number' &&
+      result.length > schema.maxLength
+    ) {
+      break
+    }
   }
 
   if (
@@ -417,6 +427,17 @@ function parseRecord(
 
     validEntryCounter++
     result[key] = parsed.data
+
+    // Once the record already has too many entries, further ones can't
+    // change that verdict — stop instead of validating an
+    // attacker-controlled tail with unbounded work. Errors collected so
+    // far are preserved.
+    if (
+      typeof schema.maxLength === 'number' &&
+      validEntryCounter > schema.maxLength
+    ) {
+      break
+    }
   }
 
   if (

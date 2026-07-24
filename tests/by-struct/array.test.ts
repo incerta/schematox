@@ -1710,4 +1710,21 @@ describe('Compound schema specifics (foldA)', () => {
       },
     ])
   })
+
+  it('stops validating once maxLength is exceeded, instead of scanning the rest of the array (bounded work, not O(subject.length))', () => {
+    const struct = x.array(x.string()).maxLength(2)
+
+    // index 3 is invalid, but it's well past the point where the array is
+    // already known to be too long (after index 2) — it must never be
+    // reached, so it must never show up in the error array.
+    const parsed = struct.parse(['a', 'b', 'c', 123, 'e'])
+
+    expect(parsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: [],
+        schema: struct.__schema,
+      },
+    ])
+  })
 })

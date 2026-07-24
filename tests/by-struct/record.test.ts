@@ -2015,4 +2015,21 @@ describe('Compound schema specifics (foldA)', () => {
       },
     ])
   })
+
+  it('stops validating once maxLength is exceeded, instead of scanning the rest of the entries', () => {
+    const struct = x.record(x.string()).maxLength(2)
+
+    // `bad`/`d` come after the point where the record is already known to
+    // be too long (after `c`) — `bad`'s invalid value must never be
+    // reached, so it must never show up in the error array.
+    const parsed = struct.parse({ a: 'x', b: 'y', c: 'z', bad: 123, d: 'w' })
+
+    expect(parsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: [],
+        schema: struct.__schema,
+      },
+    ])
+  })
 })
