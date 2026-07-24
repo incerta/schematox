@@ -59,7 +59,10 @@ function printTable(bench: Bench) {
         library,
         'ops/sec': Math.round(ops).toLocaleString(),
         'mean (ms)': meanMs.toFixed(5),
-        'vs fastest': ops === fastestOps ? 'fastest' : `${(fastestOps / ops).toFixed(2)}x slower`,
+        'vs fastest':
+          ops === fastestOps
+            ? 'fastest'
+            : `${(fastestOps / ops).toFixed(2)}x slower`,
       }))
   )
 }
@@ -69,24 +72,73 @@ async function main() {
   await benchConstruction('primitive (string, minLength)', primitive.builders)
   await benchConstruction('flat object (3 fields)', flatObject.builders)
   await benchConstruction('nested object', nestedObject.builders)
-  await benchConstruction('array of 10 objects (schema only, not the array)', arrayShape.builders)
+  await benchConstruction(
+    'array of 10 objects (schema only, not the array)',
+    arrayShape.builders
+  )
 
-  console.log('\n\nParsing/validation (schema built once, reused across calls)\n')
+  console.log(
+    '\n\nParsing/validation (schema built once, reused across calls)\n'
+  )
 
-  await benchParse('primitive: valid subject', primitive.schemas, primitive.validSubject)
-  await benchParse('primitive: invalid subject (wrong type)', primitive.schemas, primitive.invalidSubjectWrongType)
-  await benchParse('primitive: invalid subject (too short)', primitive.schemas, primitive.invalidSubjectTooShort)
+  await benchParse(
+    'primitive: valid subject',
+    primitive.schemas,
+    primitive.validSubject
+  )
+  await benchParse(
+    'primitive: invalid subject (wrong type)',
+    primitive.schemas,
+    primitive.invalidSubjectWrongType
+  )
+  await benchParse(
+    'primitive: invalid subject (too short)',
+    primitive.schemas,
+    primitive.invalidSubjectTooShort
+  )
 
-  await benchParse('flat object: valid subject', flatObject.schemas, flatObject.validSubject)
-  await benchParse('flat object: invalid subject (wrong type)', flatObject.schemas, flatObject.invalidSubjectWrongType)
-  await benchParse('flat object: invalid subject (missing field)', flatObject.schemas, flatObject.invalidSubjectMissingField)
+  await benchParse(
+    'flat object: valid subject',
+    flatObject.schemas,
+    flatObject.validSubject
+  )
+  await benchParse(
+    'flat object: invalid subject (wrong type)',
+    flatObject.schemas,
+    flatObject.invalidSubjectWrongType
+  )
+  await benchParse(
+    'flat object: invalid subject (missing field)',
+    flatObject.schemas,
+    flatObject.invalidSubjectMissingField
+  )
 
-  await benchParse('nested object: valid subject', nestedObject.schemas, nestedObject.validSubject)
-  await benchParse('nested object: invalid subject (wrong type)', nestedObject.schemas, nestedObject.invalidSubjectWrongType)
-  await benchParse('nested object: invalid subject (missing field)', nestedObject.schemas, nestedObject.invalidSubjectMissingField)
+  await benchParse(
+    'nested object: valid subject',
+    nestedObject.schemas,
+    nestedObject.validSubject
+  )
+  await benchParse(
+    'nested object: invalid subject (wrong type)',
+    nestedObject.schemas,
+    nestedObject.invalidSubjectWrongType
+  )
+  await benchParse(
+    'nested object: invalid subject (missing field)',
+    nestedObject.schemas,
+    nestedObject.invalidSubjectMissingField
+  )
 
-  await benchParse('array (10 items): valid subject', arrayShape.schemas, arrayShape.validSubject)
-  await benchParse('array (10 items): invalid subject (wrong type in last item)', arrayShape.schemas, arrayShape.invalidSubjectWrongType)
+  await benchParse(
+    'array (10 items): valid subject',
+    arrayShape.schemas,
+    arrayShape.validSubject
+  )
+  await benchParse(
+    'array (10 items): invalid subject (wrong type in last item)',
+    arrayShape.schemas,
+    arrayShape.invalidSubjectWrongType
+  )
 }
 
 main()

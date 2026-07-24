@@ -9,7 +9,10 @@ export type LibKey = 'tox' | 'zod' | 'sup' | 'val' | 'ajv' | 'yup'
 // valibot/ajv all have one) — yup doesn't, so its adapter wraps the
 // throwing validateSync() in a try/catch, which is a real, fair difference
 // in cost between libraries, not something to hide by picking an unusual API.
-export const adapters: Record<LibKey, (schema: any, subject: unknown) => boolean> = {
+export const adapters: Record<
+  LibKey,
+  (schema: any, subject: unknown) => boolean
+> = {
   tox: (schema, subject) => schema.parse(subject).success,
   zod: (schema, subject) => schema.safeParse(subject).success,
   sup: (schema, subject) => sup.validate(subject, schema)[0] === undefined,
