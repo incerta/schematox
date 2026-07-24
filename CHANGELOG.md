@@ -4,6 +4,7 @@
 
 - FIX: `object()`/`record()` rejected valid plain objects that aren't `instanceof Object` in the strict identity sense (e.g. `process.env` under Node, `Object.create(null)`, cross-realm objects). The type check now uses `Object.prototype.toString.call(subject) === '[object Object]'`, which still rejects `Map`/`Set`/`Error`/typed arrays/other built-ins.
 - BREAKING: removed the `subject` field from `InvalidSubject` (the shape of `ParseError['error']` entries). It echoed the raw parsed input value into validation errors, which could leak sensitive data (e.g. secrets from `process.env`) when errors are logged/serialized. `code`, `path`, and `schema` remain.
+- BREAKING: `record()`'s `key` schema is now enforced at parse time. Previously `key` only affected the inferred TypeScript type (e.g. branded keys) and every runtime key was accepted regardless of constraints like `minLength`/`maxLength`/`brand`; a record with a key that fails its `key` schema is now rejected instead of silently passing.
 
 ## [1.3.1](https://github.com/incerta/schematox/compare/v1.3.0...v1.3.1)
 
