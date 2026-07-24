@@ -1337,4 +1337,41 @@ describe('Compound schema specifics (foldA)', () => {
       }
     }
   })
+  it('rejects trailing elements beyond the declared arity, instead of silently truncating them', () => {
+    const struct = x.tuple([x.string(), x.number()])
+
+    const parsed = struct.parse(['a', 1, 'unexpected extra', { junk: true }])
+
+    expect(parsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: [],
+        schema: struct.__schema,
+      },
+    ])
+  })
+
+  it('an extra element and an invalid required element both get reported together', () => {
+    const struct = x.tuple([x.string(), x.number()])
+
+    const parsed = struct.parse([123, 1, 'extra'])
+
+    expect(parsed.error).toStrictEqual([
+      { code: x.ERROR_CODE.invalidType, path: [0], schema: { type: 'string' } },
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: [],
+        schema: struct.__schema,
+      },
+    ])
+  })
+
+  it('a trailing optional element can still be omitted (arity check only rejects too many, not too few)', () => {
+    const struct = x.tuple([x.string(), x.number().optional()])
+
+    const parsed = struct.parse(['a'])
+
+    expect(parsed.error).toBe(undefined)
+    expect(parsed.data).toStrictEqual(['a', undefined])
+  })
 })
