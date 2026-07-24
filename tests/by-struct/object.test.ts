@@ -680,7 +680,6 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
             {
               code: x.ERROR_CODE.invalidType,
               schema: schema,
-              subject: subject,
               path: [],
             },
           ]
@@ -743,13 +742,12 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
     foldE: {
       const construct = x.makeStruct(schema)
 
-      for (const [subject, invalidSubj, invalidSubjSchema, path] of samples) {
+      for (const [subject, , invalidSubjSchema, path] of samples) {
         const expectedError = [
           {
             path,
             code: x.ERROR_CODE.invalidType,
             schema: invalidSubjSchema,
-            subject: invalidSubj,
           },
         ]
 
@@ -799,13 +797,11 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
         code: x.ERROR_CODE.invalidType,
         path: ['x'],
         schema: schema.of.x,
-        subject: undefined,
       },
       {
         code: x.ERROR_CODE.invalidType,
         path: ['y'],
         schema: schema.of.y,
-        subject: null,
       },
     ]
 
@@ -816,6 +812,33 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
     expect(parsedSchema.error).toStrictEqual(expectedError)
     expect(parsedStruct.error).toStrictEqual(expectedError)
     expect(parsedConstruct.error).toStrictEqual(expectedError)
+  })
+
+  it('accepts plain objects whose constructor is not `Object` (e.g. `Object.create(null)`, cross-realm/native-bound objects), while still rejecting Map/Set/Error/typed arrays', () => {
+    const struct = x.object({ x: x.string() })
+
+    const nullProtoSubject = Object.create(null) as Record<string, unknown>
+    nullProtoSubject['x'] = 'y'
+
+    expect(nullProtoSubject.constructor).toBe(undefined)
+    expect(struct.parse(nullProtoSubject).data).toStrictEqual({ x: 'y' })
+
+    class Foo {}
+    const customConstructorSubject = Object.assign(new Foo(), { x: 'y' })
+
+    expect(customConstructorSubject.constructor).not.toBe(Object)
+    expect(struct.parse(customConstructorSubject).data).toStrictEqual({
+      x: 'y',
+    })
+
+    for (const subject of [
+      new Map(),
+      new Set(),
+      new Error(),
+      new Int8Array(),
+    ]) {
+      expect(struct.parse(subject).error).toBeTruthy()
+    }
   })
 })
 
@@ -1323,7 +1346,6 @@ describe('Compound schema specifics (foldA)', () => {
          '38','39','40','41','42','43','44','45','46','47','48','49','50',
          'x'
         ],
-        subject: 0,
       },
     ]
 
@@ -1481,5 +1503,20 @@ describe('Compound schema specifics (foldA)', () => {
         expect(standardParsed.value).toStrictEqual(subj)
       }
     }
+  })
+
+  it('an extra key not declared in the schema is never traversed, even if its value is pathologically deep', () => {
+    const struct = x.object({ a: x.string() })
+
+    let deeplyNested: unknown = { leaf: true }
+
+    for (let i = 0; i < 200_000; i++) {
+      deeplyNested = { nested: deeplyNested }
+    }
+
+    const parsed = struct.parse({ a: 'value', extra: deeplyNested })
+
+    expect(parsed.error).toBe(undefined)
+    expect(parsed.data).toStrictEqual({ a: 'value' })
   })
 })

@@ -1083,7 +1083,6 @@ describe('ERROR_CODE.invalidType (foldC)', () => {
             {
               code: x.ERROR_CODE.invalidType,
               schema: schema,
-              subject: subject,
               path: [],
             },
           ]
@@ -1125,7 +1124,6 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
           {
             code: x.ERROR_CODE.invalidRange,
             schema: schema,
-            subject: subject,
             path: [],
           },
         ]
@@ -1164,7 +1162,6 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
           {
             code: x.ERROR_CODE.invalidRange,
             schema: schema,
-            subject: subject,
             path: [],
           },
         ]
@@ -1203,7 +1200,6 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
           {
             code: x.ERROR_CODE.invalidRange,
             schema: schema,
-            subject: subject,
             path: [],
           },
         ]

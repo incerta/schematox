@@ -727,7 +727,6 @@ describe('ERROR_CODE.invalidType (foldC)', () => {
             {
               code: x.ERROR_CODE.invalidType,
               schema: schema,
-              subject: subject,
               path: [],
             },
           ]

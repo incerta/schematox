@@ -316,6 +316,8 @@ type FromStruct = Infer<typeof struct>
 Extra properties in the parsed subject that are not specified in the `object` schema will not cause an error and will be skipped.
 This is a deliberate decision that allows client schemas to remain functional whenever the API is extended.
 
+Any plain object is accepted as a subject, including ones without `Object.prototype` in their chain (`Object.create(null)`) or ones backed by a native binding (e.g. `process.env`). `Map`, `Set`, `Error`, typed arrays, and other non-plain-object built-ins are rejected.
+
 ```typescript
 const schema = {
   type: 'object',
@@ -344,6 +346,8 @@ type FromStruct = Infer<typeof struct>
 ### Record
 
 Undefined record entries are skipped in parsed results and ignored by range limiter counter. If a key exists, it means a value is also present.
+
+Like `object`, any plain object is accepted as a subject (including `Object.create(null)` and native-bound objects like `process.env`); `Map`, `Set`, `Error`, typed arrays, and similar built-ins are rejected.
 
 ```typescript
 const schema = {
@@ -450,7 +454,6 @@ The `result.error` shape is:
     "code": "INVALID_TYPE",
     "path": ["x", "y", 0, "z"]
     "schema": { "type": "string" },
-    "subject": 0,
   }
 ]
 ```
@@ -461,5 +464,6 @@ It's always an array of `InvalidSubject` entries, each has the following propert
   - `INVALID_TYPE`: schema subject or default value don't meet schema type specifications
   - `INVALID_RANGE`: `min/max` or `minLength/maxLength` schema requirements aren't met
 - `schema`: the specific section of `schema` where the invalid value is found.
-- `subject`: the specific part of the validated subject where the invalid value exists.
 - `path`: traces the route from the root to the error subject, with strings as keys and numbers as array indexes.
+
+Note: the parsed input itself is intentionally **not** included in the error — only the schema fragment and path. This prevents sensitive data (e.g. secrets from `process.env`) from ending up in logs when errors are serialized (`JSON.stringify(result.error)`).

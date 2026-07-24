@@ -1049,7 +1049,6 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
             {
               code: x.ERROR_CODE.invalidType,
               schema: schema,
-              subject: subject,
               path: [],
             },
           ]
@@ -1105,13 +1104,12 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
     foldE: {
       const construct = x.makeStruct(schema)
 
-      for (const [subject, invalidSubj, invalidSubjSchema, path] of samples) {
+      for (const [subject, , invalidSubjSchema, path] of samples) {
         const expectedError = [
           {
             path,
             code: x.ERROR_CODE.invalidType,
             schema: invalidSubjSchema,
-            subject: invalidSubj,
           },
         ]
 
@@ -1153,13 +1151,11 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
         code: x.ERROR_CODE.invalidType,
         path: [0],
         schema: schema.of,
-        subject: null,
       },
       {
         code: x.ERROR_CODE.invalidType,
         path: [2],
         schema: schema.of,
-        subject: undefined,
       },
     ]
 
@@ -1192,7 +1188,6 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
           {
             code: x.ERROR_CODE.invalidRange,
             schema: schema,
-            subject: subject,
             path: [],
           },
         ]
@@ -1236,7 +1231,6 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
           {
             code: x.ERROR_CODE.invalidRange,
             schema: schema,
-            subject: subject,
             path: [],
           },
         ]
@@ -1285,7 +1279,6 @@ describe('ERROR_CODE.invalidRange (foldD)', () => {
           {
             code: x.ERROR_CODE.invalidRange,
             schema: schema,
-            subject: subject,
             path: [],
           },
         ]
@@ -1674,5 +1667,15 @@ describe('Compound schema specifics (foldA)', () => {
         expect(standardParsed.value).toStrictEqual(subj)
       }
     }
+  })
+
+  it('subject breadth does not grow recursion depth (parsing is iterative over elements, not recursive)', () => {
+    const struct = x.array(x.string())
+    const subject = new Array(200_000).fill('x')
+
+    const parsed = struct.parse(subject)
+
+    expect(parsed.error).toBe(undefined)
+    expect(parsed.data?.length).toBe(200_000)
   })
 })

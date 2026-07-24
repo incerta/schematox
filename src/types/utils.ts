@@ -17,25 +17,11 @@ export type ParseSuccess<T> = {
 export type InvalidSubject = {
   code: ErrorCode
 
-  /**
-   * Path to the invalid data, represented as an array of object keys (strings)
-   * and array indices (numbers) that can be used to navigate to the specific
-   * location where validation failed
-   **/
+  /** Path to the invalid data: object keys and array indices from the root */
   path: ErrorPath
 
-  /**
-   * The specific part of the schema definition that was used to validate
-   * the subject data (not necessarily the overall schema, but the schema
-   * fragment that caused the validation failure)
-   **/
+  /** The schema fragment that the invalid data failed to satisfy */
   schema: Schema
-
-  /**
-   * The specific data value that failed validation (not necessarily the
-   * entire input, but the particular piece of data that caused the issue)
-   **/
-  subject: unknown
 }
 
 export type ErrorCode = 'INVALID_TYPE' | 'INVALID_RANGE'

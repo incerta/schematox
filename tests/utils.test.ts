@@ -166,7 +166,6 @@ describe('Check ParseResult utilities', () => {
         code: x.ERROR_CODE.invalidType,
         path: [],
         schema: { type: 'string' },
-        subject: undefined,
       },
     ]
 

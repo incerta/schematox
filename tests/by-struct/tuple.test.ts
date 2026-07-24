@@ -691,7 +691,6 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
             {
               code: x.ERROR_CODE.invalidType,
               schema: schema,
-              subject: subject,
               path: [],
             },
           ]
@@ -755,13 +754,12 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
     foldE: {
       const construct = x.makeStruct(schema)
 
-      for (const [subject, invalidSubj, invalidSubjSchema, path] of samples) {
+      for (const [subject, , invalidSubjSchema, path] of samples) {
         const expectedError = [
           {
             path,
             code: x.ERROR_CODE.invalidType,
             schema: invalidSubjSchema,
-            subject: invalidSubj,
           },
         ]
 
@@ -803,13 +801,11 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
         code: x.ERROR_CODE.invalidType,
         path: [0],
         schema: schema.of[0],
-        subject: 'A',
       },
       {
         code: x.ERROR_CODE.invalidType,
         path: [1],
         schema: schema.of[1],
-        subject: 'B',
       },
     ]
 
