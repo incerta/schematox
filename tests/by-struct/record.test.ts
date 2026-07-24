@@ -12,7 +12,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
       of: { type: 'boolean' },
     } as const satisfies x.Schema
 
-    const struct = x.record(x.boolean(), x.string().brand('x', 'y'))
+    const struct = x.record(x.boolean()).key(x.string().brand('x', 'y'))
 
     type Key = string & { __x: 'y' }
     type ExpectedSubj = Record<Key, boolean>
@@ -681,7 +681,8 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
     } as const satisfies x.Schema
 
     const struct = x
-      .record(x.boolean(), x.string().brand('x', 'y'))
+      .record(x.boolean())
+      .key(x.string().brand('x', 'y'))
       .minLength(1)
       .maxLength(1)
       .optional()
@@ -788,7 +789,7 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
   it('record struct branded key subject lookup', () => {
     const idStruct = x.string().brand('x', 'y')
-    const recordStruct = x.record(x.boolean(), idStruct)
+    const recordStruct = x.record(x.boolean()).key(idStruct)
 
     type Id = x.Infer<typeof idStruct>
     type Expected = Record<Id, boolean>
@@ -855,7 +856,12 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const struct = prevStruct.optional()
 
     type ExpectedKeys =
-      StructSharedKeys | 'description' | 'nullable' | 'minLength' | 'maxLength'
+      | StructSharedKeys
+      | 'description'
+      | 'nullable'
+      | 'minLength'
+      | 'maxLength'
+      | 'key'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -909,7 +915,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const struct = prevStruct.nullable()
 
     type ExpectedKeys =
-      StructSharedKeys | 'description' | 'minLength' | 'maxLength'
+      StructSharedKeys | 'description' | 'minLength' | 'maxLength' | 'key'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -963,7 +969,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x.record(x.boolean()).optional().nullable()
     const struct = prevStruct.minLength(1)
 
-    type ExpectedKeys = StructSharedKeys | 'description' | 'maxLength'
+    type ExpectedKeys = StructSharedKeys | 'description' | 'maxLength' | 'key'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -1019,7 +1025,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
     const struct = prevStruct.maxLength(1)
 
-    type ExpectedKeys = StructSharedKeys | 'description'
+    type ExpectedKeys = StructSharedKeys | 'description' | 'key'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -1081,7 +1087,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
     const struct = prevStruct.description('x')
 
-    type ExpectedKeys = StructSharedKeys
+    type ExpectedKeys = StructSharedKeys | 'key'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -1143,7 +1149,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
     const struct = prevStruct.optional()
 
-    type ExpectedKeys = StructSharedKeys
+    type ExpectedKeys = StructSharedKeys | 'key'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -1350,7 +1356,7 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
   })
 
   it('the `key` schema is enforced at runtime, not just used for type inference', () => {
-    const struct = x.record(x.boolean(), x.string().minLength(5))
+    const struct = x.record(x.boolean()).key(x.string().minLength(5))
 
     const parsed = struct.parse({ a: true })
 
@@ -1364,7 +1370,10 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
   })
 
   it('rejects a valid value under an invalid key, without counting it toward minLength/maxLength', () => {
-    const struct = x.record(x.boolean(), x.string().minLength(5)).maxLength(1)
+    const struct = x
+      .record(x.boolean())
+      .key(x.string().minLength(5))
+      .maxLength(1)
 
     const parsed = struct.parse({ a: true, valid: true })
 
@@ -1379,7 +1388,7 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
   })
 
   it('reports both the key error and the value error for the same entry', () => {
-    const struct = x.record(x.number(), x.string().minLength(5))
+    const struct = x.record(x.number()).key(x.string().minLength(5))
 
     const parsed = struct.parse({ a: 'not a number' })
 
@@ -1398,7 +1407,7 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
   })
 
   it('a valid key with a valid value still parses normally', () => {
-    const struct = x.record(x.boolean(), x.string().minLength(5))
+    const struct = x.record(x.boolean()).key(x.string().minLength(5))
 
     const parsed = struct.parse({ valid: true })
 

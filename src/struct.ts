@@ -51,6 +51,11 @@ export function makeStruct(schema: Schema) {
     }
   }
 
+  if (params.has('key')) {
+    result.key = (key: StructShape<StringSchema>) =>
+      makeStruct({ ...schema, key: key.__schema })
+  }
+
   if (params.has('min')) {
     if (schema.type === 'bigint') {
       result.min = (min: BigIntString) => makeStruct({ ...schema, min })
@@ -128,29 +133,11 @@ export function object<T extends Record<string, StructShape<Schema>>>(of: T) {
   return makeStruct(schema)
 }
 
-export function record<T extends StructShape<Schema>>(
-  of: T,
-  key?: undefined
-): Struct<{ type: 'record'; of: T['__schema'] }>
-
-export function record<
-  T extends StructShape<Schema>,
-  U extends StructShape<StringSchema>,
->(
-  of: T,
-  key: U
-): Struct<{ type: 'record'; of: T['__schema']; key: U['__schema'] }>
-
-export function record(of: StructShape<any>, key?: StructShape<any>) {
-  if (key !== undefined) {
-    return makeStruct({
-      type: 'record',
-      of: of.__schema,
-      key: key.__schema,
-    })
-  }
-
-  return makeStruct({ type: 'record', of: of.__schema })
+export function record<T extends StructShape<Schema>>(of: T) {
+  return makeStruct({
+    type: 'record',
+    of: of.__schema as T['__schema'],
+  })
 }
 
 export function tuple<
