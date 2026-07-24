@@ -49,6 +49,25 @@ function parseRecursively(
   schema: Schema,
   subject: unknown
 ): ParseResult<unknown> {
+  // Schemas are plain data and may come from an untyped external source
+  // (JSON, a database) that TypeScript's `satisfies Schema` never actually
+  // checked. A malformed schema must be reported like anything else, not
+  // thrown — this guards every level, not just the root, since it's on the
+  // one function every nested schema recurses through.
+  if (
+    typeof schema !== 'object' ||
+    schema === null ||
+    typeof PARSE_FN_BY_SCHEMA_KIND[(schema as Schema).type] !== 'function'
+  ) {
+    return error([
+      {
+        code: ERROR_CODE.invalidSchema,
+        path: errorPath,
+        schema: schema as Schema,
+      },
+    ])
+  }
+
   if (schema.optional === true && subject === undefined) {
     return success(undefined)
   }
@@ -80,7 +99,19 @@ function parseBigInt(
   }
 
   if (typeof schema.min === 'string') {
-    const min = BigInt(schema.min)
+    let min: bigint
+
+    try {
+      min = BigInt(schema.min)
+    } catch {
+      return error([
+        {
+          code: ERROR_CODE.invalidSchema,
+          path: errorPath,
+          schema,
+        },
+      ])
+    }
 
     if (subject < min) {
       return error([
@@ -94,7 +125,19 @@ function parseBigInt(
   }
 
   if (typeof schema.max === 'string') {
-    const max = BigInt(schema.max)
+    let max: bigint
+
+    try {
+      max = BigInt(schema.max)
+    } catch {
+      return error([
+        {
+          code: ERROR_CODE.invalidSchema,
+          path: errorPath,
+          schema,
+        },
+      ])
+    }
 
     if (subject > max) {
       return error([
@@ -478,6 +521,16 @@ function parseTuple(
   schema: TupleSchema<Array<Schema>>,
   subject: unknown
 ) {
+  if (Array.isArray(schema.of) === false) {
+    return error([
+      {
+        code: ERROR_CODE.invalidSchema,
+        path: errorPath,
+        schema,
+      },
+    ])
+  }
+
   if (Array.isArray(subject) === false) {
     return error([
       {
@@ -536,6 +589,16 @@ function parseUnion(
   schema: UnionSchema<Array<Schema>>,
   subject: unknown
 ) {
+  if (Array.isArray(schema.of) === false) {
+    return error([
+      {
+        code: ERROR_CODE.invalidSchema,
+        path: errorPath,
+        schema,
+      },
+    ])
+  }
+
   for (const subSchema of schema.of) {
     const parsed = parseRecursively(errorPath, subSchema, subject)
 

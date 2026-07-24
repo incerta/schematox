@@ -2,6 +2,7 @@ export const ERROR_CODE = {
   invalidType: 'INVALID_TYPE',
   invalidRange: 'INVALID_RANGE',
   invalidUnion: 'INVALID_UNION',
+  invalidSchema: 'INVALID_SCHEMA',
 } as const
 
 // prettier-ignore
