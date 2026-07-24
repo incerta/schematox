@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- FIX: `object()`/`record()` rejected valid plain objects that aren't `instanceof Object` in the strict identity sense (e.g. `process.env` under Node, `Object.create(null)`, cross-realm objects). The type check now uses `Object.prototype.toString.call(subject) === '[object Object]'`, which still rejects `Map`/`Set`/`Error`/typed arrays/other built-ins.
+- BREAKING: removed the `subject` field from `InvalidSubject` (the shape of `ParseError['error']` entries). It echoed the raw parsed input value into validation errors, which could leak sensitive data (e.g. secrets from `process.env`) when errors are logged/serialized. `code`, `path`, and `schema` remain.
+
 ## [1.3.1](https://github.com/incerta/schematox/compare/v1.3.0...v1.3.1)
 
 - [Modernize schematox ESM TypeScript build and test setup #58](https://github.com/incerta/schematox/pull/67)

@@ -146,7 +146,6 @@ const FOLD_C = `{
         {
           code: x.ERROR_CODE.invalidType,
           schema: schema,
-          subject: subject,
           path: [],
         },
       ]
@@ -180,7 +179,6 @@ const FOLD_D = `{
       {
         code: x.ERROR_CODE.invalidRange,
         schema: schema,
-        subject: subject,
         path: [],
       },
     ]
@@ -208,13 +206,12 @@ const FOLD_D = `{
 const FOLD_E = `{
   const construct = x.makeStruct(schema)
 
-  for (const [subject, invalidSubj, invalidSubjSchema, path] of samples) {
+  for (const [subject, , invalidSubjSchema, path] of samples) {
     const expectedError = [
       {
         path,
         code: x.ERROR_CODE.invalidType,
         schema: invalidSubjSchema,
-        subject: invalidSubj,
       },
     ]
 

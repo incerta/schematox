@@ -43,6 +43,7 @@ export function parse(schema: Schema, subject: unknown): ParseResult<unknown> {
   return parseRecursively([], schema, subject)
 }
 
+// Recursion depth follows the static schema's nesting, never the subject's, so untrusted input can't drive stack depth.
 function parseRecursively(
   errorPath: ErrorPath,
   schema: Schema,
@@ -73,7 +74,6 @@ function parseBigInt(
       {
         code: ERROR_CODE.invalidType,
         path: errorPath,
-        subject,
         schema,
       },
     ])
@@ -87,7 +87,6 @@ function parseBigInt(
         {
           code: ERROR_CODE.invalidRange,
           path: errorPath,
-          subject,
           schema,
         },
       ])
@@ -102,7 +101,6 @@ function parseBigInt(
         {
           code: ERROR_CODE.invalidRange,
           path: errorPath,
-          subject,
           schema,
         },
       ])
@@ -122,7 +120,6 @@ function parseBoolean(
       {
         code: ERROR_CODE.invalidType,
         path: errorPath,
-        subject,
         schema,
       },
     ])
@@ -141,7 +138,6 @@ function parseLiteral(
       {
         code: ERROR_CODE.invalidType,
         path: errorPath,
-        subject,
         schema,
       },
     ])
@@ -160,7 +156,6 @@ function parseNumber(
       {
         code: ERROR_CODE.invalidType,
         path: errorPath,
-        subject,
         schema,
       },
     ])
@@ -172,7 +167,6 @@ function parseNumber(
         {
           code: ERROR_CODE.invalidRange,
           path: errorPath,
-          subject,
           schema,
         },
       ])
@@ -185,7 +179,6 @@ function parseNumber(
         {
           code: ERROR_CODE.invalidRange,
           path: errorPath,
-          subject,
           schema,
         },
       ])
@@ -205,7 +198,6 @@ function parseString(
       {
         code: ERROR_CODE.invalidType,
         path: errorPath,
-        subject,
         schema,
       },
     ])
@@ -217,7 +209,6 @@ function parseString(
         {
           code: ERROR_CODE.invalidRange,
           path: errorPath,
-          subject,
           schema,
         },
       ])
@@ -230,7 +221,6 @@ function parseString(
         {
           code: ERROR_CODE.invalidRange,
           path: errorPath,
-          subject,
           schema,
         },
       ])
@@ -250,7 +240,6 @@ function parseArray(
       {
         code: ERROR_CODE.invalidType,
         path: errorPath,
-        subject,
         schema,
       },
     ])
@@ -285,7 +274,6 @@ function parseArray(
         {
           code: ERROR_CODE.invalidRange,
           path: errorPath,
-          subject,
           schema,
         },
       ])
@@ -304,7 +292,6 @@ function parseArray(
       {
         code: ERROR_CODE.invalidRange,
         path: errorPath,
-        subject,
         schema,
       },
     ])
@@ -321,14 +308,13 @@ function parseObject(
   if (
     typeof subject !== 'object' ||
     subject === null ||
-    subject.constructor !== Object
+    Object.prototype.toString.call(subject) !== '[object Object]'
   ) {
     return error([
       {
         code: ERROR_CODE.invalidType,
         path: errorPath,
         schema,
-        subject,
       },
     ])
   }
@@ -374,14 +360,13 @@ function parseRecord(
   if (
     typeof subject !== 'object' ||
     subject === null ||
-    subject.constructor !== Object
+    Object.prototype.toString.call(subject) !== '[object Object]'
   ) {
     return error([
       {
         code: ERROR_CODE.invalidType,
         path: errorPath,
         schema,
-        subject,
       },
     ])
   }
@@ -420,7 +405,6 @@ function parseRecord(
         {
           code: ERROR_CODE.invalidRange,
           path: errorPath,
-          subject,
           schema,
         },
       ])
@@ -437,7 +421,6 @@ function parseRecord(
       {
         code: ERROR_CODE.invalidRange,
         path: errorPath,
-        subject,
         schema,
       },
     ])
@@ -460,7 +443,6 @@ function parseTuple(
       {
         code: ERROR_CODE.invalidType,
         path: errorPath,
-        subject,
         schema,
       },
     ])
@@ -512,7 +494,6 @@ function parseUnion(
     {
       code: ERROR_CODE.invalidType,
       path: errorPath,
-      subject,
       schema,
     },
   ])

@@ -250,7 +250,6 @@ it('iterate over fixture.DATA_TYPE', () => {
           {
             code: x.ERROR_CODE.invalidType,
             schema: schema,
-            subject: subject,
             path: [],
           },
         ]
@@ -296,7 +295,6 @@ it('min', () => {
         {
           code: x.ERROR_CODE.invalidRange,
           schema: schema,
-          subject: subject,
           path: [],
         },
       ]
@@ -357,13 +355,12 @@ it('InvalidSubject error of nested schema should have correct path/schema/subjec
   foldE: {
     const construct = x.makeStruct(schema)
 
-    for (const [subject, invalidSubj, invalidSubjSchema, path] of samples) {
+    for (const [subject, , invalidSubjSchema, path] of samples) {
       const expectedError = [
         {
           path,
           code: x.ERROR_CODE.invalidType,
           schema: invalidSubjSchema,
-          subject: invalidSubj,
         },
       ]
 
