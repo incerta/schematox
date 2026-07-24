@@ -43,6 +43,10 @@ export type Struct<T extends Schema> = Omit<
         }
       >
 
+      key: <U extends StructShape<StringSchema>>(
+        key: U
+      ) => Struct<T & { key: U['__schema'] }>
+
       minLength: <U extends number>(
         minLength: U
       ) => Struct<T & { minLength: U }>
@@ -85,7 +89,7 @@ type ParamsBySchemaType = {
   //
   array: ExtractParams<ArraySchema>
   object: ExtractParams<ObjectSchema>
-  record: Exclude<ExtractParams<RecordSchema>, 'key'>
+  record: ExtractParams<RecordSchema>
   tuple: ExtractParams<TupleSchema>
   union: ExtractParams<UnionSchema>
 }

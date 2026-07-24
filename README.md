@@ -364,14 +364,15 @@ const schema = {
 } as const satisfies Schema
 
 const userId = string().brand('idFor', 'user')
-const struct = record(number(), userId)
+const struct = record(number())
+  .key(userId)
   .minLength(1)
   .maxLength(1)
   .optional()
   .nullable()
   .description('x')
 
-// Record<string & { __brand: ['idFor', 'user'] }, number>  | null | undefined
+// Record<string & { __idFor: 'user' }, number> | null | undefined
 type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
 ```
@@ -427,6 +428,18 @@ type FromStruct = Infer<typeof struct>
 - `brand?: [string, unknown]` – make primitive type nominal "['idFor', 'User'] -> T & { \_\_idFor: 'User' }"
 - `minLength/maxLength/min/max` – schema type dependent limiting characteristics
 - `description?: string` – description of the particular schema property which can be used to provide more detailed information for the user/developer on validation/parse error
+
+### Why brands are `{ __category: subCategory }` instead of a `unique symbol`
+
+Some validation libraries (e.g. zod) brand values with a single fixed `unique symbol` key. schematox instead derives a plain, per-category string key from the brand tuple: `['idFor', 'User']` becomes `{ __idFor: 'User' }`.
+
+- **Readable diagnostics**: hovering a branded type or reading a type error shows `string & { __idFor: 'User' }` instead of an opaque `{ [Symbol(brand)]: 'User' }`.
+- **No `unique symbol` declaration-emit friction**: `unique symbol` types have known rough edges when preserved across published `.d.ts` files and package boundaries; a string-keyed intersection avoids that class of issue entirely.
+- **Phantom either way**: like zod's symbol brand, this key is never actually written to the value at runtime — `.brand()` only records `[category, subCategory]` on the schema, purely for type inference. Neither approach changes what a branded value looks like at runtime.
+- **Per-category keys leave room to compose brands**: because the key is derived from `category` rather than fixed, two different categories produce two different phantom keys, which is what would let multiple brands be intersected onto the same value without one overwriting the other (schemas currently only carry a single `brand` field, so this isn't exposed yet).
+- **The `__` prefix is the workaround, not a caveat**: `category` is a free-form string, and primitive types already carry real structural members (`string`'s `length`, `toString`, etc.). Branding with a bare `category` key (no prefix) would risk colliding with one of those — e.g. `{ length: 'x' }` intersected with real `string.length: number` collapses the whole type to `never`. Prefixing with `__` sidesteps this: `.brand('length', 'x')` produces `{ __length: 'x' }`, which doesn't collide with anything, so `length` (and any other real member name) is a perfectly safe category to use.
+
+The one name still worth avoiding is a `category` that itself starts with `proto__`, since `__${category}` would then literally read `__proto__`. Harmless in practice — brands are never assigned at runtime, so there's no live object carrying that key — but avoidable all the same.
 
 ## Error Shape
 
