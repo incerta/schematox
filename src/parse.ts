@@ -62,7 +62,7 @@ function parseRecursively(
     return error([
       {
         code: ERROR_CODE.invalidSchema,
-        path: errorPath,
+        path: [...errorPath],
         schema: schema as Schema,
       },
     ])
@@ -92,7 +92,7 @@ function parseBigInt(
     return error([
       {
         code: ERROR_CODE.invalidType,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -103,7 +103,7 @@ function parseBigInt(
       return error([
         {
           code: ERROR_CODE.invalidSchema,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -117,7 +117,7 @@ function parseBigInt(
       return error([
         {
           code: ERROR_CODE.invalidSchema,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -127,7 +127,7 @@ function parseBigInt(
       return error([
         {
           code: ERROR_CODE.invalidRange,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -139,7 +139,7 @@ function parseBigInt(
       return error([
         {
           code: ERROR_CODE.invalidSchema,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -153,7 +153,7 @@ function parseBigInt(
       return error([
         {
           code: ERROR_CODE.invalidSchema,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -163,7 +163,7 @@ function parseBigInt(
       return error([
         {
           code: ERROR_CODE.invalidRange,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -182,7 +182,7 @@ function parseBoolean(
     return error([
       {
         code: ERROR_CODE.invalidType,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -200,7 +200,7 @@ function parseLiteral(
     return error([
       {
         code: ERROR_CODE.invalidType,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -218,7 +218,7 @@ function parseNumber(
     return error([
       {
         code: ERROR_CODE.invalidType,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -229,7 +229,7 @@ function parseNumber(
       return error([
         {
           code: ERROR_CODE.invalidSchema,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -239,7 +239,7 @@ function parseNumber(
       return error([
         {
           code: ERROR_CODE.invalidRange,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -251,7 +251,7 @@ function parseNumber(
       return error([
         {
           code: ERROR_CODE.invalidSchema,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -261,7 +261,7 @@ function parseNumber(
       return error([
         {
           code: ERROR_CODE.invalidRange,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -280,7 +280,7 @@ function parseString(
     return error([
       {
         code: ERROR_CODE.invalidType,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -291,7 +291,7 @@ function parseString(
       return error([
         {
           code: ERROR_CODE.invalidSchema,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -301,7 +301,7 @@ function parseString(
       return error([
         {
           code: ERROR_CODE.invalidRange,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -313,7 +313,7 @@ function parseString(
       return error([
         {
           code: ERROR_CODE.invalidSchema,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -323,7 +323,7 @@ function parseString(
       return error([
         {
           code: ERROR_CODE.invalidRange,
-          path: errorPath,
+          path: [...errorPath],
           schema,
         },
       ])
@@ -342,7 +342,7 @@ function parseArray(
     return error([
       {
         code: ERROR_CODE.invalidType,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -355,7 +355,7 @@ function parseArray(
     return error([
       {
         code: ERROR_CODE.invalidSchema,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -368,8 +368,9 @@ function parseArray(
     const nestedSchema = schema.of
     const nestedValue = subject[i]
 
-    const updatedErrorPath = [...errorPath, i]
-    const parsed = parseRecursively(updatedErrorPath, nestedSchema, nestedValue)
+    errorPath.push(i)
+    const parsed = parseRecursively(errorPath, nestedSchema, nestedValue)
+    errorPath.pop()
 
     if (parsed.error) {
       invalidSubjects = invalidSubjects ?? []
@@ -401,7 +402,7 @@ function parseArray(
 
     invalidSubjects.push({
       code: ERROR_CODE.invalidRange,
-      path: errorPath,
+      path: [...errorPath],
       schema,
     })
   }
@@ -414,7 +415,7 @@ function parseArray(
 
     invalidSubjects.push({
       code: ERROR_CODE.invalidRange,
-      path: errorPath,
+      path: [...errorPath],
       schema,
     })
   }
@@ -439,7 +440,7 @@ function parseObject(
     return error([
       {
         code: ERROR_CODE.invalidType,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -454,8 +455,9 @@ function parseObject(
     const nestedSchema = schema.of[key] as Schema
     const nestedValue = narrowedSubj[key]
 
-    const updatedErrorPath = [...errorPath, key]
-    const parsed = parseRecursively(updatedErrorPath, nestedSchema, nestedValue)
+    errorPath.push(key)
+    const parsed = parseRecursively(errorPath, nestedSchema, nestedValue)
+    errorPath.pop()
 
     if (parsed.error) {
       invalidSubjects = invalidSubjects ?? []
@@ -491,7 +493,7 @@ function parseRecord(
     return error([
       {
         code: ERROR_CODE.invalidType,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -504,7 +506,7 @@ function parseRecord(
     return error([
       {
         code: ERROR_CODE.invalidSchema,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -522,12 +524,12 @@ function parseRecord(
       continue
     }
 
-    const updatedErrorPath = [...errorPath, key]
+    errorPath.push(key)
 
     let keyIsValid = true
 
     if (schema.key !== undefined) {
-      const parsedKey = parseRecursively(updatedErrorPath, schema.key, key)
+      const parsedKey = parseRecursively(errorPath, schema.key, key)
 
       if (parsedKey.error) {
         keyIsValid = false
@@ -539,7 +541,8 @@ function parseRecord(
       }
     }
 
-    const parsed = parseRecursively(updatedErrorPath, schema.of, nestedValue)
+    const parsed = parseRecursively(errorPath, schema.of, nestedValue)
+    errorPath.pop()
 
     if (parsed.error) {
       invalidSubjects = invalidSubjects ?? []
@@ -577,7 +580,7 @@ function parseRecord(
 
     invalidSubjects.push({
       code: ERROR_CODE.invalidRange,
-      path: errorPath,
+      path: [...errorPath],
       schema,
     })
   }
@@ -590,7 +593,7 @@ function parseRecord(
 
     invalidSubjects.push({
       code: ERROR_CODE.invalidRange,
-      path: errorPath,
+      path: [...errorPath],
       schema,
     })
   }
@@ -611,7 +614,7 @@ function parseTuple(
     return error([
       {
         code: ERROR_CODE.invalidSchema,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -621,7 +624,7 @@ function parseTuple(
     return error([
       {
         code: ERROR_CODE.invalidType,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -634,8 +637,9 @@ function parseTuple(
     const nestedSchema = schema.of[i]!
     const nestedValue = subject[i]
 
-    const updatedErrorPath = [...errorPath, i]
-    const parsed = parseRecursively(updatedErrorPath, nestedSchema, nestedValue)
+    errorPath.push(i)
+    const parsed = parseRecursively(errorPath, nestedSchema, nestedValue)
+    errorPath.pop()
 
     if (parsed.error) {
       invalidSubjects = invalidSubjects ?? []
@@ -658,7 +662,7 @@ function parseTuple(
 
     invalidSubjects.push({
       code: ERROR_CODE.invalidRange,
-      path: errorPath,
+      path: [...errorPath],
       schema,
     })
   }
@@ -679,7 +683,7 @@ function parseUnion(
     return error([
       {
         code: ERROR_CODE.invalidSchema,
-        path: errorPath,
+        path: [...errorPath],
         schema,
       },
     ])
@@ -696,7 +700,7 @@ function parseUnion(
   return error([
     {
       code: ERROR_CODE.invalidUnion,
-      path: errorPath,
+      path: [...errorPath],
       schema,
     },
   ])
