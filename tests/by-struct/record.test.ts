@@ -1971,4 +1971,48 @@ describe('Compound schema specifics (foldA)', () => {
       },
     ])
   })
+
+  it('a maxLength violation does not discard entry errors collected before it was reached', () => {
+    const struct = x
+      .record(x.string())
+      .key(x.string().minLength(3))
+      .maxLength(2)
+
+    const parsed = struct.parse({ ab: 'x', cde: 'y', fgh: 'z', ijk: 'w' })
+
+    expect(parsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: ['ab'],
+        schema: { type: 'string', minLength: 3 },
+      },
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: [],
+        schema: struct.__schema,
+      },
+    ])
+  })
+
+  it('a minLength violation does not discard entry errors', () => {
+    const struct = x
+      .record(x.string())
+      .key(x.string().minLength(3))
+      .minLength(5)
+
+    const parsed = struct.parse({ ab: 'x', cde: 'y' })
+
+    expect(parsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: ['ab'],
+        schema: { type: 'string', minLength: 3 },
+      },
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: [],
+        schema: struct.__schema,
+      },
+    ])
+  })
 })

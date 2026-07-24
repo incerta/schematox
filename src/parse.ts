@@ -265,36 +265,36 @@ function parseArray(
     }
 
     result.push(parsed.data)
-
-    if (
-      typeof schema.maxLength === 'number' &&
-      result.length > schema.maxLength
-    ) {
-      return error([
-        {
-          code: ERROR_CODE.invalidRange,
-          path: errorPath,
-          schema,
-        },
-      ])
-    }
   }
 
-  if (invalidSubjects?.length) {
-    return error(invalidSubjects)
+  if (
+    typeof schema.maxLength === 'number' &&
+    result.length > schema.maxLength
+  ) {
+    invalidSubjects = invalidSubjects ?? []
+
+    invalidSubjects.push({
+      code: ERROR_CODE.invalidRange,
+      path: errorPath,
+      schema,
+    })
   }
 
   if (
     typeof schema.minLength === 'number' &&
     result.length < schema.minLength
   ) {
-    return error([
-      {
-        code: ERROR_CODE.invalidRange,
-        path: errorPath,
-        schema,
-      },
-    ])
+    invalidSubjects = invalidSubjects ?? []
+
+    invalidSubjects.push({
+      code: ERROR_CODE.invalidRange,
+      path: errorPath,
+      schema,
+    })
+  }
+
+  if (invalidSubjects?.length) {
+    return error(invalidSubjects)
   }
 
   return success(result)
@@ -416,34 +416,33 @@ function parseRecord(
     }
 
     validEntryCounter++
-
-    if (
-      typeof schema.maxLength === 'number' &&
-      validEntryCounter > schema.maxLength
-    ) {
-      return error([
-        {
-          code: ERROR_CODE.invalidRange,
-          path: errorPath,
-          schema,
-        },
-      ])
-    }
-
     result[key] = parsed.data
+  }
+
+  if (
+    typeof schema.maxLength === 'number' &&
+    validEntryCounter > schema.maxLength
+  ) {
+    invalidSubjects = invalidSubjects ?? []
+
+    invalidSubjects.push({
+      code: ERROR_CODE.invalidRange,
+      path: errorPath,
+      schema,
+    })
   }
 
   if (
     typeof schema.minLength === 'number' &&
     validEntryCounter < schema.minLength
   ) {
-    return error([
-      {
-        code: ERROR_CODE.invalidRange,
-        path: errorPath,
-        schema,
-      },
-    ])
+    invalidSubjects = invalidSubjects ?? []
+
+    invalidSubjects.push({
+      code: ERROR_CODE.invalidRange,
+      path: errorPath,
+      schema,
+    })
   }
 
   if (invalidSubjects?.length) {

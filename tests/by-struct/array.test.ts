@@ -1680,4 +1680,34 @@ describe('Compound schema specifics (foldA)', () => {
     expect(parsed.error).toBe(undefined)
     expect(parsed.data?.length).toBe(200_000)
   })
+
+  it('a maxLength violation does not discard element errors collected before it was reached', () => {
+    const struct = x.array(x.string()).maxLength(2)
+
+    const parsed = struct.parse([123, 'a', 'b', 'c'])
+
+    expect(parsed.error).toStrictEqual([
+      { code: x.ERROR_CODE.invalidType, path: [0], schema: { type: 'string' } },
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: [],
+        schema: struct.__schema,
+      },
+    ])
+  })
+
+  it('a minLength violation does not discard element errors', () => {
+    const struct = x.array(x.string()).minLength(5)
+
+    const parsed = struct.parse([123, 'a'])
+
+    expect(parsed.error).toStrictEqual([
+      { code: x.ERROR_CODE.invalidType, path: [0], schema: { type: 'string' } },
+      {
+        code: x.ERROR_CODE.invalidRange,
+        path: [],
+        schema: struct.__schema,
+      },
+    ])
+  })
 })

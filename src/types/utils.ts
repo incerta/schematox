@@ -4,6 +4,7 @@ export type ParseResult<T> = ParseError | ParseSuccess<T>
 
 export type ParseError = {
   success: false
+  /** Length > 1 only for object/record/array/tuple — see README's Error Shape section */
   error: InvalidSubject[]
   data?: never
 }
