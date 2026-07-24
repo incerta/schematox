@@ -481,6 +481,7 @@ It's always an array of `InvalidSubject` entries, each has the following propert
   - `INVALID_TYPE`: schema subject or default value don't meet schema type specifications
   - `INVALID_RANGE`: `min/max` or `minLength/maxLength` schema requirements aren't met
   - `INVALID_UNION`: subject didn't satisfy any of `union`'s member schemas. `schema` is the union schema itself, not any one member — the subject isn't required to conform to a specific branch, so blaming one wouldn't be accurate.
+  - `INVALID_SCHEMA`: the schema itself is malformed — not a plain object, an unrecognized `type`, a `bigint` `min`/`max` that isn't a valid bigint string, or a `tuple`/`union` `of` that isn't an array. Since schemas can be plain data from an untyped external source (JSON, a database), TypeScript's `satisfies Schema` never actually ran on them; `parse()` still never throws, it reports this instead.
 - `schema`: the specific section of `schema` where the invalid value is found.
 - `path`: traces the route from the root to the error subject, with strings as keys and numbers as array indexes.
 
