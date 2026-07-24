@@ -351,6 +351,8 @@ Like `object`, any plain object is accepted as a subject (including `Object.crea
 
 If a `key` schema is given, every key is parsed against it, same as values are parsed against `of` — an entry with an invalid key produces an error and is excluded from the parsed result and from `minLength`/`maxLength` counting.
 
+Any string key, including `__proto__`, is stored safely as ordinary data — the parsed result never has its actual prototype altered by a subject's own keys.
+
 ```typescript
 const schema = {
   type: 'record',

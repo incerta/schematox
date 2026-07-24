@@ -1,5 +1,5 @@
 import { ERROR_CODE } from './constants.js'
-import { error, success } from './utils.js'
+import { assignOwnProperty, error, success } from './utils.js'
 
 import type { InferSchema } from './types/infer.js'
 import type { ErrorPath, InvalidSubject, ParseResult } from './types/utils.js'
@@ -394,7 +394,7 @@ function parseObject(
     }
 
     if (Object.prototype.hasOwnProperty.call(narrowedSubj, key)) {
-      result[key] = parsed.data
+      assignOwnProperty(result, key, parsed.data)
     }
   }
 
@@ -469,7 +469,7 @@ function parseRecord(
     }
 
     validEntryCounter++
-    result[key] = parsed.data
+    assignOwnProperty(result, key, parsed.data)
 
     // Once the record already has too many entries, further ones can't
     // change that verdict — stop instead of validating an
