@@ -478,6 +478,7 @@ It's always an array of `InvalidSubject` entries, each has the following propert
 - `code`:
   - `INVALID_TYPE`: schema subject or default value don't meet schema type specifications
   - `INVALID_RANGE`: `min/max` or `minLength/maxLength` schema requirements aren't met
+  - `INVALID_UNION`: subject didn't satisfy any of `union`'s member schemas. `schema` is the union schema itself, not any one member — the subject isn't required to conform to a specific branch, so blaming one wouldn't be accurate.
 - `schema`: the specific section of `schema` where the invalid value is found.
 - `path`: traces the route from the root to the error subject, with strings as keys and numbers as array indexes.
 

@@ -24,7 +24,7 @@ export type InvalidSubject = {
   schema: Schema
 }
 
-export type ErrorCode = 'INVALID_TYPE' | 'INVALID_RANGE'
+export type ErrorCode = 'INVALID_TYPE' | 'INVALID_RANGE' | 'INVALID_UNION'
 
 export type ErrorPath = Array<
   string /* object key */ | number /* array index */

@@ -512,7 +512,7 @@ function parseUnion(
 
   return error([
     {
-      code: ERROR_CODE.invalidType,
+      code: ERROR_CODE.invalidUnion,
       path: errorPath,
       schema,
     },
