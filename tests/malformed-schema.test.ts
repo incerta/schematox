@@ -127,3 +127,145 @@ describe('parse() never throws, even when the schema itself is malformed', () =>
     ])
   })
 })
+
+// Previously these silently skipped the constraint instead of enforcing it
+// or flagging the schema — a schema-authoring mistake (e.g. min: '5' where
+// a number was expected) went unnoticed rather than being reported.
+describe('a min/max/minLength/maxLength of the wrong type is a schema error, not silently ignored', () => {
+  it('bigint: min/max must be a string (BigIntString), not any other type', () => {
+    const minParsed = x.parse({ type: 'bigint', min: 5 } as never, 3n)
+
+    expect(minParsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidSchema,
+        path: [],
+        schema: { type: 'bigint', min: 5 },
+      },
+    ])
+
+    const maxParsed = x.parse({ type: 'bigint', max: 5 } as never, 3n)
+
+    expect(maxParsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidSchema,
+        path: [],
+        schema: { type: 'bigint', max: 5 },
+      },
+    ])
+  })
+
+  it('number: min/max must be a number', () => {
+    const minParsed = x.parse({ type: 'number', min: '5' } as never, 3)
+
+    expect(minParsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidSchema,
+        path: [],
+        schema: { type: 'number', min: '5' },
+      },
+    ])
+
+    const maxParsed = x.parse({ type: 'number', max: '5' } as never, 10)
+
+    expect(maxParsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidSchema,
+        path: [],
+        schema: { type: 'number', max: '5' },
+      },
+    ])
+  })
+
+  it('string: minLength/maxLength must be a number', () => {
+    const minParsed = x.parse({ type: 'string', minLength: '5' } as never, 'a')
+
+    expect(minParsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidSchema,
+        path: [],
+        schema: { type: 'string', minLength: '5' },
+      },
+    ])
+
+    const maxParsed = x.parse(
+      { type: 'string', maxLength: '5' } as never,
+      'abcdefgh'
+    )
+
+    expect(maxParsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidSchema,
+        path: [],
+        schema: { type: 'string', maxLength: '5' },
+      },
+    ])
+  })
+
+  it('array: minLength/maxLength must be a number', () => {
+    const schemaOf = { type: 'boolean' } as const
+
+    const minParsed = x.parse(
+      { type: 'array', of: schemaOf, minLength: '1' } as never,
+      []
+    )
+
+    expect(minParsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidSchema,
+        path: [],
+        schema: { type: 'array', of: schemaOf, minLength: '1' },
+      },
+    ])
+
+    const maxParsed = x.parse(
+      { type: 'array', of: schemaOf, maxLength: '1' } as never,
+      [true, true, true]
+    )
+
+    expect(maxParsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidSchema,
+        path: [],
+        schema: { type: 'array', of: schemaOf, maxLength: '1' },
+      },
+    ])
+  })
+
+  it('record: minLength/maxLength must be a number', () => {
+    const schemaOf = { type: 'string' } as const
+
+    const minParsed = x.parse(
+      { type: 'record', of: schemaOf, minLength: '1' } as never,
+      {}
+    )
+
+    expect(minParsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidSchema,
+        path: [],
+        schema: { type: 'record', of: schemaOf, minLength: '1' },
+      },
+    ])
+
+    const maxParsed = x.parse(
+      { type: 'record', of: schemaOf, maxLength: '1' } as never,
+      { a: 'x', b: 'y' }
+    )
+
+    expect(maxParsed.error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidSchema,
+        path: [],
+        schema: { type: 'record', of: schemaOf, maxLength: '1' },
+      },
+    ])
+  })
+
+  it('a constraint that is simply absent is not an error (only present-but-wrong-type is)', () => {
+    expect(x.parse({ type: 'number' }, 42).error).toBe(undefined)
+    expect(x.parse({ type: 'string' }, 'x').error).toBe(undefined)
+    expect(
+      x.parse({ type: 'array', of: { type: 'boolean' } }, [true]).error
+    ).toBe(undefined)
+  })
+})

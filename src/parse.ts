@@ -98,7 +98,17 @@ function parseBigInt(
     ])
   }
 
-  if (typeof schema.min === 'string') {
+  if (schema.min !== undefined) {
+    if (typeof schema.min !== 'string') {
+      return error([
+        {
+          code: ERROR_CODE.invalidSchema,
+          path: errorPath,
+          schema,
+        },
+      ])
+    }
+
     let min: bigint
 
     try {
@@ -124,7 +134,17 @@ function parseBigInt(
     }
   }
 
-  if (typeof schema.max === 'string') {
+  if (schema.max !== undefined) {
+    if (typeof schema.max !== 'string') {
+      return error([
+        {
+          code: ERROR_CODE.invalidSchema,
+          path: errorPath,
+          schema,
+        },
+      ])
+    }
+
     let max: bigint
 
     try {
@@ -204,7 +224,17 @@ function parseNumber(
     ])
   }
 
-  if (typeof schema.min === 'number') {
+  if (schema.min !== undefined) {
+    if (typeof schema.min !== 'number') {
+      return error([
+        {
+          code: ERROR_CODE.invalidSchema,
+          path: errorPath,
+          schema,
+        },
+      ])
+    }
+
     if (subject < schema.min) {
       return error([
         {
@@ -216,7 +246,17 @@ function parseNumber(
     }
   }
 
-  if (typeof schema.max === 'number') {
+  if (schema.max !== undefined) {
+    if (typeof schema.max !== 'number') {
+      return error([
+        {
+          code: ERROR_CODE.invalidSchema,
+          path: errorPath,
+          schema,
+        },
+      ])
+    }
+
     if (subject > schema.max) {
       return error([
         {
@@ -246,7 +286,17 @@ function parseString(
     ])
   }
 
-  if (typeof schema.minLength === 'number') {
+  if (schema.minLength !== undefined) {
+    if (typeof schema.minLength !== 'number') {
+      return error([
+        {
+          code: ERROR_CODE.invalidSchema,
+          path: errorPath,
+          schema,
+        },
+      ])
+    }
+
     if (subject.length < schema.minLength) {
       return error([
         {
@@ -258,7 +308,17 @@ function parseString(
     }
   }
 
-  if (typeof schema.maxLength === 'number') {
+  if (schema.maxLength !== undefined) {
+    if (typeof schema.maxLength !== 'number') {
+      return error([
+        {
+          code: ERROR_CODE.invalidSchema,
+          path: errorPath,
+          schema,
+        },
+      ])
+    }
+
     if (subject.length > schema.maxLength) {
       return error([
         {
@@ -282,6 +342,19 @@ function parseArray(
     return error([
       {
         code: ERROR_CODE.invalidType,
+        path: errorPath,
+        schema,
+      },
+    ])
+  }
+
+  if (
+    (schema.maxLength !== undefined && typeof schema.maxLength !== 'number') ||
+    (schema.minLength !== undefined && typeof schema.minLength !== 'number')
+  ) {
+    return error([
+      {
+        code: ERROR_CODE.invalidSchema,
         path: errorPath,
         schema,
       },
@@ -418,6 +491,19 @@ function parseRecord(
     return error([
       {
         code: ERROR_CODE.invalidType,
+        path: errorPath,
+        schema,
+      },
+    ])
+  }
+
+  if (
+    (schema.maxLength !== undefined && typeof schema.maxLength !== 'number') ||
+    (schema.minLength !== undefined && typeof schema.minLength !== 'number')
+  ) {
+    return error([
+      {
+        code: ERROR_CODE.invalidSchema,
         path: errorPath,
         schema,
       },
