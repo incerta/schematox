@@ -506,6 +506,8 @@ npm install
 npm run bench
 ```
 
+**schematox wins on parsing, where it matters most.** For primitives — strings, numbers, booleans, bigints, literals — schematox is the fastest library in this comparison, ajv included, since there's no schema tree to walk and no compiled-function overhead either. On objects, arrays, records, and tuples it's neck-and-neck with valibot and consistently ahead of zod, superstruct, and yup. The only library that pulls further ahead on those compound shapes is ajv, whose compiled validators trade a punishing one-time construction cost for that speed — see below.
+
 Numbers below were captured on Node v23.7.0, Apple M1. Absolute numbers will differ on your machine — what should hold up is the relative ordering and the reasoning behind it.
 
 ### Schema construction (ops/sec, higher is better)
@@ -549,7 +551,7 @@ Numbers below were captured on Node v23.7.0, Apple M1. Absolute numbers will dif
 
 **On a bare primitive, schematox is fastest of all — including ajv.** A `bigint`/`boolean`/`literal`/`number`/`string` check is one `typeof` plus a comparison or two, no allocation, no loop. There's no schema-tree depth for an interpreter's overhead to hide in, so schematox's minimal per-call work wins outright.
 
-**On objects, records, arrays, and tuples ("compound schemas"), the cost is dominated by per-element work**, not the top-level check — how much happens for every key or item beyond the type test itself. This is where schematox previously trailed zod and valibot by 2-3x: `parse()`'s array/object/record/tuple loops were copying the error-path array (`[...errorPath, key]`) for *every* element regardless of whether that element ever errored, and assigning each parsed field with `Object.defineProperty` (needed only to guard the single dangerous key `__proto__`, but paid on every key). Both were fixed by building the error path via push/pop on one shared array — only copying it at the point an error is actually recorded — and by giving every key except `__proto__` a plain assignment. schematox now matches or beats valibot and zod on every compound-schema parsing case above, both valid and invalid.
+**On objects, records, arrays, and tuples ("compound schemas"), the cost is dominated by per-element work**, not the top-level check — how much happens for every key or item beyond the type test itself, since these shapes validate multiple children instead of one value. schematox keeps that per-element cost low enough to run neck-and-neck with valibot and ahead of zod across every compound-schema case above, both valid and invalid subjects.
 
 **Array-of-objects looks worse than flat-object for every library, including ajv — that's volume, not an array-specific weakness.** The array benchmark validates 10 nested objects (30 field checks total) per call; the flat-object benchmark validates 3. Ops/sec drops roughly in proportion to the work per call for every library in the table, ajv included, not just schematox.
 
