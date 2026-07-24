@@ -19,7 +19,7 @@ Simply make a fork and create a PR if you think that something is off. Alternati
 
 # Testing strategy
 
-Our tests are located at `src/tests/*`. Learn more about the testing structure and strategy at [tests/README.md](https://github.com/incerta/schematox/blob/main/src/tests/README.md).
+Our tests are located at `tests/*`. Learn more about the testing structure and strategy at [tests/README.md](https://github.com/incerta/schematox/blob/main/tests/README.md).
 
 # Type testing
 

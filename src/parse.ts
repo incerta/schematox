@@ -510,6 +510,20 @@ function parseTuple(
     result.push(parsed.data)
   }
 
+  // Trailing elements beyond the declared arity are never validated, so
+  // they must not be silently accepted either — unlike object()'s
+  // documented "extra keys ignored", a tuple's whole point is a fixed
+  // shape.
+  if (subject.length > schema.of.length) {
+    invalidSubjects = invalidSubjects ?? []
+
+    invalidSubjects.push({
+      code: ERROR_CODE.invalidRange,
+      path: errorPath,
+      schema,
+    })
+  }
+
   if (invalidSubjects?.length) {
     return error(invalidSubjects)
   }

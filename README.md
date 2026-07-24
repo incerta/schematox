@@ -379,6 +379,8 @@ type FromStruct = Infer<typeof struct>
 
 ### Tuple
 
+Unlike `object`, extra elements beyond the declared arity are rejected, not ignored — a tuple's shape is meant to be exact. A trailing element whose own schema is `optional` can still be omitted.
+
 ```typescript
 const schema = {
   type: 'tuple',
