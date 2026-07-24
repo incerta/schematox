@@ -144,7 +144,7 @@ const FOLD_C = `{
     for (const subject of types) {
       const expectedError = [
         {
-          code: x.ERROR_CODE.invalidType,
+          code: expectedErrorCode,
           schema: schema,
           path: [],
         },
@@ -165,7 +165,7 @@ const FOLD_C = `{
       }
 
       expect(parsedStandard.issues).toStrictEqual([
-        { message: x.ERROR_CODE.invalidType, path: [] },
+        { message: expectedErrorCode, path: [] },
       ])
     }
   }
@@ -210,7 +210,7 @@ const FOLD_E = `{
     const expectedError = [
       {
         path,
-        code: x.ERROR_CODE.invalidType,
+        code: expectedErrorCode,
         schema: invalidSubjSchema,
       },
     ]
@@ -230,7 +230,7 @@ const FOLD_E = `{
     }
 
     expect(parsedStandard.issues).toStrictEqual([
-      { path, message: x.ERROR_CODE.invalidType },
+      { path, message: expectedErrorCode },
     ])
   }
 }`

@@ -1071,6 +1071,8 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 })
 
 describe('ERROR_CODE.invalidType (foldC)', () => {
+  const expectedErrorCode = x.ERROR_CODE.invalidType
+
   it('iterate over fixture.DATA_TYPE', () => {
     const schema = { type: 'string' } satisfies x.Schema
     const struct = x.string()
@@ -1087,7 +1089,7 @@ describe('ERROR_CODE.invalidType (foldC)', () => {
         for (const subject of types) {
           const expectedError = [
             {
-              code: x.ERROR_CODE.invalidType,
+              code: expectedErrorCode,
               schema: schema,
               path: [],
             },
@@ -1108,7 +1110,7 @@ describe('ERROR_CODE.invalidType (foldC)', () => {
           }
 
           expect(parsedStandard.issues).toStrictEqual([
-            { message: x.ERROR_CODE.invalidType, path: [] },
+            { message: expectedErrorCode, path: [] },
           ])
         }
       }

@@ -658,6 +658,8 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 })
 
 describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
+  const expectedErrorCode = x.ERROR_CODE.invalidType
+
   it('iterate over fixture.DATA_TYPE', () => {
     const schema = {
       type: 'object',
@@ -678,7 +680,7 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
         for (const subject of types) {
           const expectedError = [
             {
-              code: x.ERROR_CODE.invalidType,
+              code: expectedErrorCode,
               schema: schema,
               path: [],
             },
@@ -699,7 +701,7 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
           }
 
           expect(parsedStandard.issues).toStrictEqual([
-            { message: x.ERROR_CODE.invalidType, path: [] },
+            { message: expectedErrorCode, path: [] },
           ])
         }
       }
@@ -746,7 +748,7 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
         const expectedError = [
           {
             path,
-            code: x.ERROR_CODE.invalidType,
+            code: expectedErrorCode,
             schema: invalidSubjSchema,
           },
         ]
@@ -766,7 +768,7 @@ describe('ERROR_CODE.invalidType (foldC, foldE)', () => {
         }
 
         expect(parsedStandard.issues).toStrictEqual([
-          { path, message: x.ERROR_CODE.invalidType },
+          { path, message: expectedErrorCode },
         ])
       }
     }
