@@ -15,8 +15,19 @@ const FILE_PATHS = [
   'tests/by-struct/union.test.ts',
 ]
 
+// union() reports ERROR_CODE.invalidUnion (not invalidType) when no branch
+// matches, so its foldC/foldE blocks diverge from the shared template on
+// that one value and are hand-maintained instead of generated.
+const SKIP_LABELS: Partial<Record<string, string[]>> = {
+  'tests/by-struct/union.test.ts': ['foldC', 'foldE'],
+}
+
 for (const filePath of FILE_PATHS) {
   for (const [foldLabel, foldContent] of FOLDS) {
+    if (SKIP_LABELS[filePath]?.includes(foldLabel)) {
+      continue
+    }
+
     foldSync({ filePath, foldLabel, foldContent })
   }
 }
