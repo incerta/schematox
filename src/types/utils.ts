@@ -1,5 +1,20 @@
 import type { Schema } from './schema.ts'
 
+export type ParseOptions = {
+  /**
+   * Attempt to convert the subject to the schema's target type before
+   * validating it — e.g. the string `"42"` becomes the number `42` for a
+   * `number` schema. Off by default. Only a fixed set of unambiguous
+   * conversions between `bigint`/`boolean`/`number`/`string` are attempted;
+   * a failed or inapplicable conversion silently falls through to the
+   * subject as-is, so validation reports the same INVALID_TYPE error it
+   * would without coercion. Compound schemas (array/object/record/tuple/
+   * union), `literal`, and `unknown` are never coerced themselves — the
+   * flag still reaches their coercible descendants.
+   **/
+  coerce?: boolean
+}
+
 export type ParseResult<T> = ParseError | ParseSuccess<T>
 
 export type ParseError = {

@@ -9,6 +9,7 @@ import type {
   BrandSchema,
   StringSchema,
 } from './types/schema.ts'
+import type { ParseOptions } from './types/utils.ts'
 import type { Struct, StructParams, StructShape } from './types/struct.ts'
 
 export function makeStruct<T extends Schema>(schema: T): Struct<T>
@@ -16,7 +17,8 @@ export function makeStruct(schema: Schema) {
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const result: Record<string, unknown> & StandardSchemaV1 = {
     __schema: { ...schema },
-    parse: (subj: unknown) => parse(schema as never, subj),
+    parse: (subj: unknown, options?: ParseOptions) =>
+      parse(schema as never, subj, options),
     ['~standard']: {
       ...STANDARD_SCHEMA,
       validate: (input) => {
