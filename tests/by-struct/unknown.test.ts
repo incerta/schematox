@@ -447,7 +447,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x.unknown()
     const struct = prevStruct.optional()
 
-    type ExpectedKeys = StructSharedKeys | 'brand' | 'nullable' | 'description'
+    type ExpectedKeys = StructSharedKeys | 'nullable' | 'description'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -499,59 +499,6 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x.unknown().optional()
     const struct = prevStruct.nullable()
 
-    type ExpectedKeys = StructSharedKeys | 'brand' | 'description'
-
-    foldB: {
-      const construct = x.makeStruct(schema)
-
-      /* ensure that struct keys are reduced after application */
-
-      type StructKeys = keyof typeof struct
-
-      x.tCh<StructKeys, ExpectedKeys>()
-      x.tCh<ExpectedKeys, StructKeys>()
-
-      type ConstructKeys = keyof typeof construct
-
-      x.tCh<ConstructKeys, ExpectedKeys>()
-      x.tCh<ExpectedKeys, ConstructKeys>()
-
-      /* ensure that construct/struct schema types are identical  */
-
-      type ExpectedSchema = typeof schema
-      type StructSchema = typeof struct.__schema
-
-      x.tCh<StructSchema, ExpectedSchema>()
-      x.tCh<ExpectedSchema, StructSchema>()
-
-      type ConstructSchema = typeof struct.__schema
-
-      x.tCh<ConstructSchema, ExpectedSchema>()
-      x.tCh<ExpectedSchema, ConstructSchema>()
-
-      /* runtime schema check */
-
-      expect(struct.__schema).toStrictEqual(schema)
-      expect(construct.__schema).toStrictEqual(schema)
-      expect(construct.__schema === schema).toBe(false)
-
-      /* runtime schema parameter application immutability check */
-
-      expect(prevStruct.__schema === struct.__schema).toBe(false)
-    }
-  })
-
-  it('optional + nullable + brand', () => {
-    const schema = {
-      type: 'unknown',
-      optional: true,
-      nullable: true,
-      brand: ['x', 'y'],
-    } as const satisfies x.Schema
-
-    const prevStruct = x.unknown().optional().nullable()
-    const struct = prevStruct.brand('x', 'y')
-
     type ExpectedKeys = StructSharedKeys | 'description'
 
     foldB: {
@@ -594,17 +541,16 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     }
   })
 
-  it('optional + nullable + brand + description', () => {
+  it('optional + nullable + description', () => {
     const schema = {
       type: 'unknown',
       optional: true,
       nullable: true,
-      brand: ['x', 'y'],
       description: 'x',
     } as const satisfies x.Schema
 
-    const prevStruct = x.unknown().optional().nullable().brand('x', 'y')
-    const struct = prevStruct.description('x')
+    const prevStruct = x.unknown().optional().nullable()
+    const struct = prevStruct.description(schema.description)
 
     type ExpectedKeys = StructSharedKeys
 
@@ -648,16 +594,15 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     }
   })
 
-  it('description + brand + nullable + optional', () => {
+  it('description + nullable + optional', () => {
     const schema = {
       type: 'unknown',
       optional: true,
       nullable: true,
-      brand: ['x', 'y'],
       description: 'x',
     } as const satisfies x.Schema
 
-    const prevStruct = x.unknown().description('x').brand('x', 'y').nullable()
+    const prevStruct = x.unknown().description('x').nullable()
     const struct = prevStruct.optional()
 
     type ExpectedKeys = StructSharedKeys
@@ -708,4 +653,8 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
  * `unknown` data — so there is no `ERROR_CODE.invalidType` (foldC) or
  * `ERROR_CODE.invalidRange` (foldD) case for this schema, unlike every
  * other primitive.
+ *
+ * It also has no `brand` param, unlike every other primitive: `T & unknown`
+ * collapses to `T` in TypeScript, so branding would silently narrow the
+ * inferred type away from `unknown` instead of tagging it.
  **/

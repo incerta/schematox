@@ -156,7 +156,7 @@ const string = makeStruct(schema)
 
 ## Primitive Schema
 
-Any schema share optional/nullable/description/brand parameters.
+Any schema share optional/nullable/description/brand parameters (`unknown` is the one exception — see [Unknown](#unknown)).
 
 ### BigInt
 
@@ -289,19 +289,19 @@ type FromStruct = Infer<typeof struct>
 
 Accepts any subject — parsing never fails. Useful as an escape hatch for data whose shape isn't known or worth declaring upfront.
 
+Unlike every other primitive, `unknown` has no `brand` param: `T & unknown` collapses to plain `T` in TypeScript, so branding it would silently narrow the inferred type away from `unknown` instead of tagging it.
+
 ```typescript
 const schema = {
   type: 'unknown',
   optional: true,
   nullable: true,
-  brand: ['x', 'y'],
   description: 'x',
 } as const satisfies Schema
 
 const struct = unknown() //
   .optional()
   .nullable()
-  .brand('x', 'y')
   .description('x')
 
 // unknown

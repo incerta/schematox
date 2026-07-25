@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- FEAT: added an `unknown` primitive schema (`unknown()` / `{ type: 'unknown' }`) that accepts any subject without validation — an escape hatch for data whose shape isn't known or worth declaring upfront. Unlike every other primitive, it never produces `INVALID_TYPE`/`INVALID_RANGE`, and it has no `brand` param: `T & unknown` collapses to plain `T` in TypeScript, so branding it would silently narrow the inferred type away from `unknown` instead of tagging it. ([#81](https://github.com/incerta/schematox/pull/81))
+
 ## [2.0.0](https://github.com/incerta/schematox/compare/v1.3.1...v2.0.0)
 
 - FIX: `object()`/`record()` rejected valid plain objects that aren't `instanceof Object` in the strict identity sense (e.g. `process.env` under Node, `Object.create(null)`, cross-realm objects). The type check now uses `Object.prototype.toString.call(subject) === '[object Object]'`, which still rejects `Map`/`Set`/`Error`/typed arrays/other built-ins. ([#69](https://github.com/incerta/schematox/pull/69))
