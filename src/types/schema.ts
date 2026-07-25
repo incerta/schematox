@@ -112,6 +112,12 @@ export type LiteralSchema<
   of: T
 }
 
-export type UnknownSchema = PrimitiveSchemaShared & {
+/**
+ * No `brand` — `T & unknown` collapses to `T` in TypeScript, so branding
+ * `unknown` would silently narrow the inferred type away from `unknown`
+ * instead of tagging it, the opposite of what every other primitive's
+ * `brand` does.
+ **/
+export type UnknownSchema = SchemaShared & {
   type: 'unknown'
 }
