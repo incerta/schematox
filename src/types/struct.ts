@@ -22,7 +22,7 @@ import type {
   BigIntString,
 } from './schema.ts'
 
-import type { CustomCoercer } from './coerce.ts'
+import type { ConvertFn } from './convert.ts'
 import type { InferSchema } from './infer.ts'
 
 /**
@@ -102,7 +102,7 @@ export type Struct<T extends Schema, Converted extends boolean = false> = Omit<
          * why it's a separate switch from the built-in
          * bigint/boolean/number/string table.
          **/
-        convert: (fn: CustomCoercer) => Struct<T, true>
+        convert: (fn: ConvertFn) => Struct<T, true>
       })
 
 type BrandSubType =
