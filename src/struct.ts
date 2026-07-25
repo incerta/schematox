@@ -25,9 +25,11 @@ export function makeStruct(
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const result: Record<string, unknown> & StandardSchemaV1 = {
     __schema: { ...schema },
-    // Deliberately not part of the public `Struct<T>` type — see
-    // `withCoercer`'s doc comment for why. Read back only by this module's
-    // own composition functions (`object`/`array`/etc.) via `readCoercers`.
+    // Backs the public `coercer` method below. Kept off the `Struct<T>`
+    // type itself (read back only by this module's own composition
+    // functions — `object`/`array`/etc. — via `readCoercers`) since it's
+    // an implementation detail of how a member's coercer reaches its
+    // parent once composed; `coercer` is the actual public surface.
     __coercers: coercers,
     parse: (subj: unknown, options?: ParseOptions) =>
       parse(schema as never, subj, withStructCoercers(options, coercers)),
@@ -54,6 +56,14 @@ export function makeStruct(
   result.nullable = () => makeStruct({ ...schema, nullable: true }, coercers)
   result.description = (description: string) =>
     makeStruct({ ...schema, description }, coercers)
+
+  // Unlike every param above, never touches `schema` — it's tracked
+  // separately (see `coercers`) so it never appears in `__schema`. A later
+  // call replaces the earlier one (last-write-wins, same as `description`),
+  // and it stays available for repeated calls since nothing is ever added
+  // to `keyof T` to remove it from the chain.
+  result.coercer = (fn: CustomCoercer) =>
+    makeStruct(schema, [...coercers, { path: [], fn }])
 
   /* Schema specific params */
 
@@ -124,46 +134,6 @@ function readCoercers(struct: object): ReadonlyArray<CoercerPathEntry> {
     (struct as { __coercers?: ReadonlyArray<CoercerPathEntry> }).__coercers ??
     []
   )
-}
-
-/**
- * Attaches a custom coercer to `struct`'s own position in the schema tree.
- * It runs before any built-in `coerce` conversion for that exact node,
- * whenever `.parse()` is called with `{ coerce: true }` — same gate as the
- * built-in table, so a struct's declared coercers never activate silently
- * on a call that didn't ask for coercion.
- *
- * Deliberately a free function, not a `.coercer()` chain method: a chain
- * method would add a new key to *every* struct's public shape, which this
- * library's own test suite pins exhaustively per schema type (see
- * `tests/by-struct/*`, `foldB`) — an unrelated, wide blast radius for what
- * is otherwise a self-contained, opt-in feature. `withCoercer` instead
- * reads/writes a plain runtime property (`__coercers`) that the `Struct<T>`
- * type never declares, so it never appears in `keyof struct`.
- *
- * Composition (`object`/`array`/`record`/`tuple`/`union`) automatically
- * gathers a member's coercers into the parent's own list, remapped to that
- * member's position in the schema tree — so this can be called at any
- * depth before the struct is composed into a larger one:
- *
- * ```typescript
- * const trimmed = withCoercer(string(), (s) =>
- *   typeof s === 'string' ? s.trim() : s
- * )
- * const struct = object({ name: trimmed })
- *
- * struct.parse({ name: '  Ann  ' }, { coerce: true })
- * // { success: true, data: { name: 'Ann' } }
- * ```
- **/
-export function withCoercer<T extends Schema>(
-  struct: Struct<T>,
-  fn: CustomCoercer
-): Struct<T> {
-  return makeStruct(struct.__schema as T, [
-    ...readCoercers(struct),
-    { path: [], fn },
-  ])
 }
 
 /**

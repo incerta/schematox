@@ -6,7 +6,6 @@ export { COERCER_PATH_ITEM } from './coerce.js'
 
 export {
   makeStruct,
-  withCoercer,
   //
   boolean,
   literal,
