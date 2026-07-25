@@ -23,6 +23,7 @@ Most TypeScript validators (Zod, Yup, Joi) make you build a schema out of functi
   - [Literal](#literal)
   - [Number](#number)
   - [String](#string)
+  - [Unknown](#unknown)
 - [Compound Schema](#compound-schema)
   - [Array](#array)
   - [Object](#object)
@@ -284,6 +285,30 @@ type FromSchema = Infer<typeof schema>
 type FromStruct = Infer<typeof struct>
 ```
 
+### Unknown
+
+Accepts any subject — parsing never fails. Useful as an escape hatch for data whose shape isn't known or worth declaring upfront.
+
+```typescript
+const schema = {
+  type: 'unknown',
+  optional: true,
+  nullable: true,
+  brand: ['x', 'y'],
+  description: 'x',
+} as const satisfies Schema
+
+const struct = unknown() //
+  .optional()
+  .nullable()
+  .brand('x', 'y')
+  .description('x')
+
+// unknown
+type FromSchema = Infer<typeof schema>
+type FromStruct = Infer<typeof struct>
+```
+
 ## Compound Schema
 
 Any compound schema could have any other schema type as its member including itself.
@@ -494,7 +519,7 @@ Note: the parsed input itself is intentionally **not** included in the error —
 
 Only `object`, `record`, `array`, and `tuple` can produce more than one `InvalidSubject`. Each independently validates multiple children (object keys, record entries, array/tuple elements) and collects every failure into a single flat array — including a `minLength`/`maxLength` violation, which is reported *alongside* any child errors rather than replacing them. For example, an array that's both too short and has an invalid element reports both problems, not just one.
 
-Every other type — `bigint`, `boolean`, `literal`, `number`, `string`, `union` — performs a single check with no aggregation, so parsing one directly can only ever produce exactly one entry (or none, on success). When one of these is nested inside a compound schema, its single error just becomes one of potentially several entries contributed by the surrounding `object`/`record`/`array`/`tuple`.
+Every other type — `bigint`, `boolean`, `literal`, `number`, `string`, `union` — performs a single check with no aggregation, so parsing one directly can only ever produce exactly one entry (or none, on success). When one of these is nested inside a compound schema, its single error just becomes one of potentially several entries contributed by the surrounding `object`/`record`/`array`/`tuple`. `unknown` never performs a check at all — it accepts any subject, so it can never contribute an entry.
 
 ## Benchmarks
 

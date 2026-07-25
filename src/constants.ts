@@ -12,6 +12,7 @@ export const PARAMS_BY_SCHEMA_TYPE = {
   number:   new Set(['optional', 'nullable', 'description', 'brand', 'min', 'max'] as const),
   bigint:   new Set(['optional', 'nullable', 'description', 'brand', 'min', 'max'] as const),
   string:   new Set(['optional', 'nullable', 'description', 'brand', 'minLength', 'maxLength'] as const),
+  unknown:  new Set(['optional', 'nullable', 'description', 'brand'] as const),
   //
   array:    new Set(['optional', 'nullable', 'description', 'minLength', 'maxLength'] as const),
   object:   new Set(['optional', 'nullable', 'description'] as const),

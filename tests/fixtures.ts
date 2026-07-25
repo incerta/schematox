@@ -7,6 +7,7 @@ export const DATA_TYPE = [
     [BigInt('9007199254740994'), BigInt('0'), BigInt('-9007199254740994')],
   ],
   ['string', ['', 'x', 'xy', 'xyz']],
+  ['unknown', []], // added to be consistent with `foldC`
   [
     'binary',
     [

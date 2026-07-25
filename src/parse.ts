@@ -18,6 +18,7 @@ import type {
   LiteralSchema,
   NumberSchema,
   StringSchema,
+  UnknownSchema,
 } from './types/schema.js'
 
 const PARSE_FN_BY_SCHEMA_KIND = {
@@ -26,6 +27,7 @@ const PARSE_FN_BY_SCHEMA_KIND = {
   literal: parseLiteral,
   number: parseNumber,
   string: parseString,
+  unknown: parseUnknown,
   //
   array: parseArray,
   object: parseObject,
@@ -330,6 +332,14 @@ function parseString(
     }
   }
 
+  return success(subject)
+}
+
+function parseUnknown(
+  _errorPath: ErrorPath,
+  _schema: UnknownSchema,
+  subject: unknown
+) {
   return success(subject)
 }
 

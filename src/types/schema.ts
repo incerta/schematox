@@ -74,7 +74,12 @@ export type PrimitiveSchemaShared = SchemaShared & {
 }
 
 export type PrimitiveSchema =
-  BigIntSchema | BooleanSchema | LiteralSchema | NumberSchema | StringSchema
+  | BigIntSchema
+  | BooleanSchema
+  | LiteralSchema
+  | NumberSchema
+  | StringSchema
+  | UnknownSchema
 
 export type BooleanSchema = PrimitiveSchemaShared & {
   type: 'boolean'
@@ -105,4 +110,8 @@ export type LiteralSchema<
 > = PrimitiveSchemaShared & {
   type: 'literal'
   of: T
+}
+
+export type UnknownSchema = PrimitiveSchemaShared & {
+  type: 'unknown'
 }

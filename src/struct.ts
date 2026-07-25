@@ -110,6 +110,10 @@ export function string() {
   return makeStruct({ type: 'string' })
 }
 
+export function unknown() {
+  return makeStruct({ type: 'unknown' })
+}
+
 /**
  * Compounds
  **/
