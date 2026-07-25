@@ -25,11 +25,20 @@ import type {
 import type { CustomCoercer } from './coerce.ts'
 import type { InferSchema } from './infer.ts'
 
-export type Struct<T extends Schema> = Omit<
+/**
+ * `Converted` is a phantom flag, not derived from `T`/`Schema` — `.convert()`
+ * deliberately never touches the schema (see its own doc comment below), so
+ * there's no schema field for `Omit<..., keyof T>` to key off of the way it
+ * does for every other param. Tracking "has `.convert()` already been
+ * called" as a second type parameter instead reproduces the same
+ * once-only-application rule this library already enforces for `.brand()`/
+ * `.min()`/etc., without writing anything into `__schema` to get it.
+ **/
+export type Struct<T extends Schema, Converted extends boolean = false> = Omit<
   Pick<
     {
-      optional: () => Struct<T & { optional: true }>
-      nullable: () => Struct<T & { nullable: true }>
+      optional: () => Struct<T & { optional: true }, Converted>
+      nullable: () => Struct<T & { nullable: true }, Converted>
 
       brand: <
         U extends [string, BrandSubType] | [Readonly<[string, BrandSubType]>],
@@ -42,52 +51,59 @@ export type Struct<T extends Schema> = Omit<
             : U extends [Readonly<[infer V, infer W]>]
               ? BrandSchema<V, W>
               : never
-        }
+        },
+        Converted
       >
 
       key: <U extends StructShape<StringSchema>>(
         key: U
-      ) => Struct<T & { key: U['__schema'] }>
+      ) => Struct<T & { key: U['__schema'] }, Converted>
 
       minLength: <U extends number>(
         minLength: U
-      ) => Struct<T & { minLength: U }>
+      ) => Struct<T & { minLength: U }, Converted>
 
       maxLength: <U extends number>(
         maxLength: U
-      ) => Struct<T & { maxLength: U }>
+      ) => Struct<T & { maxLength: U }, Converted>
 
       max: T extends BigIntSchema
-        ? <U extends BigIntString>(max: U) => Struct<T & { max: U }>
-        : <U extends number>(max: U) => Struct<T & { max: U }>
+        ? <U extends BigIntString>(max: U) => Struct<T & { max: U }, Converted>
+        : <U extends number>(max: U) => Struct<T & { max: U }, Converted>
 
       min: T extends BigIntSchema
-        ? <U extends BigIntString>(min: U) => Struct<T & { min: U }>
-        : <U extends number>(min: U) => Struct<T & { min: U }>
+        ? <U extends BigIntString>(min: U) => Struct<T & { min: U }, Converted>
+        : <U extends number>(min: U) => Struct<T & { min: U }, Converted>
 
       description: <U extends string>(
         description: U
-      ) => Struct<T & { description: U }>
+      ) => Struct<T & { description: U }, Converted>
     },
     ParamsBySchemaType[T['type']]
   >,
   keyof T
 > & {
   __schema: Readonly<T>
-
-  /**
-   * Attaches a custom coercer at this struct's own position in the schema
-   * tree. Unlike every other param above, it's never stored on the schema
-   * (so it never appears in `keyof T`/`__schema`, and is never "used up" —
-   * it stays callable indefinitely; a later call replaces the earlier one).
-   * Runs on every `.parse()` call unconditionally, independently of the
-   * `coerce` option — see `ParseOptions.coerce`'s doc comment for why it's
-   * a separate switch from the built-in bigint/boolean/number/string table.
-   **/
-  coercer: (fn: CustomCoercer) => Struct<T>
-
   parse: (s: unknown, options?: ParseOptions) => ParseResult<InferSchema<T>>
-} & StandardSchemaV1<unknown, InferSchema<T>>
+} & StandardSchemaV1<unknown, InferSchema<T>> &
+  (Converted extends true
+    ? unknown
+    : {
+        /**
+         * Attaches a custom conversion function at this struct's own
+         * position in the schema tree. Never stored on the schema — so it
+         * never appears in `keyof T`/`__schema` — but still only
+         * applicable once per struct, same as every param above: calling
+         * `.convert()` flips `Converted` to `true`, which removes `convert`
+         * from the returned struct's own type.
+         *
+         * Runs on every `.parse()` call unconditionally, independently of
+         * the `coerce` option — see `ParseOptions.coerce`'s doc comment for
+         * why it's a separate switch from the built-in
+         * bigint/boolean/number/string table.
+         **/
+        convert: (fn: CustomCoercer) => Struct<T, true>
+      })
 
 type BrandSubType =
   boolean | number | string | ReadonlyArray<unknown> | Record<string, unknown>
