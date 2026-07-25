@@ -83,13 +83,13 @@ update them to `INVALID_UNION`.
 const struct = tuple([string(), number()])
 
 struct.parse(['a', 1, 'extra']) // previously: succeeded, extra truncated
-                                 // now: fails
+// now: fails
 ```
 
 Unlike `object()`'s documented "extra keys ignored" (a deliberate
 forward-compatibility choice), a tuple's whole point is a fixed shape, and
 the extra elements were never validated at all. A trailing element whose
-own schema is `optional` can still be omitted — this only rejects *more*
+own schema is `optional` can still be omitted — this only rejects _more_
 elements than declared, not fewer.
 
 If any code intentionally passed over-long arrays/tuples expecting silent

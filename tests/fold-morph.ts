@@ -7,6 +7,7 @@ const FILE_PATHS = [
   'tests/by-struct/literal.test.ts',
   'tests/by-struct/number.test.ts',
   'tests/by-struct/string.test.ts',
+  'tests/by-struct/unknown.test.ts',
   //
   'tests/by-struct/array.test.ts',
   'tests/by-struct/object.test.ts',

@@ -14,6 +14,7 @@ import type {
   LiteralSchema,
   NumberSchema,
   StringSchema,
+  UnknownSchema,
   //
   BrandSchema,
 } from './schema.ts'
@@ -63,7 +64,9 @@ export type InferPrimitive<T> = T extends BigIntSchema
         ? string
         : T extends LiteralSchema<infer U>
           ? U
-          : never
+          : T extends UnknownSchema
+            ? unknown
+            : never
 
 export type InferArray<T> =
   T extends ArraySchema<infer U> ? Array<InferSchema<U>> : never

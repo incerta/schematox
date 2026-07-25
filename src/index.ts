@@ -10,6 +10,7 @@ export {
   number,
   bigint,
   string,
+  unknown,
   //
   array,
   object,
@@ -58,6 +59,7 @@ export type {
   LiteralSchema,
   NumberSchema,
   StringSchema,
+  UnknownSchema,
   //
   BigIntString,
 } from './types/schema.js'

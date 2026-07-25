@@ -17,6 +17,7 @@ import type {
   LiteralSchema,
   NumberSchema,
   StringSchema,
+  UnknownSchema,
   //
   BigIntString,
 } from './schema.ts'
@@ -86,6 +87,7 @@ type ParamsBySchemaType = {
   literal: ExtractParams<LiteralSchema>
   number: ExtractParams<NumberSchema>
   string: ExtractParams<StringSchema>
+  unknown: ExtractParams<UnknownSchema>
   //
   array: ExtractParams<ArraySchema>
   object: ExtractParams<ObjectSchema>
