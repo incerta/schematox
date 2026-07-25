@@ -32,7 +32,7 @@ Most TypeScript validators (Zod, Yup, Joi) make you build a schema out of functi
   - [Union](#union)
 - [Schema Parameters](#schema-parameters)
 - [Coercion](#coercion)
-  - [Custom coercers](#custom-coercers)
+  - [Custom converters](#custom-converters)
 - [Error Shape](#error-shape)
 - [Benchmarks](#benchmarks)
 
@@ -514,7 +514,7 @@ A conversion that doesn't apply (wrong source type) or fails (e.g. `"abc"` for `
 
 The [Standard Schema](https://standardschema.dev) `~standard.validate` entry point doesn't take options — that signature is fixed by the spec — so coercion isn't reachable through it; use `parse()`/`struct.parse()` directly when you need it.
 
-### Custom coercers
+### Custom converters
 
 The built-in table only covers `bigint`/`boolean`/`number`/`string`. `.convert()` attaches a custom conversion function to any struct — like every other struct param, it's a chain method, not a schema field: `T & unknown` schemas stay JSON-serializable data, and the converter itself is tracked separately, never written into `__schema`.
 
@@ -563,26 +563,7 @@ array(dollars).parse(['$10', '$20'], { coerce: true })
 
 A converter attached to a compound struct itself (its own subject, before that struct's own validation runs) and one attached to its child (e.g. every array element) are different positions and don't collide — `array(dollars).convert((s) => typeof s === 'string' ? s.split(',') : s)` splits a whole comma-separated string into an array first, and the item-level `dollars` converter still runs on each resulting element afterward. It doesn't mutate the struct it's called on — the original still parses without the attached converter.
 
-For a static schema with no struct at all, the equivalent is passing `customCoercers` directly to `parse()`, keyed by the coercer's position in the *schema* tree rather than the runtime subject: object keys as-is, `tuple`/`union` member schemas by index, and the exported `COERCER_PATH_ITEM` sentinel for `array`/`record`'s one child position (applies uniformly to every element/entry — there's no fixed index to key by, and the sentinel is also what keeps "coerce every item" from colliding with "coerce the array's own subject", which is `path: []`). Like `.convert()`, `customCoercers` runs independently of `coerce`:
-
-```typescript
-import { parse, COERCER_PATH_ITEM } from 'schematox'
-import type { Schema } from 'schematox'
-
-const schema = { type: 'array', of: { type: 'number' } } as const satisfies Schema
-
-parse(schema, ['$1', '$2'], {
-  customCoercers: [
-    {
-      path: [COERCER_PATH_ITEM],
-      fn: (s) => (typeof s === 'string' ? Number(s.slice(1)) : s),
-    },
-  ],
-})
-// { success: true, data: [1, 2] } — no coerce: true needed
-```
-
-`record()`'s `key` schema doesn't support a custom coercer in this first pass — record keys are always plain strings already, and only the built-in string table applies to them.
+`.convert()` is only available through a struct — there's no equivalent for a static schema used on its own, since a converter's position is only meaningful relative to a specific struct's composition. `record()`'s `key` schema doesn't support a custom converter either — record keys are always plain strings already, and only the built-in string table applies to them.
 
 ## Error Shape
 

@@ -1,14 +1,15 @@
 import { ERROR_CODE } from './constants.js'
+import { getCoerceFn } from './coerce.js'
 import {
-  buildCoercerTree,
-  getCoercerTreeChild,
-  getCoerceFn,
-  getSelfCoercer,
-  COERCER_PATH_ITEM,
-} from './coerce.js'
+  buildConvertTree,
+  getConvertTreeChild,
+  getSelfConvert,
+  CONVERT_PATH_ITEM,
+} from './convert.js'
 import { assignOwnProperty, error, success } from './utils.js'
 
-import type { CoercerTreeNode } from './coerce.js'
+import type { ConvertTreeNode } from './convert.js'
+import type { ConvertPathEntry } from './types/convert.js'
 import type { InferSchema } from './types/infer.js'
 import type {
   ErrorPath,
@@ -65,7 +66,36 @@ export function parse(
     schema,
     subject,
     options?.coerce === true,
-    buildCoercerTree(options?.customCoercers)
+    undefined
+  )
+}
+
+/**
+ * Not part of the public `index.ts` surface. `struct.ts` is the only
+ * caller, feeding in the flat `{ path, fn }[]` list a struct accumulates
+ * from its own and its composed children's `.convert()` calls — there's
+ * no public, schema-only equivalent, since a converter's position is only
+ * meaningful relative to a specific struct's composition.
+ **/
+export function parseWithConverters<T extends Schema>(
+  schema: T,
+  subject: unknown,
+  options: ParseOptions | undefined,
+  converters: ReadonlyArray<ConvertPathEntry>
+): ParseResult<InferSchema<T>>
+
+export function parseWithConverters(
+  schema: Schema,
+  subject: unknown,
+  options: ParseOptions | undefined,
+  converters: ReadonlyArray<ConvertPathEntry>
+): ParseResult<unknown> {
+  return parseRecursively(
+    [],
+    schema,
+    subject,
+    options?.coerce === true,
+    buildConvertTree(converters)
   )
 }
 
@@ -75,7 +105,7 @@ function parseRecursively(
   schema: Schema,
   subject: unknown,
   coerce: boolean,
-  coercerNode: CoercerTreeNode | undefined
+  convertNode: ConvertTreeNode | undefined
 ): ParseResult<unknown> {
   // Schemas are plain data and may come from an untyped external source
   // (JSON, a database) that TypeScript's `satisfies Schema` never actually
@@ -104,16 +134,15 @@ function parseRecursively(
     return success(null)
   }
 
-  // Independent of `coerce`: a struct's own declared coercer (or one
-  // passed directly via `customCoercers`) is an explicit, per-position
-  // opt-in — like `.brand()`/`.min()`, it takes effect once declared, with
-  // no separate runtime switch. The built-in bigint/boolean/number/string
-  // table is the opposite: a blanket, call-site opt-in via `coerce`, since
-  // it isn't tied to any one field.
-  const customCoerceFn = getSelfCoercer(coercerNode)
+  // Independent of `coerce`: a struct's own declared `.convert()` is an
+  // explicit, per-position opt-in — like `.brand()`/`.min()`, it takes
+  // effect once declared, with no separate runtime switch. The built-in
+  // bigint/boolean/number/string table is the opposite: a blanket,
+  // call-site opt-in via `coerce`, since it isn't tied to any one field.
+  const customConvertFn = getSelfConvert(convertNode)
 
-  if (customCoerceFn !== undefined) {
-    subject = customCoerceFn(subject)
+  if (customConvertFn !== undefined) {
+    subject = customConvertFn(subject)
   }
 
   if (coerce) {
@@ -129,7 +158,7 @@ function parseRecursively(
     schema as never,
     subject,
     coerce,
-    coercerNode
+    convertNode
   )
 }
 
@@ -138,7 +167,7 @@ function parseBigInt(
   schema: BigIntSchema,
   subject: unknown,
   _coerce: boolean,
-  _coercerNode: CoercerTreeNode | undefined
+  _convertNode: ConvertTreeNode | undefined
 ) {
   if (typeof subject !== 'bigint') {
     return error([
@@ -230,7 +259,7 @@ function parseBoolean(
   schema: BooleanSchema,
   subject: unknown,
   _coerce: boolean,
-  _coercerNode: CoercerTreeNode | undefined
+  _convertNode: ConvertTreeNode | undefined
 ) {
   if (typeof subject !== 'boolean') {
     return error([
@@ -250,7 +279,7 @@ function parseLiteral(
   schema: LiteralSchema,
   subject: unknown,
   _coerce: boolean,
-  _coercerNode: CoercerTreeNode | undefined
+  _convertNode: ConvertTreeNode | undefined
 ) {
   if (subject !== schema.of) {
     return error([
@@ -270,7 +299,7 @@ function parseNumber(
   schema: NumberSchema,
   subject: unknown,
   _coerce: boolean,
-  _coercerNode: CoercerTreeNode | undefined
+  _convertNode: ConvertTreeNode | undefined
 ) {
   if (typeof subject !== 'number' || Number.isFinite(subject) === false) {
     return error([
@@ -334,7 +363,7 @@ function parseString(
   schema: StringSchema,
   subject: unknown,
   _coerce: boolean,
-  _coercerNode: CoercerTreeNode | undefined
+  _convertNode: ConvertTreeNode | undefined
 ) {
   if (typeof subject !== 'string') {
     return error([
@@ -398,7 +427,7 @@ function parseUnknown(
   _schema: UnknownSchema,
   subject: unknown,
   _coerce: boolean,
-  _coercerNode: CoercerTreeNode | undefined
+  _convertNode: ConvertTreeNode | undefined
 ) {
   return success(subject)
 }
@@ -408,7 +437,7 @@ function parseArray(
   schema: ArraySchema<Schema>,
   subject: unknown,
   coerce: boolean,
-  coercerNode: CoercerTreeNode | undefined
+  convertNode: ConvertTreeNode | undefined
 ) {
   if (Array.isArray(subject) === false) {
     return error([
@@ -435,7 +464,7 @@ function parseArray(
 
   const result: unknown[] = []
   let invalidSubjects: InvalidSubject[] | undefined
-  const itemCoercerNode = getCoercerTreeChild(coercerNode, COERCER_PATH_ITEM)
+  const itemConvertNode = getConvertTreeChild(convertNode, CONVERT_PATH_ITEM)
 
   for (let i = 0; i < subject.length; i++) {
     const nestedSchema = schema.of
@@ -447,7 +476,7 @@ function parseArray(
       nestedSchema,
       nestedValue,
       coerce,
-      itemCoercerNode
+      itemConvertNode
     )
     errorPath.pop()
 
@@ -511,7 +540,7 @@ function parseObject(
   schema: ObjectSchema<Record<string, Schema>>,
   subject: unknown,
   coerce: boolean,
-  coercerNode: CoercerTreeNode | undefined
+  convertNode: ConvertTreeNode | undefined
 ): ParseResult<unknown> {
   if (
     typeof subject !== 'object' ||
@@ -542,7 +571,7 @@ function parseObject(
       nestedSchema,
       nestedValue,
       coerce,
-      getCoercerTreeChild(coercerNode, key)
+      getConvertTreeChild(convertNode, key)
     )
     errorPath.pop()
 
@@ -572,7 +601,7 @@ function parseRecord(
   schema: RecordSchema<Schema>,
   subject: unknown,
   coerce: boolean,
-  coercerNode: CoercerTreeNode | undefined
+  convertNode: ConvertTreeNode | undefined
 ) {
   if (
     typeof subject !== 'object' ||
@@ -605,9 +634,9 @@ function parseRecord(
   let invalidSubjects: InvalidSubject[] | undefined
   let validEntryCounter = 0
   // Record keys are always plain strings (`for...in`), and there's no fixed
-  // key to attach a custom coercer to (unlike `object`'s named properties)
+  // key to attach a custom converter to (unlike `object`'s named properties)
   // — key coercion stays limited to the built-in string table via `coerce`.
-  const valueCoercerNode = getCoercerTreeChild(coercerNode, COERCER_PATH_ITEM)
+  const valueConvertNode = getConvertTreeChild(convertNode, CONVERT_PATH_ITEM)
 
   for (const key in subject) {
     const nestedValue = (subject as Record<string, unknown>)[key]
@@ -645,7 +674,7 @@ function parseRecord(
       schema.of,
       nestedValue,
       coerce,
-      valueCoercerNode
+      valueConvertNode
     )
     errorPath.pop()
 
@@ -715,7 +744,7 @@ function parseTuple(
   schema: TupleSchema<Array<Schema>>,
   subject: unknown,
   coerce: boolean,
-  coercerNode: CoercerTreeNode | undefined
+  convertNode: ConvertTreeNode | undefined
 ) {
   if (Array.isArray(schema.of) === false) {
     return error([
@@ -750,7 +779,7 @@ function parseTuple(
       nestedSchema,
       nestedValue,
       coerce,
-      getCoercerTreeChild(coercerNode, i)
+      getConvertTreeChild(convertNode, i)
     )
     errorPath.pop()
 
@@ -792,7 +821,7 @@ function parseUnion(
   schema: UnionSchema<Array<Schema>>,
   subject: unknown,
   coerce: boolean,
-  coercerNode: CoercerTreeNode | undefined
+  convertNode: ConvertTreeNode | undefined
 ) {
   if (Array.isArray(schema.of) === false) {
     return error([
@@ -810,7 +839,7 @@ function parseUnion(
       schema.of[i]!,
       subject,
       coerce,
-      getCoercerTreeChild(coercerNode, i)
+      getConvertTreeChild(convertNode, i)
     )
 
     if (parsed.error === undefined) {

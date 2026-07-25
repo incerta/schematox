@@ -2,8 +2,6 @@ export { ERROR_CODE, PARAMS_BY_SCHEMA_TYPE } from './constants.js'
 
 export { parse } from './parse.js'
 
-export { COERCER_PATH_ITEM } from './coerce.js'
-
 export {
   makeStruct,
   //
@@ -34,12 +32,7 @@ export type {
   PrettifyObject,
 } from './types/utils.js'
 
-export type {
-  CustomCoercer,
-  CoercerPath,
-  CoercerPathEntry,
-  CoercerPathSegment,
-} from './types/coerce.js'
+export type { ConvertFn } from './types/convert.js'
 
 export type {
   Infer,
