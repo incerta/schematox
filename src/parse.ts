@@ -60,14 +60,12 @@ export function parse(
   subject: unknown,
   options?: ParseOptions
 ): ParseResult<unknown> {
-  const coerce = options?.coerce === true
-
   return parseRecursively(
     [],
     schema,
     subject,
-    coerce,
-    coerce ? buildCoercerTree(options?.customCoercers) : undefined
+    options?.coerce === true,
+    buildCoercerTree(options?.customCoercers)
   )
 }
 
@@ -106,13 +104,19 @@ function parseRecursively(
     return success(null)
   }
 
+  // Independent of `coerce`: a struct's own declared coercer (or one
+  // passed directly via `customCoercers`) is an explicit, per-position
+  // opt-in — like `.brand()`/`.min()`, it takes effect once declared, with
+  // no separate runtime switch. The built-in bigint/boolean/number/string
+  // table is the opposite: a blanket, call-site opt-in via `coerce`, since
+  // it isn't tied to any one field.
+  const customCoerceFn = getSelfCoercer(coercerNode)
+
+  if (customCoerceFn !== undefined) {
+    subject = customCoerceFn(subject)
+  }
+
   if (coerce) {
-    const customCoerceFn = getSelfCoercer(coercerNode)
-
-    if (customCoerceFn !== undefined) {
-      subject = customCoerceFn(subject)
-    }
-
     const coerceFn = getCoerceFn(schema.type)
 
     if (coerceFn !== undefined) {

@@ -12,19 +12,25 @@ export type ParseOptions = {
    * would without coercion. Compound schemas (array/object/record/tuple/
    * union), `literal`, and `unknown` are never coerced themselves — the
    * flag still reaches their coercible descendants.
+   *
+   * This only gates the built-in table. `customCoercers` below is a
+   * separate, independent switch — it isn't a blanket "guess the type"
+   * behavior like this one, so it doesn't share a gate with it.
    **/
   coerce?: boolean
 
   /**
    * Field-specific coercers, keyed by their position in the *schema* tree
-   * (see `CoercerPathSegment`). Only consulted when `coerce` is true, same
-   * as the built-in table — a struct built with `withCoercer()` populates
-   * this automatically via `struct.parse()`; it's also settable directly
-   * here for schemas defined as plain data. When both a custom coercer and
-   * the built-in table apply to the same position, the custom one runs
-   * first and the built-in one still runs after on its result — useful for
-   * e.g. stripping a `"$"` prefix before the built-in string→number
-   * conversion takes over.
+   * (see `CoercerPathSegment`) — a struct's `.coercer()` populates this
+   * automatically via `struct.parse()`; it's also settable directly here
+   * for schemas defined as plain data. Unlike `coerce` above, these always
+   * run, independently of it — each entry is an explicit, per-position
+   * declaration (like a `.brand()` or `.min()`), not a blanket behavior
+   * that needs a separate opt-in. When both a custom coercer and the
+   * built-in table apply to the same position, the custom one runs first
+   * and the built-in one still runs after on its result *if* `coerce` is
+   * also true — useful for e.g. stripping a `"$"` prefix before the
+   * built-in string→number conversion takes over.
    **/
   customCoercers?: ReadonlyArray<CoercerPathEntry>
 }

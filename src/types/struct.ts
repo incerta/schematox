@@ -22,6 +22,7 @@ import type {
   BigIntString,
 } from './schema.ts'
 
+import type { CustomCoercer } from './coerce.ts'
 import type { InferSchema } from './infer.ts'
 
 export type Struct<T extends Schema> = Omit<
@@ -73,6 +74,18 @@ export type Struct<T extends Schema> = Omit<
   keyof T
 > & {
   __schema: Readonly<T>
+
+  /**
+   * Attaches a custom coercer at this struct's own position in the schema
+   * tree. Unlike every other param above, it's never stored on the schema
+   * (so it never appears in `keyof T`/`__schema`, and is never "used up" —
+   * it stays callable indefinitely; a later call replaces the earlier one).
+   * Runs on every `.parse()` call unconditionally, independently of the
+   * `coerce` option — see `ParseOptions.coerce`'s doc comment for why it's
+   * a separate switch from the built-in bigint/boolean/number/string table.
+   **/
+  coercer: (fn: CustomCoercer) => Struct<T>
+
   parse: (s: unknown, options?: ParseOptions) => ParseResult<InferSchema<T>>
 } & StandardSchemaV1<unknown, InferSchema<T>>
 

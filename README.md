@@ -516,32 +516,44 @@ The [Standard Schema](https://standardschema.dev) `~standard.validate` entry poi
 
 ### Custom coercers
 
-The built-in table only covers `bigint`/`boolean`/`number`/`string`. `withCoercer()` attaches a custom conversion function to any struct — a free function, not a schema field, for the same reason coercion itself isn't a schema field: it's a struct/parser concern, kept out of the JSON-serializable schema entirely.
+The built-in table only covers `bigint`/`boolean`/`number`/`string`. `.coercer()` attaches a custom conversion function to any struct — like every other struct param, it's a chain method, not a schema field: `T & unknown` schemas stay JSON-serializable data, and the coercer itself is tracked separately, never written into `__schema`.
 
 ```typescript
-import { withCoercer, object, string } from 'schematox'
+import { object, string } from 'schematox'
 
-const trimmed = withCoercer(string(), (s) =>
+const trimmed = string().coercer((s) =>
   typeof s === 'string' ? s.trim() : s
 )
 
 const struct = object({ name: trimmed })
 
-struct.parse({ name: '  Ann  ' }, { coerce: true })
-// { success: true, data: { name: 'Ann' } }
-
 struct.parse({ name: '  Ann  ' })
-// { success: true, data: { name: '  Ann  ' } } — coerce wasn't requested
+// { success: true, data: { name: 'Ann' } }
 ```
 
-A coercer is a plain `(subject: unknown) => unknown` function, following the same contract as the built-in ones: given a subject it doesn't recognize, return it unchanged rather than throwing, and let the ordinary validation report `INVALID_TYPE`. It's only consulted when `{ coerce: true }` is passed to that specific `.parse()` call — attaching one to a struct doesn't change that struct's behavior on a call that didn't ask for coercion, same as the built-in table. When both a custom coercer and a built-in conversion apply to the same position, the custom one runs first and the built-in one still runs afterward on its result — e.g. a custom coercer can strip a `"$"` prefix, and the built-in string→number conversion still turns what's left into a number.
+A coercer is a plain `(subject: unknown) => unknown` function, following the same contract as the built-in ones: given a subject it doesn't recognize, return it unchanged rather than throwing, and let the ordinary validation report `INVALID_TYPE`.
 
-`withCoercer()` composes through `array()`/`object()`/`record()`/`tuple()`/`union()` — attach it at any depth before composing:
+**`.coercer()` and `{ coerce: true }` are two independent switches.** `{ coerce: true }` gates the built-in bigint/boolean/number/string table — a blanket, call-site opt-in, since it isn't tied to any one field. A struct's own `.coercer()` is the opposite: an explicit, per-field declaration, active on every `.parse()` call the moment it's attached, exactly like `.brand()` or `.min()` — no separate flag needed to "turn it on", and `{ coerce: true }` has no bearing on whether it runs. When both apply to the same position, the custom one runs first and the built-in one still runs afterward on its result *if* `{ coerce: true }` was also passed — e.g. a custom coercer can strip a `"$"` prefix unconditionally, and the built-in string→number conversion turns what's left into a number only when coercion was explicitly requested for that call:
 
 ```typescript
-import { withCoercer, array, number } from 'schematox'
+const price = number().coercer((s) =>
+  typeof s === 'string' && s.startsWith('$') ? s.slice(1) : s
+)
 
-const dollars = withCoercer(number(), (s) =>
+price.parse('$42')
+// error — the coercer strips "$", leaving the string "42", but nothing
+// converts it to a number without { coerce: true }
+
+price.parse('$42', { coerce: true })
+// { success: true, data: 42 }
+```
+
+`.coercer()` composes through `array()`/`object()`/`record()`/`tuple()`/`union()` — attach it at any depth before composing, and it's tracked by position so it only fires where it was declared:
+
+```typescript
+import { array, number } from 'schematox'
+
+const dollars = number().coercer((s) =>
   typeof s === 'string' && s.startsWith('$') ? s.slice(1) : s
 )
 
@@ -549,11 +561,9 @@ array(dollars).parse(['$10', '$20'], { coerce: true })
 // { success: true, data: [10, 20] }
 ```
 
-A coercer attached to a compound struct itself (its own subject, before that struct's own validation runs) and one attached to its child (e.g. every array element) are different positions and don't collide — `withCoercer(array(dollars), (s) => typeof s === 'string' ? s.split(',') : s)` splits a whole comma-separated string into an array first, and the item-level `dollars` coercer still runs on each resulting element afterward.
+A coercer attached to a compound struct itself (its own subject, before that struct's own validation runs) and one attached to its child (e.g. every array element) are different positions and don't collide — `array(dollars).coercer((s) => typeof s === 'string' ? s.split(',') : s)` splits a whole comma-separated string into an array first, and the item-level `dollars` coercer still runs on each resulting element afterward. It doesn't mutate the struct it's called on: the original still parses without the attached coercer, and calling `.coercer()` again later replaces the earlier one (same last-write-wins behavior as `.description()`).
 
-`withCoercer()` is deliberately a free function — `withCoercer(struct, fn)` — rather than a `.coercer()` chain method. A chain method would add a new key to *every* struct's public shape, and this library's own test suite pins that shape exhaustively per schema type; a free function sidesteps that without changing what it does. It doesn't mutate its input: the original struct still parses without the attached coercer.
-
-For a static schema with no struct at all, the equivalent is passing `customCoercers` directly to `parse()`, keyed by the coercer's position in the *schema* tree rather than the runtime subject: object keys as-is, `tuple`/`union` member schemas by index, and the exported `COERCER_PATH_ITEM` sentinel for `array`/`record`'s one child position (applies uniformly to every element/entry — there's no fixed index to key by, and the sentinel is also what keeps "coerce every item" from colliding with "coerce the array's own subject", which is `path: []`):
+For a static schema with no struct at all, the equivalent is passing `customCoercers` directly to `parse()`, keyed by the coercer's position in the *schema* tree rather than the runtime subject: object keys as-is, `tuple`/`union` member schemas by index, and the exported `COERCER_PATH_ITEM` sentinel for `array`/`record`'s one child position (applies uniformly to every element/entry — there's no fixed index to key by, and the sentinel is also what keeps "coerce every item" from colliding with "coerce the array's own subject", which is `path: []`). Like `.coercer()`, `customCoercers` runs independently of `coerce`:
 
 ```typescript
 import { parse, COERCER_PATH_ITEM } from 'schematox'
@@ -562,15 +572,14 @@ import type { Schema } from 'schematox'
 const schema = { type: 'array', of: { type: 'number' } } as const satisfies Schema
 
 parse(schema, ['$1', '$2'], {
-  coerce: true,
   customCoercers: [
     {
       path: [COERCER_PATH_ITEM],
-      fn: (s) => (typeof s === 'string' ? s.slice(1) : s),
+      fn: (s) => (typeof s === 'string' ? Number(s.slice(1)) : s),
     },
   ],
 })
-// { success: true, data: [1, 2] }
+// { success: true, data: [1, 2] } — no coerce: true needed
 ```
 
 `record()`'s `key` schema doesn't support a custom coercer in this first pass — record keys are always plain strings already, and only the built-in string table applies to them.
