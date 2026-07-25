@@ -1,7 +1,14 @@
 import { ERROR_CODE } from './constants.js'
-import { getCoerceFn } from './coerce.js'
+import {
+  buildCoercerTree,
+  getCoercerTreeChild,
+  getCoerceFn,
+  getSelfCoercer,
+  COERCER_PATH_ITEM,
+} from './coerce.js'
 import { assignOwnProperty, error, success } from './utils.js'
 
+import type { CoercerTreeNode } from './coerce.js'
 import type { InferSchema } from './types/infer.js'
 import type {
   ErrorPath,
@@ -53,7 +60,15 @@ export function parse(
   subject: unknown,
   options?: ParseOptions
 ): ParseResult<unknown> {
-  return parseRecursively([], schema, subject, options?.coerce === true)
+  const coerce = options?.coerce === true
+
+  return parseRecursively(
+    [],
+    schema,
+    subject,
+    coerce,
+    coerce ? buildCoercerTree(options?.customCoercers) : undefined
+  )
 }
 
 // Recursion depth follows the static schema's nesting, never the subject's, so untrusted input can't drive stack depth.
@@ -61,7 +76,8 @@ function parseRecursively(
   errorPath: ErrorPath,
   schema: Schema,
   subject: unknown,
-  coerce: boolean
+  coerce: boolean,
+  coercerNode: CoercerTreeNode | undefined
 ): ParseResult<unknown> {
   // Schemas are plain data and may come from an untyped external source
   // (JSON, a database) that TypeScript's `satisfies Schema` never actually
@@ -91,6 +107,12 @@ function parseRecursively(
   }
 
   if (coerce) {
+    const customCoerceFn = getSelfCoercer(coercerNode)
+
+    if (customCoerceFn !== undefined) {
+      subject = customCoerceFn(subject)
+    }
+
     const coerceFn = getCoerceFn(schema.type)
 
     if (coerceFn !== undefined) {
@@ -102,7 +124,8 @@ function parseRecursively(
     errorPath,
     schema as never,
     subject,
-    coerce
+    coerce,
+    coercerNode
   )
 }
 
@@ -110,7 +133,8 @@ function parseBigInt(
   errorPath: ErrorPath,
   schema: BigIntSchema,
   subject: unknown,
-  _coerce: boolean
+  _coerce: boolean,
+  _coercerNode: CoercerTreeNode | undefined
 ) {
   if (typeof subject !== 'bigint') {
     return error([
@@ -201,7 +225,8 @@ function parseBoolean(
   errorPath: ErrorPath,
   schema: BooleanSchema,
   subject: unknown,
-  _coerce: boolean
+  _coerce: boolean,
+  _coercerNode: CoercerTreeNode | undefined
 ) {
   if (typeof subject !== 'boolean') {
     return error([
@@ -220,7 +245,8 @@ function parseLiteral(
   errorPath: ErrorPath,
   schema: LiteralSchema,
   subject: unknown,
-  _coerce: boolean
+  _coerce: boolean,
+  _coercerNode: CoercerTreeNode | undefined
 ) {
   if (subject !== schema.of) {
     return error([
@@ -239,7 +265,8 @@ function parseNumber(
   errorPath: ErrorPath,
   schema: NumberSchema,
   subject: unknown,
-  _coerce: boolean
+  _coerce: boolean,
+  _coercerNode: CoercerTreeNode | undefined
 ) {
   if (typeof subject !== 'number' || Number.isFinite(subject) === false) {
     return error([
@@ -302,7 +329,8 @@ function parseString(
   errorPath: ErrorPath,
   schema: StringSchema,
   subject: unknown,
-  _coerce: boolean
+  _coerce: boolean,
+  _coercerNode: CoercerTreeNode | undefined
 ) {
   if (typeof subject !== 'string') {
     return error([
@@ -365,7 +393,8 @@ function parseUnknown(
   _errorPath: ErrorPath,
   _schema: UnknownSchema,
   subject: unknown,
-  _coerce: boolean
+  _coerce: boolean,
+  _coercerNode: CoercerTreeNode | undefined
 ) {
   return success(subject)
 }
@@ -374,7 +403,8 @@ function parseArray(
   errorPath: ErrorPath,
   schema: ArraySchema<Schema>,
   subject: unknown,
-  coerce: boolean
+  coerce: boolean,
+  coercerNode: CoercerTreeNode | undefined
 ) {
   if (Array.isArray(subject) === false) {
     return error([
@@ -401,6 +431,7 @@ function parseArray(
 
   const result: unknown[] = []
   let invalidSubjects: InvalidSubject[] | undefined
+  const itemCoercerNode = getCoercerTreeChild(coercerNode, COERCER_PATH_ITEM)
 
   for (let i = 0; i < subject.length; i++) {
     const nestedSchema = schema.of
@@ -411,7 +442,8 @@ function parseArray(
       errorPath,
       nestedSchema,
       nestedValue,
-      coerce
+      coerce,
+      itemCoercerNode
     )
     errorPath.pop()
 
@@ -474,7 +506,8 @@ function parseObject(
   errorPath: ErrorPath,
   schema: ObjectSchema<Record<string, Schema>>,
   subject: unknown,
-  coerce: boolean
+  coerce: boolean,
+  coercerNode: CoercerTreeNode | undefined
 ): ParseResult<unknown> {
   if (
     typeof subject !== 'object' ||
@@ -504,7 +537,8 @@ function parseObject(
       errorPath,
       nestedSchema,
       nestedValue,
-      coerce
+      coerce,
+      getCoercerTreeChild(coercerNode, key)
     )
     errorPath.pop()
 
@@ -533,7 +567,8 @@ function parseRecord(
   errorPath: ErrorPath,
   schema: RecordSchema<Schema>,
   subject: unknown,
-  coerce: boolean
+  coerce: boolean,
+  coercerNode: CoercerTreeNode | undefined
 ) {
   if (
     typeof subject !== 'object' ||
@@ -565,6 +600,10 @@ function parseRecord(
   const result: Record<string, unknown> = {}
   let invalidSubjects: InvalidSubject[] | undefined
   let validEntryCounter = 0
+  // Record keys are always plain strings (`for...in`), and there's no fixed
+  // key to attach a custom coercer to (unlike `object`'s named properties)
+  // — key coercion stays limited to the built-in string table via `coerce`.
+  const valueCoercerNode = getCoercerTreeChild(coercerNode, COERCER_PATH_ITEM)
 
   for (const key in subject) {
     const nestedValue = (subject as Record<string, unknown>)[key]
@@ -579,7 +618,13 @@ function parseRecord(
     let keyIsValid = true
 
     if (schema.key !== undefined) {
-      const parsedKey = parseRecursively(errorPath, schema.key, key, coerce)
+      const parsedKey = parseRecursively(
+        errorPath,
+        schema.key,
+        key,
+        coerce,
+        undefined
+      )
 
       if (parsedKey.error) {
         keyIsValid = false
@@ -591,7 +636,13 @@ function parseRecord(
       }
     }
 
-    const parsed = parseRecursively(errorPath, schema.of, nestedValue, coerce)
+    const parsed = parseRecursively(
+      errorPath,
+      schema.of,
+      nestedValue,
+      coerce,
+      valueCoercerNode
+    )
     errorPath.pop()
 
     if (parsed.error) {
@@ -659,7 +710,8 @@ function parseTuple(
   errorPath: ErrorPath,
   schema: TupleSchema<Array<Schema>>,
   subject: unknown,
-  coerce: boolean
+  coerce: boolean,
+  coercerNode: CoercerTreeNode | undefined
 ) {
   if (Array.isArray(schema.of) === false) {
     return error([
@@ -693,7 +745,8 @@ function parseTuple(
       errorPath,
       nestedSchema,
       nestedValue,
-      coerce
+      coerce,
+      getCoercerTreeChild(coercerNode, i)
     )
     errorPath.pop()
 
@@ -734,7 +787,8 @@ function parseUnion(
   errorPath: ErrorPath,
   schema: UnionSchema<Array<Schema>>,
   subject: unknown,
-  coerce: boolean
+  coerce: boolean,
+  coercerNode: CoercerTreeNode | undefined
 ) {
   if (Array.isArray(schema.of) === false) {
     return error([
@@ -746,8 +800,14 @@ function parseUnion(
     ])
   }
 
-  for (const subSchema of schema.of) {
-    const parsed = parseRecursively(errorPath, subSchema, subject, coerce)
+  for (let i = 0; i < schema.of.length; i++) {
+    const parsed = parseRecursively(
+      errorPath,
+      schema.of[i]!,
+      subject,
+      coerce,
+      getCoercerTreeChild(coercerNode, i)
+    )
 
     if (parsed.error === undefined) {
       return parsed

@@ -1,4 +1,5 @@
 import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants.js'
+import { COERCER_PATH_ITEM } from './coerce.js'
 import { parse } from './parse.js'
 import { assignOwnProperty } from './utils.js'
 
@@ -9,16 +10,27 @@ import type {
   BrandSchema,
   StringSchema,
 } from './types/schema.ts'
+import type { CoercerPathEntry, CustomCoercer } from './types/coerce.ts'
 import type { ParseOptions } from './types/utils.ts'
 import type { Struct, StructParams, StructShape } from './types/struct.ts'
 
-export function makeStruct<T extends Schema>(schema: T): Struct<T>
-export function makeStruct(schema: Schema) {
+export function makeStruct<T extends Schema>(
+  schema: T,
+  coercers?: ReadonlyArray<CoercerPathEntry>
+): Struct<T>
+export function makeStruct(
+  schema: Schema,
+  coercers: ReadonlyArray<CoercerPathEntry> = []
+) {
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const result: Record<string, unknown> & StandardSchemaV1 = {
     __schema: { ...schema },
+    // Deliberately not part of the public `Struct<T>` type — see
+    // `withCoercer`'s doc comment for why. Read back only by this module's
+    // own composition functions (`object`/`array`/etc.) via `readCoercers`.
+    __coercers: coercers,
     parse: (subj: unknown, options?: ParseOptions) =>
-      parse(schema as never, subj, options),
+      parse(schema as never, subj, withStructCoercers(options, coercers)),
     ['~standard']: {
       ...STANDARD_SCHEMA,
       validate: (input) => {
@@ -38,54 +50,120 @@ export function makeStruct(schema: Schema) {
 
   /* Params present in all schema types */
 
-  result.optional = () => makeStruct({ ...schema, optional: true })
-  result.nullable = () => makeStruct({ ...schema, nullable: true })
+  result.optional = () => makeStruct({ ...schema, optional: true }, coercers)
+  result.nullable = () => makeStruct({ ...schema, nullable: true }, coercers)
   result.description = (description: string) =>
-    makeStruct({ ...schema, description })
+    makeStruct({ ...schema, description }, coercers)
 
   /* Schema specific params */
 
   if (params.has('brand')) {
     result.brand = (...args: BrandSchema | [BrandSchema]) => {
-      return makeStruct({
-        ...schema,
-        brand: (Array.isArray(args[0]) ? args[0] : args) as BrandSchema,
-      })
+      return makeStruct(
+        {
+          ...schema,
+          brand: (Array.isArray(args[0]) ? args[0] : args) as BrandSchema,
+        },
+        coercers
+      )
     }
   }
 
   if (params.has('key')) {
     result.key = (key: StructShape<StringSchema>) =>
-      makeStruct({ ...schema, key: key.__schema })
+      makeStruct({ ...schema, key: key.__schema }, coercers)
   }
 
   if (params.has('min')) {
     if (schema.type === 'bigint') {
-      result.min = (min: BigIntString) => makeStruct({ ...schema, min })
+      result.min = (min: BigIntString) =>
+        makeStruct({ ...schema, min }, coercers)
     } else {
-      result.min = (min: number) => makeStruct({ ...schema, min })
+      result.min = (min: number) => makeStruct({ ...schema, min }, coercers)
     }
   }
 
   if (params.has('max')) {
     if (schema.type === 'bigint') {
-      result.max = (max: BigIntString) => makeStruct({ ...schema, max })
+      result.max = (max: BigIntString) =>
+        makeStruct({ ...schema, max }, coercers)
     } else {
-      result.max = (max: number) => makeStruct({ ...schema, max })
+      result.max = (max: number) => makeStruct({ ...schema, max }, coercers)
     }
   }
 
   if (params.has('minLength')) {
     result.minLength = (minLength: number) =>
-      makeStruct({ ...schema, minLength })
+      makeStruct({ ...schema, minLength }, coercers)
   }
 
   if (params.has('maxLength')) {
     result.maxLength = (maxLength: number) =>
-      makeStruct({ ...schema, maxLength })
+      makeStruct({ ...schema, maxLength }, coercers)
   }
 
   return result
+}
+
+function withStructCoercers(
+  options: ParseOptions | undefined,
+  structCoercers: ReadonlyArray<CoercerPathEntry>
+): ParseOptions | undefined {
+  if (structCoercers.length === 0) {
+    return options
+  }
+
+  return {
+    ...options,
+    customCoercers: [...structCoercers, ...(options?.customCoercers ?? [])],
+  }
+}
+
+function readCoercers(struct: object): ReadonlyArray<CoercerPathEntry> {
+  return (
+    (struct as { __coercers?: ReadonlyArray<CoercerPathEntry> }).__coercers ??
+    []
+  )
+}
+
+/**
+ * Attaches a custom coercer to `struct`'s own position in the schema tree.
+ * It runs before any built-in `coerce` conversion for that exact node,
+ * whenever `.parse()` is called with `{ coerce: true }` — same gate as the
+ * built-in table, so a struct's declared coercers never activate silently
+ * on a call that didn't ask for coercion.
+ *
+ * Deliberately a free function, not a `.coercer()` chain method: a chain
+ * method would add a new key to *every* struct's public shape, which this
+ * library's own test suite pins exhaustively per schema type (see
+ * `tests/by-struct/*`, `foldB`) — an unrelated, wide blast radius for what
+ * is otherwise a self-contained, opt-in feature. `withCoercer` instead
+ * reads/writes a plain runtime property (`__coercers`) that the `Struct<T>`
+ * type never declares, so it never appears in `keyof struct`.
+ *
+ * Composition (`object`/`array`/`record`/`tuple`/`union`) automatically
+ * gathers a member's coercers into the parent's own list, remapped to that
+ * member's position in the schema tree — so this can be called at any
+ * depth before the struct is composed into a larger one:
+ *
+ * ```typescript
+ * const trimmed = withCoercer(string(), (s) =>
+ *   typeof s === 'string' ? s.trim() : s
+ * )
+ * const struct = object({ name: trimmed })
+ *
+ * struct.parse({ name: '  Ann  ' }, { coerce: true })
+ * // { success: true, data: { name: 'Ann' } }
+ * ```
+ **/
+export function withCoercer<T extends Schema>(
+  struct: Struct<T>,
+  fn: CustomCoercer
+): Struct<T> {
+  return makeStruct(struct.__schema as T, [
+    ...readCoercers(struct),
+    { path: [], fn },
+  ])
 }
 
 /**
@@ -121,10 +199,18 @@ export function unknown() {
  **/
 
 export function array<T extends StructShape<Schema>>(of: T) {
-  return makeStruct({
-    type: 'array',
-    of: of.__schema as T['__schema'],
-  })
+  const coercers = readCoercers(of).map((entry) => ({
+    path: [COERCER_PATH_ITEM, ...entry.path],
+    fn: entry.fn,
+  }))
+
+  return makeStruct(
+    {
+      type: 'array',
+      of: of.__schema as T['__schema'],
+    },
+    coercers
+  )
 }
 
 export function object<T extends Record<string, StructShape<Schema>>>(of: T) {
@@ -132,23 +218,34 @@ export function object<T extends Record<string, StructShape<Schema>>>(of: T) {
     type: 'object' as const,
     of: {} as { [K in keyof T]: T[K]['__schema'] },
   }
+  const coercers: CoercerPathEntry[] = []
 
   for (const key in of) {
-    assignOwnProperty(
-      schema.of,
-      key,
-      (of[key] as NonNullable<(typeof of)[typeof key]>).__schema
-    )
+    const child = of[key] as NonNullable<(typeof of)[typeof key]>
+
+    assignOwnProperty(schema.of, key, child.__schema)
+
+    for (const entry of readCoercers(child)) {
+      coercers.push({ path: [key, ...entry.path], fn: entry.fn })
+    }
   }
 
-  return makeStruct(schema)
+  return makeStruct(schema, coercers)
 }
 
 export function record<T extends StructShape<Schema>>(of: T) {
-  return makeStruct({
-    type: 'record',
-    of: of.__schema as T['__schema'],
-  })
+  const coercers = readCoercers(of).map((entry) => ({
+    path: [COERCER_PATH_ITEM, ...entry.path],
+    fn: entry.fn,
+  }))
+
+  return makeStruct(
+    {
+      type: 'record',
+      of: of.__schema as T['__schema'],
+    },
+    coercers
+  )
 }
 
 export function tuple<
@@ -159,7 +256,15 @@ export function tuple<
     of: of.map((x) => x.__schema) as { [K in keyof T]: T[K]['__schema'] },
   } as const
 
-  return makeStruct(schema)
+  const coercers: CoercerPathEntry[] = []
+
+  for (let i = 0; i < of.length; i++) {
+    for (const entry of readCoercers(of[i]!)) {
+      coercers.push({ path: [i, ...entry.path], fn: entry.fn })
+    }
+  }
+
+  return makeStruct(schema, coercers)
 }
 
 export function union<
@@ -173,10 +278,17 @@ export function union<
         }
       : never
   }
+  const coercers: CoercerPathEntry[] = []
 
-  for (const subSchema of of) {
+  for (let i = 0; i < of.length; i++) {
+    const subSchema = of[i]!
+
     schema.of.push(subSchema.__schema)
+
+    for (const entry of readCoercers(subSchema)) {
+      coercers.push({ path: [i, ...entry.path], fn: entry.fn })
+    }
   }
 
-  return makeStruct(schema)
+  return makeStruct(schema, coercers)
 }
