@@ -31,6 +31,7 @@ Most TypeScript validators (Zod, Yup, Joi) make you build a schema out of functi
   - [Tuple](#tuple)
   - [Union](#union)
 - [Schema Parameters](#schema-parameters)
+- [Coercion](#coercion)
 - [Error Shape](#error-shape)
 - [Benchmarks](#benchmarks)
 
@@ -470,6 +471,47 @@ Some validation libraries (e.g. zod) brand values with a single fixed `unique sy
 - **The `__` prefix is the workaround, not a caveat**: `category` is a free-form string, and primitive types already carry real structural members (`string`'s `length`, `toString`, etc.). Branding with a bare `category` key (no prefix) would risk colliding with one of those — e.g. `{ length: 'x' }` intersected with real `string.length: number` collapses the whole type to `never`. Prefixing with `__` sidesteps this: `.brand('length', 'x')` produces `{ __length: 'x' }`, which doesn't collide with anything, so `length` (and any other real member name) is a perfectly safe category to use.
 
 The one name still worth avoiding is a `category` that itself starts with `proto__`, since `__${category}` would then literally read `__proto__`. Harmless in practice — brands are never assigned at runtime, so there's no live object carrying that key — but avoidable all the same.
+
+## Coercion
+
+Coercion is a parse-time option, not a schema property. It's opt-in per call, on both the free `parse()` function and a struct's `.parse()`:
+
+```typescript
+import { parse, number } from 'schematox'
+
+const schema = { type: 'number' } as const satisfies Schema
+
+parse(schema, '42')                    // error — "42" is not a number
+parse(schema, '42', { coerce: true })  // { success: true, data: 42 }
+
+number().parse('42', { coerce: true }) // { success: true, data: 42 }
+```
+
+The same `schema`/`struct` parses raw strings from a URL query, a form submission, or an env var one way, and an already-typed JSON body another — without needing two schemas or a `.coerce()`-flavored variant of every primitive to keep around. This is also why coercion isn't a schema field: a schema that always coerced would silently accept `"42"` even where a caller specifically wanted to reject it (e.g. an internal API that only trusts a JSON body). Whether coercion applies is a property of a specific `parse()` call, so it can differ per call site even when the schema itself is shared.
+
+Because coercion only changes which raw inputs are *accepted*, never what a successful parse *returns*, it has no effect on `Infer`/`InferSchema` — a coerced `number` schema still infers as `number`, the same as without coercion.
+
+Only `bigint`, `boolean`, `number`, and `string` are coercible, and only from one of the other three — the conversion is always unambiguous, never a parse of arbitrary text:
+
+| target    | accepted input                       | conversion |
+| --------- | ------------------------------------- | ---------- |
+| `number`  | non-empty numeric `string`            | `Number(x)`, rejected if `NaN` |
+|           | `boolean`                             | `true → 1`, `false → 0` |
+|           | `bigint`                              | `Number(x)` |
+| `bigint`  | integer `string`/`number`             | `BigInt(x)`, rejected if it throws (e.g. `"4.2"`, `4.2`) |
+|           | `boolean`                             | `true → 1n`, `false → 0n` |
+| `string`  | `number`/`boolean`                    | `String(x)` |
+|           | `bigint`                              | `x.toString()` |
+| `boolean` | `string`                              | only the exact strings `"true"`/`"false"` — not `"TRUE"`, `"1"`, `"yes"` |
+|           | `number`/`bigint`                     | only `1`/`0` or `1n`/`0n` |
+
+A conversion that doesn't apply (wrong source type) or fails (e.g. `"abc"` for `number`, `"4.2"` for `bigint`) is left as-is and falls through to the same `INVALID_TYPE` error parsing would produce without coercion — coercion never throws and never introduces a new error code. `min`/`max`/`minLength`/`maxLength` are checked against the coerced value, so `parse({ type: 'number', min: 10 }, '5', { coerce: true })` fails with `INVALID_RANGE`, not `INVALID_TYPE`.
+
+`literal` and `unknown` are never coerced — a `literal`'s target type depends on the runtime type of `of` rather than `schema.type` alone, and `unknown` already accepts anything. Compound schemas (`array`/`object`/`record`/`tuple`/`union`) aren't coerced themselves (there's no single scalar to convert a subject into an array from), but `{ coerce: true }` still reaches every coercible descendant: `parse(array(number()), ['1', '2'], { coerce: true })` succeeds with `[1, 2]`.
+
+`optional`/`nullable` are checked before coercion runs, so `undefined`/`null` pass straight through rather than being coerced into e.g. `0`/`false`.
+
+The [Standard Schema](https://standardschema.dev) `~standard.validate` entry point doesn't take options — that signature is fixed by the spec — so coercion isn't reachable through it; use `parse()`/`struct.parse()` directly when you need it.
 
 ## Error Shape
 

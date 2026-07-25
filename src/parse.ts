@@ -1,8 +1,14 @@
 import { ERROR_CODE } from './constants.js'
+import { getCoerceFn } from './coerce.js'
 import { assignOwnProperty, error, success } from './utils.js'
 
 import type { InferSchema } from './types/infer.js'
-import type { ErrorPath, InvalidSubject, ParseResult } from './types/utils.js'
+import type {
+  ErrorPath,
+  InvalidSubject,
+  ParseOptions,
+  ParseResult,
+} from './types/utils.js'
 
 import type {
   Schema,
@@ -38,18 +44,24 @@ const PARSE_FN_BY_SCHEMA_KIND = {
 
 export function parse<T extends Schema>(
   schema: T,
-  subject: unknown
+  subject: unknown,
+  options?: ParseOptions
 ): ParseResult<InferSchema<T>>
 
-export function parse(schema: Schema, subject: unknown): ParseResult<unknown> {
-  return parseRecursively([], schema, subject)
+export function parse(
+  schema: Schema,
+  subject: unknown,
+  options?: ParseOptions
+): ParseResult<unknown> {
+  return parseRecursively([], schema, subject, options?.coerce === true)
 }
 
 // Recursion depth follows the static schema's nesting, never the subject's, so untrusted input can't drive stack depth.
 function parseRecursively(
   errorPath: ErrorPath,
   schema: Schema,
-  subject: unknown
+  subject: unknown,
+  coerce: boolean
 ): ParseResult<unknown> {
   // Schemas are plain data and may come from an untyped external source
   // (JSON, a database) that TypeScript's `satisfies Schema` never actually
@@ -78,17 +90,27 @@ function parseRecursively(
     return success(null)
   }
 
+  if (coerce) {
+    const coerceFn = getCoerceFn(schema.type)
+
+    if (coerceFn !== undefined) {
+      subject = coerceFn(subject)
+    }
+  }
+
   return PARSE_FN_BY_SCHEMA_KIND[schema.type](
     errorPath,
     schema as never,
-    subject
+    subject,
+    coerce
   )
 }
 
 function parseBigInt(
   errorPath: ErrorPath,
   schema: BigIntSchema,
-  subject: unknown
+  subject: unknown,
+  _coerce: boolean
 ) {
   if (typeof subject !== 'bigint') {
     return error([
@@ -178,7 +200,8 @@ function parseBigInt(
 function parseBoolean(
   errorPath: ErrorPath,
   schema: BooleanSchema,
-  subject: unknown
+  subject: unknown,
+  _coerce: boolean
 ) {
   if (typeof subject !== 'boolean') {
     return error([
@@ -196,7 +219,8 @@ function parseBoolean(
 function parseLiteral(
   errorPath: ErrorPath,
   schema: LiteralSchema,
-  subject: unknown
+  subject: unknown,
+  _coerce: boolean
 ) {
   if (subject !== schema.of) {
     return error([
@@ -214,7 +238,8 @@ function parseLiteral(
 function parseNumber(
   errorPath: ErrorPath,
   schema: NumberSchema,
-  subject: unknown
+  subject: unknown,
+  _coerce: boolean
 ) {
   if (typeof subject !== 'number' || Number.isFinite(subject) === false) {
     return error([
@@ -276,7 +301,8 @@ function parseNumber(
 function parseString(
   errorPath: ErrorPath,
   schema: StringSchema,
-  subject: unknown
+  subject: unknown,
+  _coerce: boolean
 ) {
   if (typeof subject !== 'string') {
     return error([
@@ -338,7 +364,8 @@ function parseString(
 function parseUnknown(
   _errorPath: ErrorPath,
   _schema: UnknownSchema,
-  subject: unknown
+  subject: unknown,
+  _coerce: boolean
 ) {
   return success(subject)
 }
@@ -346,7 +373,8 @@ function parseUnknown(
 function parseArray(
   errorPath: ErrorPath,
   schema: ArraySchema<Schema>,
-  subject: unknown
+  subject: unknown,
+  coerce: boolean
 ) {
   if (Array.isArray(subject) === false) {
     return error([
@@ -379,7 +407,12 @@ function parseArray(
     const nestedValue = subject[i]
 
     errorPath.push(i)
-    const parsed = parseRecursively(errorPath, nestedSchema, nestedValue)
+    const parsed = parseRecursively(
+      errorPath,
+      nestedSchema,
+      nestedValue,
+      coerce
+    )
     errorPath.pop()
 
     if (parsed.error) {
@@ -440,7 +473,8 @@ function parseArray(
 function parseObject(
   errorPath: ErrorPath,
   schema: ObjectSchema<Record<string, Schema>>,
-  subject: unknown
+  subject: unknown,
+  coerce: boolean
 ): ParseResult<unknown> {
   if (
     typeof subject !== 'object' ||
@@ -466,7 +500,12 @@ function parseObject(
     const nestedValue = narrowedSubj[key]
 
     errorPath.push(key)
-    const parsed = parseRecursively(errorPath, nestedSchema, nestedValue)
+    const parsed = parseRecursively(
+      errorPath,
+      nestedSchema,
+      nestedValue,
+      coerce
+    )
     errorPath.pop()
 
     if (parsed.error) {
@@ -493,7 +532,8 @@ function parseObject(
 function parseRecord(
   errorPath: ErrorPath,
   schema: RecordSchema<Schema>,
-  subject: unknown
+  subject: unknown,
+  coerce: boolean
 ) {
   if (
     typeof subject !== 'object' ||
@@ -539,7 +579,7 @@ function parseRecord(
     let keyIsValid = true
 
     if (schema.key !== undefined) {
-      const parsedKey = parseRecursively(errorPath, schema.key, key)
+      const parsedKey = parseRecursively(errorPath, schema.key, key, coerce)
 
       if (parsedKey.error) {
         keyIsValid = false
@@ -551,7 +591,7 @@ function parseRecord(
       }
     }
 
-    const parsed = parseRecursively(errorPath, schema.of, nestedValue)
+    const parsed = parseRecursively(errorPath, schema.of, nestedValue, coerce)
     errorPath.pop()
 
     if (parsed.error) {
@@ -618,7 +658,8 @@ function parseRecord(
 function parseTuple(
   errorPath: ErrorPath,
   schema: TupleSchema<Array<Schema>>,
-  subject: unknown
+  subject: unknown,
+  coerce: boolean
 ) {
   if (Array.isArray(schema.of) === false) {
     return error([
@@ -648,7 +689,12 @@ function parseTuple(
     const nestedValue = subject[i]
 
     errorPath.push(i)
-    const parsed = parseRecursively(errorPath, nestedSchema, nestedValue)
+    const parsed = parseRecursively(
+      errorPath,
+      nestedSchema,
+      nestedValue,
+      coerce
+    )
     errorPath.pop()
 
     if (parsed.error) {
@@ -687,7 +733,8 @@ function parseTuple(
 function parseUnion(
   errorPath: ErrorPath,
   schema: UnionSchema<Array<Schema>>,
-  subject: unknown
+  subject: unknown,
+  coerce: boolean
 ) {
   if (Array.isArray(schema.of) === false) {
     return error([
@@ -700,7 +747,7 @@ function parseUnion(
   }
 
   for (const subSchema of schema.of) {
-    const parsed = parseRecursively(errorPath, subSchema, subject)
+    const parsed = parseRecursively(errorPath, subSchema, subject, coerce)
 
     if (parsed.error === undefined) {
       return parsed

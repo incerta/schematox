@@ -1,4 +1,4 @@
-import { ParseResult } from './utils.js'
+import { ParseOptions, ParseResult } from './utils.js'
 
 import type { StandardSchemaV1 } from './standard-schema.ts'
 import type {
@@ -73,7 +73,7 @@ export type Struct<T extends Schema> = Omit<
   keyof T
 > & {
   __schema: Readonly<T>
-  parse: (s: unknown) => ParseResult<InferSchema<T>>
+  parse: (s: unknown, options?: ParseOptions) => ParseResult<InferSchema<T>>
 } & StandardSchemaV1<unknown, InferSchema<T>>
 
 type BrandSubType =

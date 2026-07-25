@@ -26,6 +26,7 @@ export type {
   ErrorPath,
   InvalidSubject,
   ParseError,
+  ParseOptions,
   ParseResult,
   ParseSuccess,
   PrettifyObject,
