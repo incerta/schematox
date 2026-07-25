@@ -61,17 +61,14 @@ export function makeStruct(
 
   // Unlike every param above, never touches `schema` — it's tracked
   // separately (see `preprocessors`) so it never appears in `__schema`.
-  // Still only applicable once, same as every param above: an entry with
-  // an empty path is this struct's own preprocessor (as opposed to one
-  // inherited from a composed child, which always has at least one path
-  // segment — see `array`/`object`/etc. below), so its presence means
-  // `.preprocess()` already ran and the method is omitted this time
-  // around, matching `Struct<T, Preprocessed>`'s type-level removal of
-  // `preprocess` once applied.
-  if (preprocessors.every((entry) => entry.path.length > 0)) {
-    result.preprocess = (fn: PreprocessFn) =>
-      makeStruct(schema, [...preprocessors, { path: [], fn }])
-  }
+  // Unlike every param above, it's also not a one-time application: since
+  // it isn't a schema field, there's nothing for the type system to key a
+  // "used up" state off of, so repeated calls are allowed — an entry with
+  // an empty path is this struct's own preprocessor, and a later one
+  // simply replaces the earlier one (`buildPreprocessTree` keeps the last
+  // entry for a given path).
+  result.preprocess = (fn: PreprocessFn) =>
+    makeStruct(schema, [...preprocessors, { path: [], fn }])
 
   /* Schema specific params */
 

@@ -97,27 +97,13 @@ describe('.preprocess(): does not mutate the struct it was called on', () => {
     expect(b.parse('x')).toStrictEqual({ success: true, data: 'x' })
   })
 
-  it('cannot be called a second time — removed from the type once applied, same as .brand()/.min()/etc.', () => {
-    const struct = x.string().preprocess(() => 'first')
+  it('can be called more than once — not schema-related, so unlike .brand()/.min()/etc. it stays available; the last call wins', () => {
+    const struct = x
+      .string()
+      .preprocess(() => 'first')
+      .preprocess(() => 'second')
 
-    type ExpectedKeys =
-      | '__schema'
-      | '~standard'
-      | 'parse'
-      | 'optional'
-      | 'nullable'
-      | 'brand'
-      | 'minLength'
-      | 'maxLength'
-      | 'description'
-
-    x.tCh<keyof typeof struct, ExpectedKeys>()
-    x.tCh<ExpectedKeys, keyof typeof struct>()
-
-    // @ts-expect-error: 'preprocess' does not exist on type 'Struct<..., true>'
-    const goneAtRuntimeToo = struct.preprocess
-
-    expect(goneAtRuntimeToo).toBe(undefined)
+    expect(struct.parse('x')).toStrictEqual({ success: true, data: 'second' })
   })
 })
 

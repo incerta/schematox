@@ -25,25 +25,16 @@ import type {
 import type { PreprocessFn } from './preprocess.ts'
 import type { InferSchema } from './infer.ts'
 
-/**
- * `Preprocessed` is a phantom flag, not derived from `T`/`Schema` —
- * `.preprocess()` deliberately never touches the schema (see its own doc
- * comment below), so there's no schema field for `Omit<..., keyof T>` to
- * key off of the way it does for every other param. Tracking "has
- * `.preprocess()` already been called" as a second type parameter instead
- * reproduces the same once-only-application rule this library already
- * enforces for `.brand()`/`.min()`/etc., without writing anything into
- * `__schema` to get it.
- **/
-export type Struct<
-  T extends Schema,
-  Preprocessed extends boolean = false,
-> = Omit<
+export type Struct<T extends Schema> = Omit<
   Pick<
     {
-      optional: () => Struct<T & { optional: true }, Preprocessed>
-      nullable: () => Struct<T & { nullable: true }, Preprocessed>
+      /** Allows `undefined` in addition to the usual value. */
+      optional: () => Struct<T & { optional: true }>
 
+      /** Allows `null` in addition to the usual value. */
+      nullable: () => Struct<T & { nullable: true }>
+
+      /** Tags the value as a nominal type, e.g. `string & { __idFor: 'User' }`. */
       brand: <
         U extends [string, BrandSubType] | [Readonly<[string, BrandSubType]>],
       >(
@@ -55,63 +46,54 @@ export type Struct<
             : U extends [Readonly<[infer V, infer W]>]
               ? BrandSchema<V, W>
               : never
-        },
-        Preprocessed
+        }
       >
 
+      /** Schema used to validate a record's keys. */
       key: <U extends StructShape<StringSchema>>(
         key: U
-      ) => Struct<T & { key: U['__schema'] }, Preprocessed>
+      ) => Struct<T & { key: U['__schema'] }>
 
+      /** Minimum length/size allowed. */
       minLength: <U extends number>(
         minLength: U
-      ) => Struct<T & { minLength: U }, Preprocessed>
+      ) => Struct<T & { minLength: U }>
 
+      /** Maximum length/size allowed. */
       maxLength: <U extends number>(
         maxLength: U
-      ) => Struct<T & { maxLength: U }, Preprocessed>
+      ) => Struct<T & { maxLength: U }>
 
+      /** Maximum value allowed. */
       max: T extends BigIntSchema
-        ? <U extends BigIntString>(
-            max: U
-          ) => Struct<T & { max: U }, Preprocessed>
-        : <U extends number>(max: U) => Struct<T & { max: U }, Preprocessed>
+        ? <U extends BigIntString>(max: U) => Struct<T & { max: U }>
+        : <U extends number>(max: U) => Struct<T & { max: U }>
 
+      /** Minimum value allowed. */
       min: T extends BigIntSchema
-        ? <U extends BigIntString>(
-            min: U
-          ) => Struct<T & { min: U }, Preprocessed>
-        : <U extends number>(min: U) => Struct<T & { min: U }, Preprocessed>
+        ? <U extends BigIntString>(min: U) => Struct<T & { min: U }>
+        : <U extends number>(min: U) => Struct<T & { min: U }>
 
+      /** Free-text description, for documentation purposes only. */
       description: <U extends string>(
         description: U
-      ) => Struct<T & { description: U }, Preprocessed>
+      ) => Struct<T & { description: U }>
     },
     ParamsBySchemaType[T['type']]
   >,
   keyof T
 > & {
   __schema: Readonly<T>
+
+  /**
+   * Runs before validation to adjust the raw input — e.g. trim a string,
+   * strip a currency prefix. Independent of the schema and of the
+   * `coerce` option: it always runs, and never appears in `__schema`.
+   **/
+  preprocess: (fn: PreprocessFn) => Struct<T & { preprocess: PreprocessFn }>
+
   parse: (s: unknown, options?: ParseOptions) => ParseResult<InferSchema<T>>
-} & StandardSchemaV1<unknown, InferSchema<T>> &
-  (Preprocessed extends true
-    ? unknown
-    : {
-        /**
-         * Attaches a custom preprocessing function at this struct's own
-         * position in the schema tree. Never stored on the schema — so it
-         * never appears in `keyof T`/`__schema` — but still only
-         * applicable once per struct, same as every param above: calling
-         * `.preprocess()` flips `Preprocessed` to `true`, which removes
-         * `preprocess` from the returned struct's own type.
-         *
-         * Runs on every `.parse()` call unconditionally, independently of
-         * the `coerce` option — see `ParseOptions.coerce`'s doc comment for
-         * why it's a separate switch from the built-in
-         * bigint/boolean/number/string table.
-         **/
-        preprocess: (fn: PreprocessFn) => Struct<T, true>
-      })
+} & StandardSchemaV1<unknown, InferSchema<T>>
 
 type BrandSubType =
   boolean | number | string | ReadonlyArray<unknown> | Record<string, unknown>
