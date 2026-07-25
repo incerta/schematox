@@ -1,15 +1,15 @@
 import { ERROR_CODE } from './constants.js'
 import { getCoerceFn } from './coerce.js'
 import {
-  buildConvertTree,
-  getConvertTreeChild,
-  getSelfConvert,
-  CONVERT_PATH_ITEM,
-} from './convert.js'
+  buildPreprocessTree,
+  getPreprocessTreeChild,
+  getSelfPreprocess,
+  PREPROCESS_PATH_ITEM,
+} from './preprocess.js'
 import { assignOwnProperty, error, success } from './utils.js'
 
-import type { ConvertTreeNode } from './convert.js'
-import type { ConvertPathEntry } from './types/convert.js'
+import type { PreprocessTreeNode } from './preprocess.js'
+import type { PreprocessPathEntry } from './types/preprocess.js'
 import type { InferSchema } from './types/infer.js'
 import type {
   ErrorPath,
@@ -73,29 +73,29 @@ export function parse(
 /**
  * Not part of the public `index.ts` surface. `struct.ts` is the only
  * caller, feeding in the flat `{ path, fn }[]` list a struct accumulates
- * from its own and its composed children's `.convert()` calls — there's
- * no public, schema-only equivalent, since a converter's position is only
- * meaningful relative to a specific struct's composition.
+ * from its own and its composed children's `.preprocess()` calls — there's
+ * no public, schema-only equivalent, since a preprocessor's position is
+ * only meaningful relative to a specific struct's composition.
  **/
-export function parseWithConverters<T extends Schema>(
+export function parseWithPreprocessors<T extends Schema>(
   schema: T,
   subject: unknown,
   options: ParseOptions | undefined,
-  converters: ReadonlyArray<ConvertPathEntry>
+  preprocessors: ReadonlyArray<PreprocessPathEntry>
 ): ParseResult<InferSchema<T>>
 
-export function parseWithConverters(
+export function parseWithPreprocessors(
   schema: Schema,
   subject: unknown,
   options: ParseOptions | undefined,
-  converters: ReadonlyArray<ConvertPathEntry>
+  preprocessors: ReadonlyArray<PreprocessPathEntry>
 ): ParseResult<unknown> {
   return parseRecursively(
     [],
     schema,
     subject,
     options?.coerce === true,
-    buildConvertTree(converters)
+    buildPreprocessTree(preprocessors)
   )
 }
 
@@ -105,7 +105,7 @@ function parseRecursively(
   schema: Schema,
   subject: unknown,
   coerce: boolean,
-  convertNode: ConvertTreeNode | undefined
+  preprocessNode: PreprocessTreeNode | undefined
 ): ParseResult<unknown> {
   // Schemas are plain data and may come from an untyped external source
   // (JSON, a database) that TypeScript's `satisfies Schema` never actually
@@ -134,15 +134,15 @@ function parseRecursively(
     return success(null)
   }
 
-  // Independent of `coerce`: a struct's own declared `.convert()` is an
+  // Independent of `coerce`: a struct's own declared `.preprocess()` is an
   // explicit, per-position opt-in — like `.brand()`/`.min()`, it takes
   // effect once declared, with no separate runtime switch. The built-in
   // bigint/boolean/number/string table is the opposite: a blanket,
   // call-site opt-in via `coerce`, since it isn't tied to any one field.
-  const customConvertFn = getSelfConvert(convertNode)
+  const customPreprocessFn = getSelfPreprocess(preprocessNode)
 
-  if (customConvertFn !== undefined) {
-    subject = customConvertFn(subject)
+  if (customPreprocessFn !== undefined) {
+    subject = customPreprocessFn(subject)
   }
 
   if (coerce) {
@@ -158,7 +158,7 @@ function parseRecursively(
     schema as never,
     subject,
     coerce,
-    convertNode
+    preprocessNode
   )
 }
 
@@ -167,7 +167,7 @@ function parseBigInt(
   schema: BigIntSchema,
   subject: unknown,
   _coerce: boolean,
-  _convertNode: ConvertTreeNode | undefined
+  _preprocessNode: PreprocessTreeNode | undefined
 ) {
   if (typeof subject !== 'bigint') {
     return error([
@@ -259,7 +259,7 @@ function parseBoolean(
   schema: BooleanSchema,
   subject: unknown,
   _coerce: boolean,
-  _convertNode: ConvertTreeNode | undefined
+  _preprocessNode: PreprocessTreeNode | undefined
 ) {
   if (typeof subject !== 'boolean') {
     return error([
@@ -279,7 +279,7 @@ function parseLiteral(
   schema: LiteralSchema,
   subject: unknown,
   _coerce: boolean,
-  _convertNode: ConvertTreeNode | undefined
+  _preprocessNode: PreprocessTreeNode | undefined
 ) {
   if (subject !== schema.of) {
     return error([
@@ -299,7 +299,7 @@ function parseNumber(
   schema: NumberSchema,
   subject: unknown,
   _coerce: boolean,
-  _convertNode: ConvertTreeNode | undefined
+  _preprocessNode: PreprocessTreeNode | undefined
 ) {
   if (typeof subject !== 'number' || Number.isFinite(subject) === false) {
     return error([
@@ -363,7 +363,7 @@ function parseString(
   schema: StringSchema,
   subject: unknown,
   _coerce: boolean,
-  _convertNode: ConvertTreeNode | undefined
+  _preprocessNode: PreprocessTreeNode | undefined
 ) {
   if (typeof subject !== 'string') {
     return error([
@@ -427,7 +427,7 @@ function parseUnknown(
   _schema: UnknownSchema,
   subject: unknown,
   _coerce: boolean,
-  _convertNode: ConvertTreeNode | undefined
+  _preprocessNode: PreprocessTreeNode | undefined
 ) {
   return success(subject)
 }
@@ -437,7 +437,7 @@ function parseArray(
   schema: ArraySchema<Schema>,
   subject: unknown,
   coerce: boolean,
-  convertNode: ConvertTreeNode | undefined
+  preprocessNode: PreprocessTreeNode | undefined
 ) {
   if (Array.isArray(subject) === false) {
     return error([
@@ -464,7 +464,10 @@ function parseArray(
 
   const result: unknown[] = []
   let invalidSubjects: InvalidSubject[] | undefined
-  const itemConvertNode = getConvertTreeChild(convertNode, CONVERT_PATH_ITEM)
+  const itemPreprocessNode = getPreprocessTreeChild(
+    preprocessNode,
+    PREPROCESS_PATH_ITEM
+  )
 
   for (let i = 0; i < subject.length; i++) {
     const nestedSchema = schema.of
@@ -476,7 +479,7 @@ function parseArray(
       nestedSchema,
       nestedValue,
       coerce,
-      itemConvertNode
+      itemPreprocessNode
     )
     errorPath.pop()
 
@@ -540,7 +543,7 @@ function parseObject(
   schema: ObjectSchema<Record<string, Schema>>,
   subject: unknown,
   coerce: boolean,
-  convertNode: ConvertTreeNode | undefined
+  preprocessNode: PreprocessTreeNode | undefined
 ): ParseResult<unknown> {
   if (
     typeof subject !== 'object' ||
@@ -571,7 +574,7 @@ function parseObject(
       nestedSchema,
       nestedValue,
       coerce,
-      getConvertTreeChild(convertNode, key)
+      getPreprocessTreeChild(preprocessNode, key)
     )
     errorPath.pop()
 
@@ -601,7 +604,7 @@ function parseRecord(
   schema: RecordSchema<Schema>,
   subject: unknown,
   coerce: boolean,
-  convertNode: ConvertTreeNode | undefined
+  preprocessNode: PreprocessTreeNode | undefined
 ) {
   if (
     typeof subject !== 'object' ||
@@ -634,9 +637,13 @@ function parseRecord(
   let invalidSubjects: InvalidSubject[] | undefined
   let validEntryCounter = 0
   // Record keys are always plain strings (`for...in`), and there's no fixed
-  // key to attach a custom converter to (unlike `object`'s named properties)
-  // — key coercion stays limited to the built-in string table via `coerce`.
-  const valueConvertNode = getConvertTreeChild(convertNode, CONVERT_PATH_ITEM)
+  // key to attach a custom preprocessor to (unlike `object`'s named
+  // properties) — key coercion stays limited to the built-in string table
+  // via `coerce`.
+  const valuePreprocessNode = getPreprocessTreeChild(
+    preprocessNode,
+    PREPROCESS_PATH_ITEM
+  )
 
   for (const key in subject) {
     const nestedValue = (subject as Record<string, unknown>)[key]
@@ -674,7 +681,7 @@ function parseRecord(
       schema.of,
       nestedValue,
       coerce,
-      valueConvertNode
+      valuePreprocessNode
     )
     errorPath.pop()
 
@@ -744,7 +751,7 @@ function parseTuple(
   schema: TupleSchema<Array<Schema>>,
   subject: unknown,
   coerce: boolean,
-  convertNode: ConvertTreeNode | undefined
+  preprocessNode: PreprocessTreeNode | undefined
 ) {
   if (Array.isArray(schema.of) === false) {
     return error([
@@ -779,7 +786,7 @@ function parseTuple(
       nestedSchema,
       nestedValue,
       coerce,
-      getConvertTreeChild(convertNode, i)
+      getPreprocessTreeChild(preprocessNode, i)
     )
     errorPath.pop()
 
@@ -821,7 +828,7 @@ function parseUnion(
   schema: UnionSchema<Array<Schema>>,
   subject: unknown,
   coerce: boolean,
-  convertNode: ConvertTreeNode | undefined
+  preprocessNode: PreprocessTreeNode | undefined
 ) {
   if (Array.isArray(schema.of) === false) {
     return error([
@@ -839,7 +846,7 @@ function parseUnion(
       schema.of[i]!,
       subject,
       coerce,
-      getConvertTreeChild(convertNode, i)
+      getPreprocessTreeChild(preprocessNode, i)
     )
 
     if (parsed.error === undefined) {

@@ -1,19 +1,19 @@
 import { describe, it, expect } from 'vitest'
 import * as x from '../src/index.js'
 
-// Custom converters are a struct/parser feature, same as the built-in coerce
-// table — they never touch the schema. `.convert()` is a real chain method
+// Custom preprocessors are a struct/parser feature, same as the built-in coerce
+// table — they never touch the schema. `.preprocess()` is a real chain method
 // (not a wrapper function): tests/type.ts's `StructSharedKeys` pins it once
 // for every struct type, so it costs nothing in the by-struct fold tests.
-describe('.convert(): always active once declared, independently of { coerce: true }', () => {
+describe('.preprocess(): always active once declared, independently of { coerce: true }', () => {
   it('runs with no options at all', () => {
-    const struct = x.string().convert(() => 'replaced')
+    const struct = x.string().preprocess(() => 'replaced')
 
     expect(struct.parse('x')).toStrictEqual({ success: true, data: 'replaced' })
   })
 
   it('runs the same whether coerce is true or false', () => {
-    const struct = x.string().convert(() => 'replaced')
+    const struct = x.string().preprocess(() => 'replaced')
 
     expect(struct.parse('x', { coerce: true })).toStrictEqual({
       success: true,
@@ -25,8 +25,8 @@ describe('.convert(): always active once declared, independently of { coerce: tr
     })
   })
 
-  it('a converter that returns the subject unchanged falls through to the ordinary error', () => {
-    const struct = x.number().convert((s) => s)
+  it('a preprocessor that returns the subject unchanged falls through to the ordinary error', () => {
+    const struct = x.number().preprocess((s) => s)
 
     expect(struct.parse('abc').error).toStrictEqual([
       {
@@ -38,9 +38,9 @@ describe('.convert(): always active once declared, independently of { coerce: tr
   })
 })
 
-describe('.convert() vs { coerce: true }: two independent switches', () => {
-  it("coerce: true doesn't retroactively enable a converter that wasn't declared", () => {
-    // number() has no .convert() attached — only the built-in table applies
+describe('.preprocess() vs { coerce: true }: two independent switches', () => {
+  it("coerce: true doesn't retroactively enable a preprocessor that wasn't declared", () => {
+    // number() has no .preprocess() attached — only the built-in table applies
     const struct = x.number()
 
     expect(struct.parse('42', { coerce: true })).toStrictEqual({
@@ -55,14 +55,14 @@ describe('.convert() vs { coerce: true }: two independent switches', () => {
     })
   })
 
-  it('a custom converter runs first, then the built-in table still applies when coerce: true', () => {
+  it('a custom preprocessor runs first, then the built-in table still applies when coerce: true', () => {
     const price = x
       .number()
-      .convert((s) =>
+      .preprocess((s) =>
         typeof s === 'string' && s.startsWith('$') ? s.slice(1) : s
       )
 
-    // custom converter alone turns "$42" into "42" (still a string) —
+    // custom preprocessor alone turns "$42" into "42" (still a string) —
     // without { coerce: true } the built-in string→number conversion never runs
     expect(price.parse('$42').error).toStrictEqual([
       { code: x.ERROR_CODE.invalidType, path: [], schema: price.__schema },
@@ -75,10 +75,10 @@ describe('.convert() vs { coerce: true }: two independent switches', () => {
   })
 })
 
-describe('.convert(): does not mutate the struct it was called on', () => {
-  it('the base struct keeps parsing without the attached converter', () => {
+describe('.preprocess(): does not mutate the struct it was called on', () => {
+  it('the base struct keeps parsing without the attached preprocessor', () => {
     const base = x.string()
-    const upper = base.convert((s) =>
+    const upper = base.preprocess((s) =>
       typeof s === 'string' ? s.toUpperCase() : s
     )
 
@@ -89,7 +89,7 @@ describe('.convert(): does not mutate the struct it was called on', () => {
   it('survives further chain calls in either order', () => {
     const a = x
       .string()
-      .convert(() => 'A')
+      .preprocess(() => 'A')
       .optional()
     const b = x.string().optional()
 
@@ -98,7 +98,7 @@ describe('.convert(): does not mutate the struct it was called on', () => {
   })
 
   it('cannot be called a second time — removed from the type once applied, same as .brand()/.min()/etc.', () => {
-    const struct = x.string().convert(() => 'first')
+    const struct = x.string().preprocess(() => 'first')
 
     type ExpectedKeys =
       | '__schema'
@@ -114,20 +114,20 @@ describe('.convert(): does not mutate the struct it was called on', () => {
     x.tCh<keyof typeof struct, ExpectedKeys>()
     x.tCh<ExpectedKeys, keyof typeof struct>()
 
-    // @ts-expect-error: 'convert' does not exist on type 'Struct<..., true>'
-    const goneAtRuntimeToo = struct.convert
+    // @ts-expect-error: 'preprocess' does not exist on type 'Struct<..., true>'
+    const goneAtRuntimeToo = struct.preprocess
 
     expect(goneAtRuntimeToo).toBe(undefined)
   })
 })
 
-describe('.convert(): composed into object() applies only at its own key', () => {
+describe('.preprocess(): composed into object() applies only at its own key', () => {
   const trimmed = x
     .string()
-    .convert((s) => (typeof s === 'string' ? s.trim() : s))
+    .preprocess((s) => (typeof s === 'string' ? s.trim() : s))
   const struct = x.object({ name: trimmed, city: x.string() })
 
-  it('converts the annotated key', () => {
+  it('preprocesses the annotated key', () => {
     expect(struct.parse({ name: '  Ann  ', city: 'Berlin' })).toStrictEqual({
       success: true,
       data: { name: 'Ann', city: 'Berlin' },
@@ -142,10 +142,10 @@ describe('.convert(): composed into object() applies only at its own key', () =>
   })
 })
 
-describe('.convert(): composed into array() applies uniformly to every item', () => {
+describe('.preprocess(): composed into array() applies uniformly to every item', () => {
   const dollars = x
     .number()
-    .convert((s) =>
+    .preprocess((s) =>
       typeof s === 'string' && s.startsWith('$') ? s.slice(1) : s
     )
   const struct = x.array(dollars)
@@ -159,19 +159,19 @@ describe('.convert(): composed into array() applies uniformly to every item', ()
     )
   })
 
-  it("an array's own converter and its item converter don't collide", () => {
+  it("an array's own preprocessor and its item preprocessor don't collide", () => {
     const wholeSubject = x
       .array(dollars)
-      .convert((s) => (typeof s === 'string' ? s.split(',') : s))
+      .preprocess((s) => (typeof s === 'string' ? s.split(',') : s))
 
     expect(wholeSubject.parse('$1,$2,$3', { coerce: true })).toStrictEqual({
       success: true,
       data: [1, 2, 3],
     })
 
-    // The item converter alone (no whole-subject converter) still only
+    // The item preprocessor alone (no whole-subject preprocessor) still only
     // sees an already-array subject — a comma string is rejected as
-    // INVALID_TYPE, proving the two converters are genuinely independent
+    // INVALID_TYPE, proving the two preprocessors are genuinely independent
     // positions.
     expect(struct.parse('$1,$2,$3', { coerce: true }).error).toStrictEqual([
       { code: x.ERROR_CODE.invalidType, path: [], schema: struct.__schema },
@@ -179,16 +179,16 @@ describe('.convert(): composed into array() applies uniformly to every item', ()
   })
 })
 
-describe('.convert(): composed into record() applies to every value, never to keys', () => {
+describe('.preprocess(): composed into record() applies to every value, never to keys', () => {
   const struct = x.record(
     x
       .number()
-      .convert((s) =>
+      .preprocess((s) =>
         typeof s === 'string' && s.startsWith('$') ? s.slice(1) : s
       )
   )
 
-  it('converts every value', () => {
+  it('preprocesses every value', () => {
     expect(struct.parse({ a: '$1', b: '$2' }, { coerce: true })).toStrictEqual({
       success: true,
       data: { a: 1, b: 2 },
@@ -196,13 +196,13 @@ describe('.convert(): composed into record() applies to every value, never to ke
   })
 })
 
-describe('.convert(): composed into tuple() applies per position', () => {
+describe('.preprocess(): composed into tuple() applies per position', () => {
   const struct = x.tuple([
-    x.number().convert((s) => (s === 'zero' ? 0 : s)),
+    x.number().preprocess((s) => (s === 'zero' ? 0 : s)),
     x.number(),
   ])
 
-  it('the converter at position 0 does not leak into position 1', () => {
+  it('the preprocessor at position 0 does not leak into position 1', () => {
     expect(struct.parse(['zero', 5])).toStrictEqual({
       success: true,
       data: [0, 5],
@@ -217,10 +217,10 @@ describe('.convert(): composed into tuple() applies per position', () => {
   })
 })
 
-describe('.convert(): composed into union() applies per member', () => {
-  it('a converter on one member does not affect the other', () => {
+describe('.preprocess(): composed into union() applies per member', () => {
+  it('a preprocessor on one member does not affect the other', () => {
     const struct = x.union([
-      x.literal('yes').convert((s) => (s === true ? 'yes' : s)),
+      x.literal('yes').preprocess((s) => (s === true ? 'yes' : s)),
       x.number(),
     ])
 
@@ -232,11 +232,11 @@ describe('.convert(): composed into union() applies per member', () => {
   })
 })
 
-describe('.convert(): propagates through multiple levels of composition', () => {
+describe('.preprocess(): propagates through multiple levels of composition', () => {
   it('object -> array -> object', () => {
     const id = x
       .number()
-      .convert((s) =>
+      .preprocess((s) =>
         typeof s === 'string' && s.startsWith('#') ? Number(s.slice(1)) : s
       )
     const struct = x.object({
@@ -251,13 +251,13 @@ describe('.convert(): propagates through multiple levels of composition', () => 
     )
   })
 
-  it('two converters sharing a path prefix (same array item, different keys)', () => {
+  it('two preprocessors sharing a path prefix (same array item, different keys)', () => {
     const width = x
       .number()
-      .convert((s) => (typeof s === 'string' ? Number(s.slice(1)) : s))
+      .preprocess((s) => (typeof s === 'string' ? Number(s.slice(1)) : s))
     const height = x
       .number()
-      .convert((s) => (typeof s === 'string' ? Number(s.slice(1)) : s))
+      .preprocess((s) => (typeof s === 'string' ? Number(s.slice(1)) : s))
     const struct = x.array(x.object({ w: width, h: height }))
 
     expect(struct.parse([{ w: '#1', h: '#2' }])).toStrictEqual({
@@ -267,7 +267,7 @@ describe('.convert(): propagates through multiple levels of composition', () => 
   })
 })
 
-describe('struct composition tolerates a struct-shaped value with no converters of its own', () => {
+describe('struct composition tolerates a struct-shaped value with no preprocessors of its own', () => {
   it('object() accepts a plain { __schema } value', () => {
     const plain = { __schema: { type: 'string' } } as x.StructShape<x.Schema>
     const struct = x.object({ name: plain })
@@ -279,9 +279,9 @@ describe('struct composition tolerates a struct-shaped value with no converters 
   })
 })
 
-describe("~standard.validate does not support options, so a struct's converters don't apply through it", () => {
+describe("~standard.validate does not support options, so a struct's preprocessors don't apply through it", () => {
   it('the Standard Schema entry point stays strict', () => {
-    const struct = x.number().convert(() => 42)
+    const struct = x.number().preprocess(() => 42)
     const validated = struct['~standard'].validate('anything')
 
     if (validated instanceof Promise) {

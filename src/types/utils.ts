@@ -12,10 +12,10 @@ export type ParseOptions = {
    * union), `literal`, and `unknown` are never coerced themselves — the
    * flag still reaches their coercible descendants.
    *
-   * This only gates the built-in table. A struct's own `.convert()` is a
-   * separate, independent switch — see its doc comment on `Struct<T>` for
-   * why it isn't a blanket "guess the type" behavior like this one, so it
-   * doesn't share a gate with it.
+   * This only gates the built-in table. A struct's own `.preprocess()` is
+   * a separate, independent switch — see its doc comment on `Struct<T>`
+   * for why it isn't a blanket "guess the type" behavior like this one, so
+   * it doesn't share a gate with it.
    **/
   coerce?: boolean
 }

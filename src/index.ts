@@ -32,7 +32,7 @@ export type {
   PrettifyObject,
 } from './types/utils.js'
 
-export type { ConvertFn } from './types/convert.js'
+export type { PreprocessFn } from './types/preprocess.js'
 
 export type {
   Infer,

@@ -1,6 +1,6 @@
 import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants.js'
-import { CONVERT_PATH_ITEM } from './convert.js'
-import { parse, parseWithConverters } from './parse.js'
+import { PREPROCESS_PATH_ITEM } from './preprocess.js'
+import { parse, parseWithPreprocessors } from './parse.js'
 import { assignOwnProperty } from './utils.js'
 
 import type { StandardSchemaV1 } from './types/standard-schema.ts'
@@ -10,29 +10,29 @@ import type {
   BrandSchema,
   StringSchema,
 } from './types/schema.ts'
-import type { ConvertFn, ConvertPathEntry } from './types/convert.ts'
+import type { PreprocessFn, PreprocessPathEntry } from './types/preprocess.ts'
 import type { ParseOptions } from './types/utils.ts'
 import type { Struct, StructParams, StructShape } from './types/struct.ts'
 
 export function makeStruct<T extends Schema>(
   schema: T,
-  converters?: ReadonlyArray<ConvertPathEntry>
+  preprocessors?: ReadonlyArray<PreprocessPathEntry>
 ): Struct<T>
 export function makeStruct(
   schema: Schema,
-  converters: ReadonlyArray<ConvertPathEntry> = []
+  preprocessors: ReadonlyArray<PreprocessPathEntry> = []
 ) {
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const result: Record<string, unknown> & StandardSchemaV1 = {
     __schema: { ...schema },
-    // Backs the public `convert` method below. Kept off the `Struct<T>`
+    // Backs the public `preprocess` method below. Kept off the `Struct<T>`
     // type itself (read back only by this module's own composition
-    // functions — `object`/`array`/etc. — via `readConverters`) since it's
-    // an implementation detail of how a member's converter reaches its
-    // parent once composed; `convert` is the actual public surface.
-    __converters: converters,
+    // functions — `object`/`array`/etc. — via `readPreprocessors`) since
+    // it's an implementation detail of how a member's preprocessor reaches
+    // its parent once composed; `preprocess` is the actual public surface.
+    __preprocessors: preprocessors,
     parse: (subj: unknown, options?: ParseOptions) =>
-      parseWithConverters(schema as never, subj, options, converters),
+      parseWithPreprocessors(schema as never, subj, options, preprocessors),
     ['~standard']: {
       ...STANDARD_SCHEMA,
       validate: (input) => {
@@ -52,22 +52,25 @@ export function makeStruct(
 
   /* Params present in all schema types */
 
-  result.optional = () => makeStruct({ ...schema, optional: true }, converters)
-  result.nullable = () => makeStruct({ ...schema, nullable: true }, converters)
+  result.optional = () =>
+    makeStruct({ ...schema, optional: true }, preprocessors)
+  result.nullable = () =>
+    makeStruct({ ...schema, nullable: true }, preprocessors)
   result.description = (description: string) =>
-    makeStruct({ ...schema, description }, converters)
+    makeStruct({ ...schema, description }, preprocessors)
 
   // Unlike every param above, never touches `schema` — it's tracked
-  // separately (see `converters`) so it never appears in `__schema`. Still
-  // only applicable once, same as every param above: an entry with an
-  // empty path is this struct's own converter (as opposed to one inherited
-  // from a composed child, which always has at least one path segment —
-  // see `array`/`object`/etc. below), so its presence means `.convert()`
-  // already ran and the method is omitted this time around, matching
-  // `Struct<T, Converted>`'s type-level removal of `convert` once applied.
-  if (converters.every((entry) => entry.path.length > 0)) {
-    result.convert = (fn: ConvertFn) =>
-      makeStruct(schema, [...converters, { path: [], fn }])
+  // separately (see `preprocessors`) so it never appears in `__schema`.
+  // Still only applicable once, same as every param above: an entry with
+  // an empty path is this struct's own preprocessor (as opposed to one
+  // inherited from a composed child, which always has at least one path
+  // segment — see `array`/`object`/etc. below), so its presence means
+  // `.preprocess()` already ran and the method is omitted this time
+  // around, matching `Struct<T, Preprocessed>`'s type-level removal of
+  // `preprocess` once applied.
+  if (preprocessors.every((entry) => entry.path.length > 0)) {
+    result.preprocess = (fn: PreprocessFn) =>
+      makeStruct(schema, [...preprocessors, { path: [], fn }])
   }
 
   /* Schema specific params */
@@ -79,51 +82,53 @@ export function makeStruct(
           ...schema,
           brand: (Array.isArray(args[0]) ? args[0] : args) as BrandSchema,
         },
-        converters
+        preprocessors
       )
     }
   }
 
   if (params.has('key')) {
     result.key = (key: StructShape<StringSchema>) =>
-      makeStruct({ ...schema, key: key.__schema }, converters)
+      makeStruct({ ...schema, key: key.__schema }, preprocessors)
   }
 
   if (params.has('min')) {
     if (schema.type === 'bigint') {
       result.min = (min: BigIntString) =>
-        makeStruct({ ...schema, min }, converters)
+        makeStruct({ ...schema, min }, preprocessors)
     } else {
-      result.min = (min: number) => makeStruct({ ...schema, min }, converters)
+      result.min = (min: number) =>
+        makeStruct({ ...schema, min }, preprocessors)
     }
   }
 
   if (params.has('max')) {
     if (schema.type === 'bigint') {
       result.max = (max: BigIntString) =>
-        makeStruct({ ...schema, max }, converters)
+        makeStruct({ ...schema, max }, preprocessors)
     } else {
-      result.max = (max: number) => makeStruct({ ...schema, max }, converters)
+      result.max = (max: number) =>
+        makeStruct({ ...schema, max }, preprocessors)
     }
   }
 
   if (params.has('minLength')) {
     result.minLength = (minLength: number) =>
-      makeStruct({ ...schema, minLength }, converters)
+      makeStruct({ ...schema, minLength }, preprocessors)
   }
 
   if (params.has('maxLength')) {
     result.maxLength = (maxLength: number) =>
-      makeStruct({ ...schema, maxLength }, converters)
+      makeStruct({ ...schema, maxLength }, preprocessors)
   }
 
   return result
 }
 
-function readConverters(struct: object): ReadonlyArray<ConvertPathEntry> {
+function readPreprocessors(struct: object): ReadonlyArray<PreprocessPathEntry> {
   return (
-    (struct as { __converters?: ReadonlyArray<ConvertPathEntry> })
-      .__converters ?? []
+    (struct as { __preprocessors?: ReadonlyArray<PreprocessPathEntry> })
+      .__preprocessors ?? []
   )
 }
 
@@ -160,8 +165,8 @@ export function unknown() {
  **/
 
 export function array<T extends StructShape<Schema>>(of: T) {
-  const converters = readConverters(of).map((entry) => ({
-    path: [CONVERT_PATH_ITEM, ...entry.path],
+  const preprocessors = readPreprocessors(of).map((entry) => ({
+    path: [PREPROCESS_PATH_ITEM, ...entry.path],
     fn: entry.fn,
   }))
 
@@ -170,7 +175,7 @@ export function array<T extends StructShape<Schema>>(of: T) {
       type: 'array',
       of: of.__schema as T['__schema'],
     },
-    converters
+    preprocessors
   )
 }
 
@@ -179,24 +184,24 @@ export function object<T extends Record<string, StructShape<Schema>>>(of: T) {
     type: 'object' as const,
     of: {} as { [K in keyof T]: T[K]['__schema'] },
   }
-  const converters: ConvertPathEntry[] = []
+  const preprocessors: PreprocessPathEntry[] = []
 
   for (const key in of) {
     const child = of[key] as NonNullable<(typeof of)[typeof key]>
 
     assignOwnProperty(schema.of, key, child.__schema)
 
-    for (const entry of readConverters(child)) {
-      converters.push({ path: [key, ...entry.path], fn: entry.fn })
+    for (const entry of readPreprocessors(child)) {
+      preprocessors.push({ path: [key, ...entry.path], fn: entry.fn })
     }
   }
 
-  return makeStruct(schema, converters)
+  return makeStruct(schema, preprocessors)
 }
 
 export function record<T extends StructShape<Schema>>(of: T) {
-  const converters = readConverters(of).map((entry) => ({
-    path: [CONVERT_PATH_ITEM, ...entry.path],
+  const preprocessors = readPreprocessors(of).map((entry) => ({
+    path: [PREPROCESS_PATH_ITEM, ...entry.path],
     fn: entry.fn,
   }))
 
@@ -205,7 +210,7 @@ export function record<T extends StructShape<Schema>>(of: T) {
       type: 'record',
       of: of.__schema as T['__schema'],
     },
-    converters
+    preprocessors
   )
 }
 
@@ -217,15 +222,15 @@ export function tuple<
     of: of.map((x) => x.__schema) as { [K in keyof T]: T[K]['__schema'] },
   } as const
 
-  const converters: ConvertPathEntry[] = []
+  const preprocessors: PreprocessPathEntry[] = []
 
   for (let i = 0; i < of.length; i++) {
-    for (const entry of readConverters(of[i]!)) {
-      converters.push({ path: [i, ...entry.path], fn: entry.fn })
+    for (const entry of readPreprocessors(of[i]!)) {
+      preprocessors.push({ path: [i, ...entry.path], fn: entry.fn })
     }
   }
 
-  return makeStruct(schema, converters)
+  return makeStruct(schema, preprocessors)
 }
 
 export function union<
@@ -239,17 +244,17 @@ export function union<
         }
       : never
   }
-  const converters: ConvertPathEntry[] = []
+  const preprocessors: PreprocessPathEntry[] = []
 
   for (let i = 0; i < of.length; i++) {
     const subSchema = of[i]!
 
     schema.of.push(subSchema.__schema)
 
-    for (const entry of readConverters(subSchema)) {
-      converters.push({ path: [i, ...entry.path], fn: entry.fn })
+    for (const entry of readPreprocessors(subSchema)) {
+      preprocessors.push({ path: [i, ...entry.path], fn: entry.fn })
     }
   }
 
-  return makeStruct(schema, converters)
+  return makeStruct(schema, preprocessors)
 }
