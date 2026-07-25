@@ -61,13 +61,24 @@ function coerceBoolean(subject: unknown): unknown {
   return subject
 }
 
+/**
+ * `number` can't exactly represent every integer a `bigint` or a numeric
+ * string can — beyond this magnitude, `Number(x)` silently rounds to the
+ * nearest representable double instead of throwing. That would make
+ * coercion produce a *wrong* value rather than an unambiguous one, which
+ * breaks the "lossy → left unchanged" contract above, so both bigint- and
+ * string-sourced conversions are rejected once the result lands outside
+ * the safe integer range.
+ **/
 function coerceNumber(subject: unknown): unknown {
   if (typeof subject === 'boolean') {
     return subject ? 1 : 0
   }
 
   if (typeof subject === 'bigint') {
-    return Number(subject)
+    const coerced = Number(subject)
+
+    return Number.isSafeInteger(coerced) ? coerced : subject
   }
 
   if (typeof subject !== 'string' || subject.trim() === '') {
@@ -76,7 +87,15 @@ function coerceNumber(subject: unknown): unknown {
 
   const coerced = Number(subject)
 
-  return Number.isNaN(coerced) ? subject : coerced
+  if (Number.isNaN(coerced)) {
+    return subject
+  }
+
+  if (Number.isInteger(coerced) && !Number.isSafeInteger(coerced)) {
+    return subject
+  }
+
+  return coerced
 }
 
 function coerceString(subject: unknown): unknown {
