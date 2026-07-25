@@ -1,4 +1,5 @@
 import type { Schema } from './schema.ts'
+import type { CoercerPathEntry } from './coerce.ts'
 
 export type ParseOptions = {
   /**
@@ -13,6 +14,19 @@ export type ParseOptions = {
    * flag still reaches their coercible descendants.
    **/
   coerce?: boolean
+
+  /**
+   * Field-specific coercers, keyed by their position in the *schema* tree
+   * (see `CoercerPathSegment`). Only consulted when `coerce` is true, same
+   * as the built-in table — a struct built with `withCoercer()` populates
+   * this automatically via `struct.parse()`; it's also settable directly
+   * here for schemas defined as plain data. When both a custom coercer and
+   * the built-in table apply to the same position, the custom one runs
+   * first and the built-in one still runs after on its result — useful for
+   * e.g. stripping a `"$"` prefix before the built-in string→number
+   * conversion takes over.
+   **/
+  customCoercers?: ReadonlyArray<CoercerPathEntry>
 }
 
 export type ParseResult<T> = ParseError | ParseSuccess<T>

@@ -1,4 +1,9 @@
 import type { Schema } from './types/schema.js'
+import type {
+  CoercerPathEntry,
+  CoercerPathSegment,
+  CustomCoercer,
+} from './types/coerce.js'
 
 /**
  * Only scalar primitives with an unambiguous target representation are
@@ -108,4 +113,68 @@ function coerceString(subject: unknown): unknown {
   }
 
   return subject
+}
+
+/**
+ * Sentinel `CoercerPathSegment` standing in for "the singular child schema
+ * of an array/record" — see `CoercerPathSegment`'s doc comment in
+ * `types/coerce.ts` for why a plain index/key can't be used here.
+ **/
+export const COERCER_PATH_ITEM: symbol = Symbol('schematox.coercer.item')
+
+export type CoercerTreeNode = {
+  self?: CustomCoercer
+  children?: Map<CoercerPathSegment, CoercerTreeNode>
+}
+
+/**
+ * Converts the flat, struct-composition-friendly `{ path, fn }[]` list into
+ * a tree that mirrors the schema's own shape, so a lookup during parsing is
+ * a single `Map.get` per level instead of re-scanning the whole list at
+ * every recursion depth.
+ **/
+export function buildCoercerTree(
+  entries: ReadonlyArray<CoercerPathEntry> | undefined
+): CoercerTreeNode | undefined {
+  if (entries === undefined || entries.length === 0) {
+    return undefined
+  }
+
+  const root: CoercerTreeNode = {}
+
+  for (const { path, fn } of entries) {
+    let node = root
+
+    for (const segment of path) {
+      node.children = node.children ?? new Map()
+
+      let next = node.children.get(segment)
+
+      if (next === undefined) {
+        next = {}
+        node.children.set(segment, next)
+      }
+
+      node = next
+    }
+
+    // Last entry for a given path wins, same as any other spread-applied
+    // struct param (e.g. calling `.description()` twice).
+    node.self = fn
+  }
+
+  return root
+}
+
+export function getCoercerTreeChild(
+  node: CoercerTreeNode | undefined,
+  segment: CoercerPathSegment
+): CoercerTreeNode | undefined {
+  return node?.children?.get(segment)
+}
+
+export function getSelfCoercer(
+  node: CoercerTreeNode | undefined
+): CustomCoercer | undefined {
+  return node?.self
 }
