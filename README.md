@@ -495,9 +495,9 @@ Only `bigint`, `boolean`, `number`, and `string` are coercible, and only from on
 
 | target    | accepted input                       | conversion |
 | --------- | ------------------------------------- | ---------- |
-| `number`  | non-empty numeric `string`            | `Number(x)`, rejected if `NaN` |
+| `number`  | non-empty numeric `string`            | `Number(x)`, rejected if `NaN` or outside `Number.isSafeInteger` range (for an integer value — `Number` can't represent every integer a `string`/`bigint` can, so a result outside that range is rejected rather than silently rounded) |
 |           | `boolean`                             | `true → 1`, `false → 0` |
-|           | `bigint`                              | `Number(x)` |
+|           | `bigint`                              | `Number(x)`, rejected outside `Number.isSafeInteger` range, same reasoning |
 | `bigint`  | integer `string`/`number`             | `BigInt(x)`, rejected if it throws (e.g. `"4.2"`, `4.2`) |
 |           | `boolean`                             | `true → 1n`, `false → 0n` |
 | `string`  | `number`/`boolean`                    | `String(x)` |

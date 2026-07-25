@@ -77,6 +77,35 @@ describe('coerce: number', () => {
       data: 15,
     })
   })
+
+  it('rejects a bigint beyond the safe integer range instead of silently rounding it', () => {
+    // 2^53 + 1 — Number(9007199254740993n) rounds to 9007199254740992,
+    // a different, wrong value, if left unguarded.
+    expect(
+      x.parse(schema, 9007199254740993n, { coerce: true }).error
+    ).toStrictEqual([{ code: x.ERROR_CODE.invalidType, path: [], schema }])
+
+    // Within range: coerces normally.
+    expect(x.parse(schema, 9007199254740991n, { coerce: true })).toStrictEqual({
+      success: true,
+      data: 9007199254740991,
+    })
+
+    // Astronomically large: Number(x) is already Infinity, still rejected.
+    expect(x.parse(schema, 10n ** 400n, { coerce: true }).error).toStrictEqual([
+      { code: x.ERROR_CODE.invalidType, path: [], schema },
+    ])
+  })
+
+  it('rejects an integer string beyond the safe integer range instead of silently rounding it', () => {
+    expect(
+      x.parse(schema, '9007199254740993', { coerce: true }).error
+    ).toStrictEqual([{ code: x.ERROR_CODE.invalidType, path: [], schema }])
+
+    expect(x.parse(schema, '9007199254740991', { coerce: true })).toStrictEqual(
+      { success: true, data: 9007199254740991 }
+    )
+  })
 })
 
 describe('coerce: bigint', () => {
