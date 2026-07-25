@@ -25,11 +25,11 @@ export function makeStruct(
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const result: Record<string, unknown> & StandardSchemaV1 = {
     __schema: { ...schema },
-    // Backs the public `coercer` method below. Kept off the `Struct<T>`
+    // Backs the public `convert` method below. Kept off the `Struct<T>`
     // type itself (read back only by this module's own composition
     // functions — `object`/`array`/etc. — via `readCoercers`) since it's
     // an implementation detail of how a member's coercer reaches its
-    // parent once composed; `coercer` is the actual public surface.
+    // parent once composed; `convert` is the actual public surface.
     __coercers: coercers,
     parse: (subj: unknown, options?: ParseOptions) =>
       parse(schema as never, subj, withStructCoercers(options, coercers)),
@@ -58,12 +58,17 @@ export function makeStruct(
     makeStruct({ ...schema, description }, coercers)
 
   // Unlike every param above, never touches `schema` — it's tracked
-  // separately (see `coercers`) so it never appears in `__schema`. A later
-  // call replaces the earlier one (last-write-wins, same as `description`),
-  // and it stays available for repeated calls since nothing is ever added
-  // to `keyof T` to remove it from the chain.
-  result.coercer = (fn: CustomCoercer) =>
-    makeStruct(schema, [...coercers, { path: [], fn }])
+  // separately (see `coercers`) so it never appears in `__schema`. Still
+  // only applicable once, same as every param above: an entry with an
+  // empty path is this struct's own converter (as opposed to one inherited
+  // from a composed child, which always has at least one path segment —
+  // see `array`/`object`/etc. below), so its presence means `.convert()`
+  // already ran and the method is omitted this time around, matching
+  // `Struct<T, Converted>`'s type-level removal of `convert` once applied.
+  if (coercers.every((entry) => entry.path.length > 0)) {
+    result.convert = (fn: CustomCoercer) =>
+      makeStruct(schema, [...coercers, { path: [], fn }])
+  }
 
   /* Schema specific params */
 

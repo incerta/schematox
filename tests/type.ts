@@ -1,1 +1,1 @@
-export type StructSharedKeys = '__schema' | '~standard' | 'parse' | 'coercer'
+export type StructSharedKeys = '__schema' | '~standard' | 'parse' | 'convert'

@@ -2,18 +2,18 @@ import { describe, it, expect } from 'vitest'
 import * as x from '../src/index.js'
 
 // Custom coercers are a struct/parser feature, same as the built-in table —
-// they never touch the schema. `.coercer()` is a real chain method (not a
+// they never touch the schema. `.convert()` is a real chain method (not a
 // wrapper function): tests/type.ts's `StructSharedKeys` pins it once for
 // every struct type, so it costs nothing in the by-struct fold tests.
-describe('.coercer(): always active once declared, independently of { coerce: true }', () => {
+describe('.convert(): always active once declared, independently of { coerce: true }', () => {
   it('runs with no options at all', () => {
-    const struct = x.string().coercer(() => 'replaced')
+    const struct = x.string().convert(() => 'replaced')
 
     expect(struct.parse('x')).toStrictEqual({ success: true, data: 'replaced' })
   })
 
   it('runs the same whether coerce is true or false', () => {
-    const struct = x.string().coercer(() => 'replaced')
+    const struct = x.string().convert(() => 'replaced')
 
     expect(struct.parse('x', { coerce: true })).toStrictEqual({
       success: true,
@@ -26,7 +26,7 @@ describe('.coercer(): always active once declared, independently of { coerce: tr
   })
 
   it('a coercer that returns the subject unchanged falls through to the ordinary error', () => {
-    const struct = x.number().coercer((s) => s)
+    const struct = x.number().convert((s) => s)
 
     expect(struct.parse('abc').error).toStrictEqual([
       {
@@ -38,9 +38,9 @@ describe('.coercer(): always active once declared, independently of { coerce: tr
   })
 })
 
-describe('.coercer() vs { coerce: true }: two independent switches', () => {
+describe('.convert() vs { coerce: true }: two independent switches', () => {
   it("coerce: true doesn't retroactively enable a coercer that wasn't declared", () => {
-    // number() has no .coercer() attached — only the built-in table applies
+    // number() has no .convert() attached — only the built-in table applies
     const struct = x.number()
 
     expect(struct.parse('42', { coerce: true })).toStrictEqual({
@@ -58,7 +58,7 @@ describe('.coercer() vs { coerce: true }: two independent switches', () => {
   it('a custom coercer runs first, then the built-in table still applies when coerce: true', () => {
     const price = x
       .number()
-      .coercer((s) =>
+      .convert((s) =>
         typeof s === 'string' && s.startsWith('$') ? s.slice(1) : s
       )
 
@@ -75,10 +75,10 @@ describe('.coercer() vs { coerce: true }: two independent switches', () => {
   })
 })
 
-describe('.coercer(): does not mutate the struct it was called on', () => {
+describe('.convert(): does not mutate the struct it was called on', () => {
   it('the base struct keeps parsing without the attached coercer', () => {
     const base = x.string()
-    const upper = base.coercer((s) =>
+    const upper = base.convert((s) =>
       typeof s === 'string' ? s.toUpperCase() : s
     )
 
@@ -89,7 +89,7 @@ describe('.coercer(): does not mutate the struct it was called on', () => {
   it('survives further chain calls in either order', () => {
     const a = x
       .string()
-      .coercer(() => 'A')
+      .convert(() => 'A')
       .optional()
     const b = x.string().optional()
 
@@ -97,20 +97,34 @@ describe('.coercer(): does not mutate the struct it was called on', () => {
     expect(b.parse('x')).toStrictEqual({ success: true, data: 'x' })
   })
 
-  it('calling .coercer() twice: the last one wins', () => {
-    const struct = x
-      .string()
-      .coercer(() => 'first')
-      .coercer(() => 'second')
+  it('cannot be called a second time — removed from the type once applied, same as .brand()/.min()/etc.', () => {
+    const struct = x.string().convert(() => 'first')
 
-    expect(struct.parse('x')).toStrictEqual({ success: true, data: 'second' })
+    type ExpectedKeys =
+      | '__schema'
+      | '~standard'
+      | 'parse'
+      | 'optional'
+      | 'nullable'
+      | 'brand'
+      | 'minLength'
+      | 'maxLength'
+      | 'description'
+
+    x.tCh<keyof typeof struct, ExpectedKeys>()
+    x.tCh<ExpectedKeys, keyof typeof struct>()
+
+    // @ts-expect-error: 'convert' does not exist on type 'Struct<..., true>'
+    const goneAtRuntimeToo = struct.convert
+
+    expect(goneAtRuntimeToo).toBe(undefined)
   })
 })
 
-describe('.coercer(): composed into object() applies only at its own key', () => {
+describe('.convert(): composed into object() applies only at its own key', () => {
   const trimmed = x
     .string()
-    .coercer((s) => (typeof s === 'string' ? s.trim() : s))
+    .convert((s) => (typeof s === 'string' ? s.trim() : s))
   const struct = x.object({ name: trimmed, city: x.string() })
 
   it('coerces the annotated key', () => {
@@ -128,10 +142,10 @@ describe('.coercer(): composed into object() applies only at its own key', () =>
   })
 })
 
-describe('.coercer(): composed into array() applies uniformly to every item', () => {
+describe('.convert(): composed into array() applies uniformly to every item', () => {
   const dollars = x
     .number()
-    .coercer((s) =>
+    .convert((s) =>
       typeof s === 'string' && s.startsWith('$') ? s.slice(1) : s
     )
   const struct = x.array(dollars)
@@ -148,7 +162,7 @@ describe('.coercer(): composed into array() applies uniformly to every item', ()
   it("an array's own coercer and its item coercer don't collide", () => {
     const wholeSubject = x
       .array(dollars)
-      .coercer((s) => (typeof s === 'string' ? s.split(',') : s))
+      .convert((s) => (typeof s === 'string' ? s.split(',') : s))
 
     expect(wholeSubject.parse('$1,$2,$3', { coerce: true })).toStrictEqual({
       success: true,
@@ -164,11 +178,11 @@ describe('.coercer(): composed into array() applies uniformly to every item', ()
   })
 })
 
-describe('.coercer(): composed into record() applies to every value, never to keys', () => {
+describe('.convert(): composed into record() applies to every value, never to keys', () => {
   const struct = x.record(
     x
       .number()
-      .coercer((s) =>
+      .convert((s) =>
         typeof s === 'string' && s.startsWith('$') ? s.slice(1) : s
       )
   )
@@ -181,9 +195,9 @@ describe('.coercer(): composed into record() applies to every value, never to ke
   })
 })
 
-describe('.coercer(): composed into tuple() applies per position', () => {
+describe('.convert(): composed into tuple() applies per position', () => {
   const struct = x.tuple([
-    x.number().coercer((s) => (s === 'zero' ? 0 : s)),
+    x.number().convert((s) => (s === 'zero' ? 0 : s)),
     x.number(),
   ])
 
@@ -202,10 +216,10 @@ describe('.coercer(): composed into tuple() applies per position', () => {
   })
 })
 
-describe('.coercer(): composed into union() applies per member', () => {
+describe('.convert(): composed into union() applies per member', () => {
   it('a coercer on one member does not affect the other', () => {
     const struct = x.union([
-      x.literal('yes').coercer((s) => (s === true ? 'yes' : s)),
+      x.literal('yes').convert((s) => (s === true ? 'yes' : s)),
       x.number(),
     ])
 
@@ -217,11 +231,11 @@ describe('.coercer(): composed into union() applies per member', () => {
   })
 })
 
-describe('.coercer(): propagates through multiple levels of composition', () => {
+describe('.convert(): propagates through multiple levels of composition', () => {
   it('object -> array -> object', () => {
     const id = x
       .number()
-      .coercer((s) =>
+      .convert((s) =>
         typeof s === 'string' && s.startsWith('#') ? Number(s.slice(1)) : s
       )
     const struct = x.object({
@@ -239,10 +253,10 @@ describe('.coercer(): propagates through multiple levels of composition', () => 
   it('two coercers sharing a path prefix (same array item, different keys)', () => {
     const width = x
       .number()
-      .coercer((s) => (typeof s === 'string' ? Number(s.slice(1)) : s))
+      .convert((s) => (typeof s === 'string' ? Number(s.slice(1)) : s))
     const height = x
       .number()
-      .coercer((s) => (typeof s === 'string' ? Number(s.slice(1)) : s))
+      .convert((s) => (typeof s === 'string' ? Number(s.slice(1)) : s))
     const struct = x.array(x.object({ w: width, h: height }))
 
     expect(struct.parse([{ w: '#1', h: '#2' }])).toStrictEqual({
@@ -302,7 +316,7 @@ describe('parse(): customCoercers can be supplied directly for a static schema, 
 
 describe("~standard.validate does not support options, so struct-level coercers don't apply through it", () => {
   it('the Standard Schema entry point stays strict', () => {
-    const struct = x.number().coercer(() => 42)
+    const struct = x.number().convert(() => 42)
     const validated = struct['~standard'].validate('anything')
 
     if (validated instanceof Promise) {
