@@ -22,23 +22,27 @@ import type {
   BigIntString,
 } from './schema.ts'
 
-import type { ConvertFn } from './convert.ts'
+import type { PreprocessFn } from './preprocess.ts'
 import type { InferSchema } from './infer.ts'
 
 /**
- * `Converted` is a phantom flag, not derived from `T`/`Schema` — `.convert()`
- * deliberately never touches the schema (see its own doc comment below), so
- * there's no schema field for `Omit<..., keyof T>` to key off of the way it
- * does for every other param. Tracking "has `.convert()` already been
- * called" as a second type parameter instead reproduces the same
- * once-only-application rule this library already enforces for `.brand()`/
- * `.min()`/etc., without writing anything into `__schema` to get it.
+ * `Preprocessed` is a phantom flag, not derived from `T`/`Schema` —
+ * `.preprocess()` deliberately never touches the schema (see its own doc
+ * comment below), so there's no schema field for `Omit<..., keyof T>` to
+ * key off of the way it does for every other param. Tracking "has
+ * `.preprocess()` already been called" as a second type parameter instead
+ * reproduces the same once-only-application rule this library already
+ * enforces for `.brand()`/`.min()`/etc., without writing anything into
+ * `__schema` to get it.
  **/
-export type Struct<T extends Schema, Converted extends boolean = false> = Omit<
+export type Struct<
+  T extends Schema,
+  Preprocessed extends boolean = false,
+> = Omit<
   Pick<
     {
-      optional: () => Struct<T & { optional: true }, Converted>
-      nullable: () => Struct<T & { nullable: true }, Converted>
+      optional: () => Struct<T & { optional: true }, Preprocessed>
+      nullable: () => Struct<T & { nullable: true }, Preprocessed>
 
       brand: <
         U extends [string, BrandSubType] | [Readonly<[string, BrandSubType]>],
@@ -52,32 +56,36 @@ export type Struct<T extends Schema, Converted extends boolean = false> = Omit<
               ? BrandSchema<V, W>
               : never
         },
-        Converted
+        Preprocessed
       >
 
       key: <U extends StructShape<StringSchema>>(
         key: U
-      ) => Struct<T & { key: U['__schema'] }, Converted>
+      ) => Struct<T & { key: U['__schema'] }, Preprocessed>
 
       minLength: <U extends number>(
         minLength: U
-      ) => Struct<T & { minLength: U }, Converted>
+      ) => Struct<T & { minLength: U }, Preprocessed>
 
       maxLength: <U extends number>(
         maxLength: U
-      ) => Struct<T & { maxLength: U }, Converted>
+      ) => Struct<T & { maxLength: U }, Preprocessed>
 
       max: T extends BigIntSchema
-        ? <U extends BigIntString>(max: U) => Struct<T & { max: U }, Converted>
-        : <U extends number>(max: U) => Struct<T & { max: U }, Converted>
+        ? <U extends BigIntString>(
+            max: U
+          ) => Struct<T & { max: U }, Preprocessed>
+        : <U extends number>(max: U) => Struct<T & { max: U }, Preprocessed>
 
       min: T extends BigIntSchema
-        ? <U extends BigIntString>(min: U) => Struct<T & { min: U }, Converted>
-        : <U extends number>(min: U) => Struct<T & { min: U }, Converted>
+        ? <U extends BigIntString>(
+            min: U
+          ) => Struct<T & { min: U }, Preprocessed>
+        : <U extends number>(min: U) => Struct<T & { min: U }, Preprocessed>
 
       description: <U extends string>(
         description: U
-      ) => Struct<T & { description: U }, Converted>
+      ) => Struct<T & { description: U }, Preprocessed>
     },
     ParamsBySchemaType[T['type']]
   >,
@@ -86,23 +94,23 @@ export type Struct<T extends Schema, Converted extends boolean = false> = Omit<
   __schema: Readonly<T>
   parse: (s: unknown, options?: ParseOptions) => ParseResult<InferSchema<T>>
 } & StandardSchemaV1<unknown, InferSchema<T>> &
-  (Converted extends true
+  (Preprocessed extends true
     ? unknown
     : {
         /**
-         * Attaches a custom conversion function at this struct's own
+         * Attaches a custom preprocessing function at this struct's own
          * position in the schema tree. Never stored on the schema — so it
          * never appears in `keyof T`/`__schema` — but still only
          * applicable once per struct, same as every param above: calling
-         * `.convert()` flips `Converted` to `true`, which removes `convert`
-         * from the returned struct's own type.
+         * `.preprocess()` flips `Preprocessed` to `true`, which removes
+         * `preprocess` from the returned struct's own type.
          *
          * Runs on every `.parse()` call unconditionally, independently of
          * the `coerce` option — see `ParseOptions.coerce`'s doc comment for
          * why it's a separate switch from the built-in
          * bigint/boolean/number/string table.
          **/
-        convert: (fn: ConvertFn) => Struct<T, true>
+        preprocess: (fn: PreprocessFn) => Struct<T, true>
       })
 
 type BrandSubType =

@@ -32,7 +32,7 @@ Most TypeScript validators (Zod, Yup, Joi) make you build a schema out of functi
   - [Union](#union)
 - [Schema Parameters](#schema-parameters)
 - [Coercion](#coercion)
-  - [Custom converters](#custom-converters)
+  - [Custom preprocessors](#custom-preprocessors)
 - [Error Shape](#error-shape)
 - [Benchmarks](#benchmarks)
 
@@ -514,14 +514,14 @@ A conversion that doesn't apply (wrong source type) or fails (e.g. `"abc"` for `
 
 The [Standard Schema](https://standardschema.dev) `~standard.validate` entry point doesn't take options — that signature is fixed by the spec — so coercion isn't reachable through it; use `parse()`/`struct.parse()` directly when you need it.
 
-### Custom converters
+### Custom preprocessors
 
-The built-in table only covers `bigint`/`boolean`/`number`/`string`. `.convert()` attaches a custom conversion function to any struct — like every other struct param, it's a chain method, not a schema field: `T & unknown` schemas stay JSON-serializable data, and the converter itself is tracked separately, never written into `__schema`.
+The built-in table only covers `bigint`/`boolean`/`number`/`string`. `.preprocess()` attaches a custom pre-validation function to any struct — like every other struct param, it's a chain method, not a schema field: `T & unknown` schemas stay JSON-serializable data, and the preprocessor itself is tracked separately, never written into `__schema`. Named to match [Zod's `z.preprocess()`](https://zod.dev/api), which does the same thing: run before validation, not after (unlike `.transform()`, which runs on the already-validated value and can change its type — this doesn't).
 
 ```typescript
 import { object, string } from 'schematox'
 
-const trimmed = string().convert((s) =>
+const trimmed = string().preprocess((s) =>
   typeof s === 'string' ? s.trim() : s
 )
 
@@ -531,29 +531,29 @@ struct.parse({ name: '  Ann  ' })
 // { success: true, data: { name: 'Ann' } }
 ```
 
-A converter is a plain `(subject: unknown) => unknown` function, following the same contract as the built-in table: given a subject it doesn't recognize, return it unchanged rather than throwing, and let the ordinary validation report `INVALID_TYPE`. Like every other struct param, `.convert()` only applies once per struct — it disappears from the type the moment it's called, same as `.brand()`/`.min()`/etc., so a second call is a compile error, not a silent overwrite.
+A preprocessor is a plain `(subject: unknown) => unknown` function, following the same contract as the built-in table: given a subject it doesn't recognize, return it unchanged rather than throwing, and let the ordinary validation report `INVALID_TYPE`. Like every other struct param, `.preprocess()` only applies once per struct — it disappears from the type the moment it's called, same as `.brand()`/`.min()`/etc., so a second call is a compile error, not a silent overwrite.
 
-**`.convert()` and `{ coerce: true }` are two independent switches.** `{ coerce: true }` gates the built-in bigint/boolean/number/string table — a blanket, call-site opt-in, since it isn't tied to any one field. A struct's own `.convert()` is the opposite: an explicit, per-field declaration, active on every `.parse()` call the moment it's attached, exactly like `.brand()` or `.min()` — no separate flag needed to "turn it on", and `{ coerce: true }` has no bearing on whether it runs. When both apply to the same position, the custom one runs first and the built-in one still runs afterward on its result *if* `{ coerce: true }` was also passed — e.g. a custom converter can strip a `"$"` prefix unconditionally, and the built-in string→number conversion turns what's left into a number only when coercion was explicitly requested for that call:
+**`.preprocess()` and `{ coerce: true }` are two independent switches.** `{ coerce: true }` gates the built-in bigint/boolean/number/string table — a blanket, call-site opt-in, since it isn't tied to any one field. A struct's own `.preprocess()` is the opposite: an explicit, per-field declaration, active on every `.parse()` call the moment it's attached, exactly like `.brand()` or `.min()` — no separate flag needed to "turn it on", and `{ coerce: true }` has no bearing on whether it runs. When both apply to the same position, the custom one runs first and the built-in one still runs afterward on its result *if* `{ coerce: true }` was also passed — e.g. a custom preprocessor can strip a `"$"` prefix unconditionally, and the built-in string→number conversion turns what's left into a number only when coercion was explicitly requested for that call:
 
 ```typescript
-const price = number().convert((s) =>
+const price = number().preprocess((s) =>
   typeof s === 'string' && s.startsWith('$') ? s.slice(1) : s
 )
 
 price.parse('$42')
-// error — the converter strips "$", leaving the string "42", but nothing
-// converts it to a number without { coerce: true }
+// error — the preprocessor strips "$", leaving the string "42", but
+// nothing converts it to a number without { coerce: true }
 
 price.parse('$42', { coerce: true })
 // { success: true, data: 42 }
 ```
 
-`.convert()` composes through `array()`/`object()`/`record()`/`tuple()`/`union()` — attach it at any depth before composing, and it's tracked by position so it only fires where it was declared:
+`.preprocess()` composes through `array()`/`object()`/`record()`/`tuple()`/`union()` — attach it at any depth before composing, and it's tracked by position so it only fires where it was declared:
 
 ```typescript
 import { array, number } from 'schematox'
 
-const dollars = number().convert((s) =>
+const dollars = number().preprocess((s) =>
   typeof s === 'string' && s.startsWith('$') ? s.slice(1) : s
 )
 
@@ -561,9 +561,9 @@ array(dollars).parse(['$10', '$20'], { coerce: true })
 // { success: true, data: [10, 20] }
 ```
 
-A converter attached to a compound struct itself (its own subject, before that struct's own validation runs) and one attached to its child (e.g. every array element) are different positions and don't collide — `array(dollars).convert((s) => typeof s === 'string' ? s.split(',') : s)` splits a whole comma-separated string into an array first, and the item-level `dollars` converter still runs on each resulting element afterward. It doesn't mutate the struct it's called on — the original still parses without the attached converter.
+A preprocessor attached to a compound struct itself (its own subject, before that struct's own validation runs) and one attached to its child (e.g. every array element) are different positions and don't collide — `array(dollars).preprocess((s) => typeof s === 'string' ? s.split(',') : s)` splits a whole comma-separated string into an array first, and the item-level `dollars` preprocessor still runs on each resulting element afterward. It doesn't mutate the struct it's called on — the original still parses without the attached preprocessor.
 
-`.convert()` is only available through a struct — there's no equivalent for a static schema used on its own, since a converter's position is only meaningful relative to a specific struct's composition. `record()`'s `key` schema doesn't support a custom converter either — record keys are always plain strings already, and only the built-in string table applies to them.
+`.preprocess()` is only available through a struct — there's no equivalent for a static schema used on its own, since a preprocessor's position is only meaningful relative to a specific struct's composition. `record()`'s `key` schema doesn't support a custom preprocessor either — record keys are always plain strings already, and only the built-in string table applies to them.
 
 ## Error Shape
 
