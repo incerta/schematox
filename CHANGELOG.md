@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- CHORE: stopped publishing `src` alongside `dist`. It was ~40% of the package's unpacked size (76KB of 184KB) and unreachable at runtime — `main`/`exports`/`types` all resolve to `dist` only. `dist/*.js.map` and `dist/*.d.ts.map` still reference `../src/*.ts` for anyone who clones the repo or has it linked locally, but those paths now resolve to nothing inside an installed `node_modules` copy, so debuggers/editors fall back to the compiled `.js`/`.d.ts` instead of original source — a deliberate tradeoff in favor of the smaller install footprint the library is meant to compete on. Source remains fully readable on GitHub and in the published git tag. ([#85](https://github.com/incerta/schematox/pull/85))
+
 ## [2.1.0](https://github.com/incerta/schematox/compare/v2.0.0...v2.1.0)
 
 - FEAT: added an `unknown` primitive schema (`unknown()` / `{ type: 'unknown' }`) that accepts any subject without validation — an escape hatch for data whose shape isn't known or worth declaring upfront. Unlike every other primitive, it never produces `INVALID_TYPE`/`INVALID_RANGE`, and it has no `brand` param: `T & unknown` collapses to plain `T` in TypeScript, so branding it would silently narrow the inferred type away from `unknown` instead of tagging it. ([#81](https://github.com/incerta/schematox/pull/81))
