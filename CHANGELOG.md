@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- CHORE: stopped publishing `src` alongside `dist`. It was ~40% of the package's unpacked size (76KB of 184KB) and unreachable at runtime — `main`/`exports`/`types` all resolve to `dist` only. `dist/*.js.map` and `dist/*.d.ts.map` still reference `../src/*.ts` for anyone who clones the repo or has it linked locally, but those paths now resolve to nothing inside an installed `node_modules` copy, so debuggers/editors fall back to the compiled `.js`/`.d.ts` instead of original source — a deliberate tradeoff in favor of the smaller install footprint the library is meant to compete on. Source remains fully readable on GitHub and in the published git tag. ([#85](https://github.com/incerta/schematox/pull/85))
+- CHORE: reverted the decision to stop publishing `src` alongside `dist` (#85). That change dropped the tarball from 40.1kB to 30.5kB by removing `src` from the package, but `dist/*.js.map`/`dist/*.d.ts.map` reference `../src/*.ts` — so for anyone installing from npm, dropping `src` silently broke stepping into schematox's actual source from a debugger or "go to definition" in an editor, falling back to the compiled `.js`/`.d.ts` instead. Bundle size still matters (see the [Benchmarks](./README.md#benchmarks) section), but not at the cost of working source maps for every consumer, not just ones with the repo cloned or linked locally — schematox's niche is "much smaller than the mainstream heavyweight validators," not "the smallest possible install."
 
 ## [2.1.0](https://github.com/incerta/schematox/compare/v2.0.0...v2.1.0)
 
