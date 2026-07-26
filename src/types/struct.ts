@@ -78,6 +78,11 @@ export type Struct<T extends Schema> = Omit<
       description: <U extends string>(
         description: U
       ) => Struct<T & { description: U }>
+
+      /** Arbitrary user-defined data, ignored by parse/Infer. */
+      meta: <U extends Record<string, unknown>>(
+        meta: U
+      ) => Struct<T & { meta: U }>
     },
     ParamsBySchemaType[T['type']]
   >,

@@ -58,6 +58,8 @@ export function makeStruct(
     makeStruct({ ...schema, nullable: true }, preprocessors)
   result.description = (description: string) =>
     makeStruct({ ...schema, description }, preprocessors)
+  result.meta = (meta: Record<string, unknown>) =>
+    makeStruct({ ...schema, meta }, preprocessors)
 
   // Unlike every param above, never touches `schema` — it's tracked
   // separately (see `preprocessors`) so it never appears in `__schema`.

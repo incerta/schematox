@@ -26,6 +26,15 @@ export type SchemaShared = {
    * This field has no impact on validation or type inference.
    **/
   description?: string
+
+  /**
+   * Arbitrary user-defined data (e.g. a DB column name, a UI label).
+   * This field has no impact on validation or type inference — schematox
+   * never reads it — but it survives on `__schema`/`satisfies Schema` alike,
+   * fully typed, since it's a real member of `Schema` rather than an
+   * excess property.
+   **/
+  meta?: Record<string, unknown>
 }
 
 /**
