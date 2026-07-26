@@ -1,9 +1,11 @@
 import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants.js'
 import { PREPROCESS_PATH_ITEM } from './preprocess.js'
 import { parseWithPreprocessors } from './parse.js'
+import { toJsonSchema } from './json-schema.js'
 import { assignOwnProperty } from './utils.js'
 
 import type { StandardSchemaV1 } from './types/standard-schema.ts'
+import type { StandardJSONSchemaV1 } from './types/standard-json-schema.ts'
 import type {
   Schema,
   BigIntString,
@@ -23,7 +25,9 @@ export function makeStruct(
   preprocessors: ReadonlyArray<PreprocessPathEntry> = []
 ) {
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
-  const result: Record<string, unknown> & StandardSchemaV1 = {
+  const result: Record<string, unknown> &
+    StandardSchemaV1 &
+    StandardJSONSchemaV1 = {
     __schema: { ...schema },
     // Backs the public `preprocess` method below. Kept off the `Struct<T>`
     // type itself (read back only by this module's own composition
@@ -51,6 +55,10 @@ export function makeStruct(
                 message: x.code,
               })),
             }
+      },
+      jsonSchema: {
+        input: (options) => toJsonSchema(schema, options.target),
+        output: (options) => toJsonSchema(schema, options.target),
       },
     },
   }

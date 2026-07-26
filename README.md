@@ -35,6 +35,7 @@ The reason this works where other "schema is data" libraries can't: [TypeBox](ht
 - [Schema Parameters](#schema-parameters)
 - [Coercion](#coercion)
   - [Custom preprocessors](#custom-preprocessors)
+- [Standard JSON Schema](#standard-json-schema)
 - [Error Shape](#error-shape)
 - [Benchmarks](#benchmarks)
 - [Attaching Custom Metadata to a Schema](#attaching-custom-metadata-to-a-schema)
@@ -60,7 +61,7 @@ npm install schematox
 - **Small enough to read.** The whole library is ~1,200 lines of TypeScript — you can read it end to end instead of trusting a black box. The package ships `src` alongside `dist` for exactly this reason: `.d.ts`/`.js` source maps point at the real `.ts` files, so "go to definition" on `Infer<T>` lands on the actual conditional type, not tsc's compiled `.d.ts` — a few extra kB in the tarball so the type inference this library is built around stays as transparent from your editor as it is in this README.
 - **Either-style error handling.** `parse()` never throws. You always get `{ success, data, error }` back and decide what happens next.
 - **Branded primitives, first-class.** Nominal typing (`string & { __idFor: 'User' }`) is built in, not bolted on.
-- **[Standard Schema](https://standardschema.dev) compliant.** Works with any tool built against the shared validation interface used by Zod, Valibot, and others.
+- **[Standard Schema](https://standardschema.dev) compliant.** Works with any tool built against the shared validation interface used by Zod, Valibot, and others — including [Standard JSON Schema](https://standardschema.dev/json-schema), the companion spec for converting a schema to an actual JSON Schema document.
 - **100% test coverage, enforced.** Statements, branches, functions, and lines — every release is gated on it.
 
 ## Quick Start
@@ -595,6 +596,40 @@ array(dollars).parse(['$10', '$20'], { coerce: true })
 A preprocessor attached to a compound struct itself (its own subject, before that struct's own validation runs) and one attached to its child (e.g. every array element) are different positions and don't collide — `array(dollars).preprocess((s) => typeof s === 'string' ? s.split(',') : s)` splits a whole comma-separated string into an array first, and the item-level `dollars` preprocessor still runs on each resulting element afterward. It doesn't mutate the struct it's called on — the original still parses without the attached preprocessor.
 
 `.preprocess()` is only available through a struct — there's no equivalent for a static schema used on its own, since a preprocessor's position is only meaningful relative to a specific struct's composition. `record()`'s `key` schema doesn't support a custom preprocessor either — record keys are always plain strings already, and only the built-in string table applies to them.
+
+## Standard JSON Schema
+
+Alongside [Standard Schema](https://standardschema.dev) (`~standard.validate`, see [Coercion](#coercion) above), schematox implements its companion spec, [Standard JSON Schema](https://standardschema.dev/json-schema) — converting a schema to an actual JSON Schema document, for API docs, AI tool-calling schemas, form generators, or anything else that consumes JSON Schema rather than validating directly.
+
+Reached the same way as `~standard.validate`, off any struct or construct:
+
+```typescript
+import { object, string } from 'schematox'
+
+const user = object({
+  id: string(),
+  nickname: string().optional(),
+})
+
+user['~standard'].jsonSchema.output({ target: 'draft-2020-12' })
+// {
+//   type: 'object',
+//   properties: { id: { type: 'string' }, nickname: { type: 'string' } },
+//   required: ['id'],
+// }
+```
+
+Only `"draft-2020-12"` and `"draft-07"` — the two targets the spec *strongly recommends* — are supported; any other `target` (including `"openapi-3.0"`) throws, per spec ("libraries should throw if they don't support a specified target"). `input()` and `output()` return the same result: schematox's static `Schema` has no separate transform-pipeline step (the way e.g. a Zod `.transform()` would) for the two to diverge on.
+
+A few mappings are worth calling out:
+
+- `bigint` throws. No JSON value can represent a `bigint` (`JSON.stringify` itself throws on one), so there's no honest lossy fallback to reach for instead.
+- `brand` and `meta` are dropped. Neither has a JSON Schema representation: `brand` is a TypeScript-only nominal tag, and merging arbitrary `meta` keys in automatically risks colliding with reserved JSON Schema keywords.
+- `nullable` widens `type` into `["<type>", "null"]` (or folds into an existing `anyOf`, or wraps the node in one) rather than adding a disconnected sibling alternative.
+- `tuple` closes itself against extra elements — `prefixItems`/`items: false` on `"draft-2020-12"`, positional `items`/`additionalItems: false` on `"draft-07"` — matching schematox's own fixed-length tuple semantics.
+- `record`'s `key` schema maps to `propertyNames`.
+
+Like `~standard.validate`, this is only reachable through a struct or construct — wrap a static schema with `makeStruct()` first if you're working from one directly.
 
 ## Error Shape
 

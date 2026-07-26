@@ -1,6 +1,7 @@
 import { ParseOptions, ParseResult } from './utils.js'
 
 import type { StandardSchemaV1 } from './standard-schema.ts'
+import type { StandardJSONSchemaV1 } from './standard-json-schema.ts'
 import type {
   Schema,
   //
@@ -98,7 +99,8 @@ export type Struct<T extends Schema> = Omit<
   preprocess: (fn: PreprocessFn) => Struct<T & { preprocess: PreprocessFn }>
 
   parse: (s: unknown, options?: ParseOptions) => ParseResult<InferSchema<T>>
-} & StandardSchemaV1<unknown, InferSchema<T>>
+} & StandardSchemaV1<unknown, InferSchema<T>> &
+  StandardJSONSchemaV1<unknown, InferSchema<T>>
 
 type BrandSubType =
   boolean | number | string | ReadonlyArray<unknown> | Record<string, unknown>
