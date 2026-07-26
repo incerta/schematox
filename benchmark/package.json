@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Performance comparison of schematox against similar validation libraries",
   "scripts": {
-    "bench": "tsx index.ts"
+    "bench": "tsx index.ts",
+    "size": "tsx size/measure.ts"
   },
   "dependencies": {
     "ajv": "^8.17.1",
@@ -16,6 +17,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/node": "^22.10.2",
+    "esbuild": "^0.28.1",
     "tsx": "^4.19.2",
     "typescript": "^5.3.2"
   }

@@ -1,6 +1,6 @@
 # Benchmarks
 
-This directory compares schematox against [zod](https://www.npmjs.com/package/zod), [valibot](https://www.npmjs.com/package/valibot), [superstruct](https://www.npmjs.com/package/superstruct), [ajv](https://www.npmjs.com/package/ajv), and [yup](https://www.npmjs.com/package/yup), using [tinybench](https://www.npmjs.com/package/tinybench). It measures two separate things — **building** a schema once, and **parsing** with an already-built schema — across four shapes (a bare primitive, a flat 3-field object, a 2-level nested object with an array field, and an array of 10 objects), each with both a valid and an invalid subject.
+This directory compares schematox against [zod](https://www.npmjs.com/package/zod), [valibot](https://www.npmjs.com/package/valibot), [superstruct](https://www.npmjs.com/package/superstruct), [ajv](https://www.npmjs.com/package/ajv), and [yup](https://www.npmjs.com/package/yup). Two things are measured: **speed**, using [tinybench](https://www.npmjs.com/package/tinybench) — both **building** a schema once and **parsing** with an already-built schema, across four shapes (a bare primitive, a flat 3-field object, a 2-level nested object with an array field, and an array of 10 objects), each with both a valid and an invalid subject — and **bundle size**, using [esbuild](https://esbuild.github.io) to bundle and minify a realistic single-schema use case.
 
 Run it yourself:
 
@@ -58,3 +58,31 @@ Numbers below were captured on Node v23.7.0, Apple M1. Absolute numbers will dif
 **Array-of-objects looks worse than flat-object for every library, including ajv — that's volume, not an array-specific weakness.** The array benchmark validates 10 nested objects (30 field checks total) per call; the flat-object benchmark validates 3. Ops/sec drops roughly in proportion to the work per call for every library in the table, ajv included, not just schematox.
 
 **superstruct and yup sit at the opposite ends of the construction/parsing tradeoff.** superstruct's schemas are cheap closures to build — fastest construction by a wide margin — but the slowest interpreter to run except against yup. yup is unusually slow on both sides: it's the only library here without a non-throwing validate API (its adapter wraps `validateSync()` in try/catch — see [`adapters.ts`](./adapters.ts)), and its schema resolution is the heaviest of the group regardless of outcome.
+
+## Bundle size (minified + gzip, smaller is better)
+
+Run it yourself:
+
+```sh
+cd benchmark
+npm install
+npm run size
+```
+
+This isn't the package's published unpacked size — it's what actually ships to a client for one realistic use case: build the same flat 3-field object schema used above, parse one subject with it, then bundle and minify with [esbuild](https://esbuild.github.io) for the browser platform and gzip the result. Unused exports get tree-shaken like they would in a real app, so the number reflects the cost of *using* a library, not owning it on disk.
+
+schematox appears twice. `schematox (struct)` is the `object()`/`string()`/... chain, authored the same way the ops/sec benchmarks above build it. `schematox (static schema)` passes a plain object literal straight to `parse()` instead — no `struct` builder at all. Both produce identical runtime behavior; this checks whether "a schema is just data" pays off in bundle size, not only in portability.
+
+| library | minified | minified + gzip | vs smallest |
+|---|---|---|---|
+| valibot | 3.18 kB | 1.21 kB | smallest |
+| superstruct | 3.38 kB | 1.43 kB | 1.19x larger |
+| schematox (static schema) | 6.18 kB | 1.54 kB | 1.28x larger |
+| schematox (struct) | 8.29 kB | 2.13 kB | 1.77x larger |
+| yup | 41.20 kB | 13.14 kB | 10.88x larger |
+| zod | 58.26 kB | 13.84 kB | 11.45x larger |
+| ajv | 115.12 kB | 35.43 kB | 29.33x larger |
+
+**schematox isn't the smallest here — valibot and superstruct both beat it, by a real margin, not noise.** Both are built from the ground up as independent, individually-importable functions with no shared runtime beyond what a given call needs. schematox's `parse()` path (shared across every schema type, coercion, and `.preprocess()`) doesn't shrink to fit a single flat object the way valibot's or superstruct's per-function design does, even with dead-code elimination doing its job. It's still 6-9x smaller than zod and yup and over 15x smaller than ajv's compiled output for the same schema — the honest claim is "meaningfully lighter than the mainstream option," not "the lightest thing here."
+
+**Authoring style changes the number, not just the portability story.** The static-schema version is ~28% smaller minified and ~28% smaller gzipped than the `struct` version, because it only pulls in `parse()` — the `struct` version also pulls in the chain-method machinery (`.optional()`, `.nullable()`, `.brand()`, `.preprocess()`, ...) that a flat object with no chained params never calls but esbuild can't fully prove away. If bundle weight is the priority for a given call site, passing a plain schema object to `parse()` directly is the smaller choice, not just the more "data-first" one.
