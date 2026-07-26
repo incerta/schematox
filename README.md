@@ -10,13 +10,18 @@
 
 Most TypeScript validators (Zod, Yup, Joi) make you build a schema out of function calls, which means the schema only exists as code you import. Schematox schemas are plain JSON objects that structurally satisfy a `Schema` type — so the same schema can be serialized, stored in a database, sent over the wire, diffed between versions, or generated from another source of truth, in addition to being usable directly as a typesafe parser. You still get a familiar chainable `struct` builder (à la Zod) if you'd rather write schemas as code — both approaches produce the exact same JSON underneath.
 
+This goes further than "the schema happens to serialize to JSON." `Infer<T>` derives the TypeScript type by structurally reading a schema's own `type`/`of`/`brand`/`optional` fields — it isn't tied to how the object was built. Hand-write a schema, load one from a database, or generate one from another source of truth, and `Infer<typeof schema>` produces the exact same type a builder call would have. Other "schema is data" libraries built on JSON Schema — [TypeBox](https://github.com/sinclairzx81/typebox) is the best-known — don't offer this: TypeBox's `Static<T>` reads a `static` property off the schema's *type*, but that property is a phantom injected only by the return type of its `Type.*` builder functions; it's never actually present at runtime and can't appear in a hand-authored object literal, since writing it would require already knowing the type you're trying to derive. Feed TypeBox a JSON Schema object from outside your program — a config file, a database row, an OpenAPI document — and it validates fine but gives you no static type for it. Plain JSON Schema/ajv have no type-level story at all: validation only, never inference. Schematox's [Static schema](#static-schema) mode is the one genuinely bidirectional path — data in, type out — with no phantom field and no builder call required.
+
 - [Install](#install)
 - [Minimal Requirements](#minimal-requirements)
 - [Why Schematox?](#why-schematox)
 - [Quick Start](#quick-start)
   - [Static Schema](#static-schema)
+    - [Why this works, and why other schema-as-data libraries cannot](#why-this-works-and-why-other-schema-as-data-libraries-cannot)
   - [Struct](#struct)
   - [Construct](#construct)
+- [Narrowing the Schema Type](#narrowing-the-schema-type)
+- [Attaching Custom Metadata to a Schema](#attaching-custom-metadata-to-a-schema)
 - [Primitive Schema](#primitive-schema)
   - [BigInt](#bigint)
   - [Boolean](#boolean)
@@ -50,6 +55,7 @@ npm install schematox
 ## Why Schematox?
 
 - **Schemas are data, not just code.** A schema is a plain JSON object that structurally satisfies the `Schema` type — no function calls required. Store it, transfer it, generate it, diff it, or use it as the source of truth for other structures like DB models.
+- **Type inference is structural, not phantom.** `Infer<T>` reads the type straight off a schema's own `type`/`of`/`brand` fields, computed by ordinary conditional types — not from a hidden `static`-style property that only a builder call can inject, the way [TypeBox](https://github.com/sinclairzx81/typebox) does it. That means a schema built anywhere (by hand, loaded from a DB, generated from another source of truth) infers the exact same type a builder call would, with nothing extra attached. Plain JSON Schema/ajv can't do this at all — they validate but never infer.
 - **Zero dependencies.** Nothing to audit, nothing to update out from under you.
 - **Small enough to read.** The whole library is ~1,200 lines of TypeScript — you can read it end to end instead of trusting a black box.
 - **Either-style error handling.** `parse()` never throws. You always get `{ success, data, error }` back and decide what happens next.
@@ -90,8 +96,8 @@ export const schema = {
 type User = Infer<typeof schema>
   // ^?  { id: string & { __idFor: 'User' }, name: string }
 
-const subject = { id: '1'  name: 'John' }
-const parsed = parse(userSchema, subject)
+const subject = { id: '1', name: 'John' }
+const parsed = parse(schema, subject)
    // ^? ParseResult<User>
 
 parsed.error
@@ -109,6 +115,17 @@ if (parsed.success === false) {
 parsed.data
     // ^? User
 ```
+
+#### Why this works, and why other schema-as-data libraries cannot
+
+`Infer<T>` is an ordinary TypeScript conditional type over the `Schema` union — it pattern-matches on the schema's own `type`/`of`/`brand`/`optional`/`nullable` keys and builds the output type from them. Nothing about that computation cares whether the object came from a builder, a hand-written literal, `JSON.parse`, or a codegen step. The `schema` constant above was typed with nothing but a plain object literal and `as const satisfies Schema` — no call to `object()`/`string()` was involved, and `Infer` still recovers the fully branded `User` type.
+
+That's not how JSON-Schema-based "data" libraries do it:
+
+- **TypeBox** schemas are real JSON Schema at runtime, and `Static<T>` also looks like structural inference — but it's reading a `static` field that exists only in the *type* TypeBox's `Type.String()`/`Type.Object()` builders fabricate for their return value. It is never actually present on the object at runtime, and you cannot write it yourself in a literal, because doing so would require already knowing the TypeScript type you're trying to derive. Take a JSON Schema object from anywhere outside TypeBox's own builders — a database row, a config file, an OpenAPI document — and `Static<T>` has nothing to read; you get validation but no type.
+- **Plain JSON Schema / ajv** have no compile-time type at all. The schema is data, full stop — there is no equivalent of `Infer`/`Static` to call.
+
+So the "Static schema" mode here isn't just "you can also write JSON instead of calling a builder" — it's that the type contract for a piece of data can itself be expressed *as that same data*, and TypeScript will recover it, regardless of where the data came from. `Struct`/`Construct` below are conveniences built on top of the same `Schema` shape, not a separate, richer format the Static mode is missing out on.
 
 ### Struct
 
@@ -156,9 +173,147 @@ const schema = { type: 'string' } as const satisfies Schema
 const string = makeStruct(schema)
 ```
 
+## Narrowing the Schema Type
+
+Every schema shape (`ObjectSchema<T>`, `ArraySchema<T>`, `UnionSchema<T>`, `LiteralSchema<T>`, ...) is an exported generic type, not an opaque type produced only by a builder call. That means you can compose your own restricted subset of `Schema` using nothing but ordinary TypeScript generics, and get a real compile-time contract for "only schemas shaped like *this* are allowed here" — not just a convention enforced by review.
+
+For example, a DB-repository layer might want to allow only flat objects — no nested `object`/`record`/`tuple`, no `bigint` — while still allowing simple unions and arrays of primitives:
+
+```typescript
+import type {
+  Infer,
+  PrimitiveSchema,
+  ObjectSchema,
+  UnionSchema,
+  StringSchema,
+  NumberSchema,
+  LiteralSchema,
+  ArraySchema,
+} from 'schematox'
+
+export type BaseRepoModelSchema = ObjectSchema<
+  Record<
+    string,
+    | Exclude<PrimitiveSchema, { type: 'bigint' }>
+    | UnionSchema<Array<LiteralSchema<string> | StringSchema>>
+    | ArraySchema<
+        | StringSchema
+        | NumberSchema
+        | UnionSchema<Array<StringSchema | LiteralSchema<string> | LiteralSchema<number>>>
+      >
+  >
+>
+```
+
+Any schema declared `as const satisfies BaseRepoModelSchema` is simultaneously a valid `Schema` — so `parse`/`Infer` work exactly as usual — and statically guaranteed to respect the narrower shape:
+
+```typescript
+import { parse } from 'schematox'
+
+const userModel = {
+  type: 'object',
+  of: {
+    id: { type: 'string', brand: ['idFor', 'User'] },
+    status: {
+      type: 'union',
+      of: [
+        { type: 'literal', of: 'active' },
+        { type: 'literal', of: 'banned' },
+      ],
+    },
+    tags: { type: 'array', of: { type: 'string' } },
+  },
+} as const satisfies BaseRepoModelSchema
+
+type UserModel = Infer<typeof userModel>
+  // ^? { id: string & { __idFor: 'User' }, status: 'active' | 'banned', tags: string[] }
+
+parse(userModel, { id: '1', status: 'active', tags: ['x'] })
+  // ^? ParseResult<UserModel>
+
+const brokenModel = {
+  type: 'object',
+  of: {
+    profile: { type: 'object', of: { bio: { type: 'string' } } },
+  },
+  // @ts-expect-error nested `object` is not one of BaseRepoModelSchema's allowed field types
+} satisfies BaseRepoModelSchema
+```
+
+Nothing here is special-cased by schematox — `ObjectSchema`, `ArraySchema`, `UnionSchema`, and friends are just regular generics over the same `Schema` union `Infer` reads, so any subset of the schema language you can describe with `Exclude`, unions, and nested generics becomes a type the compiler, `parse`, and `Infer` all agree on. This isn't available in schema-as-data libraries built on JSON Schema: TypeBox's `TSchema` subtypes carry the phantom `static`/`params` fields described [above](#why-this-works-and-why-other-schema-as-data-libraries-cannot), so hand-composing a restricted schema type — rather than composing `Type.*` calls — breaks the machinery that produces `Static<T>`. Plain JSON Schema/ajv have no schema *type* to narrow in the first place.
+
+The narrowing composes like any other TypeScript type, so it isn't limited to a single flat object. A union of `BaseRepoModelSchema`s is itself still a fully narrowed schema:
+
+```typescript
+import type { UnionSchema } from 'schematox'
+
+export type UnionRepoModelSchema = UnionSchema<Array<BaseRepoModelSchema>>
+export type RepoModelSchema = BaseRepoModelSchema | UnionRepoModelSchema
+```
+
+And the same trick works one level up: you can write your own minimal contract for "a struct built from one of these schemas," without reaching for schematox's own `Struct<T>` type at all — a plain object type naming just the two members a consumer actually needs:
+
+```typescript
+import { object, string, number, array } from 'schematox'
+import type { ParseResult } from 'schematox'
+
+export type RepoStruct = {
+  __schema: RepoModelSchema
+  parse: (x: unknown) => ParseResult<unknown>
+}
+
+function saveModel(model: RepoStruct, data: unknown) {
+  return model.parse(data)
+}
+
+const userModel = object({ id: string(), tags: array(string()) })
+saveModel(userModel, { id: '1', tags: ['a'] }) // OK — flat schema satisfies RepoModelSchema
+
+const brokenModel = object({ profile: object({ bio: string() }) })
+saveModel(brokenModel, {}) // ❌ Type error — nested object schema doesn't satisfy RepoModelSchema
+```
+
+Any struct or construct built from a schema that satisfies `RepoModelSchema` also satisfies `RepoStruct` — `__schema` lines up structurally, and the extra `options?: ParseOptions` parameter on the real `parse` is compatible with the narrower signature declared here. `saveModel` can only ever be called with repo-shaped models; anything else — a struct with a nested `object` field, or a union with even one non-conforming member — is rejected before it reaches a database, by the compiler alone.
+
+## Attaching Custom Metadata to a Schema
+
+Every schema — static, struct, or construct — accepts an optional `meta` field for your own data: say, mapping each field to a database column, right on the schema that already validates it.
+
+```typescript
+import { parse } from 'schematox'
+import type { Infer, Schema } from 'schematox'
+
+const userSchema = {
+  type: 'object',
+  of: {
+    id: { type: 'string', brand: ['idFor', 'User'], meta: { dbColumn: 'user_id' } },
+    name: { type: 'string', meta: { dbColumn: 'full_name' } },
+  },
+} as const satisfies Schema
+
+userSchema.of.id.meta.dbColumn // 'user_id' — fully typed
+userSchema.of.name.meta.dbColumn // 'full_name'
+
+type User = Infer<typeof userSchema>
+  // ^? { id: string & { __idFor: 'User' }, name: string } — `meta` never leaks in here
+
+function columnNames(schema: typeof userSchema) {
+  return Object.values(schema.of).map((field) => field.meta.dbColumn)
+}
+
+columnNames(userSchema) // ['user_id', 'full_name']
+parse(userSchema, { id: '1', name: 'John' }) // meta has no effect on validation
+```
+
+The struct API has the same thing as a chainable setter: `string().meta({ dbColumn: 'user_id' })`, which lands in exactly the same place on `__schema`.
+
+Because `meta` is a real member of `Schema` — not bolted on — it works with the idiomatic `as const satisfies Schema` style directly, no workaround needed. `parse` never reads it and `Infer` never produces it, so it's purely for your own tooling: codegen, reflection, documentation, or anything else that wants to walk the schema and find data schematox itself doesn't care about.
+
+If you need something less structured than a `Record<string, unknown>` — genuinely arbitrary top-level keys, of any shape, on a schema you already have lying around — that's still possible too, just not through a direct `satisfies Schema` check: `makeStruct<T extends Schema>(schema: T): Struct<T>` and `parse<T extends Schema>` both infer `T` from the exact literal you pass, extra keys included, since TypeScript's excess-property check only fires when a fresh literal is checked *against* a named type — a generic parameter being inferred isn't that. So `makeStruct({ type: 'string', dbColumn: 'user_id' } as const).__schema.dbColumn` type-checks and survives, while the same object written as `{ ... } as const satisfies Schema` would be rejected for the unknown key. `meta` exists precisely so you don't have to reach for this in the common case.
+
 ## Primitive Schema
 
-Any schema share optional/nullable/description/brand parameters (`unknown` is the one exception — see [Unknown](#unknown)).
+Any schema share optional/nullable/description/meta/brand parameters (`unknown` is the one exception — see [Unknown](#unknown)).
 
 ### BigInt
 
@@ -171,6 +326,7 @@ const schema = {
   min: '1',
   max: '4',
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const struct = bigint()
@@ -180,6 +336,7 @@ const struct = bigint()
   .min('1')
   .max('4')
   .description('x')
+  .meta({ x: 'y' })
 
 // (bigint & { __x: 'y' }) | undefined | null
 type FromSchema = Infer<typeof schema>
@@ -195,6 +352,7 @@ const schema = {
   nullable: true,
   brand: ['x', 'y'],
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const struct = boolean() //
@@ -202,6 +360,7 @@ const struct = boolean() //
   .nullable()
   .brand('x', 'y')
   .description('x')
+  .meta({ x: 'y' })
 
 // (boolean & { __x: 'y' }) | undefined | null
 type FromSchema = Infer<typeof schema>
@@ -219,6 +378,7 @@ const schema = {
   minLength: 1,
   maxLength: 2,
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const struct = string()
@@ -228,6 +388,7 @@ const struct = string()
   .minLength(1)
   .maxLength(2)
   .description('x')
+  .meta({ x: 'y' })
 
 // (string & { __x: 'y' }) | undefined | null
 type FromSchema = Infer<typeof schema>
@@ -246,6 +407,7 @@ const schema = {
   nullable: true,
   brand: ['x', 'y'],
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const struct = literal('x') //
@@ -253,6 +415,7 @@ const struct = literal('x') //
   .nullable()
   .brand('x', 'y')
   .description('x')
+  .meta({ x: 'y' })
 
 // ('x' & { __x: 'y' }) | undefined | null
 type FromSchema = Infer<typeof schema>
@@ -272,6 +435,7 @@ const schema = {
   min: 1,
   max: 4,
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const struct = number()
@@ -281,6 +445,7 @@ const struct = number()
   .min(1)
   .max(4)
   .description('x')
+  .meta({ x: 'y' })
 
 // (number & { __x: 'y' }) | undefined | null
 type FromSchema = Infer<typeof schema>
@@ -299,12 +464,14 @@ const schema = {
   optional: true,
   nullable: true,
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const struct = unknown() //
   .optional()
   .nullable()
   .description('x')
+  .meta({ x: 'y' })
 
 // unknown
 type FromSchema = Infer<typeof schema>
@@ -325,6 +492,7 @@ const schema = {
   minLength: 1,
   maxLength: 1000,
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const struct = array(string())
@@ -333,6 +501,7 @@ const struct = array(string())
   .minLength(1)
   .maxLength(1000)
   .description('x')
+  .meta({ x: 'y' })
 
 // string[] | undefined | null
 type FromSchema = Infer<typeof schema>
@@ -356,6 +525,7 @@ const schema = {
   optional: true,
   nullable: true,
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const struct = object({
@@ -365,6 +535,7 @@ const struct = object({
   .optional()
   .nullable()
   .description('x')
+  .meta({ x: 'y' })
 
 // { x: string; y: number } | undefined | null
 type FromSchema = Infer<typeof schema>
@@ -391,6 +562,7 @@ const schema = {
   optional: true,
   nullable: true,
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const userId = string().brand('idFor', 'user')
@@ -401,6 +573,7 @@ const struct = record(number())
   .optional()
   .nullable()
   .description('x')
+  .meta({ x: 'y' })
 
 // Record<string & { __idFor: 'user' }, number> | null | undefined
 type FromSchema = Infer<typeof schema>
@@ -418,12 +591,14 @@ const schema = {
   optional: true,
   nullable: true,
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const struct = tuple([string(), number()])
   .optional()
   .nullable()
   .description('x')
+  .meta({ x: 'y' })
 
 // [string, number] | undefined | null
 type FromSchema = Infer<typeof schema>
@@ -441,12 +616,14 @@ const schema = {
   optional: true,
   nullable: true,
   description: 'x',
+  meta: { x: 'y' },
 } as const satisfies Schema
 
 const struct = union([string(), number()])
   .optional()
   .nullable()
   .description('x')
+  .meta({ x: 'y' })
 
 // string | number | undefined | null
 type FromSchema = Infer<typeof schema>
@@ -460,6 +637,7 @@ type FromStruct = Infer<typeof struct>
 - `brand?: [string, unknown]` – make primitive type nominal "['idFor', 'User'] -> T & { \_\_idFor: 'User' }"
 - `minLength/maxLength/min/max` – schema type dependent limiting characteristics
 - `description?: string` – description of the particular schema property which can be used to provide more detailed information for the user/developer on validation/parse error
+- `meta?: Record<string, unknown>` – arbitrary user-defined data (e.g. a DB column name); ignored by `parse`/`Infer`, preserved on `__schema` — see [Attaching Custom Metadata to a Schema](#attaching-custom-metadata-to-a-schema)
 
 ### Why brands are `{ __category: subCategory }` instead of a `unique symbol`
 

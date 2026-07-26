@@ -1,1 +1,2 @@
-export type StructSharedKeys = '__schema' | '~standard' | 'parse' | 'preprocess'
+export type StructSharedKeys =
+  '__schema' | '~standard' | 'parse' | 'preprocess' | 'meta'
