@@ -21,6 +21,13 @@ export {
 
 export { error, success, tCh } from './utils.js'
 
+export {
+  coerceBigInt,
+  coerceBoolean,
+  coerceNumber,
+  coerceString,
+} from './coerce.js'
+
 export type {
   ErrorCode,
   ErrorPath,

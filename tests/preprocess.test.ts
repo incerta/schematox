@@ -265,10 +265,40 @@ describe('struct composition tolerates a struct-shaped value with no preprocesso
   })
 })
 
-describe("~standard.validate does not support options, so a struct's preprocessors don't apply through it", () => {
-  it('the Standard Schema entry point stays strict', () => {
+describe('~standard.validate: a preprocessor is declared at struct-construction time, so it applies through the Standard Schema entry point too', () => {
+  it('runs a self preprocessor', () => {
     const struct = x.number().preprocess(() => 42)
     const validated = struct['~standard'].validate('anything')
+
+    if (validated instanceof Promise) {
+      throw Error('Not expected')
+    }
+
+    expect(validated.issues).toBe(undefined)
+    expect((validated as { value: unknown }).value).toBe(42)
+  })
+
+  it('runs a preprocessor composed into an object at its own key', () => {
+    const trimmed = x
+      .string()
+      .preprocess((s) => (typeof s === 'string' ? s.trim() : s))
+    const struct = x.object({ name: trimmed })
+
+    const validated = struct['~standard'].validate({ name: '  Ann  ' })
+
+    if (validated instanceof Promise) {
+      throw Error('Not expected')
+    }
+
+    expect(validated.issues).toBe(undefined)
+    expect((validated as { value: unknown }).value).toStrictEqual({
+      name: 'Ann',
+    })
+  })
+
+  it("doesn't retroactively enable the built-in coerce table — only { coerce: true } on parse()/struct.parse() does, and ~standard.validate never passes it", () => {
+    const struct = x.number()
+    const validated = struct['~standard'].validate('42')
 
     if (validated instanceof Promise) {
       throw Error('Not expected')
@@ -277,5 +307,9 @@ describe("~standard.validate does not support options, so a struct's preprocesso
     expect(validated.issues).toStrictEqual([
       { message: x.ERROR_CODE.invalidType, path: [] },
     ])
+    expect(struct.parse('42', { coerce: true })).toStrictEqual({
+      success: true,
+      data: 42,
+    })
   })
 })

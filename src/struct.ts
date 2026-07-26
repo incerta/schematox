@@ -1,6 +1,6 @@
 import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants.js'
 import { PREPROCESS_PATH_ITEM } from './preprocess.js'
-import { parse, parseWithPreprocessors } from './parse.js'
+import { parseWithPreprocessors } from './parse.js'
 import { assignOwnProperty } from './utils.js'
 
 import type { StandardSchemaV1 } from './types/standard-schema.ts'
@@ -36,7 +36,12 @@ export function makeStruct(
     ['~standard']: {
       ...STANDARD_SCHEMA,
       validate: (input) => {
-        const parsed = parse(schema as never, input)
+        const parsed = parseWithPreprocessors(
+          schema as never,
+          input,
+          undefined,
+          preprocessors
+        )
 
         return parsed.success
           ? { value: parsed.data }
