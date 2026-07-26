@@ -8,16 +8,15 @@
 [![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://www.npmjs.com/package/schematox)
 [![license](https://img.shields.io/npm/l/schematox.svg)](./LICENSE)
 
-Most TypeScript validators (Zod, Yup, Joi) make you build a schema out of function calls, which means the schema only exists as code you import. Schematox schemas are plain JSON objects that structurally satisfy a `Schema` type — so the same schema can be serialized, stored in a database, sent over the wire, diffed between versions, or generated from another source of truth, in addition to being usable directly as a typesafe parser. You still get a familiar chainable `struct` builder (à la Zod) if you'd rather write schemas as code — both approaches produce the exact same JSON underneath.
+Zod, Yup, and Joi schemas are built from function calls, so a schema only ever exists as code you import. A schematox schema is a plain JSON object — write it as a literal, load it from a database, generate it from another source of truth — and it's still a full typesafe parser with real inferred types, not just validated data. Prefer writing code? A chainable `struct` builder (à la Zod) is right there too; both forms compile to the exact same JSON underneath.
 
-This goes further than "the schema happens to serialize to JSON." `Infer<T>` derives the TypeScript type by structurally reading a schema's own `type`/`of`/`brand`/`optional` fields — it isn't tied to how the object was built. Hand-write a schema, load one from a database, or generate one from another source of truth, and `Infer<typeof schema>` produces the exact same type a builder call would have. Other "schema is data" libraries built on JSON Schema — [TypeBox](https://github.com/sinclairzx81/typebox) is the best-known — don't offer this: TypeBox's `Static<T>` reads a `static` property off the schema's *type*, but that property is a phantom injected only by the return type of its `Type.*` builder functions; it's never actually present at runtime and can't appear in a hand-authored object literal, since writing it would require already knowing the type you're trying to derive. Feed TypeBox a JSON Schema object from outside your program — a config file, a database row, an OpenAPI document — and it validates fine but gives you no static type for it. Plain JSON Schema/ajv have no type-level story at all: validation only, never inference. Schematox's [Static schema](#static-schema) mode is the one genuinely bidirectional path — data in, type out — with no phantom field and no builder call required.
+The reason this works where other "schema is data" libraries can't: [TypeBox](https://github.com/sinclairzx81/typebox)'s `Static<T>` reads a phantom `static` property that only its own builders inject — hand it a schema from anywhere else and you get validation with no type. Plain JSON Schema/ajv don't infer at all. Schematox's `Infer<T>` reads structurally off the schema's own fields, so it produces the same type no matter where the schema came from. See [Static schema](#static-schema) for the full case.
 
 - [Install](#install)
 - [Minimal Requirements](#minimal-requirements)
 - [Why Schematox?](#why-schematox)
 - [Quick Start](#quick-start)
   - [Static Schema](#static-schema)
-    - [Why this works, and why other schema-as-data libraries cannot](#why-this-works-and-why-other-schema-as-data-libraries-cannot)
   - [Struct](#struct)
   - [Construct](#construct)
 - [Narrowing the Schema Type](#narrowing-the-schema-type)
@@ -40,6 +39,7 @@ This goes further than "the schema happens to serialize to JSON." `Infer<T>` der
   - [Custom preprocessors](#custom-preprocessors)
 - [Error Shape](#error-shape)
 - [Benchmarks](#benchmarks)
+- [Why this works, and why other schema-as-data libraries cannot](#why-this-works-and-why-other-schema-as-data-libraries-cannot)
 
 ## Install
 
@@ -57,7 +57,7 @@ npm install schematox
 - **Schemas are data, not just code.** A schema is a plain JSON object that structurally satisfies the `Schema` type — no function calls required. Store it, transfer it, generate it, diff it, or use it as the source of truth for other structures like DB models.
 - **Type inference is structural, not phantom.** `Infer<T>` reads the type straight off a schema's own `type`/`of`/`brand` fields, computed by ordinary conditional types — not from a hidden `static`-style property that only a builder call can inject, the way [TypeBox](https://github.com/sinclairzx81/typebox) does it. That means a schema built anywhere (by hand, loaded from a DB, generated from another source of truth) infers the exact same type a builder call would, with nothing extra attached. Plain JSON Schema/ajv can't do this at all — they validate but never infer.
 - **Zero dependencies.** Nothing to audit, nothing to update out from under you.
-- **Small enough to read.** The whole library is ~1,200 lines of TypeScript — you can read it end to end instead of trusting a black box.
+- **Small enough to read.** The whole library is ~1,200 lines of TypeScript — you can read it end to end instead of trusting a black box. The package ships `src` alongside `dist` for exactly this reason: `.d.ts`/`.js` source maps point at the real `.ts` files, so "go to definition" on `Infer<T>` lands on the actual conditional type, not tsc's compiled `.d.ts` — a few extra kB in the tarball so the type inference this library is built around stays as transparent from your editor as it is in this README.
 - **Either-style error handling.** `parse()` never throws. You always get `{ success, data, error }` back and decide what happens next.
 - **Branded primitives, first-class.** Nominal typing (`string & { __idFor: 'User' }`) is built in, not bolted on.
 - **[Standard Schema](https://standardschema.dev) compliant.** Works with any tool built against the shared validation interface used by Zod, Valibot, and others.
@@ -115,17 +115,6 @@ if (parsed.success === false) {
 parsed.data
     // ^? User
 ```
-
-#### Why this works, and why other schema-as-data libraries cannot
-
-`Infer<T>` is an ordinary TypeScript conditional type over the `Schema` union — it pattern-matches on the schema's own `type`/`of`/`brand`/`optional`/`nullable` keys and builds the output type from them. Nothing about that computation cares whether the object came from a builder, a hand-written literal, `JSON.parse`, or a codegen step. The `schema` constant above was typed with nothing but a plain object literal and `as const satisfies Schema` — no call to `object()`/`string()` was involved, and `Infer` still recovers the fully branded `User` type.
-
-That's not how JSON-Schema-based "data" libraries do it:
-
-- **TypeBox** schemas are real JSON Schema at runtime, and `Static<T>` also looks like structural inference — but it's reading a `static` field that exists only in the *type* TypeBox's `Type.String()`/`Type.Object()` builders fabricate for their return value. It is never actually present on the object at runtime, and you cannot write it yourself in a literal, because doing so would require already knowing the TypeScript type you're trying to derive. Take a JSON Schema object from anywhere outside TypeBox's own builders — a database row, a config file, an OpenAPI document — and `Static<T>` has nothing to read; you get validation but no type.
-- **Plain JSON Schema / ajv** have no compile-time type at all. The schema is data, full stop — there is no equivalent of `Infer`/`Static` to call.
-
-So the "Static schema" mode here isn't just "you can also write JSON instead of calling a builder" — it's that the type contract for a piece of data can itself be expressed *as that same data*, and TypeScript will recover it, regardless of where the data came from. `Struct`/`Construct` below are conveniences built on top of the same `Schema` shape, not a separate, richer format the Static mode is missing out on.
 
 ### Struct
 
@@ -802,3 +791,14 @@ The [`benchmark/`](./benchmark) directory compares schematox's construction and 
 - **Construction speed is mid-pack for schematox** — superstruct builds schemas fastest, ajv by far the slowest.
 
 See [`benchmark/README.md`](./benchmark/README.md) for full methodology, result tables, and the reasoning behind the ranking.
+
+## Why this works, and why other schema-as-data libraries cannot
+
+`Infer<T>` is an ordinary TypeScript conditional type over the `Schema` union — it pattern-matches on the schema's own `type`/`of`/`brand`/`optional`/`nullable` keys and builds the output type from them. Nothing about that computation cares whether the object came from a builder, a hand-written literal, `JSON.parse`, or a codegen step. The `schema` constant in the [Static schema](#static-schema) example was typed with nothing but a plain object literal and `as const satisfies Schema` — no call to `object()`/`string()` was involved, and `Infer` still recovers the fully branded `User` type.
+
+That's not how JSON-Schema-based "data" libraries do it:
+
+- **TypeBox** schemas are real JSON Schema at runtime, and `Static<T>` also looks like structural inference — but it's reading a `static` field that exists only in the *type* TypeBox's `Type.String()`/`Type.Object()` builders fabricate for their return value. It is never actually present on the object at runtime, and you cannot write it yourself in a literal, because doing so would require already knowing the TypeScript type you're trying to derive. Take a JSON Schema object from anywhere outside TypeBox's own builders — a database row, a config file, an OpenAPI document — and `Static<T>` has nothing to read; you get validation but no type.
+- **Plain JSON Schema / ajv** have no compile-time type at all. The schema is data, full stop — there is no equivalent of `Infer`/`Static` to call.
+
+So the "Static schema" mode here isn't just "you can also write JSON instead of calling a builder" — it's that the type contract for a piece of data can itself be expressed *as that same data*, and TypeScript will recover it, regardless of where the data came from. `Struct`/`Construct` are conveniences built on top of the same `Schema` shape, not a separate, richer format the Static mode is missing out on.
