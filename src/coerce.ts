@@ -33,7 +33,7 @@ export function getCoerceFn(schemaType: Schema['type']) {
  * never manufactures its own error.
  **/
 
-function coerceBigInt(subject: unknown): unknown {
+export function coerceBigInt(subject: unknown): unknown {
   if (
     typeof subject !== 'string' &&
     typeof subject !== 'number' &&
@@ -49,7 +49,7 @@ function coerceBigInt(subject: unknown): unknown {
   }
 }
 
-function coerceBoolean(subject: unknown): unknown {
+export function coerceBoolean(subject: unknown): unknown {
   if (subject === 'true' || subject === 1 || subject === 1n) {
     return true
   }
@@ -70,7 +70,7 @@ function coerceBoolean(subject: unknown): unknown {
  * string-sourced conversions are rejected once the result lands outside
  * the safe integer range.
  **/
-function coerceNumber(subject: unknown): unknown {
+export function coerceNumber(subject: unknown): unknown {
   if (typeof subject === 'boolean') {
     return subject ? 1 : 0
   }
@@ -98,7 +98,7 @@ function coerceNumber(subject: unknown): unknown {
   return coerced
 }
 
-function coerceString(subject: unknown): unknown {
+export function coerceString(subject: unknown): unknown {
   if (typeof subject === 'number' || typeof subject === 'boolean') {
     return String(subject)
   }

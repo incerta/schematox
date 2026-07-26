@@ -541,7 +541,9 @@ A conversion that doesn't apply (wrong source type) or fails (e.g. `"abc"` for `
 
 `optional`/`nullable` are checked before coercion runs, so `undefined`/`null` pass straight through rather than being coerced into e.g. `0`/`false`.
 
-The [Standard Schema](https://standardschema.dev) `~standard.validate` entry point doesn't take options — that signature is fixed by the spec — so coercion isn't reachable through it; use `parse()`/`struct.parse()` directly when you need it.
+Coercion is a `parse()`-call option, not a schema property (see above), and there's no struct-construction-time way to request it either — so there's nothing for a struct's `['~standard'].validate` to turn on by default. Its input is whatever the calling library passes, unchanged; use `parse()`/`struct.parse()` directly when you need coercion.
+
+If a struct only ever reaches your code through `~standard.validate` (e.g. a form library's Standard-Schema-only resolver) and it still needs `"42"` → `42`-style conversion, `.preprocess()` below is the way to get it: unlike `{ coerce: true }`, a preprocessor is attached to the struct itself at construction time, so it runs on every `~standard.validate` call too, no per-call option needed. The four functions behind the built-in table above are themselves exported — `coerceBigInt`/`coerceBoolean`/`coerceNumber`/`coerceString` — so the same conversion `{ coerce: true }` would have applied can be attached directly: `number().preprocess(coerceNumber)` reaches `"42" → 42` through `~standard.validate` with the exact built-in behavior, no hand-written conversion needed.
 
 ### Custom preprocessors
 
