@@ -4,7 +4,7 @@
 
 [![npm version](https://img.shields.io/npm/v/schematox.svg)](https://www.npmjs.com/package/schematox)
 [![npm downloads](https://img.shields.io/npm/dm/schematox.svg)](https://www.npmjs.com/package/schematox)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/schematox)](https://bundlephobia.com/package/schematox)
+[![bundle size](https://deno.bundlejs.com/badge?q=schematox)](https://bundlejs.com/?q=schematox)
 [![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://www.npmjs.com/package/schematox)
 [![license](https://img.shields.io/npm/l/schematox.svg)](./LICENSE)
 
