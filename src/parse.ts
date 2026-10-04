@@ -1,7 +1,6 @@
 import { ERROR_CODE } from './constants.js'
 import { getCoerceFn } from './coerce.js'
 import {
-  buildPreprocessTree,
   getPreprocessTreeChild,
   getSelfPreprocess,
   PREPROCESS_PATH_ITEM,
@@ -9,7 +8,6 @@ import {
 import { assignOwnProperty, error, success } from './utils.js'
 
 import type { PreprocessTreeNode } from './preprocess.js'
-import type { PreprocessPathEntry } from './types/preprocess.js'
 import type { InferSchema } from './types/infer.js'
 import type {
   ErrorPath,
@@ -72,30 +70,31 @@ export function parse(
 
 /**
  * Not part of the public `index.ts` surface. `struct.ts` is the only
- * caller, feeding in the flat `{ path, fn }[]` list a struct accumulates
- * from its own and its composed children's `.preprocess()` calls — there's
- * no public, schema-only equivalent, since a preprocessor's position is
- * only meaningful relative to a specific struct's composition.
+ * caller, feeding in the tree built (once, at struct creation — not per
+ * call) from the flat `{ path, fn }[]` list a struct accumulates from its
+ * own and its composed children's `.preprocess()` calls — there's no
+ * public, schema-only equivalent, since a preprocessor's position is only
+ * meaningful relative to a specific struct's composition.
  **/
 export function parseWithPreprocessors<T extends Schema>(
   schema: T,
   subject: unknown,
   options: ParseOptions | undefined,
-  preprocessors: ReadonlyArray<PreprocessPathEntry>
+  preprocessTree: PreprocessTreeNode | undefined
 ): ParseResult<InferSchema<T>>
 
 export function parseWithPreprocessors(
   schema: Schema,
   subject: unknown,
   options: ParseOptions | undefined,
-  preprocessors: ReadonlyArray<PreprocessPathEntry>
+  preprocessTree: PreprocessTreeNode | undefined
 ): ParseResult<unknown> {
   return parseRecursively(
     [],
     schema,
     subject,
     options?.coerce === true,
-    buildPreprocessTree(preprocessors)
+    preprocessTree
   )
 }
 
@@ -139,10 +138,15 @@ function parseRecursively(
   // effect once declared, with no separate runtime switch. The built-in
   // bigint/boolean/number/string table is the opposite: a blanket,
   // call-site opt-in via `coerce`, since it isn't tied to any one field.
-  const customPreprocessFn = getSelfPreprocess(preprocessNode)
+  //
+  // Both are rare, so the common case (no preprocessor at this position,
+  // no `coerce`) skips the lookups entirely — this runs once per node.
+  if (preprocessNode !== undefined) {
+    const customPreprocessFn = getSelfPreprocess(preprocessNode)
 
-  if (customPreprocessFn !== undefined) {
-    subject = customPreprocessFn(subject)
+    if (customPreprocessFn !== undefined) {
+      subject = customPreprocessFn(subject)
+    }
   }
 
   if (coerce) {
@@ -574,7 +578,9 @@ function parseObject(
       nestedSchema,
       nestedValue,
       coerce,
-      getPreprocessTreeChild(preprocessNode, key)
+      preprocessNode === undefined
+        ? undefined
+        : getPreprocessTreeChild(preprocessNode, key)
     )
     errorPath.pop()
 
