@@ -10,6 +10,7 @@
     "formatter:check": "prettier --check . || (echo \"FORMATTING ERROR: use 'npm run formatter:fix'\" && exit 1)",
     "ts": "tsc -p tests/tsconfig.json",
     "attw": "npm run build && attw --pack . --profile esm-only",
+    "readme:preview": "node scripts/preview-readme.mjs",
     "check": "npm run formatter:check && npm run ts && npm run test:coverage && npm run attw",
     "morph": "jiti tests/fold-morph.ts && npm run formatter:fix",
     "release": "npm run check && bash scripts/prepare-release.sh",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@vitest/coverage-v8": "^4.1.9",
+    "marked": "^9.1.6",
     "prettier": "^3.9.4",
     "ts-morph": "^26.0.0",
     "typescript": "^5.3.2",
