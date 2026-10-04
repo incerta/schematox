@@ -1,8 +1,13 @@
 # Changelog
 
-## Unreleased
+## [2.3.0](https://github.com/incerta/schematox/compare/v2.2.0...v2.3.0)
 
-- DOCS: slimmed the README down to an overview (one quick start, a single schema-type table, short feature sections) and moved the in-depth material — per-type examples, branding rationale, coercion/preprocessor rules, error shape, metadata, narrowing, and the schema-as-data comparison — into [`docs/`](./docs/README.md). Added `npm run readme:preview`, which renders the README into an approximation of its npm package page at `tmp/readme-preview.html`.
+- PERF: a struct's `.parse()` and `['~standard'].validate` rebuilt the `.preprocess()` lookup tree on every call. It is now built once when the struct is created, and nodes with no preprocessor skip the lookup entirely. Parsing a struct with a preprocessor is ~9% faster. ([#93](https://github.com/incerta/schematox/pull/93))
+- PERF: `{ coerce: true }` looked up a coerce function at every node, including non-coercible ones like `object`/`array`. Coercion now dispatches with a `switch`, making `{ coerce: true }` parsing ~16% faster; its overhead over a plain parse dropped from ~21% to ~10%. ([#93](https://github.com/incerta/schematox/pull/93))
+- DOCS: re-ran the [benchmarks](./benchmark/README.md) against zod 4.6.5 and valibot 1.5.0, and added a build-and-parse-once comparison, a feature-cost benchmark (`npm run bench:features`), and a regression check against any git ref (`npm run bench:self`). The README's benchmark summary now reflects that zod 4 and valibot 1.5 are faster than schematox on compound shapes. ([#93](https://github.com/incerta/schematox/pull/93))
+- DOCS: slimmed the README down to an overview (one quick start, a single schema-type table, short feature sections) and moved the in-depth material — per-type examples, branding rationale, coercion/preprocessor rules, error shape, metadata, narrowing, and the schema-as-data comparison — into [`docs/`](./docs/README.md). Added `npm run readme:preview`, which renders the README into an approximation of its npm package page at `tmp/readme-preview.html`. ([#92](https://github.com/incerta/schematox/pull/92))
+- DOCS: noted that `.preprocess()` is struct-only: preprocessors aren't part of the JSON schema, so they are dropped on serialization or `makeStruct(schema)`. Static-schema users should use `{ coerce: true }` or transform input before `parse()` instead.
+- DOCS: replaced the rate-limited bundlephobia badge with bundlejs.
 
 ## [2.2.0](https://github.com/incerta/schematox/compare/v2.1.0...v2.2.0)
 
