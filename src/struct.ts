@@ -1,5 +1,5 @@
 import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants.js'
-import { PREPROCESS_PATH_ITEM } from './preprocess.js'
+import { buildPreprocessTree, PREPROCESS_PATH_ITEM } from './preprocess.js'
 import { parseWithPreprocessors } from './parse.js'
 import { assignOwnProperty } from './utils.js'
 
@@ -23,6 +23,7 @@ export function makeStruct(
   preprocessors: ReadonlyArray<PreprocessPathEntry> = []
 ) {
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
+  const preprocessTree = buildPreprocessTree(preprocessors)
   const result: Record<string, unknown> & StandardSchemaV1 = {
     __schema: { ...schema },
     // Backs the public `preprocess` method below. Kept off the `Struct<T>`
@@ -32,7 +33,7 @@ export function makeStruct(
     // its parent once composed; `preprocess` is the actual public surface.
     __preprocessors: preprocessors,
     parse: (subj: unknown, options?: ParseOptions) =>
-      parseWithPreprocessors(schema as never, subj, options, preprocessors),
+      parseWithPreprocessors(schema as never, subj, options, preprocessTree),
     ['~standard']: {
       ...STANDARD_SCHEMA,
       validate: (input) => {
@@ -40,7 +41,7 @@ export function makeStruct(
           schema as never,
           input,
           undefined,
-          preprocessors
+          preprocessTree
         )
 
         return parsed.success
