@@ -8,20 +8,26 @@ import type { Schema } from './types/schema.js'
  * compounds (array/object/record/tuple/union) have no single scalar
  * representation to convert from.
  **/
-type CoercibleSchemaKind = 'bigint' | 'boolean' | 'number' | 'string'
-
-export const COERCE_FN_BY_SCHEMA_KIND: Record<
-  CoercibleSchemaKind,
-  (subject: unknown) => unknown
-> = {
-  bigint: coerceBigInt,
-  boolean: coerceBoolean,
-  number: coerceNumber,
-  string: coerceString,
-}
-
-export function getCoerceFn(schemaType: Schema['type']) {
-  return COERCE_FN_BY_SCHEMA_KIND[schemaType as CoercibleSchemaKind]
+export function coerceBySchemaKind(
+  schemaType: Schema['type'],
+  subject: unknown
+): unknown {
+  // A `switch` rather than a kind → function lookup table: most nodes in a
+  // compound schema are non-coercible (`object`, `array`, …), and a table
+  // miss plus an indirect call per node measurably slowed `{ coerce: true }`
+  // parsing even when the input was already correctly typed.
+  switch (schemaType) {
+    case 'bigint':
+      return coerceBigInt(subject)
+    case 'boolean':
+      return coerceBoolean(subject)
+    case 'number':
+      return coerceNumber(subject)
+    case 'string':
+      return coerceString(subject)
+    default:
+      return subject
+  }
 }
 
 /**

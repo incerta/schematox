@@ -1,5 +1,5 @@
 import { ERROR_CODE } from './constants.js'
-import { getCoerceFn } from './coerce.js'
+import { coerceBySchemaKind } from './coerce.js'
 import {
   getPreprocessTreeChild,
   getSelfPreprocess,
@@ -150,11 +150,7 @@ function parseRecursively(
   }
 
   if (coerce) {
-    const coerceFn = getCoerceFn(schema.type)
-
-    if (coerceFn !== undefined) {
-      subject = coerceFn(subject)
-    }
+    subject = coerceBySchemaKind(schema.type, subject)
   }
 
   return PARSE_FN_BY_SCHEMA_KIND[schema.type](
