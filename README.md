@@ -132,6 +132,8 @@ Only `bigint`, `boolean`, `number`, and `string` are coerced, and only from one 
 const trimmed = string().preprocess((s) => (typeof s === 'string' ? s.trim() : s))
 ```
 
+`.preprocess()` is struct-only: functions aren't JSON, so preprocessors live outside `__schema` and don't survive serialization or `makeStruct(schema)`. With static schemas, use `{ coerce: true }` or transform the input before `parse()`.
+
 [Conversion table, Standard Schema interplay, and preprocessor composition →](./docs/coercion-and-preprocess.md)
 
 ## Custom metadata
