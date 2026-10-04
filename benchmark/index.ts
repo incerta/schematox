@@ -42,11 +42,32 @@ async function benchParse(
   printTable(bench)
 }
 
+// Builds a fresh schema and parses one subject with it, per call — the
+// regime of schemas created per request or otherwise short-lived, where
+// any one-time compile cost (ajv's, or zod 4's lazily generated object
+// parser) is never amortized.
+async function benchBuildAndParse(
+  label: string,
+  builders: Record<LibKey, () => unknown>,
+  subject: unknown
+) {
+  const bench = new Bench({ name: `build + parse once: ${label}` })
+
+  for (const key of LIB_KEYS) {
+    bench.add(LIB_LABELS[key], () => {
+      adapters[key](builders[key](), subject)
+    })
+  }
+
+  await bench.run()
+  printTable(bench)
+}
+
 function printTable(bench: Bench) {
   const opsByTask = bench.tasks.map((task) => ({
     library: task.name,
-    ops: task.result?.throughput.mean ?? 0,
-    meanMs: task.result?.latency.mean ?? 0,
+    ops: task.result.state === 'completed' ? task.result.throughput.mean : 0,
+    meanMs: task.result.state === 'completed' ? task.result.latency.mean : 0,
   }))
 
   const fastestOps = Math.max(...opsByTask.map((t) => t.ops))
@@ -138,6 +159,19 @@ async function main() {
     'array (10 items): invalid subject (wrong type in last item)',
     arrayShape.schemas,
     arrayShape.invalidSubjectWrongType
+  )
+
+  console.log('\n\nBuild + parse once (schema discarded after one call)\n')
+
+  await benchBuildAndParse(
+    'flat object (valid subject)',
+    flatObject.builders,
+    flatObject.validSubject
+  )
+  await benchBuildAndParse(
+    'array of 10 objects (valid subject)',
+    arrayShape.builders,
+    arrayShape.validSubject
   )
 }
 
