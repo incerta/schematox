@@ -92,6 +92,8 @@ array(dollars).parse(['$10', '$20'], { coerce: true })
 // { success: true, data: [10, 20] }
 ```
 
+The one exception is a union with a [`discriminant`](./schema-types.md#discriminant): a tagged member, or its tag property, can't have a preprocessor. Preprocess the union itself instead.
+
 A preprocessor attached to a compound struct itself (its own subject, before that struct's own validation runs) and one attached to its child (e.g. every array element) are different positions and don't collide — `array(dollars).preprocess((s) => typeof s === 'string' ? s.split(',') : s)` splits a whole comma-separated string into an array first, and the item-level `dollars` preprocessor still runs on each resulting element afterward. It doesn't mutate the struct it's called on — the original still parses without the attached preprocessor.
 
 `.preprocess()` is only available through a struct — there's no equivalent for a static schema used on its own, since a preprocessor's position is only meaningful relative to a specific struct's composition. `record()`'s `key` schema doesn't support a custom preprocessor either — record keys are always plain strings already, and only the built-in string table applies to them.

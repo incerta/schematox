@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- FEAT: `union` gets an optional `discriminant`, a key or a priority list of keys: `{ type: 'union', of, discriminant: 'type' }` / `union([...]).discriminant('type')`. Members whose literal tag matches the subject's are tried first, then members that don't declare the key. Members whose tag mismatches are skipped. If exactly one member matches the tag and it fails, its own errors are reported instead of `INVALID_UNION`. See [discriminant](./docs/schema-types.md#discriminant).
+- FEAT: `union` gets an optional `discriminant`, a key or a priority list of keys: `{ type: 'union', of, discriminant: 'type' }` / `union([...]).discriminant('type')`. Members whose literal tag matches the subject's are tried first, then members that don't declare the key. Members whose tag mismatches are skipped. If exactly one member matches the tag and it fails, its own errors are reported instead of `INVALID_UNION`. Members are selected through an index built once per schema, so selection doesn't slow down as the union grows. A `.preprocess()` on a tagged member or its tag property is rejected: it's a compile error on `.discriminant()`, and `makeStruct` throws. See [discriminant](./docs/schema-types.md#discriminant).
 
 ## [2.3.0](https://github.com/incerta/schematox/compare/v2.2.0...v2.3.0)
 

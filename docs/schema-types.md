@@ -278,4 +278,6 @@ A tag is a `literal`, or a `union` of literals. If the tag is `optional`/`nullab
 
 An array such as `['kind', 'type']` is a priority list. Each member is tagged by the first listed key it declares, so members of one union can be tagged on different keys.
 
-A member is treated as untagged if it, or its tag property, has a `.preprocess()`, because the preprocessor could rewrite the tag. The struct method only accepts keys that some object member declares.
+Members are looked up by tag through an index built once per schema, so selecting a member costs the same whether the union has 10 members or 1000. The index needs the raw tag to be final, so a tagged member, or its tag property, can't have a `.preprocess()`. `.discriminant()` rejects such keys at compile time, and `makeStruct` throws. To normalize tags, call `.preprocess()` on the union itself, which runs before the lookup. Preprocessors on other properties and on untagged members are fine.
+
+`.discriminant()` only accepts keys that some object member declares. Schemas are treated as immutable: the index is built on first parse, so changes to `of` or `discriminant` made after that aren't picked up.
