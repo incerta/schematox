@@ -61,6 +61,7 @@ export type {
   ObjectSchema,
   RecordSchema,
   UnionSchema,
+  UnionDiscriminant,
   //
   BrandSchema,
   //

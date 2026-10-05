@@ -235,3 +235,47 @@ const struct = union([literal('active'), literal('banned')])
 // 'active' | 'banned'
 type T = Infer<typeof struct>
 ```
+
+#### discriminant
+
+For unions of tagged objects, `discriminant` names the property that holds each member's literal tag. The subject's tag picks which members to try:
+
+- Members whose tag matches the subject's are tried first, in order.
+- Members that don't declare the key are tried next, in order. These are non-objects, or objects without that key.
+- Members whose tag doesn't match are never tried.
+
+Because untagged members are still tried, adding a discriminant never changes which subjects are accepted. It only skips members that couldn't match anyway. If exactly one member matches the tag and it fails, you get that member's own errors (e.g. `INVALID_TYPE` at `['radius']`) instead of a bare `INVALID_UNION`.
+
+```typescript
+const schema = {
+  type: 'union',
+  discriminant: 'type',
+  of: [
+    {
+      type: 'object',
+      of: {
+        type: { type: 'literal', of: 'circle' },
+        radius: { type: 'number' },
+      },
+    },
+    {
+      type: 'object',
+      of: { type: { type: 'literal', of: 'square' }, side: { type: 'number' } },
+    },
+  ],
+} as const satisfies Schema
+
+const struct = union([
+  object({ type: literal('circle'), radius: number() }),
+  object({ type: literal('square'), side: number() }),
+]).discriminant('type')
+
+struct.parse({ type: 'circle', radius: 'x' })
+// error: [{ code: 'INVALID_TYPE', path: ['radius'], schema: { type: 'number' } }]
+```
+
+A tag is a `literal`, or a `union` of literals. If the tag is `optional`/`nullable`, a missing/`null` subject tag matches it.
+
+An array such as `['kind', 'type']` is a priority list. Each member is tagged by the first listed key it declares, so members of one union can be tagged on different keys.
+
+A member is treated as untagged if it, or its tag property, has a `.preprocess()`, because the preprocessor could rewrite the tag. The struct method only accepts keys that some object member declares.

@@ -54,6 +54,15 @@ export type Struct<T extends Schema> = Omit<
         key: U
       ) => Struct<T & { key: U['__schema'] }>
 
+      /** Object member key(s) holding a literal tag to select the member by. */
+      discriminant: <
+        U extends
+          | DiscriminantKey<T>
+          | Readonly<[DiscriminantKey<T>, ...DiscriminantKey<T>[]]>,
+      >(
+        discriminant: U
+      ) => Struct<T & { discriminant: U }>
+
       /** Minimum length/size allowed. */
       minLength: <U extends number>(
         minLength: U
@@ -99,6 +108,17 @@ export type Struct<T extends Schema> = Omit<
 
   parse: (s: unknown, options?: ParseOptions) => ParseResult<InferSchema<T>>
 } & StandardSchemaV1<unknown, InferSchema<T>>
+
+/**
+ * Keys that at least one object member of a union declares.
+ **/
+type DiscriminantKey<T> = T extends { type: 'union'; of: infer U }
+  ? U extends ReadonlyArray<infer V>
+    ? V extends { type: 'object'; of: infer W }
+      ? keyof W & string
+      : never
+    : never
+  : never
 
 type BrandSubType =
   boolean | number | string | ReadonlyArray<unknown> | Record<string, unknown>

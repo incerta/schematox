@@ -452,7 +452,8 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x.union([x.boolean()])
     const struct = prevStruct.optional()
 
-    type ExpectedKeys = StructSharedKeys | 'description' | 'nullable'
+    type ExpectedKeys =
+      StructSharedKeys | 'description' | 'nullable' | 'discriminant'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -505,7 +506,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x.union([x.boolean()]).optional()
     const struct = prevStruct.nullable()
 
-    type ExpectedKeys = StructSharedKeys | 'description'
+    type ExpectedKeys = StructSharedKeys | 'description' | 'discriminant'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -559,7 +560,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x.union([x.boolean()]).optional().nullable()
     const struct = prevStruct.description(schema.description)
 
-    type ExpectedKeys = StructSharedKeys
+    type ExpectedKeys = StructSharedKeys | 'discriminant'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -617,7 +618,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
     const struct = prevStruct.optional()
 
-    type ExpectedKeys = StructSharedKeys
+    type ExpectedKeys = StructSharedKeys | 'discriminant'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -1300,5 +1301,300 @@ describe('Compound schema specifics (foldA)', () => {
         expect(standardParsed.value).toStrictEqual(subj)
       }
     }
+  })
+})
+
+describe('discriminant', () => {
+  const circle = x.object({
+    type: x.literal('circle'),
+    radius: x.number(),
+  })
+  const square = x.object({
+    type: x.literal('square'),
+    side: x.number(),
+  })
+
+  it('parses the tag-matched member, same as without a discriminant', () => {
+    const struct = x.union([circle, square]).discriminant('type')
+
+    expect(struct.parse({ type: 'square', side: 2 })).toStrictEqual({
+      success: true,
+      data: { type: 'square', side: 2 },
+    })
+    expect(struct.parse({ type: 'circle', radius: 1 })).toStrictEqual({
+      success: true,
+      data: { type: 'circle', radius: 1 },
+    })
+  })
+
+  it('reports the single tag-matched member own errors instead of invalidUnion', () => {
+    const struct = x.union([circle, square]).discriminant('type')
+
+    expect(struct.parse({ type: 'square', side: 'x' }).error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: ['side'],
+        schema: { type: 'number' },
+      },
+    ])
+
+    const nested = x.object({ shape: struct })
+
+    expect(nested.parse({ shape: { type: 'circle' } }).error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: ['shape', 'radius'],
+        schema: { type: 'number' },
+      },
+    ])
+  })
+
+  it('reports invalidUnion when the tag matches no member', () => {
+    const struct = x.union([circle, square]).discriminant('type')
+
+    for (const subject of [{ type: 'triangle' }, {}, { type: null }]) {
+      expect(struct.parse(subject).error).toStrictEqual([
+        { code: x.ERROR_CODE.invalidUnion, path: [], schema: struct.__schema },
+      ])
+    }
+  })
+
+  it('reports invalidUnion when several members share the matched tag', () => {
+    const squareAlt = x.object({ type: x.literal('square'), size: x.number() })
+    const struct = x.union([square, squareAlt]).discriminant('type')
+
+    expect(struct.parse({ type: 'square', size: 1 }).success).toBe(true)
+    expect(struct.parse({ type: 'square' }).error).toStrictEqual([
+      { code: x.ERROR_CODE.invalidUnion, path: [], schema: struct.__schema },
+    ])
+  })
+
+  it('falls back to untagged members, but never to mismatched ones', () => {
+    const untagged = x.object({ side: x.number() })
+    const struct = x
+      .union([x.string(), circle, untagged, square])
+      .discriminant('type')
+
+    expect(struct.parse('str')).toStrictEqual({ success: true, data: 'str' })
+    expect(struct.parse({ side: 1 })).toStrictEqual({
+      success: true,
+      data: { side: 1 },
+    })
+    // Matched `square` is tried before the earlier `untagged` member
+    expect(struct.parse({ type: 'square', side: 1 })).toStrictEqual({
+      success: true,
+      data: { type: 'square', side: 1 },
+    })
+    // Unknown tag: only untagged members are tried
+    expect(struct.parse({ type: 'triangle', side: 1 })).toStrictEqual({
+      success: true,
+      data: { side: 1 },
+    })
+    // Matched member fails, untagged fallback succeeds
+    expect(struct.parse({ type: 'square', side: 1 }).success).toBe(true)
+    expect(struct.parse({ type: 'circle', side: 1 })).toStrictEqual({
+      success: true,
+      data: { side: 1 },
+    })
+  })
+
+  it('does not invoke mismatched members', () => {
+    const calls: string[] = []
+    const tracked = (name: string) =>
+      x.number().preprocess((s) => {
+        calls.push(name)
+        return s
+      })
+
+    const struct = x
+      .union([
+        x.object({ type: x.literal('a'), v: tracked('a') }),
+        x.object({ type: x.literal('b'), v: tracked('b') }),
+      ])
+      .discriminant('type')
+
+    expect(struct.parse({ type: 'b', v: 1 }).success).toBe(true)
+    expect(calls).toStrictEqual(['b'])
+  })
+
+  it('treats a member with a preprocessed tag as untagged', () => {
+    const lower = x.object({
+      type: x
+        .literal('a')
+        .preprocess((s) => (typeof s === 'string' ? s.toLowerCase() : s)),
+    })
+    const struct = x
+      .union([x.object({ type: x.literal('b') }), lower])
+      .discriminant('type')
+
+    expect(struct.parse({ type: 'A' })).toStrictEqual({
+      success: true,
+      data: { type: 'a' },
+    })
+  })
+
+  it('treats an array discriminant as a key priority list', () => {
+    const byKind = x.object({ kind: x.literal('k'), n: x.number() })
+    const byType = x.object({ type: x.literal('t'), s: x.string() })
+    const both = x.object({
+      kind: x.literal('both'),
+      type: x.literal('t'),
+      b: x.boolean(),
+    })
+    const struct = x
+      .union([byKind, byType, both])
+      .discriminant(['kind', 'type'])
+
+    expect(struct.parse({ kind: 'k', n: 1 }).success).toBe(true)
+    expect(struct.parse({ type: 't', s: 's' }).success).toBe(true)
+    expect(struct.parse({ kind: 'both', type: 't', b: true }).success).toBe(
+      true
+    )
+    // `both` is tagged by `kind` (first listed key it declares), so a
+    // subject tagged only by `type` matches `byType` alone
+    expect(struct.parse({ type: 't', s: 1 }).error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: ['s'],
+        schema: { type: 'string' },
+      },
+    ])
+  })
+
+  it('accepts a union of literals and optional/nullable literals as a tag', () => {
+    const struct = x
+      .union([
+        x.object({
+          type: x.union([x.literal('a'), x.literal('b')]),
+          v: x.number(),
+        }),
+        x.object({ type: x.literal('c').optional(), v: x.string() }),
+      ])
+      .discriminant('type')
+
+    expect(struct.parse({ type: 'b', v: 1 }).success).toBe(true)
+    expect(struct.parse({ v: 's' }).success).toBe(true)
+    expect(struct.parse({ type: 'a', v: 's' }).error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: ['v'],
+        schema: { type: 'number' },
+      },
+    ])
+  })
+
+  it('handles `__proto__` as a discriminant key safely', () => {
+    const schema = {
+      type: 'union',
+      discriminant: '__proto__',
+      of: [{ type: 'object', of: { v: { type: 'number' } } }],
+    } as const satisfies x.Schema
+
+    const subject = JSON.parse('{"__proto__": "a", "v": 1}')
+
+    expect(x.parse(schema, subject)).toStrictEqual({
+      success: true,
+      data: { v: 1 },
+    })
+    expect(x.parse(schema, { v: 'x' }).error).toStrictEqual([
+      { code: x.ERROR_CODE.invalidUnion, path: [], schema },
+    ])
+  })
+
+  it('treats members without a literal tag under the key as untagged', () => {
+    const struct = x
+      .union([
+        x.object({ type: x.literal('a'), v: x.number() }),
+        // key declared, but not as a literal / union of literals
+        x.object({ type: x.string(), v: x.boolean() }),
+        x.object({
+          type: x.union([x.literal('b'), x.string()]),
+          v: x.string(),
+        }),
+        x.object({ type: x.literal('c').nullable(), v: x.number() }),
+      ])
+      .discriminant('type')
+
+    expect(struct.parse({ type: 'z', v: true }).success).toBe(true)
+    expect(struct.parse({ type: 'b', v: 's' }).success).toBe(true)
+    expect(struct.parse({ type: null, v: 1 }).success).toBe(true)
+
+    const malformed = {
+      type: 'union',
+      discriminant: 'type',
+      of: [null, { type: 'object', of: 'str' }, { type: 'union', of: [] }],
+    } as never
+
+    expect(x.parse(malformed, { type: 'a' }).error).toStrictEqual([
+      { code: x.ERROR_CODE.invalidUnion, path: [], schema: malformed },
+    ])
+
+    const emptyUnionTag = {
+      type: 'union',
+      discriminant: 'type',
+      of: [
+        {
+          type: 'object',
+          of: { type: { type: 'union', of: [] }, v: { type: 'number' } },
+        },
+        { type: 'object', of: { type: { type: 'literal', of: 0 } } },
+      ],
+    } as never
+
+    expect(x.parse(emptyUnionTag, { type: 0 }).success).toBe(true)
+  })
+
+  it('works with a plain data schema', () => {
+    const schema = {
+      type: 'union',
+      discriminant: 'type',
+      of: [
+        { type: 'object', of: { type: { type: 'literal', of: 'a' } } },
+        {
+          type: 'object',
+          of: {
+            type: { type: 'literal', of: 'b' },
+            v: { type: 'number' },
+          },
+        },
+      ],
+    } as const satisfies x.Schema
+
+    type Expected = { type: 'a' } | { type: 'b'; v: number }
+
+    x.tCh<x.Infer<typeof schema>, Expected>()
+    x.tCh<Expected, x.Infer<typeof schema>>()
+
+    expect(x.parse(schema, { type: 'b', v: 1 }).success).toBe(true)
+    expect(x.parse(schema, { type: 'b' }).error).toStrictEqual([
+      {
+        code: x.ERROR_CODE.invalidType,
+        path: ['v'],
+        schema: { type: 'number' },
+      },
+    ])
+  })
+
+  it('struct: sets the schema field, applies once, keeps inference', () => {
+    const prevStruct = x.union([circle, square])
+    const struct = prevStruct.discriminant('type')
+
+    expect(struct.__schema).toStrictEqual({
+      ...prevStruct.__schema,
+      discriminant: 'type',
+    })
+    expect(prevStruct.__schema).not.toHaveProperty('discriminant')
+
+    type ExpectedKeys =
+      StructSharedKeys | 'optional' | 'nullable' | 'description'
+
+    x.tCh<keyof typeof struct, ExpectedKeys>()
+    x.tCh<ExpectedKeys, keyof typeof struct>()
+
+    x.tCh<x.Infer<typeof struct>, x.Infer<typeof prevStruct>>()
+    x.tCh<x.Infer<typeof prevStruct>, x.Infer<typeof struct>>()
+
+    // @ts-expect-error not a key of any object member
+    prevStruct.discriminant('typo')
   })
 })
