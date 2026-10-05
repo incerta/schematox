@@ -1417,20 +1417,105 @@ describe('discriminant', () => {
     expect(calls).toStrictEqual(['b'])
   })
 
-  it('treats a member with a preprocessed tag as untagged', () => {
-    const lower = x.object({
-      type: x
-        .literal('a')
-        .preprocess((s) => (typeof s === 'string' ? s.toLowerCase() : s)),
+  it('throws on a preprocessor that could rewrite a member tag', () => {
+    const lower = (s: unknown) => (typeof s === 'string' ? s.toLowerCase() : s)
+    const expectedMessage = /union member 1 is tagged by the "type"/
+
+    const preprocessedTag = x.union([
+      x.object({ type: x.literal('b') }),
+      x.object({ type: x.literal('a').preprocess(lower) }),
+    ])
+
+    expect(() =>
+      // @ts-expect-error tag is preprocessed
+      preprocessedTag.discriminant('type')
+    ).toThrow(expectedMessage)
+
+    const preprocessedMember = x.union([
+      x.object({ type: x.literal('b') }),
+      x.object({ type: x.literal('a') }).preprocess(lower),
+    ])
+
+    expect(() =>
+      // @ts-expect-error member carrying the tag is preprocessed
+      preprocessedMember.discriminant('type')
+    ).toThrow(expectedMessage)
+
+    const preprocessedUnionTag = x.union([
+      x.object({ type: x.literal('b') }),
+      x.object({
+        type: x.union([x.literal('a'), x.literal('c').preprocess(lower)]),
+      }),
+    ])
+
+    expect(() =>
+      // @ts-expect-error tag union member is preprocessed
+      preprocessedUnionTag.discriminant('type')
+    ).toThrow(expectedMessage)
+
+    // Public `makeStruct` accepts preprocessors too, so it's checked as well
+    expect(() =>
+      x.makeStruct(
+        {
+          type: 'union',
+          discriminant: 'type',
+          of: [
+            { type: 'object', of: { type: { type: 'literal', of: 'b' } } },
+            { type: 'object', of: { type: { type: 'literal', of: 'a' } } },
+          ],
+        },
+        [{ path: [1, 'type'], fn: lower }]
+      )
+    ).toThrow(expectedMessage)
+  })
+
+  it('allows preprocessors that cannot rewrite a member tag', () => {
+    const lower = (s: unknown) => (typeof s === 'string' ? s.toLowerCase() : s)
+    const trim = (s: unknown) => (typeof s === 'string' ? s.trim() : s)
+
+    // On the union itself: runs before the tag is read
+    const unionLevel = x
+      .union([
+        x.object({ type: x.literal('a') }),
+        x.object({ type: x.literal('b') }),
+      ])
+      .discriminant('type')
+      .preprocess((s) =>
+        typeof s === 'object' && s !== null && 'type' in s
+          ? { ...s, type: lower(s.type) }
+          : s
+      )
+
+    expect(unionLevel.parse({ type: 'B' })).toStrictEqual({
+      success: true,
+      data: { type: 'b' },
     })
-    const struct = x
-      .union([x.object({ type: x.literal('b') }), lower])
+
+    // On a non-tag property and on an untagged member
+    const elsewhere = x
+      .union([
+        x.object({ type: x.literal('a'), name: x.string().preprocess(trim) }),
+        x.string().preprocess(trim),
+      ])
       .discriminant('type')
 
-    expect(struct.parse({ type: 'A' })).toStrictEqual({
+    expect(elsewhere.parse({ type: 'a', name: ' n ' })).toStrictEqual({
       success: true,
-      data: { type: 'a' },
+      data: { type: 'a', name: 'n' },
     })
+    expect(elsewhere.parse(' s ')).toStrictEqual({ success: true, data: 's' })
+
+    // A preprocessed property that isn't the member's tag under the
+    // priority list (`kind` wins over `type`) is allowed at runtime; the
+    // type-level check is per key, so it needs a cast
+    const byKind = x.union([
+      x.object({
+        kind: x.literal('k'),
+        type: x.literal('t').preprocess(lower),
+      }),
+    ])
+
+    expect(() => byKind.discriminant(['kind', 'type'] as never)).not.toThrow()
   })
 
   it('treats an array discriminant as a key priority list', () => {

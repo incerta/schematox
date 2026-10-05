@@ -110,15 +110,42 @@ export type Struct<T extends Schema> = Omit<
 } & StandardSchemaV1<unknown, InferSchema<T>>
 
 /**
- * Keys that at least one object member of a union declares.
+ * Keys that at least one object member of a union declares, minus keys
+ * holding a literal tag that is preprocessed — on the property itself, or
+ * on the whole member — which `makeStruct` rejects at runtime.
  **/
-type DiscriminantKey<T> = T extends { type: 'union'; of: infer U }
+type DiscriminantKey<T> = Exclude<
+  ObjectMemberKey<UnionObjectMember<T>>,
+  PreprocessedTagKey<UnionObjectMember<T>>
+>
+
+type UnionObjectMember<T> = T extends { type: 'union'; of: infer U }
   ? U extends ReadonlyArray<infer V>
-    ? V extends { type: 'object'; of: infer W }
-      ? keyof W & string
-      : never
+    ? Extract<V, { type: 'object'; of: object }>
     : never
   : never
+
+type ObjectMemberKey<M> = M extends { of: infer W } ? keyof W & string : never
+
+type PreprocessedTagKey<M> = M extends { of: infer W }
+  ? {
+      [K in keyof W & string]: W[K] extends { type: 'literal' | 'union' }
+        ? M extends { preprocess: PreprocessFn }
+          ? K
+          : IsPreprocessedTag<W[K]> extends true
+            ? K
+            : never
+        : never
+    }[keyof W & string]
+  : never
+
+type IsPreprocessedTag<S> = S extends { preprocess: PreprocessFn }
+  ? true
+  : S extends { type: 'union'; of: ReadonlyArray<infer U> }
+    ? [Extract<U, { preprocess: PreprocessFn }>] extends [never]
+      ? false
+      : true
+    : false
 
 type BrandSubType =
   boolean | number | string | ReadonlyArray<unknown> | Record<string, unknown>

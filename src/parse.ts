@@ -832,9 +832,20 @@ function parseUnion(
   coerce: boolean,
   preprocessNode: PreprocessTreeNode | undefined
 ) {
-  const discriminant = getDiscriminantKeys(schema.discriminant)
+  if (Array.isArray(schema.of) === false) {
+    return error([
+      {
+        code: ERROR_CODE.invalidSchema,
+        path: [...errorPath],
+        schema,
+      },
+    ])
+  }
 
-  if (Array.isArray(schema.of) === false || discriminant === null) {
+  const index =
+    schema.discriminant === undefined ? undefined : getUnionIndex(schema)
+
+  if (index === null) {
     return error([
       {
         code: ERROR_CODE.invalidSchema,
@@ -845,7 +856,7 @@ function parseUnion(
   }
 
   if (
-    discriminant === undefined ||
+    index === undefined ||
     typeof subject !== 'object' ||
     subject === null ||
     Object.prototype.toString.call(subject) !== '[object Object]'
@@ -877,38 +888,38 @@ function parseUnion(
   // discriminant keys (non-objects, untagged objects) — the discriminant
   // only reorders and prunes, it never makes an untagged member
   // unreachable. Members whose tag mismatches the subject's are skipped.
-  const matched: number[] = []
-  const untagged: number[] = []
-
-  const tags = getMemberTags(schema, discriminant)
-
-  for (let i = 0; i < schema.of.length; i++) {
-    const tag = tags[i]
-
-    if (tag === undefined || isTagPreprocessed(preprocessNode, i, tag.key)) {
-      untagged.push(i)
-    } else if (tag.values.has((subject as Record<string, unknown>)[tag.key])) {
-      matched.push(i)
-    }
-  }
-
+  const matched = getMatchedMembers(index, subject as Record<string, unknown>)
   let matchedError: ParseResult<unknown> | undefined
 
-  for (const i of [...matched, ...untagged]) {
+  for (let i = 0; i < matched.length; i++) {
+    const memberIndex = matched[i]!
     const parsed = parseRecursively(
       errorPath,
-      schema.of[i]!,
+      schema.of[memberIndex]!,
       subject,
       coerce,
-      getPreprocessTreeChild(preprocessNode, i)
+      getPreprocessTreeChild(preprocessNode, memberIndex)
     )
 
     if (parsed.error === undefined) {
       return parsed
     }
 
-    if (i === matched[0]) {
-      matchedError = parsed
+    matchedError = parsed
+  }
+
+  for (let i = 0; i < index.untagged.length; i++) {
+    const memberIndex = index.untagged[i]!
+    const parsed = parseRecursively(
+      errorPath,
+      schema.of[memberIndex]!,
+      subject,
+      coerce,
+      getPreprocessTreeChild(preprocessNode, memberIndex)
+    )
+
+    if (parsed.error === undefined) {
+      return parsed
     }
   }
 
@@ -927,16 +938,124 @@ function parseUnion(
   ])
 }
 
+type MemberTag = { key: string; values: Set<unknown> }
+
+export type UnionIndex = {
+  keys: ReadonlyArray<string>
+  /** Per member: the key it's tagged by and the values it accepts there. */
+  tags: ReadonlyArray<MemberTag | undefined>
+  /** Aligned with `keys`: tag value → indices of the members it selects. */
+  membersByTag: ReadonlyArray<Map<unknown, number[]>>
+  /** Members tagged by none of the keys, tried after the matched ones. */
+  untagged: ReadonlyArray<number>
+}
+
+const NO_MEMBERS: ReadonlyArray<number> = []
+
+// Built once per schema object, so selecting members costs a lookup per
+// discriminant key regardless of how many members the union has. Schemas
+// are treated as immutable: mutating `of`/`discriminant` after the first
+// parse isn't picked up. `null` caches a malformed discriminant.
+const UNION_INDEX_CACHE = new WeakMap<object, UnionIndex | null>()
+
 /**
  * `undefined` — no discriminant declared; `null` — malformed discriminant.
+ * Exported for `struct.ts`, which rejects preprocessors on tags.
  **/
-function getDiscriminantKeys(
-  discriminant: unknown
-): ReadonlyArray<string> | undefined | null {
-  if (discriminant === undefined) {
+export function getUnionIndex(
+  schema: UnionSchema<Array<Schema>>
+): UnionIndex | undefined | null {
+  if (schema.discriminant === undefined) {
     return undefined
   }
 
+  let index = UNION_INDEX_CACHE.get(schema)
+
+  if (index === undefined) {
+    index = buildUnionIndex(schema)
+    UNION_INDEX_CACHE.set(schema, index)
+  }
+
+  return index
+}
+
+function buildUnionIndex(
+  schema: UnionSchema<Array<Schema>>
+): UnionIndex | null {
+  const keys = getDiscriminantKeys(schema.discriminant)
+
+  if (keys === null || Array.isArray(schema.of) === false) {
+    return null
+  }
+
+  const tags = schema.of.map((member) => getMemberTag(member, keys))
+  const membersByTag = keys.map(() => new Map<unknown, number[]>())
+  const untagged: number[] = []
+
+  for (let i = 0; i < tags.length; i++) {
+    const tag = tags[i]
+
+    if (tag === undefined) {
+      untagged.push(i)
+      continue
+    }
+
+    const members = membersByTag[keys.indexOf(tag.key)]!
+
+    for (const value of tag.values) {
+      const indices = members.get(value)
+
+      if (indices === undefined) {
+        members.set(value, [i])
+      } else {
+        indices.push(i)
+      }
+    }
+  }
+
+  return { keys, tags, membersByTag, untagged }
+}
+
+/**
+ * Indices of the members whose tag matches the subject's, in member order.
+ **/
+function getMatchedMembers(
+  index: UnionIndex,
+  subject: Record<string, unknown>
+): ReadonlyArray<number> {
+  let matched: ReadonlyArray<number> | undefined
+  let merged: number[] | undefined
+
+  for (let k = 0; k < index.keys.length; k++) {
+    const indices = index.membersByTag[k]!.get(subject[index.keys[k]!])
+
+    if (indices === undefined) {
+      continue
+    }
+
+    if (matched === undefined) {
+      matched = indices
+      continue
+    }
+
+    // Matches through several keys: rare, so only this path allocates.
+    merged = merged ?? [...matched]
+
+    for (const i of indices) {
+      merged.push(i)
+    }
+  }
+
+  if (merged !== undefined) {
+    return merged.sort((a, b) => a - b)
+  }
+
+  return matched ?? NO_MEMBERS
+}
+
+function getDiscriminantKeys(
+  discriminant: unknown
+): ReadonlyArray<string> | null {
   if (typeof discriminant === 'string') {
     return [discriminant]
   }
@@ -950,47 +1069,6 @@ function getDiscriminantKeys(
   }
 
   return null
-}
-
-type MemberTag = { key: string; values: Set<unknown> }
-
-// Schemas are static, so a union's member tags are resolved once per schema
-// object instead of on every parse call.
-const MEMBER_TAGS_CACHE = new WeakMap<object, Array<MemberTag | undefined>>()
-
-function getMemberTags(
-  schema: UnionSchema<Array<Schema>>,
-  discriminant: ReadonlyArray<string>
-): Array<MemberTag | undefined> {
-  let tags = MEMBER_TAGS_CACHE.get(schema)
-
-  if (tags === undefined) {
-    tags = schema.of.map((member) => getMemberTag(member, discriminant))
-    MEMBER_TAGS_CACHE.set(schema, tags)
-  }
-
-  return tags
-}
-
-/**
- * A preprocessor may rewrite the tag, so the raw value can't be trusted to
- * select or skip the member before it runs.
- **/
-function isTagPreprocessed(
-  preprocessNode: PreprocessTreeNode | undefined,
-  memberIndex: number,
-  key: string
-): boolean {
-  if (preprocessNode === undefined) {
-    return false
-  }
-
-  const memberNode = getPreprocessTreeChild(preprocessNode, memberIndex)
-
-  return (
-    getSelfPreprocess(memberNode) !== undefined ||
-    getPreprocessTreeChild(memberNode, key) !== undefined
-  )
 }
 
 /**

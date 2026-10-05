@@ -1,6 +1,6 @@
 import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants.js'
 import { buildPreprocessTree, PREPROCESS_PATH_ITEM } from './preprocess.js'
-import { parseWithPreprocessors } from './parse.js'
+import { getUnionIndex, parseWithPreprocessors } from './parse.js'
 import { assignOwnProperty } from './utils.js'
 
 import type { StandardSchemaV1 } from './types/standard-schema.ts'
@@ -23,6 +23,10 @@ export function makeStruct(
   schema: Schema,
   preprocessors: ReadonlyArray<PreprocessPathEntry> = []
 ) {
+  if (schema.type === 'union') {
+    assertUntouchedUnionTags(schema, preprocessors)
+  }
+
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
   const preprocessTree = buildPreprocessTree(preprocessors)
   const result: Record<string, unknown> & StandardSchemaV1 = {
@@ -268,4 +272,42 @@ export function union<
   }
 
   return makeStruct(schema, preprocessors)
+}
+
+/**
+ * A discriminated union selects members by the subject's raw tag value
+ * through an index built once per schema, so a preprocessor that could
+ * rewrite a tag before its member sees it would make that selection wrong.
+ * Every preprocessor reaches a struct through `makeStruct`, so rejecting
+ * them here means the parser never has to account for them. A
+ * preprocessor on the union itself is fine: it runs before selection.
+ **/
+function assertUntouchedUnionTags(
+  schema: Extract<Schema, { type: 'union' }>,
+  preprocessors: ReadonlyArray<PreprocessPathEntry>
+) {
+  const index = getUnionIndex(schema)
+
+  // No discriminant, or a malformed one that parse reports as INVALID_SCHEMA
+  if (index === undefined || index === null) {
+    return
+  }
+
+  for (const { path } of preprocessors) {
+    const [memberIndex, key] = path
+
+    if (typeof memberIndex !== 'number') {
+      continue
+    }
+
+    const tag = index.tags[memberIndex]
+
+    if (tag !== undefined && (path.length === 1 || key === tag.key)) {
+      throw new Error(
+        `union member ${memberIndex} is tagged by the "${tag.key}" discriminant, ` +
+          `so neither it nor its "${tag.key}" property can have a preprocessor; ` +
+          'call .preprocess() on the union instead'
+      )
+    }
+  }
 }
