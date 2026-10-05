@@ -9,6 +9,7 @@ import type {
   BigIntString,
   BrandSchema,
   StringSchema,
+  UnionDiscriminant,
 } from './types/schema.ts'
 import type { PreprocessFn, PreprocessPathEntry } from './types/preprocess.ts'
 import type { ParseOptions } from './types/utils.ts'
@@ -95,6 +96,11 @@ export function makeStruct(
   if (params.has('key')) {
     result.key = (key: StructShape<StringSchema>) =>
       makeStruct({ ...schema, key: key.__schema }, preprocessors)
+  }
+
+  if (params.has('discriminant')) {
+    result.discriminant = (discriminant: UnionDiscriminant) =>
+      makeStruct({ ...schema, discriminant }, preprocessors)
   }
 
   if (params.has('min')) {

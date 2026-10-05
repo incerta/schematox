@@ -18,7 +18,7 @@ export const PARAMS_BY_SCHEMA_TYPE = {
   object:   new Set(['optional', 'nullable', 'description', 'meta'] as const),
   record:   new Set(['optional', 'nullable', 'description', 'meta', 'minLength', 'maxLength', 'key'] as const),
   tuple:    new Set(['optional', 'nullable', 'description', 'meta'] as const),
-  union:    new Set(['optional', 'nullable', 'description', 'meta'] as const),
+  union:    new Set(['optional', 'nullable', 'description', 'meta', 'discriminant'] as const),
 } as const
 
 export const STANDARD_SCHEMA = {

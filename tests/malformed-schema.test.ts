@@ -126,6 +126,20 @@ describe('parse() never throws, even when the schema itself is malformed', () =>
       },
     ])
   })
+
+  it('rejects a union schema whose `discriminant` is not a string or a non-empty string array', () => {
+    for (const discriminant of [1, [], [1], ['type', 1], null, {}]) {
+      const schema = {
+        type: 'union',
+        of: [{ type: 'object', of: { type: { type: 'literal', of: 'a' } } }],
+        discriminant,
+      } as never
+
+      expect(x.parse(schema, { type: 'a' }).error).toStrictEqual([
+        { code: x.ERROR_CODE.invalidSchema, path: [], schema },
+      ])
+    }
+  })
 })
 
 // Previously these silently skipped the constraint instead of enforcing it

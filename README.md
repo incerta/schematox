@@ -93,7 +93,7 @@ The `satisfies Schema` check is optional, since any structurally valid object is
 | `object`  | `of` (extra keys are ignored)            | `object({ a: string() })`              | `{ a: string }`                    |
 | `record`  | `of`, `key`, `minLength`, `maxLength`    | `record(number()).key(userId)`         | `Record<UserId, number>`           |
 | `tuple`   | `of` (exact arity)                       | `tuple([string(), number()])`          | `[string, number]`                 |
-| `union`   | `of` (first match wins)                  | `union([string(), number()])`          | `string \| number`                 |
+| `union`   | `of` (first match wins), `discriminant`  | `union([string(), number()])`          | `string \| number`                 |
 
 Parameters shared by every schema:
 

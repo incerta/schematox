@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- FEAT: `union` gets an optional `discriminant`, a key or a priority list of keys: `{ type: 'union', of, discriminant: 'type' }` / `union([...]).discriminant('type')`. Members whose literal tag matches the subject's are tried first, then members that don't declare the key. Members whose tag mismatches are skipped. If exactly one member matches the tag and it fails, its own errors are reported instead of `INVALID_UNION`. See [discriminant](./docs/schema-types.md#discriminant).
+
 ## [2.3.0](https://github.com/incerta/schematox/compare/v2.2.0...v2.3.0)
 
 - PERF: a struct's `.parse()` and `['~standard'].validate` rebuilt the `.preprocess()` lookup tree on every call. It is now built once when the struct is created, and nodes with no preprocessor skip the lookup entirely. Parsing a struct with a preprocessor is ~9% faster. ([#93](https://github.com/incerta/schematox/pull/93))

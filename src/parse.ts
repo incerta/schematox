@@ -832,7 +832,9 @@ function parseUnion(
   coerce: boolean,
   preprocessNode: PreprocessTreeNode | undefined
 ) {
-  if (Array.isArray(schema.of) === false) {
+  const discriminant = getDiscriminantKeys(schema.discriminant)
+
+  if (Array.isArray(schema.of) === false || discriminant === null) {
     return error([
       {
         code: ERROR_CODE.invalidSchema,
@@ -842,7 +844,57 @@ function parseUnion(
     ])
   }
 
+  if (
+    discriminant === undefined ||
+    typeof subject !== 'object' ||
+    subject === null ||
+    Object.prototype.toString.call(subject) !== '[object Object]'
+  ) {
+    for (let i = 0; i < schema.of.length; i++) {
+      const parsed = parseRecursively(
+        errorPath,
+        schema.of[i]!,
+        subject,
+        coerce,
+        getPreprocessTreeChild(preprocessNode, i)
+      )
+
+      if (parsed.error === undefined) {
+        return parsed
+      }
+    }
+
+    return error([
+      {
+        code: ERROR_CODE.invalidUnion,
+        path: [...errorPath],
+        schema,
+      },
+    ])
+  }
+
+  // Tag-matched members go first, then members that declare none of the
+  // discriminant keys (non-objects, untagged objects) — the discriminant
+  // only reorders and prunes, it never makes an untagged member
+  // unreachable. Members whose tag mismatches the subject's are skipped.
+  const matched: number[] = []
+  const untagged: number[] = []
+
+  const tags = getMemberTags(schema, discriminant)
+
   for (let i = 0; i < schema.of.length; i++) {
+    const tag = tags[i]
+
+    if (tag === undefined || isTagPreprocessed(preprocessNode, i, tag.key)) {
+      untagged.push(i)
+    } else if (tag.values.has((subject as Record<string, unknown>)[tag.key])) {
+      matched.push(i)
+    }
+  }
+
+  let matchedError: ParseResult<unknown> | undefined
+
+  for (const i of [...matched, ...untagged]) {
     const parsed = parseRecursively(
       errorPath,
       schema.of[i]!,
@@ -854,6 +906,16 @@ function parseUnion(
     if (parsed.error === undefined) {
       return parsed
     }
+
+    if (i === matched[0]) {
+      matchedError = parsed
+    }
+  }
+
+  // A single tag-matched member is unambiguously the intended one, so its
+  // own errors explain the failure better than a blanket INVALID_UNION.
+  if (matched.length === 1 && matchedError !== undefined) {
+    return matchedError
   }
 
   return error([
@@ -863,4 +925,146 @@ function parseUnion(
       schema,
     },
   ])
+}
+
+/**
+ * `undefined` — no discriminant declared; `null` — malformed discriminant.
+ **/
+function getDiscriminantKeys(
+  discriminant: unknown
+): ReadonlyArray<string> | undefined | null {
+  if (discriminant === undefined) {
+    return undefined
+  }
+
+  if (typeof discriminant === 'string') {
+    return [discriminant]
+  }
+
+  if (
+    Array.isArray(discriminant) &&
+    discriminant.length > 0 &&
+    discriminant.every((x) => typeof x === 'string')
+  ) {
+    return discriminant
+  }
+
+  return null
+}
+
+type MemberTag = { key: string; values: Set<unknown> }
+
+// Schemas are static, so a union's member tags are resolved once per schema
+// object instead of on every parse call.
+const MEMBER_TAGS_CACHE = new WeakMap<object, Array<MemberTag | undefined>>()
+
+function getMemberTags(
+  schema: UnionSchema<Array<Schema>>,
+  discriminant: ReadonlyArray<string>
+): Array<MemberTag | undefined> {
+  let tags = MEMBER_TAGS_CACHE.get(schema)
+
+  if (tags === undefined) {
+    tags = schema.of.map((member) => getMemberTag(member, discriminant))
+    MEMBER_TAGS_CACHE.set(schema, tags)
+  }
+
+  return tags
+}
+
+/**
+ * A preprocessor may rewrite the tag, so the raw value can't be trusted to
+ * select or skip the member before it runs.
+ **/
+function isTagPreprocessed(
+  preprocessNode: PreprocessTreeNode | undefined,
+  memberIndex: number,
+  key: string
+): boolean {
+  if (preprocessNode === undefined) {
+    return false
+  }
+
+  const memberNode = getPreprocessTreeChild(preprocessNode, memberIndex)
+
+  return (
+    getSelfPreprocess(memberNode) !== undefined ||
+    getPreprocessTreeChild(memberNode, key) !== undefined
+  )
+}
+
+/**
+ * The first discriminant key the member declares as a literal (or a union
+ * of literals) along with the values it accepts there, or `undefined` if
+ * the member isn't tagged by any of the keys.
+ **/
+function getMemberTag(
+  member: Schema,
+  discriminant: ReadonlyArray<string>
+): MemberTag | undefined {
+  if (
+    typeof member !== 'object' ||
+    member === null ||
+    member.type !== 'object' ||
+    typeof member.of !== 'object' ||
+    member.of === null
+  ) {
+    return undefined
+  }
+
+  for (const key of discriminant) {
+    if (Object.prototype.hasOwnProperty.call(member.of, key) === false) {
+      continue
+    }
+
+    const values = getTagValues(member.of[key])
+
+    if (values !== undefined) {
+      return { key, values }
+    }
+  }
+
+  return undefined
+}
+
+function getTagValues(schema: Schema | undefined): Set<unknown> | undefined {
+  if (typeof schema !== 'object' || schema === null) {
+    return undefined
+  }
+
+  let values: Set<unknown> | undefined
+
+  if (schema.type === 'literal') {
+    values = new Set([schema.of])
+  } else if (
+    schema.type === 'union' &&
+    Array.isArray(schema.of) &&
+    schema.of.length > 0
+  ) {
+    values = new Set()
+
+    for (const member of schema.of) {
+      const memberValues = getTagValues(member)
+
+      if (memberValues === undefined) {
+        return undefined
+      }
+
+      for (const value of memberValues) {
+        values.add(value)
+      }
+    }
+  } else {
+    return undefined
+  }
+
+  if (schema.optional === true) {
+    values.add(undefined)
+  }
+
+  if (schema.nullable === true) {
+    values.add(null)
+  }
+
+  return values
 }

@@ -6,7 +6,7 @@ export type Schema =
    | { type: 'object'; of: Record<string, Schema> } & SchemaShared
    | { type: 'record'; of: Schema; key?: StringSchema; minLength?: number; maxLength?: number } & SchemaShared
    | { type: 'tuple'; of: Array<Schema> } & SchemaShared
-   | { type: 'union'; of: Array<Schema> } & SchemaShared
+   | { type: 'union'; of: Array<Schema>; discriminant?: UnionDiscriminant } & SchemaShared
 
 export type BrandSchema<T = string, U = unknown> = Readonly<[T, U]>
 
@@ -69,7 +69,17 @@ export type TupleSchema<T = unknown> = SchemaShared & {
 export type UnionSchema<T = unknown> = SchemaShared & {
   type: 'union'
   of: T
+  /**
+   * Object member property key(s) holding a literal tag, e.g. `'type'`.
+   * Members whose tag matches the subject's are tried first, members
+   * without any of the keys after them, mismatching members never.
+   * An array is a priority list: each member is tagged by the first
+   * listed key it declares as a literal.
+   **/
+  discriminant?: UnionDiscriminant
 }
+
+export type UnionDiscriminant = string | Readonly<[string, ...string[]]>
 
 /**
  * Primitive schema
