@@ -276,7 +276,7 @@ struct.parse({ type: 'circle', radius: 'x' })
 
 A tag is a `literal`, or a `union` of literals. If the tag is `optional`/`nullable`, a missing/`null` subject tag matches it.
 
-An array such as `['kind', 'type']` is a priority list. Each member is tagged by the first listed key it declares, so members of one union can be tagged on different keys.
+An array such as `['kind', 'type']` is a priority list. Each member is tagged by the first listed key it declares, so members of one union can be tagged on different keys. If a subject matches members through more than one key, members matched through `kind` are tried before members matched through `type`, regardless of their order in `of`.
 
 Members are looked up by tag through an index built once per schema, so selecting a member costs the same whether the union has 10 members or 1000. The index needs the raw tag to be final, so a tagged member, or its tag property, can't have a `.preprocess()`. `.discriminant()` rejects such keys at compile time, and `makeStruct` throws. To normalize tags, call `.preprocess()` on the union itself, which runs before the lookup. Preprocessors on other properties and on untagged members are fine.
 

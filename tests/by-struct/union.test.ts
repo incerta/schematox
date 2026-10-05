@@ -1546,6 +1546,27 @@ describe('discriminant', () => {
     ])
   })
 
+  it('tries members matched through several keys in key priority order', () => {
+    const byType = x.object({ type: x.literal('t'), v: x.unknown() })
+    const byKind = x.object({ kind: x.literal('k'), v: x.number() })
+    const struct = x.union([byType, byKind]).discriminant(['kind', 'type'])
+
+    // Both members accept it: `byKind` wins despite coming later in `of`
+    expect(struct.parse({ kind: 'k', type: 't', v: 1 })).toStrictEqual({
+      success: true,
+      data: { kind: 'k', v: 1 },
+    })
+
+    // Two tag-matched members failing is ambiguous: no single member's errors
+    const strict = x
+      .union([x.object({ type: x.literal('t'), v: x.string() }), byKind])
+      .discriminant(['kind', 'type'])
+
+    expect(strict.parse({ kind: 'k', type: 't', v: true }).error).toStrictEqual(
+      [{ code: x.ERROR_CODE.invalidUnion, path: [], schema: strict.__schema }]
+    )
+  })
+
   it('accepts a union of literals and optional/nullable literals as a tag', () => {
     const struct = x
       .union([

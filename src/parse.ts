@@ -888,24 +888,36 @@ function parseUnion(
   // discriminant keys (non-objects, untagged objects) — the discriminant
   // only reorders and prunes, it never makes an untagged member
   // unreachable. Members whose tag mismatches the subject's are skipped.
-  const matched = getMatchedMembers(index, subject as Record<string, unknown>)
+  // Matched members are tried key by key in priority order, then in `of`
+  // order within a key, so no per-call list of matches is assembled.
+  const tagSubject = subject as Record<string, unknown>
+  let matchedCount = 0
   let matchedError: ParseResult<unknown> | undefined
 
-  for (let i = 0; i < matched.length; i++) {
-    const memberIndex = matched[i]!
-    const parsed = parseRecursively(
-      errorPath,
-      schema.of[memberIndex]!,
-      subject,
-      coerce,
-      getPreprocessTreeChild(preprocessNode, memberIndex)
-    )
+  for (let i = 0; i < index.keys.length; i++) {
+    const members = index.membersByTag[i]!.get(tagSubject[index.keys[i]!])
 
-    if (parsed.error === undefined) {
-      return parsed
+    if (members === undefined) {
+      continue
     }
 
-    matchedError = parsed
+    for (let k = 0; k < members.length; k++) {
+      const memberIndex = members[k]!
+      const parsed = parseRecursively(
+        errorPath,
+        schema.of[memberIndex]!,
+        subject,
+        coerce,
+        getPreprocessTreeChild(preprocessNode, memberIndex)
+      )
+
+      if (parsed.error === undefined) {
+        return parsed
+      }
+
+      matchedCount++
+      matchedError = parsed
+    }
   }
 
   for (let i = 0; i < index.untagged.length; i++) {
@@ -925,7 +937,7 @@ function parseUnion(
 
   // A single tag-matched member is unambiguously the intended one, so its
   // own errors explain the failure better than a blanket INVALID_UNION.
-  if (matched.length === 1 && matchedError !== undefined) {
+  if (matchedCount === 1 && matchedError !== undefined) {
     return matchedError
   }
 
@@ -949,8 +961,6 @@ export type UnionIndex = {
   /** Members tagged by none of the keys, tried after the matched ones. */
   untagged: ReadonlyArray<number>
 }
-
-const NO_MEMBERS: ReadonlyArray<number> = []
 
 // Built once per schema object, so selecting members costs a lookup per
 // discriminant key regardless of how many members the union has. Schemas
@@ -1014,43 +1024,6 @@ function buildUnionIndex(
   }
 
   return { keys, tags, membersByTag, untagged }
-}
-
-/**
- * Indices of the members whose tag matches the subject's, in member order.
- **/
-function getMatchedMembers(
-  index: UnionIndex,
-  subject: Record<string, unknown>
-): ReadonlyArray<number> {
-  let matched: ReadonlyArray<number> | undefined
-  let merged: number[] | undefined
-
-  for (let k = 0; k < index.keys.length; k++) {
-    const indices = index.membersByTag[k]!.get(subject[index.keys[k]!])
-
-    if (indices === undefined) {
-      continue
-    }
-
-    if (matched === undefined) {
-      matched = indices
-      continue
-    }
-
-    // Matches through several keys: rare, so only this path allocates.
-    merged = merged ?? [...matched]
-
-    for (const i of indices) {
-      merged.push(i)
-    }
-  }
-
-  if (merged !== undefined) {
-    return merged.sort((a, b) => a - b)
-  }
-
-  return matched ?? NO_MEMBERS
 }
 
 function getDiscriminantKeys(
