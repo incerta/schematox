@@ -6,3 +6,4 @@
 /benchmark/dist
 /morphs
 /benchmark/.baseline
+/benchmark/.types-tmp

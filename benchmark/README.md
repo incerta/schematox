@@ -11,6 +11,7 @@ npm run bench           # schematox vs. other libraries
 npm run bench:features  # cost of { coerce: true }, .preprocess(), ~standard.validate
 npm run bench:union     # discriminated unions; JITLESS=1 runs zod without new Function
 npm run bench:self      # working tree vs. a git ref (BASELINE_REF, default main)
+npm run bench:types     # compile-time cost of type inference
 ```
 
 Numbers below were captured on 2026-10-06 with Node v23.7.0, Apple M1, against zod 4.6.5, valibot 1.5.0, superstruct 2.0.2, ajv 8.20.0, and yup 1.7.1. Absolute numbers will differ on your machine — what should hold up is the relative ordering and the reasoning behind it.
@@ -147,6 +148,65 @@ A union of 10 object variants `{ type: 'v0' | … | 'v9', a: string, b: number, 
 - **There are stricter rules on preprocessors.** A tagged member, or its tag property, can't have `.preprocess()`, and `makeStruct` throws. The index matches raw tag values, so a preprocessor that rewrote the tag would select the wrong member. The preprocessor has to go on the union instead.
 - **Diagnostics are minimal.** An unknown tag, or several members sharing a matched tag, gives a bare `INVALID_UNION` without the expected tag values. Duplicate tags across members aren't flagged when the schema is built; they are simply tried in order.
 - **Mutation goes unseen.** Mutating a schema object after its first parse isn't seen by the cached index or parse plan. Schemas are meant to be immutable.
+
+## Type inference (`npm run bench:types`)
+
+This measures the cost of inference in `tsc`, not at runtime. It's what you notice as slow type-checks and a laggy editor. Each (library × scenario × size) case is generated as its own mini project in `.types-tmp/` and checked with `tsc --extendedDiagnostics`. schematox is consumed through its built `dist/*.d.ts`, the same way the others come from `node_modules`, so only public types are checked, never an implementation. Each case forces the inferred type to resolve: it must not be `any`, and it must be mutually assignable with a hand-written expected type. A case that fails this check shows the error instead of a number, so every row infers the same type. schematox is measured in both forms: the builder (`object({...})`) and a plain-data `as const satisfies Schema` object. ajv is left out because it infers nothing from a JSON Schema. yup has no union type, so its union row is n/a.
+
+**Instantiations** is the primary metric. It's deterministic and machine-independent, so two runs give identical counts. Check time is the median of `RUNS` (default 5) and only has 10ms resolution in `tsc`'s output. Both are reported above a per-library baseline (the import plus one `string` schema), which is listed separately. Captured on 2026-10-06 with TypeScript 5.9.3, same machine and library versions as above.
+
+### Baseline: import + one string schema
+
+| library            | instantiations | types | check time | memory |
+| ------------------ | -------------- | ----- | ---------- | ------ |
+| schematox (struct) | 522            | 312   | 20ms       | 28MB   |
+| schematox (static) | 142            | 226   | 20ms       | 31MB   |
+| zod                | 25             | 148   | 20ms       | 39MB   |
+| valibot            | 415            | 453   | 30ms       | 46MB   |
+| superstruct        | 48             | 122   | 20ms       | 30MB   |
+| yup                | 420            | 402   | 40ms       | 34MB   |
+
+### Instantiations above baseline (lower is better)
+
+| library            | wide 10 | wide 100 | wide 500 | deep 5 | deep 20 | deep 50           | union 10 | union 100 | union 500 | 10 schemas | 100 schemas | 500 schemas |
+| ------------------ | ------- | -------- | -------- | ------ | ------- | ----------------- | -------- | --------- | --------- | ---------- | ----------- | ----------- |
+| schematox (struct) | 900     | 4.3K     | 19.5K    | 1.6K   | 5.9K    | 14.5K             | 8.5K     | 75.8K     | 375.0K    | 7.2K       | 65.3K       | 323.7K      |
+| schematox (static) | 687     | 5.3K     | 25.7K    | 957    | 3.7K    | too deep (TS2321) | 2.6K     | 24.0K     | 119.2K    | 5.1K       | 49.7K       | 248.1K      |
+| zod                | 530     | 3.5K     | 16.7K    | 889    | 3.5K    | 8.6K              | 2.3K     | 21.9K     | 108.7K    | 4.1K       | 39.6K       | 197.2K      |
+| valibot            | 1.6K    | 5.7K     | 23.7K    | 2.4K   | 5.5K    | 11.6K             | 7.9K     | 32.8K     | 143.2K    | 6.2K       | 48.1K       | 234.1K      |
+| superstruct        | 769     | 3.6K     | 16.4K    | 1.1K   | 3.0K    | 6.7K              | 2.2K     | 21.5K     | 205.3K    | 3.3K       | 29.0K       | 143.0K      |
+| yup                | 1.2K    | 5.9K     | 27.1K    | 1.9K   | 6.8K    | 16.5K             | n/a      | n/a       | n/a       | 7.4K       | 69.1K       | 343.1K      |
+
+### Check time above baseline (lower is better)
+
+| library            | wide 500 | deep 50           | union 100 | union 500 | 100 schemas | 500 schemas |
+| ------------------ | -------- | ----------------- | --------- | --------- | ----------- | ----------- |
+| schematox (struct) | 50ms     | 80ms              | 190ms     | 670ms     | 210ms       | 880ms       |
+| schematox (static) | 100ms    | too deep (TS2321) | 100ms     | 350ms     | 200ms       | 710ms       |
+| zod                | 40ms     | 30ms              | 80ms      | 250ms     | 110ms       | 470ms       |
+| valibot            | 50ms     | 60ms              | 150ms     | 430ms     | 160ms       | 630ms       |
+| superstruct        | 30ms     | 40ms              | 70ms      | 290ms     | 100ms       | 420ms       |
+| yup                | 60ms     | 50ms              | n/a       | n/a       | 170ms       | 700ms       |
+
+Scenarios: _wide_ is one object with N keys of `string`/`number`/`boolean`. _deep_ is an object nested N levels, `{ v: string, child: {...} }`. _union_ is a discriminated union of N `{ type: 'vI', a: number }` variants (zod `discriminatedUnion()`, valibot `variant()`, schematox `.discriminant()`, superstruct plain `union()`). _N schemas_ is N independent `{ id, count, meta: { active, tags: string[] } }` objects in one file, the closest to a real codebase.
+
+### What the numbers say
+
+- **Everything scales linearly**, so no library has a pathological blow-up up to these sizes. The exception is superstruct's plain `union()`, which grows faster than linearly past 100 variants.
+- **schematox is mid-pack on objects and behind zod and superstruct everywhere.** For many schemas, the static form costs ~1.25x zod in instantiations and the builder ~1.6x. Both cost less than yup, and the static form is level with valibot.
+- **The builder's discriminated union is the outlier**, at ~3.5x zod and ~3x the static form (375K vs 109K instantiations at 500 variants). That's ~750 instantiations per variant, so the cost comes from the `union()` signature mapping each member's struct type, plus the `.discriminant()` re-wrap. The static form of the same union is close to zod. This is the most promising thing to optimize.
+- **A static schema hits TypeScript's depth limit at half the nesting.** `as const satisfies Schema` fails with TS2321 at 50 levels of nesting, because the comparison against the recursive `Schema` type uses two levels per object (`of` → property). Every other library, and the schematox builder, infers at least 100 levels. Beyond that, TypeScript itself can't compare the result against the expected type. Real schemas are rarely 50 levels deep, but dropping `satisfies Schema` (it's optional) or using the builder avoids the limit.
+
+| library            | deepest object that infers   |
+| ------------------ | ---------------------------- |
+| schematox (struct) | ≥ 100                        |
+| schematox (static) | 49 — too deep (TS2321) at 50 |
+| zod                | ≥ 100                        |
+| valibot            | ≥ 100                        |
+| superstruct        | ≥ 100                        |
+| yup                | ≥ 100                        |
+
+`ONLY=tox,toxStatic npm run bench:types` limits the run to the listed libraries (`tox`, `toxStatic`, `zod`, `val`, `sup`, `yup`). Instantiation counts make a good regression check for `src/types` changes, because they don't depend on the machine.
 
 ## Regression check (`npm run bench:self`)
 
