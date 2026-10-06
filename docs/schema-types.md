@@ -280,4 +280,4 @@ An array such as `['kind', 'type']` is a priority list. Each member is tagged by
 
 Members are looked up by tag through an index built once per schema, so selecting a member costs the same whether the union has 10 members or 1000. The index needs the raw tag to be final, so a tagged member, or its tag property, can't have a `.preprocess()`. `.discriminant()` rejects such keys at compile time, and `makeStruct` throws. To normalize tags, call `.preprocess()` on the union itself, which runs before the lookup. Preprocessors on other properties and on untagged members are fine.
 
-`.discriminant()` only accepts keys that some object member declares. Schemas are treated as immutable: the index is built on first parse, so changes to `of` or `discriminant` made after that aren't picked up.
+`.discriminant()` only accepts keys that some object member declares. Like every schema, a union is [treated as immutable](./schema-as-data.md#parsing-compiled-once-per-schema-object): the index is built on first parse, so changes to `of` or `discriminant` made after that aren't picked up.

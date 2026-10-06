@@ -29,3 +29,12 @@ type User = Infer<typeof schema>
 So the static schema form isn't just "you can also write JSON instead of calling a builder" — it's that the type contract for a piece of data can itself be expressed _as that same data_, and TypeScript will recover it, regardless of where the data came from. Struct and `makeStruct` are conveniences built on top of the same `Schema` shape, not a separate, richer format the static form is missing out on.
 
 The same property is what makes [narrowing the schema type](./narrowing.md) possible: TypeBox's `TSchema` subtypes carry phantom `static`/`params` fields, so hand-composing a restricted schema type breaks the machinery that produces `Static<T>`.
+
+## Parsing: compiled once per schema object
+
+A schema stays plain data at parse time too. The parser never writes to it or adds hidden fields. On the first `parse()` of a schema object, the parser compiles it into a tree of specialized closures (a parse plan) and caches that plan in a `WeakMap` keyed by the object itself. Later parses reuse the plan, so they don't re-validate the schema or re-read its constraints. The plan is garbage-collected with its schema.
+
+Two consequences:
+
+- **Schemas are treated as immutable.** Changes made to a schema object after its first parse aren't picked up. To change a schema, create a new object.
+- **Reuse a schema object to benefit from the cache.** A schema built or loaded once and parsed many times pays the compile cost once. A schema created per call pays it every time, so hoist it.

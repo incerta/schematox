@@ -1,6 +1,6 @@
 import { PARAMS_BY_SCHEMA_TYPE, STANDARD_SCHEMA } from './constants.js'
 import { buildPreprocessTree, PREPROCESS_PATH_ITEM } from './preprocess.js'
-import { getUnionIndex, parseWithPreprocessors } from './parse.js'
+import { getUnionIndex, makeStructParser } from './parse.js'
 import { assignOwnProperty } from './utils.js'
 
 import type { StandardSchemaV1 } from './types/standard-schema.ts'
@@ -28,7 +28,7 @@ export function makeStruct(
   }
 
   const params = PARAMS_BY_SCHEMA_TYPE[schema.type] as Set<StructParams>
-  const preprocessTree = buildPreprocessTree(preprocessors)
+  const parse = makeStructParser(schema, buildPreprocessTree(preprocessors))
   const result: Record<string, unknown> & StandardSchemaV1 = {
     __schema: { ...schema },
     // Backs the public `preprocess` method below. Kept off the `Struct<T>`
@@ -37,17 +37,11 @@ export function makeStruct(
     // it's an implementation detail of how a member's preprocessor reaches
     // its parent once composed; `preprocess` is the actual public surface.
     __preprocessors: preprocessors,
-    parse: (subj: unknown, options?: ParseOptions) =>
-      parseWithPreprocessors(schema as never, subj, options, preprocessTree),
+    parse: (subj: unknown, options?: ParseOptions) => parse(subj, options),
     ['~standard']: {
       ...STANDARD_SCHEMA,
       validate: (input) => {
-        const parsed = parseWithPreprocessors(
-          schema as never,
-          input,
-          undefined,
-          preprocessTree
-        )
+        const parsed = parse(input, undefined)
 
         return parsed.success
           ? { value: parsed.data }

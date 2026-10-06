@@ -178,7 +178,7 @@ const userModel = {
 - [Custom metadata](./docs/metadata.md)
 - [Narrowing the schema type](./docs/narrowing.md)
 - [Schema as data](./docs/schema-as-data.md): why `Infer` works on any schema, compared with TypeBox and ajv
-- [Benchmarks](./benchmark/README.md): schematox is fastest at parsing valid primitives; on compound shapes it trails zod 4 and ajv (both generate code with `new Function`) and valibot, and leads superstruct and yup. Compared with zod, valibot, superstruct, ajv, and yup.
+- [Benchmarks](./benchmark/README.md): schematox is fastest at parsing valid primitives; on compound shapes it is on par with valibot on valid input and ahead of it on invalid input, trails zod 4 and ajv (both generate code with `new Function`), and leads superstruct and yup. Compared with zod, valibot, superstruct, ajv, and yup.
 - [Migrating](./MIGRATING.md) · [Changelog](./CHANGELOG.md) · [Contributing](./CONTRIBUTING.md)
 
 ## License
