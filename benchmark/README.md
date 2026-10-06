@@ -9,6 +9,7 @@ cd benchmark
 npm install
 npm run bench           # schematox vs. other libraries
 npm run bench:features  # cost of { coerce: true }, .preprocess(), ~standard.validate
+npm run bench:union     # discriminated unions; JITLESS=1 runs zod without new Function
 npm run bench:self      # working tree vs. a git ref (BASELINE_REF, default main)
 ```
 
@@ -78,19 +79,75 @@ A fresh schema per call, discarded afterwards — schemas created per request, o
 
 A flat 3-field object, relative to a plain `struct.parse()` on the same shape:
 
-| case                                        | ops/sec | vs `struct.parse()` |
-| ------------------------------------------- | ------- | ------------------- |
-| `struct.parse()`                            | 5.11M   | 1.00x               |
-| `parse(schema)`                             | 5.18M   | 1.01x               |
-| `struct['~standard'].validate()`            | 5.18M   | 1.01x               |
-| `{ coerce: true }`, already-typed input     | 4.59M   | 0.90x               |
-| `{ coerce: true }`, string input            | 4.58M   | 0.90x               |
-| `.preprocess()` on one field                | 4.29M   | 0.84x               |
-| zod: plain `safeParse()`                    | 24.3M   | 4.75x               |
-| zod: `z.coerce`/`z.stringbool()`, strings   | 17.6M   | 3.44x               |
-| zod: `z.preprocess()` on one field          | 14.5M   | 2.85x               |
+| case                                      | ops/sec | vs `struct.parse()` |
+| ----------------------------------------- | ------- | ------------------- |
+| `struct.parse()`                          | 5.11M   | 1.00x               |
+| `parse(schema)`                           | 5.18M   | 1.01x               |
+| `struct['~standard'].validate()`          | 5.18M   | 1.01x               |
+| `{ coerce: true }`, already-typed input   | 4.59M   | 0.90x               |
+| `{ coerce: true }`, string input          | 4.58M   | 0.90x               |
+| `.preprocess()` on one field              | 4.29M   | 0.84x               |
+| zod: plain `safeParse()`                  | 24.3M   | 4.75x               |
+| zod: `z.coerce`/`z.stringbool()`, strings | 17.6M   | 3.44x               |
+| zod: `z.preprocess()` on one field        | 14.5M   | 2.85x               |
 
 Without `{ coerce: true }` and without a `.preprocess()` at a given position, the parser skips both lookups for that node; the small residual cost of supporting them at all is covered in the regression check below.
+
+## Discriminated unions (`npm run bench:union`)
+
+A union of 10 object variants `{ type: 'v0' | … | 'v9', a: string, b: number, c: boolean }`, measured with each library's plain union and, where there is one, its discriminated-union API: zod `discriminatedUnion()`, valibot `variant()`, ajv `discriminator`, yup `lazy()` keyed by the tag. superstruct has no discriminated API. Captured on 2026-10-06, same machine and versions as above.
+
+### Parsing (ops/sec, higher is better)
+
+| library                             | first variant | middle | last  | wrong field in last | unknown tag |
+| ----------------------------------- | ------------- | ------ | ----- | ------------------- | ----------- |
+| ajv discriminator                   | 27.4M         | 26.8M  | 27.1M | 23.0M               | 23.1M       |
+| zod `discriminatedUnion()`          | 17.3M         | 13.3M  | 13.9M | 4.05M               | 3.32M       |
+| zod `discriminatedUnion()`, jitless | 3.61M         | 3.37M  | 3.22M | 1.74M               | 2.83M       |
+| schematox `.discriminant()`         | 3.80M         | 3.84M  | 3.84M | 3.60M               | 15.2M       |
+| valibot `variant()`                 | 4.55M         | 2.04M  | 1.26M | 1.18M               | 816K        |
+| schematox `union()`                 | 3.92M         | 911K   | 462K  | 446K                | 461K        |
+| superstruct `union()`               | 595K          | 117K   | 58.4K | 40.4K               | 42.4K       |
+| yup `lazy()`                        | 181K          | 175K   | 180K  | 47.8K               | 47.8K       |
+
+### Last variant as the union grows (ops/sec)
+
+`{ type: literal, a: number }` variants:
+
+| library                             | 10    | 100   | 1000  |
+| ----------------------------------- | ----- | ----- | ----- |
+| zod `discriminatedUnion()`          | 17.3M | 11.3M | 11.7M |
+| zod `discriminatedUnion()`, jitless | 5.46M | 4.55M | 4.57M |
+| schematox `.discriminant()`         | 5.14M | 5.13M | 4.59M |
+| valibot `variant()`                 | 1.28M | 121K  | 13.7K |
+
+### Building the 10-variant union (ops/sec)
+
+| library                     | build only | build + parse once |
+| --------------------------- | ---------- | ------------------ |
+| valibot `variant()`         | 1.01M      | 517K               |
+| schematox `.discriminant()` | 36.2K      | 36.6K              |
+| zod `discriminatedUnion()`  | 24.5K      | 12.4K              |
+
+### Where schematox is strong
+
+- **Position doesn't matter.** Members are looked up through a tag → members index built once per schema. The first, middle and last variant all parse at ~3.8M, and 1000 variants parse at about the speed of 10. valibot `variant()` scans its members, so it drops ~90x from 10 to 1000 variants.
+- **Rejecting an unknown tag is nearly free.** It's one `Map` lookup and an `INVALID_UNION`, with no member parsing and no error building: 15.2M, second only to ajv and ~4.6x zod.
+- **Failures inside the matched variant stay cheap.** schematox reports the matched member's own errors (e.g. `INVALID_TYPE` at `['b']`) at almost the cost of a valid parse. zod drops from 13.9M to 4.05M on the same case because it builds richer issue objects.
+- **Without code generation, it matches zod.** Under a CSP that forbids `eval`, or with `z.config({ jitless: true })`, zod's discriminated union is within ±10% of schematox on valid subjects and slower on invalid ones. ajv and default zod get their lead from `new Function`, which isn't always allowed.
+- **Its selection rules are more flexible.**
+  - Soft fallback: members without the key, e.g. a `string()` beside the tagged objects, are still tried. zod and valibot require every member of a discriminated union to be an object carrying the key.
+  - A priority list of keys (`.discriminant(['kind', 'type'])`) instead of a single key.
+  - It works in plain-data, JSON-serializable schemas (`{ type: 'union', of, discriminant: 'type' }`).
+
+### Where schematox is weak
+
+- **On valid subjects, raw throughput trails compiled validators.** ajv is ~7x faster and default zod ~3.5-4.5x. Selection is not the bottleneck: once the member is found, schematox's object parser interprets the schema tree on every call, while zod and ajv run a generated function. This is the same gap as in the plain object tables above, and it won't close without code generation.
+- **valibot wins on the first variant.** With 10 variants, `variant()`'s scan is cheaper than an index lookup when the match is first (4.55M vs 3.80M). The index pays off from the middle onward.
+- **Construction is slow, and the cost is in the members.** 10 object members take ~25µs to build, and the `.discriminant()` call itself adds ~2µs to build the index. That's ~28x valibot, so schemas created per request should be hoisted. The index is cached per schema object, and each chained call after `.discriminant()` (e.g. `.optional()`) creates a new schema and rebuilds it.
+- **There are stricter rules on preprocessors.** A tagged member, or its tag property, can't have `.preprocess()`, and `makeStruct` throws. The index matches raw tag values, so a preprocessor that rewrote the tag would select the wrong member. The preprocessor has to go on the union instead.
+- **Diagnostics are minimal.** An unknown tag, or several members sharing a matched tag, gives a bare `INVALID_UNION` without the expected tag values. Duplicate tags across members aren't flagged when the schema is built; they are simply tried in order.
+- **Mutation goes unseen.** Mutating a schema object after its first parse isn't seen by the cached index. Schemas are meant to be immutable.
 
 ## Regression check (`npm run bench:self`)
 

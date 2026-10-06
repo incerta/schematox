@@ -6,6 +6,12 @@ import * as v from 'valibot'
 import Ajv from 'ajv'
 import * as yup from 'yup'
 
+// JITLESS=1 runs zod without its `new Function` object parsers — what it
+// does under a CSP that forbids eval
+if (process.env.JITLESS === '1') {
+  z.config({ jitless: true })
+}
+
 // Tagged union of 10 object variants:
 // { type: 'v0' | … | 'v9', a: string, b: number, c: boolean }
 //
@@ -188,6 +194,76 @@ async function benchScaling() {
   }
 }
 
+// Building a 10-variant union, alone and followed by a single parse — the
+// cost a schema created per call pays. Members are rebuilt every time, so
+// this is the whole schema, not just the union wrapper.
+async function benchConstruction() {
+  const subject = valid('v9')
+  const build = {
+    'schematox union().discriminant()': () =>
+      tox
+        .union(
+          TAGS.map((tag) =>
+            tox.object({
+              type: tox.literal(tag),
+              a: tox.string(),
+              b: tox.number(),
+              c: tox.boolean(),
+            })
+          ) as never
+        )
+        .discriminant('type' as never),
+    'zod discriminatedUnion()': () =>
+      z.discriminatedUnion(
+        'type',
+        TAGS.map((tag) =>
+          z.object({
+            type: z.literal(tag),
+            a: z.string(),
+            b: z.number(),
+            c: z.boolean(),
+          })
+        ) as never
+      ),
+    'valibot variant()': () =>
+      v.variant(
+        'type',
+        TAGS.map((tag) =>
+          v.object({
+            type: v.literal(tag),
+            a: v.string(),
+            b: v.number(),
+            c: v.boolean(),
+          })
+        )
+      ),
+  }
+  const parseOnce = {
+    'schematox union().discriminant()': () =>
+      build['schematox union().discriminant()']().parse(subject),
+    'zod discriminatedUnion()': () =>
+      build['zod discriminatedUnion()']().safeParse(subject),
+    'valibot variant()': () =>
+      v.safeParse(build['valibot variant()'](), subject),
+  }
+
+  for (const [name, tasks] of [
+    ['construction: 10 variants', build],
+    ['build + parse once: 10 variants, last variant', parseOnce],
+  ] as const) {
+    const bench = new Bench({ name })
+
+    for (const [label, fn] of Object.entries(tasks)) {
+      bench.add(label, () => {
+        fn()
+      })
+    }
+
+    await bench.run()
+    printTable(bench)
+  }
+}
+
 function printTable(bench: Bench) {
   const rows = bench.tasks.map((task) => ({
     library: task.name,
@@ -227,4 +303,4 @@ async function main() {
   }
 }
 
-main().then(benchScaling)
+main().then(benchScaling).then(benchConstruction)
