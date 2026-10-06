@@ -1648,6 +1648,17 @@ describe('discriminant', () => {
     } as never
 
     expect(x.parse(emptyUnionTag, { type: 0 }).success).toBe(true)
+
+    const nonObjectTag = {
+      type: 'union',
+      discriminant: 'type',
+      of: [
+        { type: 'object', of: { type: null } },
+        { type: 'object', of: { type: { type: 'literal', of: 'a' } } },
+      ],
+    } as never
+
+    expect(x.parse(nonObjectTag, { type: 'a' }).success).toBe(true)
   })
 
   it('works with a plain data schema', () => {
