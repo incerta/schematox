@@ -30,7 +30,7 @@ Requires TypeScript ≥ 5.3.2 and an ES2020 runtime.
 
 ## Why schematox
 
-- **Schemas are data.** A schema is a plain JSON object, so you can store it, transfer it, diff it, generate it, or use it as the source of truth for DB models and other structures.
+- **Schemas are data.** A schema is a plain JSON object, so you can store it, transfer it, diff it, generate it, or use it as the source of truth for DB models and other structures. When the built-in parser doesn't fit, you can write your own, sync or async, over the same schemas.
 - **Structural type inference.** `Infer<T>` is an ordinary conditional type over the schema's own `type`/`of`/`brand` fields. A schema written by hand or loaded from JSON infers the same type as one built with the builder API.
 - **Either-style results.** `parse()` never throws. It returns `{ success, data, error }`.
 - **Branded primitives built in.** You get nominal types like `string & { __idFor: 'User' }` with no extra setup ([details](./docs/branding.md)).
