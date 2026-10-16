@@ -1,6 +1,6 @@
 # How To Contribute
 
-Simply make a fork and create a PR if you think that something is off. Alternatively, create an [issue](https://github.com/incerta/schematox/issues) if you find a bug or have an idea/question.
+Simply make a fork and create a PR if you think that something is off. Every PR that changes the library's behavior, API, performance or docs should add its own entry to `CHANGELOG.md` (see [Changelog](#changelog)). Alternatively, create an [issue](https://github.com/incerta/schematox/issues) if you find a bug or have an idea/question.
 
 # Glossary
 
@@ -42,12 +42,13 @@ The `tCh` function will raise static type error if the second generic argument t
 # Development routine
 
 - Create an issue (optional)
-- Create feature branch
+- Create feature branch from the latest `main`
+- Add an entry for your change under `## Unreleased` in `CHANGELOG.md` (see [Changelog](#changelog))
 - Make a PR against `main` branch
 - Review diff
 - Publish alpha version using `npm run publish:alpha` script
 - Rebase PR commits into `main` branch
-- Update `CHANGELOG.md` file but don't commit changes
+- Rename `## Unreleased` in `CHANGELOG.md` to the new version header, e.g. `## [2.5.0](https://github.com/incerta/schematox/compare/v2.4.0...v2.5.0)`, but don't commit changes
 - Run `npm run release`
   - Release script going to extract new version from the `CHANGELOG.md` file
   - Release branch going to be created and pushed automatically
@@ -55,6 +56,27 @@ The `tCh` function will raise static type error if the second generic argument t
   - NPM publish and GitHub Release should be applied automatically
   - If release is not triggered automatically, go to [release action page](https://github.com/incerta/schematox/actions/workflows/release.yml)
     and trigger it by clicking `Run workflow` button
+
+## Changelog
+
+Changelog entries are written as part of the PR, not at release time, so `main` always describes what the next release contains. The top of `CHANGELOG.md` holds an `## Unreleased` section; add it if the previous release removed it:
+
+```markdown
+# Changelog
+
+## Unreleased
+
+- FEAT: what changed and why it matters to users ([#100](https://github.com/incerta/schematox/pull/100))
+
+## [2.4.0](https://github.com/incerta/schematox/compare/v2.3.0...v2.4.0)
+```
+
+- One line per change, starting with `FEAT:`, `FIX:`, `PERF:`, `DOCS:`, or `CHORE:`; use `BREAKING:` instead when existing code stops compiling or behaves differently
+- Describe the effect on users, not the implementation, and link the PR
+- For `PERF`, state the measured change (e.g. from `npm run bench:self` in `benchmark/`)
+- Purely internal changes (tests, CI, refactors without user-visible effect) need no entry
+
+At release, `## Unreleased` is renamed to the version header; that rename is the only change `npm run release` accepts.
 
 ## Checks before publish
 
