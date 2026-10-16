@@ -176,6 +176,29 @@ const struct = object({
 type T = Infer<typeof struct>
 ```
 
+#### partial
+
+`partial` and `partialExcept` derive a new object schema with first-level members made optional, e.g. a `PATCH` payload from a `PUT` one. They work on static schemas as free functions and on structs as methods, and produce the same JSON either way. The source schema is never changed.
+
+```typescript
+const put = object({
+  id: string(),
+  name: string(),
+  bio: string().optional(),
+})
+
+put.partial() // { id?: string; name?: string; bio?: string }
+put.partial(['name']) // { id: string; name?: string; bio?: string }
+put.partialExcept(['id']) // { id: string; name?: string; bio?: string }
+
+partial(put.__schema) // same as put.partial().__schema
+partialExcept(put.__schema, ['id']) // same as put.partialExcept(['id']).__schema
+```
+
+Members under `partialExcept` keys keep their own `optional` as is: `partialExcept(['id', 'bio'])` still leaves `bio` optional, where a `partial().required(['id', 'bio'])` chain in other libraries makes it required.
+
+Only first-level members change; nested objects keep their own members as declared. Keys must be a non-empty list of the object's own members; any other key is a type error, and a runtime error for schemas the type system can't see. Unlike params, both methods stay available after being called, and member preprocessors carry over to the result.
+
 ### record
 
 Entries whose value is `undefined` are skipped in the result and not counted by `minLength`/`maxLength`. If a key exists in the result, its value is present.

@@ -92,8 +92,26 @@ export type Struct<T extends Schema> = Omit<
       meta: <U extends Record<string, unknown>>(
         meta: U
       ) => Struct<T & { meta: U }>
+
+      /** Makes every member optional, or only the members under `keys`. */
+      partial: {
+        (): Struct<Extract<PartialObjectSchema<T, ObjectKey<T>>, Schema>>
+        <U extends ObjectKeys<T>>(
+          keys: U
+        ): Struct<Extract<PartialObjectSchema<T, U[number]>, Schema>>
+      }
+
+      /** Makes every member optional except the ones under `keys`, which stay as they are. */
+      partialExcept: <U extends ObjectKeys<T>>(
+        keys: U
+      ) => Struct<
+        Extract<
+          PartialObjectSchema<T, Exclude<ObjectKey<T>, U[number]>>,
+          Schema
+        >
+      >
     },
-    ParamsBySchemaType[T['type']]
+    ParamsBySchemaType[T['type']] | TransformsBySchemaType[T['type']]
   >,
   keyof T
 > & {
@@ -147,6 +165,24 @@ type IsPreprocessedTag<S> = S extends { preprocess: PreprocessFn }
       : true
     : false
 
+type ObjectKey<T> = T extends { of: infer U } ? keyof U & string : never
+
+type ObjectKeys<T> = Readonly<[ObjectKey<T>, ...ObjectKey<T>[]]>
+
+/**
+ * Object schema `T` with the members under keys `K` made optional; every
+ * other member, and every other field of `T`, is left as is.
+ **/
+export type PartialObjectSchema<T, K extends PropertyKey> = {
+  [P in keyof T]: P extends 'of'
+    ? { [Q in keyof T[P]]: Q extends K ? OptionalSchema<T[P][Q]> : T[P][Q] }
+    : T[P]
+}
+
+type OptionalSchema<T> = {
+  [P in keyof T | 'optional']: P extends 'optional' ? true : T[P & keyof T]
+}
+
 type BrandSubType =
   boolean | number | string | ReadonlyArray<unknown> | Record<string, unknown>
 
@@ -165,6 +201,17 @@ type ParamsBySchemaType = {
   record: ExtractParams<RecordSchema>
   tuple: ExtractParams<TupleSchema>
   union: ExtractParams<UnionSchema>
+}
+
+/**
+ * Methods that derive a new schema rather than set a param: since they
+ * leave no field behind, they stay available after being called.
+ **/
+type TransformsBySchemaType = Record<
+  Exclude<Schema['type'], 'object'>,
+  never
+> & {
+  object: 'partial' | 'partialExcept'
 }
 
 type ExtractParams<T> = Exclude<keyof T, 'type' | 'of'>
