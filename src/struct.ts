@@ -298,7 +298,7 @@ type MemberKeys<T extends ObjectSchemaShape> = Readonly<
 /**
  * Returns a copy of an object schema with every member made optional, or
  * only the members under `keys`. The source schema is left untouched.
- * @example partial(userSchema) // PUT payload -> PATCH payload
+ * @example partial(userSchema) // every member optional
  **/
 export function partial<T extends ObjectSchemaShape>(
   schema: T

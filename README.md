@@ -107,7 +107,7 @@ Parameters shared by every schema:
 
 Each type has a static and struct example, along with its edge cases, in **[docs/schema-types.md](./docs/schema-types.md)**.
 
-To derive a `PATCH` payload from a `PUT` one, `object` structs have `.partial()`, `.partial(keys)`, and `.partialExcept(keys)`. The free functions `partial(schema)` and `partialExcept(schema, keys)` do the same for static schemas ([details](./docs/schema-types.md#partial)).
+To derive variants of an object schema with some members optional (update payloads, drafts, filters, overrides), `object` structs have `.partial()`, `.partial(keys)`, and `.partialExcept(keys)`. The free functions `partial(schema)` and `partialExcept(schema, keys)` do the same for static schemas ([details](./docs/schema-types.md#partial)).
 
 ## Errors
 
