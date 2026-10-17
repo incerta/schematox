@@ -3,12 +3,12 @@ import * as x from '../src/index.js'
 
 import type { StructSharedKeys } from './type.js'
 
-// `partial`/`partialExcept` derive a new object schema (PUT payload -> PATCH
-// payload) by rewriting `of`. Unlike params they leave no field behind, so
-// they stay available after being called, and the free functions produce
-// the exact same JSON as the struct methods.
+// `partial`/`partialExcept` derive a new object schema with some or all
+// members made optional by rewriting `of`. Unlike params they leave no field
+// behind, so they stay available after being called, and the free functions
+// produce the exact same JSON as the struct methods.
 
-const putSchema = {
+const userSchema = {
   type: 'object',
   of: {
     id: { type: 'string' },
@@ -17,7 +17,7 @@ const putSchema = {
   },
 } as const satisfies x.Schema
 
-const putStruct = x.object({
+const userStruct = x.object({
   id: x.string(),
   name: x.string(),
   bio: x.string().optional(),
@@ -34,9 +34,9 @@ describe('partial', () => {
       },
     } as const satisfies x.Schema
 
-    const schema = x.partial(putSchema)
-    const struct = putStruct.partial()
-    const construct = x.makeStruct(putSchema).partial()
+    const schema = x.partial(userSchema)
+    const struct = userStruct.partial()
+    const construct = x.makeStruct(userSchema).partial()
 
     type Expected = {
       id?: string | undefined
@@ -84,8 +84,8 @@ describe('partial', () => {
       },
     } as const satisfies x.Schema
 
-    const schema = x.partial(putSchema, ['name'])
-    const struct = putStruct.partial(['name'])
+    const schema = x.partial(userSchema, ['name'])
+    const struct = userStruct.partial(['name'])
 
     type Expected = {
       id: string
@@ -123,8 +123,8 @@ describe('partialExcept', () => {
       },
     } as const satisfies x.Schema
 
-    const schema = x.partialExcept(putSchema, ['id'])
-    const struct = putStruct.partialExcept(['id'])
+    const schema = x.partialExcept(userSchema, ['id'])
+    const struct = userStruct.partialExcept(['id'])
 
     type Expected = {
       id: string
@@ -143,8 +143,8 @@ describe('partialExcept', () => {
 
   it('leaves an excepted member that was already optional optional', () => {
     // `partial().required(keys)` elsewhere would turn `bio` required here
-    const schema = x.partialExcept(putSchema, ['id', 'bio'])
-    const struct = putStruct.partialExcept(['id', 'bio'])
+    const schema = x.partialExcept(userSchema, ['id', 'bio'])
+    const struct = userStruct.partialExcept(['id', 'bio'])
 
     type Expected = {
       id: string
@@ -157,7 +157,7 @@ describe('partialExcept', () => {
     x.tCh<x.Infer<typeof struct>, Expected>()
     x.tCh<Expected, x.Infer<typeof struct>>()
 
-    expect(schema.of.bio).toBe(putSchema.of.bio)
+    expect(schema.of.bio).toBe(userSchema.of.bio)
     expect(struct.parse({ id: 'a' }).data).toStrictEqual({ id: 'a' })
   })
 })
@@ -202,11 +202,11 @@ describe('Derived schema', () => {
   })
 
   it('reuses members it does not change by reference', () => {
-    const schema = x.partial(putSchema, ['name'])
+    const schema = x.partial(userSchema, ['name'])
 
-    expect(schema.of.id).toBe(putSchema.of.id)
-    expect(schema.of.bio).toBe(putSchema.of.bio)
-    expect(schema.of.name).not.toBe(putSchema.of.name)
+    expect(schema.of.id).toBe(userSchema.of.id)
+    expect(schema.of.bio).toBe(userSchema.of.bio)
+    expect(schema.of.name).not.toBe(userSchema.of.name)
   })
 
   it('applies to the first level only', () => {
@@ -247,7 +247,7 @@ describe('Struct methods', () => {
       | 'partial'
       | 'partialExcept'
 
-    const struct = putStruct.partial(['name'])
+    const struct = userStruct.partial(['name'])
 
     x.tCh<keyof typeof struct, ExpectedKeys>()
     x.tCh<ExpectedKeys, keyof typeof struct>()
@@ -266,7 +266,7 @@ describe('Struct methods', () => {
     x.tCh<Expected, x.Infer<typeof chained>>()
 
     expect(chained.__schema).toStrictEqual({
-      ...x.partial(putSchema),
+      ...x.partial(userSchema),
       optional: true,
     })
     expect(chained.parse(undefined).success).toBe(true)
@@ -301,19 +301,19 @@ describe('Keys', () => {
   it('reject keys that are not members, statically and at runtime', () => {
     expect(() =>
       // @ts-expect-error not a member
-      putStruct.partial(['missing'])
+      userStruct.partial(['missing'])
     ).toThrow('object schema has no "missing" member')
 
     expect(() =>
       // @ts-expect-error not a member
-      x.partialExcept(putSchema, ['toString'])
+      x.partialExcept(userSchema, ['toString'])
     ).toThrow('object schema has no "toString" member')
   })
 
   it('must be a non-empty list', () => {
     // @ts-expect-error empty list
-    putStruct.partial([])
+    userStruct.partial([])
     // @ts-expect-error empty list
-    x.partialExcept(putSchema, [])
+    x.partialExcept(userSchema, [])
   })
 })
