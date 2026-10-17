@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- FEAT: `object` gets `partial` and `partialExcept`, which derive a new object schema with some or all first-level members made optional, so one schema can back update payloads, drafts, filters, config overrides and other shapes derived from it: `object({...}).partial()` makes every member optional, `.partial(['name'])` only the listed ones, and `.partialExcept(['id'])` every member but the listed ones. The free functions `partial(schema, keys?)` and `partialExcept(schema, keys)` do the same for static schemas and produce the same JSON. Excepted members keep their own `optional` as is, so an already-optional excepted key stays optional, unlike the `partial().required(keys)` chain in other libraries. The source schema is never changed, and member preprocessors carry over. Keys must be a non-empty list of the object's own members: any other key is a type error, and a runtime error for schemas the type system can't see. Unlike params, both methods stay available after being called. See [partial](./docs/schema-types.md#partial). ([#100](https://github.com/incerta/schematox/pull/100))
+
 ## [2.4.0](https://github.com/incerta/schematox/compare/v2.3.0...v2.4.0)
 
 - FEAT: `union` gets an optional `discriminant`, a key or a priority list of keys: `{ type: 'union', of, discriminant: 'type' }` / `union([...]).discriminant('type')`. Members whose literal tag matches the subject's are tried first, then members that don't declare the key. Members whose tag mismatches are skipped. If exactly one member matches the tag and it fails, its own errors are reported instead of `INVALID_UNION`. Members are selected through an index built once per schema, so selection doesn't slow down as the union grows. A `.preprocess()` on a tagged member or its tag property is rejected: it's a compile error on `.discriminant()`, and `makeStruct` throws. See [discriminant](./docs/schema-types.md#discriminant).

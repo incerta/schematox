@@ -13,7 +13,12 @@ import type {
 } from './types/schema.ts'
 import type { PreprocessFn, PreprocessPathEntry } from './types/preprocess.ts'
 import type { ParseOptions } from './types/utils.ts'
-import type { Struct, StructParams, StructShape } from './types/struct.ts'
+import type {
+  PartialObjectSchema,
+  Struct,
+  StructParams,
+  StructShape,
+} from './types/struct.ts'
 
 export function makeStruct<T extends Schema>(
   schema: T,
@@ -78,6 +83,18 @@ export function makeStruct(
     makeStruct(schema, [...preprocessors, { path: [], fn }])
 
   /* Schema specific params */
+
+  // Rewrite `of` without touching any member's own preprocessors, whose
+  // paths are keyed by member name and so stay valid as they are.
+  if (schema.type === 'object') {
+    result.partial = (keys?: ReadonlyArray<string>) =>
+      makeStruct(partial(schema, keys as [string]) as Schema, preprocessors)
+    result.partialExcept = (keys: ReadonlyArray<string>) =>
+      makeStruct(
+        partialExcept(schema, keys as [string]) as Schema,
+        preprocessors
+      )
+  }
 
   if (params.has('brand')) {
     result.brand = (...args: BrandSchema | [BrandSchema]) => {
@@ -266,6 +283,97 @@ export function union<
   }
 
   return makeStruct(schema, preprocessors)
+}
+
+/**
+ * Object transforms
+ **/
+
+type ObjectSchemaShape = { type: 'object'; of: object }
+
+type MemberKeys<T extends ObjectSchemaShape> = Readonly<
+  [keyof T['of'] & string, ...Array<keyof T['of'] & string>]
+>
+
+/**
+ * Returns a copy of an object schema with every member made optional, or
+ * only the members under `keys`. The source schema is left untouched.
+ * @example partial(userSchema) // every member optional
+ **/
+export function partial<T extends ObjectSchemaShape>(
+  schema: T
+): PartialObjectSchema<T, keyof T['of']>
+export function partial<T extends ObjectSchemaShape, U extends MemberKeys<T>>(
+  schema: T,
+  keys: U
+): PartialObjectSchema<T, U[number]>
+export function partial(
+  schema: ObjectSchemaShape,
+  keys?: ReadonlyArray<string>
+) {
+  if (keys === undefined) {
+    return makePartial(schema, () => true)
+  }
+
+  const listed = toMemberKeySet(schema, keys)
+
+  return makePartial(schema, (key) => listed.has(key))
+}
+
+/**
+ * Returns a copy of an object schema with every member made optional
+ * except the ones under `keys`, which keep their own `optional` as is.
+ * The source schema is left untouched.
+ * @example partialExcept(userSchema, ['id'])
+ **/
+export function partialExcept<
+  T extends ObjectSchemaShape,
+  U extends MemberKeys<T>,
+>(schema: T, keys: U): PartialObjectSchema<T, Exclude<keyof T['of'], U[number]>>
+export function partialExcept(
+  schema: ObjectSchemaShape,
+  keys: ReadonlyArray<string>
+) {
+  const excepted = toMemberKeySet(schema, keys)
+
+  return makePartial(schema, (key) => excepted.has(key) === false)
+}
+
+function toMemberKeySet(
+  schema: ObjectSchemaShape,
+  keys: ReadonlyArray<string>
+): Set<string> {
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(schema.of, key) === false) {
+      throw new Error(`object schema has no "${key}" member`)
+    }
+  }
+
+  return new Set(keys)
+}
+
+function makePartial(
+  schema: ObjectSchemaShape,
+  isTarget: (key: string) => boolean
+) {
+  const source = schema.of as Record<string, Schema>
+  const of: Record<string, Schema> = {}
+
+  for (const key in source) {
+    const member = source[key]!
+
+    // An already-optional member is reused as is: schemas are never
+    // mutated, so sharing it between both objects is safe.
+    assignOwnProperty(
+      of,
+      key,
+      isTarget(key) && member.optional !== true
+        ? { ...member, optional: true }
+        : member
+    )
+  }
+
+  return { ...schema, of }
 }
 
 /**

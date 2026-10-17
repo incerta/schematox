@@ -17,6 +17,9 @@ export {
   record,
   tuple,
   union,
+  //
+  partial,
+  partialExcept,
 } from './struct.js'
 
 export { error, success, tCh } from './utils.js'
@@ -75,7 +78,12 @@ export type {
   BigIntString,
 } from './types/schema.js'
 
-export type { Struct, StructShape, StructParams } from './types/struct.js'
+export type {
+  Struct,
+  StructShape,
+  StructParams,
+  PartialObjectSchema,
+} from './types/struct.js'
 
 export type {
   ExtendParams,

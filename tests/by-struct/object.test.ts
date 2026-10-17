@@ -449,7 +449,12 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x.object({ x: x.boolean() })
     const struct = prevStruct.optional()
 
-    type ExpectedKeys = StructSharedKeys | 'description' | 'nullable'
+    type ExpectedKeys =
+      | StructSharedKeys
+      | 'partial'
+      | 'partialExcept'
+      | 'description'
+      | 'nullable'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -502,7 +507,8 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
     const prevStruct = x.object({ x: x.boolean() }).optional()
     const struct = prevStruct.nullable()
 
-    type ExpectedKeys = StructSharedKeys | 'description'
+    type ExpectedKeys =
+      StructSharedKeys | 'partial' | 'partialExcept' | 'description'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -557,7 +563,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
     const struct = prevStruct.description(schema.description)
 
-    type ExpectedKeys = StructSharedKeys
+    type ExpectedKeys = StructSharedKeys | 'partial' | 'partialExcept'
 
     foldB: {
       const construct = x.makeStruct(schema)
@@ -614,7 +620,7 @@ describe('Struct parameter keys reduction and schema immutability (foldB)', () =
 
     const struct = prevStruct.nullable().optional()
 
-    type ExpectedKeys = StructSharedKeys
+    type ExpectedKeys = StructSharedKeys | 'partial' | 'partialExcept'
 
     foldB: {
       const construct = x.makeStruct(schema)

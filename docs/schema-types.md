@@ -176,6 +176,37 @@ const struct = object({
 type T = Infer<typeof struct>
 ```
 
+#### partial
+
+`partial` and `partialExcept` derive a variant of an object schema with some or all first-level members made optional, so one schema stays the source of truth for every shape built from it. Typical uses:
+
+- **Updates:** only the changed fields are sent, but the identifier is still required, e.g. `partialExcept(['id'])`. Covers PATCH bodies, database update calls, and event deltas.
+- **Drafts:** forms or multi-step flows saved before every field is filled in.
+- **Filters:** queries that match on any subset of fields.
+- **Overrides:** user config layered over defaults, where missing keys fall back.
+- **Sparse reads:** records where only the requested fields come back, e.g. field selection or projections.
+
+They work on static schemas as free functions and on structs as methods, and produce the same JSON either way. The source schema is never changed.
+
+```typescript
+const user = object({
+  id: string(),
+  name: string(),
+  bio: string().optional(),
+})
+
+user.partial() // { id?: string; name?: string; bio?: string }
+user.partial(['name']) // { id: string; name?: string; bio?: string }
+user.partialExcept(['id']) // { id: string; name?: string; bio?: string }
+
+partial(user.__schema) // same as user.partial().__schema
+partialExcept(user.__schema, ['id']) // same as user.partialExcept(['id']).__schema
+```
+
+Members under `partialExcept` keys keep their own `optional` as is: `partialExcept(['id', 'bio'])` still leaves `bio` optional, where a `partial().required(['id', 'bio'])` chain in other libraries makes it required.
+
+Only first-level members change; nested objects keep their own members as declared. Keys must be a non-empty list of the object's own members; any other key is a type error, and a runtime error for schemas the type system can't see. Unlike params, both methods stay available after being called, and member preprocessors carry over to the result.
+
 ### record
 
 Entries whose value is `undefined` are skipped in the result and not counted by `minLength`/`maxLength`. If a key exists in the result, its value is present.
