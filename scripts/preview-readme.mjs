@@ -4,6 +4,9 @@
 // Mirrors what npm does to a README: GitHub-flavored markdown, relative
 // links resolved against the `repository` field, GitHub-style heading slugs.
 // It is not npm's actual renderer — use `npm run publish:alpha` for that.
+// The readme column is npm's ~730px, code is set at npm's 16px and inline
+// code never wraps, so a table or code block that would scroll on npm
+// scrolls here too.
 
 import { execSync } from 'node:child_process'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -99,7 +102,9 @@ const html = `<!doctype html>
   .tabs div { flex: 1; text-align: center; padding: 10px 0; border-bottom: 2px solid #eee; font-size: 14px; color: #666; }
   .tabs div.active { border-bottom-color: #ffcd3a; color: #111; font-weight: 600; }
   main { max-width: 1150px; margin: 0 auto; padding: 24px 32px 64px; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 40px; }
-  .markdown-body { font-size: 16px; }
+  .markdown-body { font-size: 16px; max-width: 730px; }
+  .markdown-body code { white-space: nowrap; }
+  .markdown-body pre, .markdown-body code { font-size: 16px; }
   aside .side-item { border-bottom: 1px solid #eee; padding: 10px 0; }
   aside h3 { margin: 0 0 4px; font-size: 13px; color: #666; font-weight: 600; }
   aside p { margin: 0; font-size: 15px; word-break: break-all; }
