@@ -3,7 +3,7 @@
 ## Unreleased
 
 - FEAT: `object` gets `partial` and `partialExcept`, which derive a new object schema with some or all first-level members made optional, so one schema can back update payloads, drafts, filters, config overrides and other shapes derived from it: `object({...}).partial()` makes every member optional, `.partial(['name'])` only the listed ones, and `.partialExcept(['id'])` every member but the listed ones. The free functions `partial(schema, keys?)` and `partialExcept(schema, keys)` do the same for static schemas and produce the same JSON. Excepted members keep their own `optional` as is, so an already-optional excepted key stays optional, unlike the `partial().required(keys)` chain in other libraries. The source schema is never changed, and member preprocessors carry over. Keys must be a non-empty list of the object's own members: any other key is a type error, and a runtime error for schemas the type system can't see. Unlike params, both methods stay available after being called. See [partial](./docs/schema-types.md#partial). ([#100](https://github.com/incerta/schematox/pull/100))
-- DOCS: the README's tables and code blocks fit npm's readme column, so the package page no longer scrolls sideways; `npm run check` keeps it that way (`npm run readme:check`), and `npm run readme:preview` now renders at npm's column width
+- DOCS: the README's tables and code blocks fit npm's readme column, so the package page no longer scrolls sideways; `npm run check` keeps it that way (`npm run readme:check`), and `npm run readme:preview` now renders at npm's column width ([#101](https://github.com/incerta/schematox/pull/101))
 
 ## [2.4.0](https://github.com/incerta/schematox/compare/v2.3.0...v2.4.0)
 
