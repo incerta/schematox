@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- FIX: a struct's [Standard Schema](https://standardschema.dev) input type was `unknown`, so tools that type their call sites from `StandardSchemaV1.InferInput` (tRPC procedure inputs, form libraries) accepted any value at compile time. It is now the inferred subject type, the same as the output type, matching how zod and valibot type schemas without transforms. A `.preprocess()` doesn't widen it: preprocessors are meant for rare, temporary input fixes, so a value a preprocessor would accept but the schema wouldn't is a type error at the call site. Runtime behavior is unchanged.
+
 ## [2.5.0](https://github.com/incerta/schematox/compare/v2.4.0...v2.5.0)
 
 - FEAT: `object` gets `partial` and `partialExcept`, which derive a new object schema with some or all first-level members made optional, so one schema can back update payloads, drafts, filters, config overrides and other shapes derived from it: `object({...}).partial()` makes every member optional, `.partial(['name'])` only the listed ones, and `.partialExcept(['id'])` every member but the listed ones. The free functions `partial(schema, keys?)` and `partialExcept(schema, keys)` do the same for static schemas and produce the same JSON. Excepted members keep their own `optional` as is, so an already-optional excepted key stays optional, unlike the `partial().required(keys)` chain in other libraries. The source schema is never changed, and member preprocessors carry over. Keys must be a non-empty list of the object's own members: any other key is a type error, and a runtime error for schemas the type system can't see. Unlike params, both methods stay available after being called. See [partial](./docs/schema-types.md#partial). ([#100](https://github.com/incerta/schematox/pull/100))

@@ -40,6 +40,13 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
       x.tCh<StandardSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StandardSubj>()
 
+      type StandardInput = NonNullable<
+        (typeof struct)['~standard']['types']
+      >['input']
+
+      x.tCh<StandardInput, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardInput>()
+
       /* parsed either type check */
 
       type ExpectedParsed = x.ParseResult<ExpectedSubj>
@@ -145,6 +152,13 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StandardSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StandardSubj>()
+
+      type StandardInput = NonNullable<
+        (typeof struct)['~standard']['types']
+      >['input']
+
+      x.tCh<StandardInput, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardInput>()
 
       /* parsed either type check */
 
@@ -252,6 +266,13 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
       x.tCh<StandardSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StandardSubj>()
 
+      type StandardInput = NonNullable<
+        (typeof struct)['~standard']['types']
+      >['input']
+
+      x.tCh<StandardInput, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardInput>()
+
       /* parsed either type check */
 
       type ExpectedParsed = x.ParseResult<ExpectedSubj>
@@ -358,6 +379,13 @@ describe('Type inference and parse by schema/construct/struct (foldA)', () => {
 
       x.tCh<StandardSubj, ExpectedSubj>()
       x.tCh<ExpectedSubj, StandardSubj>()
+
+      type StandardInput = NonNullable<
+        (typeof struct)['~standard']['types']
+      >['input']
+
+      x.tCh<StandardInput, ExpectedSubj>()
+      x.tCh<ExpectedSubj, StandardInput>()
 
       /* parsed either type check */
 
