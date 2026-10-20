@@ -125,7 +125,7 @@ export type Struct<T extends Schema> = Omit<
   preprocess: (fn: PreprocessFn) => Struct<T & { preprocess: PreprocessFn }>
 
   parse: (s: unknown, options?: ParseOptions) => ParseResult<InferSchema<T>>
-} & StandardSchemaV1<unknown, InferSchema<T>>
+} & StandardSchemaV1<InferSchema<T>, InferSchema<T>>
 
 /**
  * Keys that at least one object member of a union declares, minus keys
