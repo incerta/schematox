@@ -1,12 +1,18 @@
-# Schematox
+<p align="center">
+  <img src="https://raw.githubusercontent.com/incerta/schematox/main/assets/logo.png" alt="schematox logo" width="117" height="200">
+</p>
 
-**A typesafe schema that's also just data.**
+<h1 align="center">schematox</h1>
 
-[![npm version](https://img.shields.io/npm/v/schematox.svg)](https://www.npmjs.com/package/schematox)
-[![npm downloads](https://img.shields.io/npm/dm/schematox.svg)](https://www.npmjs.com/package/schematox)
-[![bundle size](https://deno.bundlejs.com/badge?q=schematox)](https://bundlejs.com/?q=schematox)
-[![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://www.npmjs.com/package/schematox)
-[![license](https://img.shields.io/npm/l/schematox.svg)](./LICENSE)
+<p align="center"><strong>parse with stable static JSON-compatible schema</strong></p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/schematox"><img src="https://img.shields.io/npm/v/schematox.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/schematox"><img src="https://img.shields.io/npm/dm/schematox.svg" alt="npm downloads"></a>
+  <a href="https://bundlejs.com/?q=schematox"><img src="https://deno.bundlejs.com/badge?q=schematox" alt="bundle size"></a>
+  <a href="https://www.npmjs.com/package/schematox"><img src="https://img.shields.io/badge/dependencies-0-brightgreen" alt="dependencies"></a>
+  <a href="https://github.com/incerta/schematox/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/schematox.svg" alt="license"></a>
+</p>
 
 A schematox schema is a plain JSON object. You can write it as a literal, load it from a database, or generate it, and it is still a typesafe parser with a real inferred type. If you prefer builders, a chainable `struct` API in the style of Zod produces the exact same JSON. Unlike TypeBox's `Static<T>`, `Infer<T>` reads the schema's own fields, so it works no matter where the schema came from ([why](./docs/schema-as-data.md)).
 
@@ -35,7 +41,7 @@ Requires TypeScript ≥ 5.3.2 and an ES2020 runtime.
 - **Either-style results.** `parse()` never throws. It returns `{ success, data, error }`.
 - **Branded primitives built in.** You get nominal types like `string & { __idFor: 'User' }` with no extra setup ([details](./docs/branding.md)).
 - **[Standard Schema](https://standardschema.dev) compliant.** Works with any tool that supports Zod, Valibot, and similar libraries through the shared interface.
-- **Zero dependencies, ~1,200 lines.** The package ships `src` with source maps, so "go to definition" in your editor lands on the real TypeScript.
+- **Zero dependencies** The package ships `src` with source maps, so "go to definition" in your editor lands on the real TypeScript.
 - **100% test coverage, enforced** on every release.
 
 ## Quick start
@@ -61,7 +67,7 @@ const userStruct = object({
   name: string(),
 })
 
-type User = Infer<typeof userSchema> // same as Infer<typeof userStruct>
+type User = Infer<typeof userSchema> // = Infer<typeof userStruct>
 // ^? { id: string & { __idFor: 'User' }; name: string }
 ```
 
@@ -81,29 +87,31 @@ The `satisfies Schema` check is optional, since any structurally valid object is
 
 ## Schema types
 
-| type      | type-specific fields                     | struct example                         | infers                             |
-| --------- | ---------------------------------------- | -------------------------------------- | ---------------------------------- |
-| `string`  | `minLength`, `maxLength`                 | `string().maxLength(64)`               | `string`                           |
-| `number`  | `min`, `max` (finite numbers only)       | `number().min(0)`                      | `number`                           |
-| `bigint`  | `min`, `max` (as bigint strings)         | `bigint().min('0')`                    | `bigint`                           |
-| `boolean` | none                                     | `boolean()`                            | `boolean`                          |
-| `literal` | `of` (string, number, or boolean)        | `literal('admin')`                     | `'admin'`                          |
-| `unknown` | none (accepts anything, no `brand`)      | `unknown()`                            | `unknown`                          |
-| `array`   | `of`, `minLength`, `maxLength`           | `array(string())`                      | `string[]`                         |
-| `object`  | `of` (extra keys are ignored)            | `object({ a: string() })`              | `{ a: string }`                    |
-| `record`  | `of`, `key`, `minLength`, `maxLength`    | `record(number()).key(userId)`         | `Record<UserId, number>`           |
-| `tuple`   | `of` (exact arity)                       | `tuple([string(), number()])`          | `[string, number]`                 |
-| `union`   | `of` (first match wins), `discriminant`  | `union([string(), number()])`          | `string \| number`                 |
+Each struct builder is named after the static `type` it produces, so `string()` gives `{ type: 'string' }`:
 
-Parameters shared by every schema:
+| struct                        | type-specific fields                    | infers                   |
+| ----------------------------- | --------------------------------------- | ------------------------ |
+| `string().maxLength(64)`      | `minLength`, `maxLength`                | `string`                 |
+| `number().min(0)`             | `min`, `max` (finite only)              | `number`                 |
+| `bigint().min('0')`           | `min`, `max` (as bigint strings)        | `bigint`                 |
+| `boolean()`                   | none                                    | `boolean`                |
+| `literal('admin')`            | `of` (string, number, or boolean)       | `'admin'`                |
+| `unknown()`                   | none (accepts anything, no `brand`)     | `unknown`                |
+| `array(string())`             | `of`, `minLength`, `maxLength`          | `string[]`               |
+| `object({ a: string() })`     | `of` (extra keys ignored)               | `{ a: string }`          |
+| `record(number())`            | `of`, `key`, `minLength`, `maxLength`   | `Record<string, number>` |
+| `tuple([string(), number()])` | `of` (exact arity)                      | `[string, number]`       |
+| `union([string(), number()])` | `of` (first match wins), `discriminant` | `string \| number`       |
 
-| static                     | struct                    | effect                       |
-| -------------------------- | ------------------------- | ---------------------------- |
-| `optional: true`           | `.optional()`             | `T \| undefined`             |
-| `nullable: true`           | `.nullable()`             | `T \| null`                  |
-| `brand: ['idFor', 'User']` | `.brand('idFor', 'User')` | `T & { __idFor: 'User' }`    |
-| `description: '...'`       | `.description('...')`     | documentation only           |
-| `meta: { ... }`            | `.meta({ ... })`          | your own data, ignored by `parse` and `Infer` |
+Parameters shared by every schema. Each struct method sets the static field of the same name, so `.optional()` gives `optional: true`:
+
+| field         | struct                    | effect                                    |
+| ------------- | ------------------------- | ----------------------------------------- |
+| `optional`    | `.optional()`             | `T \| undefined`                          |
+| `nullable`    | `.nullable()`             | `T \| null`                               |
+| `brand`       | `.brand('idFor', 'User')` | `T & { __idFor: 'User' }`                 |
+| `description` | `.description('...')`     | documentation only                        |
+| `meta`        | `.meta({ ... })`          | your own data, ignored by `parse` and `Infer` |
 
 Each type has a static and struct example, along with its edge cases, in **[docs/schema-types.md](./docs/schema-types.md)**.
 
@@ -114,7 +122,13 @@ To derive variants of an object schema with some members optional (update payloa
 `result.error` is a flat array of `InvalidSubject`. Each entry has a `code`, the `path` to the invalid value, and the `schema` fragment it failed:
 
 ```json
-[{ "code": "INVALID_TYPE", "path": ["x", "y", 0, "z"], "schema": { "type": "string" } }]
+[
+  {
+    "code": "INVALID_TYPE",
+    "path": ["x", "y", 0, "z"],
+    "schema": { "type": "string" }
+  }
+]
 ```
 
 The codes are `INVALID_TYPE`, `INVALID_RANGE`, `INVALID_UNION`, and `INVALID_SCHEMA` (the schema itself is malformed). The parsed input is never included in an error, so secrets can't leak into logs. [Error details →](./docs/errors.md)
@@ -124,14 +138,19 @@ The codes are `INVALID_TYPE`, `INVALID_RANGE`, `INVALID_UNION`, and `INVALID_SCH
 Coercion is opt-in for each call, so the same schema can be strict for a JSON body and lenient for query strings or env vars:
 
 ```typescript
-parse({ type: 'number' }, '42') //                    error: "42" is not a number
-parse({ type: 'number' }, '42', { coerce: true }) //  { success: true, data: 42 }
+// error: "42" is not a number
+parse({ type: 'number' }, '42')
+
+// { success: true, data: 42 }
+parse({ type: 'number' }, '42', { coerce: true })
 ```
 
 Only `bigint`, `boolean`, `number`, and `string` are coerced, and only from one another using unambiguous conversions. For anything else, `.preprocess()` attaches a function that runs before validation:
 
 ```typescript
-const trimmed = string().preprocess((s) => (typeof s === 'string' ? s.trim() : s))
+const trimmed = string().preprocess((s) =>
+  typeof s === 'string' ? s.trim() : s
+)
 ```
 
 `.preprocess()` is struct-only: functions aren't JSON, so preprocessors live outside `__schema` and don't survive serialization or `makeStruct(schema)`. With static schemas, use `{ coerce: true }` or transform the input before `parse()`.
@@ -166,7 +185,7 @@ type FlatModelSchema = ObjectSchema<Record<string, PrimitiveSchema>>
 const userModel = {
   type: 'object',
   of: { id: { type: 'string' }, age: { type: 'number' } },
-} as const satisfies FlatModelSchema // a nested object here is a type error
+} as const satisfies FlatModelSchema // nested objects won't compile
 ```
 
 [Unions of models, struct contracts, and more →](./docs/narrowing.md)

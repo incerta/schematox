@@ -11,7 +11,8 @@
     "ts": "tsc -p tests/tsconfig.json",
     "attw": "npm run build && attw --pack . --profile esm-only",
     "readme:preview": "node scripts/preview-readme.mjs",
-    "check": "npm run formatter:check && npm run ts && npm run test:coverage && npm run attw",
+    "readme:check": "node scripts/check-readme-width.mjs",
+    "check": "npm run formatter:check && npm run readme:check && npm run ts && npm run test:coverage && npm run attw",
     "morph": "jiti tests/fold-morph.ts && npm run formatter:fix",
     "release": "npm run check && bash scripts/prepare-release.sh",
     "publish:alpha": "bash scripts/publish-alpha.sh"

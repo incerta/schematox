@@ -4,10 +4,14 @@
 // Mirrors what npm does to a README: GitHub-flavored markdown, relative
 // links resolved against the `repository` field, GitHub-style heading slugs.
 // It is not npm's actual renderer — use `npm run publish:alpha` for that.
+// The readme column is npm's ~730px, code is set at npm's 16px and inline
+// code never wraps, so a table or code block that would scroll on npm
+// scrolls here too.
 
 import { execSync } from 'node:child_process'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { marked } from 'marked'
 
 const root = resolve(import.meta.dirname, '..')
@@ -27,6 +31,24 @@ const rawBase =
 const isRelative = (href) => !/^([a-z]+:|#|\/\/)/i.test(href)
 const resolveHref = (href, base) =>
   isRelative(href) ? new URL(href.replace(/^\.\//, ''), base).href : href
+
+// Images from this repository are served by GitHub, so one that isn't pushed
+// yet would show as broken; the preview uses the local file when there is
+// one, for relative paths and for this repo's raw.githubusercontent.com URLs
+const rawRepo = repo.replace('github.com', 'raw.githubusercontent.com') + '/'
+const toLocalPath = (src) => {
+  if (isRelative(src)) return src.replace(/^\.\//, '')
+  if (src.startsWith(rawRepo))
+    return src.slice(rawRepo.length).replace(/^[^/]+\//, '')
+  return null
+}
+const resolveImage = (src) => {
+  const path = toLocalPath(src)
+  const local = path && resolve(root, path)
+  return local && existsSync(local)
+    ? pathToFileURL(local).href
+    : resolveHref(src, rawBase)
+}
 
 const escapeHtml = (s) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -56,12 +78,18 @@ marked.use({
     },
     image(href, title, text) {
       const t = title ? ` title="${escapeHtml(title)}"` : ''
-      return `<img src="${resolveHref(href, rawBase)}" alt="${escapeHtml(text)}"${t}>`
+      return `<img src="${resolveImage(href)}" alt="${escapeHtml(text)}"${t}>`
     },
   },
 })
 
-const body = marked.parse(readme)
+// Raw HTML `<img>` tags bypass the renderer above
+const body = marked
+  .parse(readme)
+  .replace(
+    /(<img\b[^>]*\ssrc=")([^"]+)"/g,
+    (_, start, src) => `${start}${resolveImage(src)}"`
+  )
 
 const packInfo = JSON.parse(
   execSync('npm pack --dry-run --json', { cwd: root, encoding: 'utf8' })
@@ -99,7 +127,9 @@ const html = `<!doctype html>
   .tabs div { flex: 1; text-align: center; padding: 10px 0; border-bottom: 2px solid #eee; font-size: 14px; color: #666; }
   .tabs div.active { border-bottom-color: #ffcd3a; color: #111; font-weight: 600; }
   main { max-width: 1150px; margin: 0 auto; padding: 24px 32px 64px; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 40px; }
-  .markdown-body { font-size: 16px; }
+  .markdown-body { font-size: 16px; max-width: 730px; }
+  .markdown-body code { white-space: nowrap; }
+  .markdown-body pre, .markdown-body code { font-size: 16px; }
   aside .side-item { border-bottom: 1px solid #eee; padding: 10px 0; }
   aside h3 { margin: 0 0 4px; font-size: 13px; color: #666; font-weight: 600; }
   aside p { margin: 0; font-size: 15px; word-break: break-all; }
