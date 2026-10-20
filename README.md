@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/incerta/schematox/main/assets/logo.png" alt="schematox logo" width="117" height="200">
+  <img src="https://raw.githubusercontent.com/incerta/schematox/main/assets/logo.png" alt="schematox logo" width="117">
 </p>
 
 <h1 align="center">schematox</h1>
